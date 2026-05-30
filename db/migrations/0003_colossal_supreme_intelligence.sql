@@ -1,0 +1,1 @@
+ALTER TABLE "organizations" ADD COLUMN "oidc_config" jsonb DEFAULT '{"enabled":false,"issuer":null,"clientId":null,"clientSecret":null,"allowRegistration":false}'::jsonb;

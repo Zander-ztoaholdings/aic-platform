@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Typography ──────────────────────────────────────────────── */
+  --font-serif:       var(--font-merriweather), var(--font-crimson-pro), Georgia, serif;
+  --font-mono:        var(--font-ibm-plex-mono), monospace;
+  --font-sans:        var(--font-space-grotesk), system-ui, sans-serif;
+
+  /* ─── AIC Brand Palette ───────────────────────────────────────── */
+  --color-aic-navy:         #0A1728;
+  --color-aic-navy-mid:     #0f1f3d;
+  --color-aic-navy-light:   #1a3160;
+  --color-aic-copper:       #c9920a;
+  --color-aic-copper-light: #e4a80c;
+  --color-aic-copper-dim:   rgba(201, 146, 10, 0.12);
+  --color-aic-paper:        #F9F8F4;
+  --color-aic-parchment:    #F9F8F4;
+  --color-aic-black:        #0f1f3d;
+  --color-aic-white:        #ffffff;
+  --color-aic-muted:        #6b7280;
+  --color-aic-border:       #e5e7eb;
+  --color-aic-bg:           #f0f4f8;
+  --color-aic-surface:      #ffffff;
+  --color-aic-border-dark:  rgba(255, 255, 255, 0.07);
+
+  /* Status colours */
+  --color-aic-green:  #22c55e;
+  --color-aic-amber:  #f59e0b;
+  --color-aic-red:    #ef4444;
+
+  /* Legacy aliases */
+  --color-aic-obsidian: #0A1728;
+  --color-aic-cyan:     #c9920a;
+  --color-aic-slate:    #6b7280;
+  --color-aic-gold:     #c9920a;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────── */
+body {
+  background-color: var(--color-aic-bg);
+  color: var(--color-aic-black);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Light surface card ─────────────────────────────────────────── */
+@utility surface-card {
+  background-color: var(--color-aic-surface);
+  border: 1px solid var(--color-aic-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(10, 22, 40, 0.06);
+}
+
+/* ─── Glass panels (kept for backwards compat) ───────────────────── */
+@utility glass-panel {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-aic-border);
+  box-shadow: 0 4px 24px rgba(10, 22, 40, 0.08);
+}
+
+@utility glass-sidebar {
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-right: 1px solid var(--color-aic-border);
+}
+
+@utility glass-stat {
+  background-color: var(--color-aic-surface);
+  border: 1px solid var(--color-aic-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@utility hover-lift {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  &:hover {
+    box-shadow: 0 8px 24px rgba(10, 22, 40, 0.10);
+    transform: translateY(-1px);
+  }
+}
+
+@utility hover-glow {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  &:hover {
+    box-shadow: 0 0 24px rgba(201, 146, 10, 0.18);
+    border-color: rgba(201, 146, 10, 0.4);
+  }
+}
+
+/* ─── Animations ─────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes copperPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 146, 10, 0); }
+  50%       { box-shadow: 0 0 20px 4px rgba(201, 146, 10, 0.2); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes barGrow {
+  from { width: 0; }
+  to   { width: var(--w); }
+}
+
+.copper-glow {
+  animation: copperPulse 3s ease-in-out infinite;
+}
+.fade-up {
+  animation: fadeUp 0.2s ease;
+}

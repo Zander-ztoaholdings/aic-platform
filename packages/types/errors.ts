@@ -1,0 +1,33 @@
+export enum AICErrorCode {
+  // Authentication & Authorization
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  FORBIDDEN = 'FORBIDDEN',
+  INSUFFICIENT_PERMISSIONS = 'INSUFFICIENT_PERMISSIONS',
+  SESSION_EXPIRED = 'SESSION_EXPIRED',
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  
+  // Multi-tenancy
+  MISSING_INSTITUTION = 'MISSING_INSTITUTION',
+  TENANT_MISMATCH = 'TENANT_MISMATCH',
+  
+  // Validation
+  INVALID_INPUT = 'INVALID_INPUT',
+  MISSING_FIELD = 'MISSING_FIELD',
+  
+  // Integrity & Tech
+  CHAIN_BROKEN = 'CHAIN_BROKEN',
+  INVALID_SIGNATURE = 'INVALID_SIGNATURE',
+  ENGINE_OFFLINE = 'ENGINE_OFFLINE',
+  
+  // Database & Resources
+  NOT_FOUND = 'NOT_FOUND',
+  CONFLICT = 'CONFLICT',
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
+}
+
+export interface AICErrorResponse {
+  code: AICErrorCode;
+  message: string;
+  detail?: unknown;
+  timestamp: string;
+}

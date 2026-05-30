@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Navy background -->
+  <rect width="32" height="32" rx="6" fill="#0f1f3d"/>
+
+  <!-- Left bracket [ -->
+  <path d="M7 6 L4 6 L4 26 L7 26" stroke="#c9920a" stroke-width="2" stroke-linecap="square" fill="none"/>
+
+  <!-- Right bracket ] -->
+  <path d="M25 6 L28 6 L28 26 L25 26" stroke="#c9920a" stroke-width="2" stroke-linecap="square" fill="none"/>
+
+  <!-- AIC text -->
+  <text x="16" y="20.5" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="1" font-family="'Space Grotesk', Arial, sans-serif">AIC</text>
+</svg>

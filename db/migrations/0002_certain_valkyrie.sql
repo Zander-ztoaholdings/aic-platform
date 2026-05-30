@@ -1,0 +1,1 @@
+ALTER TABLE "audit_logs" ADD COLUMN "resource_usage" jsonb DEFAULT '{"compute_ms":0,"memory_mb":0,"carbon_estimate_g":0}'::jsonb;

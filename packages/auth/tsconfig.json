@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["next-auth"],
+    "baseUrl": ".",
+    "paths": {
+      "@aic/db": ["../db/src/index.ts"],
+      "@aic/types": ["../types/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}
