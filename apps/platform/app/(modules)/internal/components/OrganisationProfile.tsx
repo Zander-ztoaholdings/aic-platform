@@ -5,7 +5,7 @@ import { Eyebrow, SectionCard, CopperTag } from '@/app/components/ui/Eyebrow';
 import { StatusChip } from '@/app/components/ui/StatusChip';
 
 const ORG_FIELDS = [
-  { k: 'Registered Name',     v: 'Meridian Financial Group (Pty) Ltd'   },
+  { k: 'Registered Name',     v: 'Example Organisation (demo data) (Pty) Ltd'   },
   { k: 'Registration Number', v: '2024/102938/07'                        },
   { k: 'Industry / Sector',   v: 'Financial Services — FSB Regulated'   },
   { k: 'Number of Employees', v: '340–500'                               },
@@ -99,7 +99,7 @@ export default function OrganisationProfile() {
                 SC
               </div>
               <div>
-                <div className="text-sm font-bold text-[#0f1f3d]">Dr. Sarah Chen</div>
+                <div className="text-sm font-bold text-[#0f1f3d]">A. Example</div>
                 <div className="font-mono text-[9px] text-[#c9920a]">Chief Risk Officer</div>
               </div>
             </div>

@@ -61,7 +61,7 @@ export function DashboardHeader({
             </span>
           </div>
           <h1 className="font-serif text-[20px] font-bold text-[#0f1f3d] leading-none tracking-tight">
-            Meridian Financial Group
+            Example Organisation (demo data)
           </h1>
         </div>
       </div>
@@ -76,7 +76,7 @@ export function DashboardHeader({
         {/* Integrity badge */}
         <div className="hidden md:flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-3 py-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] flex-shrink-0" />
-          <span className="font-mono text-[9px] font-bold text-green-700 uppercase tracking-[0.12em]">Integrity: Secure</span>
+          <span className="font-mono text-[9px] font-bold text-green-700 uppercase tracking-[0.12em]">Demonstration data</span>
         </div>
 
         {/* Notification bell */}
@@ -144,7 +144,7 @@ export function DashboardHeader({
         {/* User */}
         <div className="flex items-center gap-2.5 border-l border-[#e5e7eb] pl-3">
           <div className="text-right hidden sm:block">
-            <div className="text-xs font-semibold text-[#0f1f3d] leading-none">Dr. Sarah Chen</div>
+            <div className="text-xs font-semibold text-[#0f1f3d] leading-none">A. Example</div>
             <div className="font-mono text-[8px] text-[#c9920a] uppercase tracking-[0.12em] font-bold mt-0.5">
               Accountable Person
             </div>

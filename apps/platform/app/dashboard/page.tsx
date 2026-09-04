@@ -19,7 +19,7 @@ import { AccountablePerson } from './components/AccountablePerson';
 // Mock data based on the redesign spec
 const MOCK_DATA = {
   org: {
-    name: 'Meridian Financial Group',
+    name: 'Example Organisation (demo data)',
     division: 'Division 2',
     divisionName: 'Supervised',
   },
@@ -91,7 +91,7 @@ export default function ClientDashboard() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">Meridian Financial Group</span>
+              <span className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">Example Organisation (demo data)</span>
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
             <h1 className="font-serif text-4xl font-bold text-aic-navy tracking-tight">
@@ -106,7 +106,7 @@ export default function ClientDashboard() {
             </div>
             <div className="px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-full flex items-center gap-2 shadow-sm">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span className="font-mono text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Integrity: Secure</span>
+              <span className="font-mono text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Demonstration data</span>
             </div>
           </div>
         </header>
@@ -128,7 +128,7 @@ export default function ClientDashboard() {
           
           <div className="hidden lg:block">
             <AccountablePerson 
-              name="Dr. Sarah Chen"
+              name="A. Example"
               role="Chief Risk Officer"
               initials="SC"
               caapStatus="pending"

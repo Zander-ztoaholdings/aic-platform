@@ -76,7 +76,7 @@ export function DashboardSidebar({
           <BrandMark />
           <div className="min-w-0">
             <div className="font-mono text-[8px] font-bold tracking-[0.2em] uppercase text-white/35">Client Portal</div>
-            <div className="text-xs font-semibold text-white/85 mt-0.5 truncate">Meridian Financial</div>
+            <div className="text-xs font-semibold text-white/85 mt-0.5 truncate">Example Organisation</div>
           </div>
         </Link>
         <button
