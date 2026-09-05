@@ -624,3 +624,92 @@ export const examQuestions = pgTable('exam_questions', {
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
+
+// ── AIC Aware ─────────────────────────────────────────────────────────────────
+//
+// The free, self-declared tier. These two tables are owned HERE rather than in
+// aic-web, and the split is by domain rather than by file: this repo owns
+// identity and session state because that is where authentication lives, and
+// aic-web owns the standard, the scoring, the register and /verify — see the
+// note above the certification-path tables in its schema, which is a decision
+// worth keeping rather than reversing.
+//
+// The consequence is that the AIC Aware feature reads the 44 requirements from
+// aic-web's /api/standard rather than holding a competing copy. There is
+// exactly one idea of what a requirement is, and it is not in this repo.
+
+/**
+ * The named individual a client organisation puts forward as accountable, and
+ * the declaration they signed.
+ *
+ * This exists because AIC Aware requires it before the assessment opens, which
+ * makes the free tier rehearse the standard's first two requirements rather
+ * than describe them: HU-1 (a named individual, not a role) and HU-2 (that
+ * person has signed a declaration acknowledging personal accountability).
+ *
+ * Rows are superseded, never overwritten. Who was accountable on the day a
+ * declaration was made is the entire point of recording it, and a table that
+ * silently updates in place cannot answer that question later.
+ */
+export const accountablePersons = pgTable('accountable_persons', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+
+  /** The account holder who nominated them — not necessarily the same person. */
+  nominatedBy: uuid('nominated_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+
+  /** HU-1: an individual. A row reading "Head of Compliance" is a finding. */
+  name: varchar('name', { length: 255 }).notNull(),
+  jobTitle: varchar('job_title', { length: 255 }),
+  email: varchar('email', { length: 255 }).notNull(),
+
+  /** HU-2. The version pins which wording was actually agreed to — a
+   *  declaration whose text has since changed is not evidence of anything. */
+  declarationVersion: varchar('declaration_version', { length: 20 }).notNull(),
+  declarationAcceptedAt: timestamp('declaration_accepted_at', { withTimezone: true }).notNull(),
+
+  /** Hashed, not raw — an IP address is personal information under POPIA and
+   *  the only thing it is needed for here is disputing a repudiated signature. */
+  acceptedIpHash: varchar('accepted_ip_hash', { length: 64 }),
+
+  /** Set when a later declaration replaces this one. Never deleted. */
+  supersededAt: timestamp('superseded_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  byOrg: index('accountable_persons_org_idx').on(table.orgId),
+}));
+
+/**
+ * An AIC Aware self-assessment, in progress or submitted.
+ *
+ * `answers` is deliberately partial: it is written on every answer, which is
+ * what makes save-and-resume work. A row with four answers in it is a person
+ * who stopped after four questions, and that is worth knowing.
+ */
+export const awareAssessments = pgTable('aware_assessments', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+
+  /** Keyed by question id. Partial until submitted. */
+  answers: jsonb('answers').$type<Record<string, number>>().default({}),
+
+  /** IN_PROGRESS | SUBMITTED | ABANDONED */
+  status: varchar('status', { length: 20 }).notNull().default('IN_PROGRESS'),
+
+  /** Pinned at submission, for the same reason assessments.standardVersion is:
+   *  a result computed against a question set that has since changed cannot be
+   *  reconstructed, and an unreconstructable result is not a record. */
+  questionSetVersion: varchar('question_set_version', { length: 20 }),
+
+  /** Computed once, on submission — never recomputed on read. */
+  score: integer('score'),
+  indicatedDivision: varchar('indicated_division', { length: 1 }),
+
+  startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  submittedAt: timestamp('submitted_at', { withTimezone: true }),
+}, (table) => ({
+  byOrg: index('aware_assessments_org_idx').on(table.orgId),
+  byUser: index('aware_assessments_user_idx').on(table.userId),
+}));
