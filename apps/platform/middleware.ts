@@ -32,7 +32,22 @@ const SESSION_COOKIES = [
   "__Secure-next-auth.session-token",
 ];
 
-const PUBLIC_PATHS = ["/login", "/forgot-password", "/api/auth"];
+// Everything an anonymous visitor legitimately needs, and nothing else.
+//
+// /signup, /api/signup and /onboard were NOT here when the gate was closed,
+// which silently made account creation impossible — the page and the API both
+// existed and both redirected to /login. It went unnoticed because there were
+// no real users yet. Anything added here is a hole by definition, so each
+// entry has to earn its place: these three are the account-creation path, and
+// an application nobody can create an account for is not secured, it is shut.
+const PUBLIC_PATHS = [
+  "/login",
+  "/forgot-password",
+  "/api/auth",
+  "/signup",
+  "/api/signup",
+  "/onboard",
+];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

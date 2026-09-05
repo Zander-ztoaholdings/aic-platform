@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
     try {
+        // This endpoint writes an organisation and a user row per call, and it
+        // is now reachable without a session. Unthrottled, that is a free
+        // write primitive against the production database for anyone who finds
+        // it. Five per IP per hour is well above what a real signup needs.
+        const ip = getClientIP(request);
+        const { allowed } = checkRateLimit(`signup:${ip}`, 5, 60 * 60_000);
+        if (!allowed) {
+            return NextResponse.json(
+                { error: 'Too many signup attempts. Please try again later.' },
+                { status: 429 }
+            );
+        }
+
         const body = await request.json();
         const { orgName, tier, name, email, password } = body;
 
