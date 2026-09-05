@@ -18,7 +18,8 @@
     "type-check": "turbo type-check --filter=platform",
     "test": "turbo test",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
+    "db:push": "node scripts/db-push-guard.mjs",
+    "db:push:unsafe": "drizzle-kit push",
     "db:migrate": "npm run db:migrate --workspace @aic/db",
     "prepare": "husky"
   },
