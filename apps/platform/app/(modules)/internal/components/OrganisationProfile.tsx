@@ -9,7 +9,7 @@ const ORG_FIELDS = [
   { k: 'Registration Number', v: '2024/102938/07'                        },
   { k: 'Industry / Sector',   v: 'Financial Services — FSB Regulated'   },
   { k: 'Number of Employees', v: '340–500'                               },
-  { k: 'Assessment Reference',v: 'AIC-2026-MFG-001'                     },
+  { k: 'Assessment Reference',v: 'AIC-2026-DEMO-001'                    },
   { k: 'Division',            v: 'Division 2 — Supervised'              },
   { k: 'Assessment Started',  v: 'April 1, 2026'                        },
   { k: 'Certificate Expiry',  v: 'April 12, 2027'                       },
@@ -24,8 +24,8 @@ const AGREEMENTS = [
 ];
 
 const AP_DETAILS = [
-  { k: 'Email',              v: 's.chen@meridianfin.co.za' },
-  { k: 'Phone',              v: '+27 11 555 0192'          },
+  { k: 'Email',              v: 'ap@example.org (demo)'    },
+  { k: 'Phone',              v: 'Not recorded (demo)'      },
   { k: 'Declaration Signed', v: 'Apr 1, 2026 (DOC-005)'   },
   { k: 'Authority Confirmed',v: 'Full override authority'  },
 ];

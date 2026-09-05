@@ -186,7 +186,7 @@ export default function LoginPage() {
                   type="email" 
                   required 
                   className="w-full border border-[#e5e7eb] rounded-lg px-3 py-2.5 text-sm text-[#0f1f3d] focus:outline-none focus:border-[#c9920a] transition-colors bg-white"
-                  placeholder="compliance@meridian.fin"
+                  placeholder="you@organisation.com"
                 />
               </div>
 
