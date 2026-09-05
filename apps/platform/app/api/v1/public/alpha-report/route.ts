@@ -7,8 +7,8 @@ export async function GET(_req: NextRequest) {
     const demoData = {
       id: 'REP-ALPHA-2026-001',
       monthYear: 'February 2026',
-      orgName: 'Meridian Financial Group',
-      orgId: 'ORG-MFG-8842',
+      orgName: 'Example Organisation (demo data)',
+      orgId: 'ORG-DEMO-0001',
       tier: 'Tier 1 (Enterprise)',
       auditStatus: 'COMPLIANT',
       integrityScore: 92,

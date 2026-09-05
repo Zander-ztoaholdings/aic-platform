@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTenantDb, organizations, auditLogs, models, correctionRequests, eq, and, sql, desc } from '@aic/db';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 // GET /api/dashboard - Comprehensive dashboard data

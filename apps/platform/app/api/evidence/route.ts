@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTenantDb, organizations, auditDocuments, eq, desc } from '@aic/db';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 const REQUIRED_SLOTS = [

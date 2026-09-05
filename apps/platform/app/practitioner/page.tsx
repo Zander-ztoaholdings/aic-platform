@@ -116,11 +116,6 @@ export default function PractitionerPage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-3 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2">
-                <span className="font-mono text-[9px] text-[#c9920a] font-bold">
-                  Founding Partner discount: 30% off all fees for Example Organisation staff
-                </span>
-              </div>
             </SectionCard>
 
             <SectionCard className="p-4">

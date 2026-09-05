@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, auditLogs, eq, desc, sql, LedgerService } from '@aic/db';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import { enqueueEngineTask } from '@/lib/queue';
 import { z } from 'zod';
 import type { Session } from 'next-auth';

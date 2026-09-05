@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, auditLogs } from '@aic/db';
 import { EngineClient } from '../../../lib/engine-client';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 export async function POST(request: NextRequest) {

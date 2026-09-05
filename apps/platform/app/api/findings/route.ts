@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTenantDb, auditRequirements, eq, desc } from '@aic/db';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
 
 export async function GET() {

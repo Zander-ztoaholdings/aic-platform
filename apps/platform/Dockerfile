@@ -11,7 +11,14 @@ RUN turbo prune platform --docker
 FROM base AS installer
 COPY --from=pruner /app/out/json/ .
 COPY --from=pruner /app/out/package-lock.json ./package-lock.json
-RUN npm ci --ignore-scripts
+# turbo prune's --docker lockfile output has proven unreliable for this repo
+# (it has dropped whole transitive subtrees for some workspace deps, and
+# missed platform-specific optional binaries for others — verified by hand
+# by reproducing this exact step outside Docker). npm ci demands an exact
+# match to the lockfile and fails hard on either gap; npm install reconciles
+# a partial/stale lockfile against the registry instead, which is what this
+# stage actually needs to be robust.
+RUN npm install --ignore-scripts --no-audit --no-fund
 
 # ── Build ─────────────────────────────────────────────────────────────────────
 FROM installer AS builder

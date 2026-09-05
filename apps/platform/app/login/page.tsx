@@ -118,7 +118,7 @@ export default function LoginPage() {
           <div className="space-y-1">
             <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">Welcome back</h2>
             <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.2em]">
-              Example Organisation (demo data) · Client Portal
+              AIC Platform · Client Portal
             </p>
           </div>
 

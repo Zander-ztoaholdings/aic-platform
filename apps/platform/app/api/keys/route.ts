@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, apiKeys, eq, and, desc } from '@aic/db';
-import { getSession } from '../../../lib/auth';
+import { getSession } from '@/lib/auth';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import type { Session } from 'next-auth';
