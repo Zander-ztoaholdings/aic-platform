@@ -1,13 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Navy background -->
-  <rect width="32" height="32" rx="6" fill="#0f1f3d"/>
-
-  <!-- Left bracket [ -->
-  <path d="M7 6 L4 6 L4 26 L7 26" stroke="#c9920a" stroke-width="2" stroke-linecap="square" fill="none"/>
-
-  <!-- Right bracket ] -->
-  <path d="M25 6 L28 6 L28 26 L25 26" stroke="#c9920a" stroke-width="2" stroke-linecap="square" fill="none"/>
-
-  <!-- AIC text -->
-  <text x="16" y="20.5" font-size="9" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="1" font-family="'Space Grotesk', Arial, sans-serif">AIC</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#0a1628"/>
+  <g fill="#ffffff">
+    <path transform="translate(4.4800 20.5271) scale(0.012843 -0.012843)" d="M499 124H237L195 0H16L270 702H468L722 0H541ZM455 256 368 513 282 256Z"/>
+    <path transform="translate(13.9452 20.5271) scale(0.012843 -0.012843)" d="M233 702V0H62V702Z"/>
+    <path transform="translate(17.7338 20.5271) scale(0.012843 -0.012843)" d="M386 710Q511 710 600.0 644.0Q689 578 719 464H531Q510 508 471.5 531.0Q433 554 384 554Q305 554 256.0 499.0Q207 444 207 352Q207 260 256.0 205.0Q305 150 384 150Q433 150 471.5 173.0Q510 196 531 240H719Q689 126 600.0 60.5Q511 -5 386 -5Q284 -5 203.5 40.5Q123 86 78.0 167.0Q33 248 33 352Q33 456 78.0 537.5Q123 619 203.5 664.5Q284 710 386 710Z"/>
+  </g>
 </svg>
