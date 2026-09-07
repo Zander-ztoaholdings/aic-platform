@@ -7,7 +7,12 @@ export async function generatePDF(html: string): Promise<Buffer> {
   });
   
   const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0' });
+  // Puppeteer's setContent explicitly excludes 'networkidle0'/'networkidle2'
+  // from its waitUntil options (they describe navigation-driven network
+  // activity, which setContent doesn't produce). 'load' is the right wait
+  // here anyway: it fires once images, fonts and stylesheets have loaded,
+  // which is exactly what has to be true before printing to PDF.
+  await page.setContent(html, { waitUntil: 'load' });
   
   const pdf = await page.pdf({
     format: 'A4',
