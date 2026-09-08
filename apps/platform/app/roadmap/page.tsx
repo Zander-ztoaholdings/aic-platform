@@ -11,13 +11,23 @@ interface Requirement {
     title: string;
     description: string;
     category: string;
+    /** Published clause code, e.g. HU-1. Absent on legacy rows. */
+    code?: string | null;
+    /** Which of the five Rights this serves. Absent on legacy rows. */
+    rightCode?: string | null;
+    /** The evidence the published standard asks for. */
+    evidenceGuidance?: string | null;
+    standardVersion?: string | null;
     status: 'PENDING' | 'SUBMITTED' | 'VERIFIED' | 'REJECTED';
     findings?: string;
     evidence_url?: string;
 }
 
+type RightMeta = { name: string; blurb: string };
+
 export default function RoadmapPage() {
     const [requirements, setRequirements] = useState<Requirement[]>([]);
+    const [rights, setRights] = useState<Record<string, RightMeta>>({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedReq, setSelectedReq] = useState<Requirement | null>(null);
 
@@ -26,6 +36,7 @@ export default function RoadmapPage() {
             .then(res => res.json())
             .then(data => {
                 setRequirements(data.requirements || []);
+                setRights(data.rights || {});
             })
             .catch(err => {
                 console.error(err);
@@ -99,14 +110,36 @@ export default function RoadmapPage() {
                     </div>
                 </div>
 
+                {/*
+                  * Grouped by the five Algorithmic Rights, in the order the
+                  * standard publishes them, and derived from the rows actually
+                  * present rather than a hardcoded list. The previous version
+                  * rendered exactly DOCUMENTATION, TECHNICAL and OVERSIGHT —
+                  * so the two requirements signup created with category REPORTS
+                  * were written to the database and then never displayed to
+                  * anyone. Anything without a recognised Right still gets a
+                  * column here, because a requirement nobody can see is worse
+                  * than an untidy heading.
+                  */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    {['DOCUMENTATION', 'TECHNICAL', 'OVERSIGHT'].map((cat) => (
+                    {(() => {
+                        const ORDER = ['HU', 'EX', 'EM', 'CO', 'TR'];
+                        const groupOf = (r: Requirement) => r.rightCode || r.category || 'OTHER';
+                        const present = Array.from(new Set(requirements.map(groupOf)));
+                        return present.sort((a, b) => {
+                            const ai = ORDER.indexOf(a), bi = ORDER.indexOf(b);
+                            return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi) || a.localeCompare(b);
+                        });
+                    })().map((cat) => (
                         <div key={cat} className="space-y-6">
                             <h3 className="font-mono text-xs font-bold text-aic-gold uppercase tracking-[0.3em] pl-2 border-l-2 border-aic-gold">
-                                {cat}
+                                {rights[cat]?.name ?? cat}
                             </h3>
+                            {rights[cat]?.blurb && (
+                                <p className="text-[11px] text-gray-500 font-serif italic -mt-3 pl-2">{rights[cat].blurb}</p>
+                            )}
                             <div className="space-y-4">
-                                {requirements.filter(r => r.category === cat).map((req, i) => (
+                                {requirements.filter(r => (r.rightCode || r.category || 'OTHER') === cat).map((req, i) => (
                                     <motion.div 
                                         key={req.id}
                                         initial={{ opacity: 0, y: 20 }}
@@ -117,10 +150,20 @@ export default function RoadmapPage() {
                                         <div className={`inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold border mb-4 ${getStatusColor(req.status)}`}>
                                             {req.status}
                                         </div>
+                                        {req.code && (
+                                            <span className="font-mono text-[10px] font-bold text-gray-400 tracking-widest block mb-1">{req.code}</span>
+                                        )}
                                         <h4 className="font-serif font-bold text-lg mb-2 group-hover:text-aic-gold transition-colors">{req.title}</h4>
-                                        <p className="text-sm text-gray-500 font-serif leading-relaxed mb-6">
-                                            {req.description}
-                                        </p>
+                                        {req.evidenceGuidance ? (
+                                            <p className="text-sm text-gray-500 font-serif leading-relaxed mb-6">
+                                                <span className="font-mono text-[9px] uppercase tracking-widest text-gray-400 block mb-1">Evidence required</span>
+                                                {req.evidenceGuidance}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-gray-500 font-serif leading-relaxed mb-6">
+                                                {req.description}
+                                            </p>
+                                        )}
 
                                         {req.findings && (
                                             <div className="mb-6 p-4 bg-aic-paper border-l-2 border-aic-gold rounded-r-lg">

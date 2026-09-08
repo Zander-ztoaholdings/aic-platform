@@ -22,6 +22,30 @@ const pool = connectionString
       database: process.env.POSTGRES_DB,
     });
 
+/**
+ * Runs several statements as one unit of work.
+ *
+ * Signup previously created an organisation, a user, its requirements and a
+ * notification as four independent statements, so any failure part-way left a
+ * half-created organisation behind with no way to finish or retry it.
+ */
+export const withTransaction = async <T>(
+  fn: (q: (text: string, params?: any[]) => Promise<any>) => Promise<T>
+): Promise<T> => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn((text, params) => client.query(text, params));
+    await client.query('COMMIT');
+    return result;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
 export const query = async (text: string, params?: any[]) => {
   const start = Date.now();
   try {

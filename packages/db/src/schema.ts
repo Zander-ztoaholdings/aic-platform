@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, boolean, timestamp, jsonb, text, pgEnum, index, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, smallint, boolean, timestamp, jsonb, text, pgEnum, index, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Enums
@@ -63,6 +63,20 @@ export const organizations = pgTable('organizations', {
   slug: varchar('slug', { length: 100 }).unique(), // for public directory URL
   logoUrl: text('logo_url'),
   tier: tierEnum('tier').default('TIER_3'),
+
+  // ── The published Division model (db/manual/003_division_model.sql) ───────
+  // 1 Sovereign, 2 Supervised, 3 Reviewed, 4 Monitored, 5 Artificial. Divisions
+  // are modes of operation, not grades, and they determine WHICH of the 44
+  // published requirements apply — only 16 are universal.
+  //
+  // `tier` above (TIER_1/2/3) is a separate, older idea that appears nowhere in
+  // the published standard. It is left in place because existing rows carry it
+  // and several pages display it; retiring it is its own decision.
+  division: smallint('division'),
+  // Which version of the standard this organisation is being assessed against.
+  // A certificate that cannot name its own standard version is not evidence.
+  standardVersion: varchar('standard_version', { length: 20 }),
+
   integrityScore: integer('integrity_score').default(0),
   isAlpha: boolean('is_alpha').default(false),
   accreditationStatus: varchar('accreditation_status', { length: 50 }).default('PENDING'),
@@ -332,6 +346,17 @@ export const auditRequirements = pgTable('audit_requirements', {
   status: varchar('status', { length: 50 }).default('PENDING'),
   evidenceUrl: text('evidence_url'),
   findings: text('findings'),
+
+  // ── Traceability to the published standard (003_division_model.sql) ──────
+  // Requirements used to be eight hand-written rows whose text existed in no
+  // published document. They are now seeded from aic-web's /api/standard, and
+  // each row records the clause it came from so an assessment can be traced
+  // back to it. NULL code = a legacy row predating that change.
+  code: varchar('code', { length: 20 }),
+  // Named right_code, not right: RIGHT is a reserved word in Postgres.
+  rightCode: varchar('right_code', { length: 4 }), // HU | EX | EM | CO | TR
+  evidenceGuidance: text('evidence_guidance'),
+  standardVersion: varchar('standard_version', { length: 20 }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });

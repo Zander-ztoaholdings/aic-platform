@@ -8,7 +8,10 @@ export default function SignupPage() {
     const router = useRouter();
     const [form, setForm] = useState({
         orgName: '',
-        tier: 'TIER_2',
+        // Division 2 (Supervised) is the most common starting point, but it is a
+        // real choice — the Division decides which of the published
+        // requirements apply, so it is not a default anyone should coast past.
+        division: 2,
         name: '',
         email: '',
         password: '',
@@ -33,7 +36,7 @@ export default function SignupPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     orgName: form.orgName,
-                    tier: form.tier,
+                    division: form.division,
                     name: form.name,
                     email: form.email,
                     password: form.password
@@ -54,10 +57,18 @@ export default function SignupPage() {
         }
     };
 
-    const tiers = [
-        { value: 'TIER_1', label: 'Tier 1 — Critical', desc: '100% human approval (e.g. medical diagnosis, parole)' },
-        { value: 'TIER_2', label: 'Tier 2 — Elevated', desc: 'Human supervision with override (e.g. credit, hiring)' },
-        { value: 'TIER_3', label: 'Tier 3 — Standard', desc: 'Periodic monitoring (e.g. recommendations, spam)' }
+    // The five Divisions, as published at aiccertified.cloud/certification.
+    // Divisions are modes of operation, not grades — a Supervised organisation
+    // is not worse than a Sovereign one, it is answering a different set of
+    // requirements. This replaces an invented "AI Risk Tier" (Critical /
+    // Elevated / Standard) that appeared nowhere in the standard, and which
+    // meant the requirements generated at signup could not be right for anyone.
+    const divisions = [
+        { value: 1, label: '01 — Sovereign', desc: 'We make decisions. Humans make them. No AI in consequential decisions.' },
+        { value: 2, label: '02 — Supervised', desc: 'AI assists. Humans decide. A named human makes every consequential decision.' },
+        { value: 3, label: '03 — Reviewed', desc: 'AI decides. Humans review patterns and investigate flagged cases.' },
+        { value: 4, label: '04 — Monitored', desc: 'AI decides at scale. Humans oversee aggregate behaviour.' },
+        { value: 5, label: '05 — Artificial', desc: 'We build what others decide with. Accountability runs upstream.' }
     ];
 
     return (
@@ -89,21 +100,24 @@ export default function SignupPage() {
                     </div>
 
                     <div>
-                        <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest block mb-2">AI Risk Tier</label>
+                        <label className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest block mb-2">Division</label>
+                        <p className="text-[11px] text-gray-500 font-serif italic mb-3">
+                            How consequential decisions are actually made in your organisation today. Divisions are modes of operation, not grades — this determines which requirements you are assessed against, not how well you score.
+                        </p>
                         <div className="space-y-2">
-                            {tiers.map(t => (
-                                <label key={t.value} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${form.tier === t.value ? 'border-aic-gold bg-aic-gold/5' : 'border-aic-black/5 hover:border-aic-black/10'}`}>
+                            {divisions.map(d => (
+                                <label key={d.value} className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${form.division === d.value ? 'border-aic-gold bg-aic-gold/5' : 'border-aic-black/5 hover:border-aic-black/10'}`}>
                                     <input
                                         type="radio"
-                                        name="tier"
-                                        value={t.value}
-                                        checked={form.tier === t.value}
-                                        onChange={e => setForm(f => ({ ...f, tier: e.target.value }))}
+                                        name="division"
+                                        value={d.value}
+                                        checked={form.division === d.value}
+                                        onChange={() => setForm(f => ({ ...f, division: d.value }))}
                                         className="mt-1"
                                     />
                                     <div>
-                                        <span className="text-sm font-bold font-serif text-aic-black">{t.label}</span>
-                                        <p className="text-[10px] text-gray-400 font-mono mt-0.5">{t.desc}</p>
+                                        <span className="text-sm font-bold font-serif text-aic-black">{d.label}</span>
+                                        <p className="text-[10px] text-gray-400 font-mono mt-0.5">{d.desc}</p>
                                     </div>
                                 </label>
                             ))}

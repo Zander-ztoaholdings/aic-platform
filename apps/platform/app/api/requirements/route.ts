@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, auditRequirements, eq, and, asc } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
+import { fetchPublishedStandard } from '@/lib/standard';
 
 export async function GET() {
   try {
@@ -19,8 +20,20 @@ export async function GET() {
         .where(eq(auditRequirements.orgId, orgId))
         .orderBy(asc(auditRequirements.createdAt));
 
+      // The names of the five Rights come from the published standard rather
+      // than a copy held here, and are fetched server-side so the browser is
+      // not making a cross-origin call to aic-web. A failure is not fatal: the
+      // roadmap falls back to the bare Right code.
+      let rights;
+      try {
+        rights = (await fetchPublishedStandard()).rights;
+      } catch {
+        rights = undefined;
+      }
+
       return NextResponse.json({
           requirements: result,
+          rights,
           orgId
       });
     });
