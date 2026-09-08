@@ -179,6 +179,29 @@ export const authConfig: NextAuthConfig = {
       }
     })
   ],
+  // Auth.js refuses to serve any endpoint on an untrusted host, and it decides
+  // what is trusted in @auth/core's setEnvDefaults:
+  //
+  //   config.trustHost ??= !!(AUTH_URL ?? AUTH_TRUST_HOST ?? VERCEL ?? CF_PAGES
+  //                           ?? NODE_ENV !== "production")
+  //
+  // Note what is NOT in that list: NEXTAUTH_URL. next-auth's own wrapper adds a
+  // NEXTAUTH_* fallback for `secret`, and reqWithEnvURL reads NEXTAUTH_URL when
+  // rewriting the request origin — but nothing anywhere falls back to it for
+  // trustHost. So this deployment, which sets NEXTAUTH_URL and NEXTAUTH_SECRET
+  // and runs on Coolify behind Traefik (no VERCEL, no CF_PAGES, NODE_ENV
+  // production), resolved trustHost to false and every single auth endpoint —
+  // /api/auth/csrf, /providers, /session, and therefore login itself — returned
+  // 500 "There was a problem with the server configuration", surfacing to users
+  // as /login?error=Configuration. UntrustedHost is the first thing
+  // assertConfig checks, before even the missing-secret check.
+  //
+  // Set in code rather than via AUTH_TRUST_HOST because an env var is exactly
+  // the fragile link that broke here, and this is not deployment-specific: this
+  // app is always served behind a reverse proxy on a known host. It is safe
+  // because next-auth's reqWithEnvURL already pins the request origin to
+  // NEXTAUTH_URL, so a forged Host header cannot redirect callbacks elsewhere.
+  trustHost: true,
   pages: {
     signIn: '/login',
     error: '/login',
