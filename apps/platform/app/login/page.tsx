@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +26,35 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isMfaRequired, setIsMfaRequired] = useState(false);
+
+  // Which single sign-on providers are actually configured on the server.
+  // The Google and Office 365 buttons used to render unconditionally, for
+  // providers registered with empty credentials — so they were always visible
+  // and could never complete a sign-in. Asking the server which providers exist
+  // means the buttons appear exactly when they work, and adding SSO later is
+  // just an env var rather than another edit here.
+  const [ssoProviders, setSsoProviders] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/auth/providers')
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((data: Record<string, { id: string; type: string }>) => {
+        if (cancelled || !data) return;
+        setSsoProviders(
+          Object.values(data)
+            .filter((p) => p && p.type !== 'credentials')
+            .map((p) => p.id)
+        );
+      })
+      .catch(() => {
+        // A failure here means no SSO buttons, which is the safe direction:
+        // better to show only the email form than a button that cannot work.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -136,8 +165,10 @@ export default function LoginPage() {
           </AnimatePresence>
 
           <div className="space-y-6">
-            {/* SSO Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* SSO buttons — rendered only for providers the server actually has */}
+            {ssoProviders.length > 0 && (
+            <div className={`grid gap-3 ${ssoProviders.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {ssoProviders.includes('google') && (
               <button
                 type="button"
                 onClick={() => signIn('google', { callbackUrl: '/' })}
@@ -151,6 +182,8 @@ export default function LoginPage() {
                 </svg>
                 GOOGLE
               </button>
+              )}
+              {ssoProviders.includes('microsoft-entra-id') && (
               <button
                 type="button"
                 onClick={() => signIn('microsoft-entra-id', { callbackUrl: '/' })}
@@ -164,8 +197,11 @@ export default function LoginPage() {
                 </svg>
                 OFFICE 365
               </button>
+              )}
             </div>
+            )}
 
+            {ssoProviders.length > 0 && (
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-[#e5e7eb]"></span>
@@ -174,6 +210,7 @@ export default function LoginPage() {
                 <span className="bg-white px-3">or continue with email</span>
               </div>
             </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">

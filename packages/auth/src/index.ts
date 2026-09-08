@@ -27,18 +27,55 @@ async function logAuthEvent(eventType: string, details: Record<string, unknown>,
   }
 }
 
+/**
+ * OAuth providers are registered only when their credentials actually exist.
+ *
+ * Both were previously registered unconditionally with `|| ""` fallbacks, which
+ * did two separate kinds of harm. It put Google and Office 365 buttons on the
+ * login page for sign-in methods that could never complete — a certification
+ * body offering a capability it does not have, on its own front door. And
+ * because `??` does not override an empty string, `|| ""` actively blocked
+ * @auth/core's own AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET env defaulting, so even
+ * setting the canonical variable names would not have switched them on.
+ *
+ * Neither provider's variables appear in .env.example, which is consistent with
+ * them never having been configured. With this change the buttons appear if and
+ * only if the credentials are present, so turning SSO on is now purely a matter
+ * of setting the env vars — nothing here needs editing again.
+ */
+const googleId = process.env.AUTH_GOOGLE_ID ?? process.env.GOOGLE_CLIENT_ID;
+const googleSecret = process.env.AUTH_GOOGLE_SECRET ?? process.env.GOOGLE_CLIENT_SECRET;
+const entraId = process.env.AUTH_MICROSOFT_ENTRA_ID_ID;
+const entraSecret = process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET;
+const entraTenant = process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID;
+
+const oauthProviders: NextAuthConfig["providers"] = [];
+
+if (googleId && googleSecret) {
+  oauthProviders.push(GoogleProvider({ clientId: googleId, clientSecret: googleSecret }));
+} else if (process.env.NODE_ENV === "production") {
+  console.warn("[AUTH] Google sign-in disabled: AUTH_GOOGLE_ID / AUTH_GOOGLE_SECRET not set");
+}
+
+if (entraId && entraSecret) {
+  oauthProviders.push(
+    MicrosoftEntraIDProvider({
+      clientId: entraId,
+      clientSecret: entraSecret,
+      // Omitted entirely rather than passed as undefined, so the provider's own
+      // default issuer applies when no tenant is pinned.
+      ...(entraTenant
+        ? { issuer: `https://login.microsoftonline.com/${entraTenant}/v2.0` }
+        : {}),
+    })
+  );
+} else if (process.env.NODE_ENV === "production") {
+  console.warn("[AUTH] Microsoft sign-in disabled: AUTH_MICROSOFT_ENTRA_ID_ID / _SECRET not set");
+}
+
 export const authConfig: NextAuthConfig = {
   providers: [
-// ... (providers mapping remains same)
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
-    MicrosoftEntraIDProvider({
-      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID || "",
-      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET || "",
-      issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID ? `https://login.microsoftonline.com/${process.env.AUTH_MICROSOFT_ENTRA_ID_TENANT_ID}/v2.0` : undefined,
-    }),
+    ...oauthProviders,
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
