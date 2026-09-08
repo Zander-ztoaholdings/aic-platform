@@ -5,9 +5,9 @@ import { useState } from 'react';
 
 export default function QualityControlPage() {
     const [tasks] = useState([
-        { id: 'QC-102', entity: 'Capitec Bank Audit', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REPORT' },
-        { id: 'QC-103', entity: 'Discovery SPI Policy', auditor: 'Auditor #04', status: 'FLAGGED', type: 'REQUIREMENT' },
-        { id: 'QC-104', entity: 'Investec Health XAI', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REQUIREMENT' }
+        { id: 'QC-102', entity: 'Example Bank Ltd Audit', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REPORT' },
+        { id: 'QC-103', entity: 'Example Insurer SPI Policy', auditor: 'Auditor #04', status: 'FLAGGED', type: 'REQUIREMENT' },
+        { id: 'QC-104', entity: 'Example Healthcare XAI', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REQUIREMENT' }
     ]);
 
     return (

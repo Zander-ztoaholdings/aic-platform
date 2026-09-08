@@ -84,7 +84,7 @@ export default function SignupPage() {
                             value={form.orgName}
                             onChange={e => setForm(f => ({ ...f, orgName: e.target.value }))}
                             className="w-full border border-aic-black/10 rounded-xl px-4 py-3 font-serif text-sm focus:border-aic-gold outline-none transition-colors"
-                            placeholder="e.g. Standard Bank SA"
+                            placeholder="e.g. Example Bank Ltd"
                         />
                     </div>
 

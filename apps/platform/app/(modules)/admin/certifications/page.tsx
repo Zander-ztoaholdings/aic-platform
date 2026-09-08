@@ -34,7 +34,7 @@ export default function CertificationsPage() {
   const certifications: Certification[] = [
     {
       id: 'AIC-2026-0001',
-      organization: 'FirstRand Bank',
+      organization: 'Example Bank Ltd (demo)',
       tier: 'TIER_1',
       status: 'ACTIVE',
       issued_at: '2026-01-01',
@@ -45,7 +45,7 @@ export default function CertificationsPage() {
     },
     {
       id: 'AIC-2026-0002',
-      organization: 'Discovery Health',
+      organization: 'Example Healthcare Group (demo)',
       tier: 'TIER_1',
       status: 'ACTIVE',
       issued_at: '2025-12-15',
@@ -56,7 +56,7 @@ export default function CertificationsPage() {
     },
     {
       id: 'AIC-2026-0003',
-      organization: 'Vodacom SA',
+      organization: 'Example Telecom Ltd (demo)',
       tier: 'TIER_2',
       status: 'EXPIRING_SOON',
       issued_at: '2025-02-10',
@@ -67,7 +67,7 @@ export default function CertificationsPage() {
     },
     {
       id: 'AIC-2025-0089',
-      organization: 'Takealot Group',
+      organization: 'Example Retail Group (demo)',
       tier: 'TIER_2',
       status: 'ACTIVE',
       issued_at: '2025-10-01',
@@ -78,7 +78,7 @@ export default function CertificationsPage() {
     },
     {
       id: 'AIC-2025-0045',
-      organization: 'Old Mutual',
+      organization: 'Example Insurance Group (demo)',
       tier: 'TIER_1',
       status: 'ACTIVE',
       issued_at: '2025-08-15',

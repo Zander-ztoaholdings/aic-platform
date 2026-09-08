@@ -71,10 +71,10 @@ export default function GlobalLeaderboard() {
 
           <div className="space-y-4 relative z-10">
             {(data?.leaderboard || [
-              { name: 'Standard Bank', score: 98, tier: 'TIER_1' },
-              { name: 'Discovery Health', score: 95, tier: 'TIER_1' },
-              { name: 'Investec', score: 92, tier: 'TIER_1' },
-              { name: 'National Treasury', score: 89, tier: 'TIER_2' },
+              { name: 'Example Bank Ltd', score: 98, tier: 'TIER_1' },
+              { name: 'Example Healthcare Group', score: 95, tier: 'TIER_1' },
+              { name: 'Example Investment Group', score: 92, tier: 'TIER_1' },
+              { name: 'Example Public Sector Entity', score: 89, tier: 'TIER_2' },
               { name: 'AIC Internal', score: 84, tier: 'TIER_2' },
             ]).map((org: any, i: number) => (
               <motion.div 

@@ -100,7 +100,7 @@ describe('Settings Route Validation', () => {
   });
 
   it('accepts valid name', () => {
-    expect(validateSettingsInput({ name: 'FirstRand Bank' })).toEqual({ valid: true });
+    expect(validateSettingsInput({ name: 'Example Bank Ltd' })).toEqual({ valid: true });
   });
 
   it('accepts empty body (no name update)', () => {

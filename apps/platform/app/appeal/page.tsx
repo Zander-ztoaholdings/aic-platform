@@ -60,7 +60,7 @@ export default function AppealPortal() {
                                     <input 
                                         type="text" 
                                         className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
-                                        placeholder="e.g. FirstRand Bank"
+                                        placeholder="e.g. Example Bank Ltd"
                                         onChange={(e) => setFormData({...formData, orgName: e.target.value})}
                                     />
                                 </div>

@@ -72,7 +72,7 @@ export default function InsuranceRiskPage() {
 
                     <div className="mt-12 p-8 border border-dashed border-aic-black/10 rounded-2xl">
                         <p className="text-sm font-serif text-gray-500 italic leading-relaxed">
-                            *This assessment is a projection based on the current AIC Integrity Score. Actual premium discounts are subject to final underwriting by AIC Insurance Partners (Old Mutual, Santam, or Discovery).
+                            *This assessment is a projection based on the current AIC Integrity Score. Actual premium discounts are subject to final underwriting by the insurer selected during the certification process.
                         </p>
                     </div>
                 </div>

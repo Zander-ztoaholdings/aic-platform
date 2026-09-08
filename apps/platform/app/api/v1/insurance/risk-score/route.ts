@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSystemDb, organizations, sql, eq } from '@aic/db';
 
 /**
- * INSURANCE PARTNER API (Mockup for iTOO/Santam)
+ * INSURANCE PARTNER API (mock scoring endpoint for a future insurance-partner integration)
  * 
  * Provides an algorithmic risk score based on:
  * 1. AIMS Readiness Level (ISO 42001)
