@@ -3,6 +3,21 @@ import { getTenantDb, getSystemDb, aimsAssessments, conflictChecks, organization
 import { auth } from '@aic/auth';
 import { z } from 'zod';
 import { isValidTransition } from '@/lib/state-machine';
+import { hasCapability } from '@/lib/rbac';
+
+/**
+ * IMPORTANT: session.user.role is an ORG-LEVEL role (ADMIN / AUDITOR /
+ * COMPLIANCE_OFFICER / VIEWER) held by a customer's own staff — /api/signup
+ * hands 'ADMIN' to the first user of every self-registered organisation. It is
+ * not an AIC staff role. Until 8 Sep 2026 the guards below compared that
+ * org-level role against a URL-supplied orgId, so any customer admin could read
+ * and drive ANOTHER organisation's certification assessment, including
+ * transitioning it to CERTIFIED and clearing its impartiality check.
+ *
+ * Certification decisions about an organisation must never be reachable by that
+ * organisation. AIC-staff actions are therefore gated on capabilities, which
+ * grant only super-admins while the capability tables are unseeded.
+ */
 
 const TransitionSchema = z.object({
   stage: z.enum(['ADVISORY', 'READINESS', 'STAGE_1_DOCS', 'STAGE_2_TECHNICAL', 'CERTIFIED', 'SUSPENDED']),
@@ -26,8 +41,10 @@ export async function GET(
     const session = await auth();
     if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    // Regular users can only see their own org
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'AUDITOR' && session.user.orgId !== orgId) {
+    // An organisation may read its own assessment. Reading anyone else's is an
+    // AIC-staff action.
+    const isAicStaff = await hasCapability(session.user.id as string, 'conduct_assessment');
+    if (!isAicStaff && session.user.orgId !== orgId) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -35,8 +52,8 @@ export async function GET(
     const [assessment] = await sysDb.select().from(aimsAssessments).where(eq(aimsAssessments.orgId, orgId)).limit(1);
 
     if (!assessment) {
-      // Only Auditors or Admins can initialize a new assessment
-      if (session.user.role !== 'AUDITOR' && session.user.role !== 'ADMIN') {
+      // Opening an assessment is an AIC-staff action, never the customer's.
+      if (!isAicStaff) {
         return NextResponse.json({ error: 'AIMS assessment not initialized. Contact an auditor.' }, { status: 404 });
       }
       
@@ -59,7 +76,12 @@ export async function POST(
   try {
     const { orgId } = await params;
     const session = await auth();
-    if (!session?.user || (session.user.role !== 'AUDITOR' && session.user.role !== 'ADMIN')) {
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // Stage transitions are certification decisions — including the one that
+    // marks an organisation CERTIFIED — so they are AIC-staff only.
+    const isAicStaff = await hasCapability(session.user.id as string, 'conduct_assessment');
+    if (!isAicStaff) {
       return NextResponse.json({ error: 'Auditor privileges required' }, { status: 403 });
     }
 
@@ -132,7 +154,14 @@ export async function PATCH(
   try {
     const { orgId } = await params;
     const session = await auth();
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    // Clearing an impartiality conflict is the control that stops an assessed
+    // organisation choosing its own assessor. The old check accepted the
+    // org-level 'ADMIN' role, i.e. the customer, despite its own error message
+    // claiming SuperAdmin was required. Now it actually is.
+    const canClearConflicts = await hasCapability(session.user.id as string, 'clear_impartiality_conflict');
+    if (!canClearConflicts) {
       return NextResponse.json({ error: 'SuperAdmin required for conflict clearing' }, { status: 403 });
     }
 

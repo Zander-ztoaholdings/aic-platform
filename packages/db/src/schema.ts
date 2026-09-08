@@ -112,6 +112,26 @@ export const auditDocuments = pgTable('audit_documents', {
   requiredCapability: varchar('required_capability', { length: 100 }).default('view_audit_vault'),
   uploadedBy: uuid('uploaded_by').references(() => users.id),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+
+  // ── Evidence chain (db/manual/002_evidence_chain.sql) ────────────────────
+  // Which requirement this evidence is offered against. Before this existed,
+  // evidence was matched to requirements by a free-text slotType compared to a
+  // four-item hardcoded array, so an item could not be traced to what it
+  // supposedly proved.
+  requirementId: uuid('requirement_id').references((): AnyPgColumn => auditRequirements.id, { onDelete: 'set null' }),
+
+  // The act of verification, recorded as who / when / what they concluded.
+  // A DB constraint requires all three together or none: a half-recorded
+  // verification is not a verification.
+  verifiedBy: uuid('verified_by').references(() => users.id, { onDelete: 'set null' }),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }),
+  verificationOutcome: varchar('verification_outcome', { length: 30 }), // ACCEPTED | REJECTED | INSUFFICIENT
+  verificationNotes: text('verification_notes'),
+
+  // Evidence is superseded, never overwritten — what was relied on at the time
+  // of a decision must stay readable after it.
+  supersededBy: uuid('superseded_by').references((): AnyPgColumn => auditDocuments.id, { onDelete: 'set null' }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 // Document Comment Threads
@@ -133,8 +153,29 @@ export const issuedCertifications = pgTable('issued_certifications', {
   expiryDate: timestamp('expiry_date', { withTimezone: true }).notNull(),
   pdfUrl: text('pdf_url'), // Link to the watermarked PDF
   verificationCode: varchar('verification_code', { length: 50 }).unique(), // For public directory check
+  // ACTIVE | SUSPENDED | REVOKED | EXPIRED | WITHDRAWN — constrained in the DB.
+  // Until 002_evidence_chain.sql no code path ever updated this table, so a
+  // certificate stayed ACTIVE past its own expiryDate and the public register
+  // kept saying so.
   status: varchar('status', { length: 20 }).default('ACTIVE'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+
+  // ── Lifecycle (db/manual/002_evidence_chain.sql) ─────────────────────────
+  // A suspension or revocation must carry its reason and its author; the DB
+  // enforces that, because a withdrawal nobody can account for is not one.
+  suspendedAt: timestamp('suspended_at', { withTimezone: true }),
+  suspendedBy: uuid('suspended_by').references(() => users.id, { onDelete: 'set null' }),
+  suspensionReason: text('suspension_reason'),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: uuid('revoked_by').references(() => users.id, { onDelete: 'set null' }),
+  revocationReason: text('revocation_reason'),
+  reinstatedAt: timestamp('reinstated_at', { withTimezone: true }),
+  reinstatedBy: uuid('reinstated_by').references(() => users.id, { onDelete: 'set null' }),
+
+  // The assessment that justified issuing this. Without it the evidentiary
+  // basis for a certificate is not recoverable from its own record.
+  assessmentId: uuid('assessment_id').references((): AnyPgColumn => aimsAssessments.id, { onDelete: 'set null' }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 // Human-in-the-Loop (HITL) Logs (Immutable Accountability)
@@ -713,3 +754,81 @@ export const awareAssessments = pgTable('aware_assessments', {
   byOrg: index('aware_assessments_org_idx').on(table.orgId),
   byUser: index('aware_assessments_user_idx').on(table.userId),
 }));
+
+
+// ─── The auditor-judgement layer ──────────────────────────────────────────────
+// See db/manual/002_evidence_chain.sql. Before these tables, the chain
+// requirement → evidence → verification → finding → corrective action →
+// decision broke at "finding": auditRequirements.findings was a single text
+// column overwritten by each scan, with no severity, owner, due date or
+// closure state, and nothing modelled non-conformity or its remedy at all.
+
+/**
+ * An auditor's finding against a requirement.
+ *
+ * Severity uses the vocabulary already defined in AIC's Audit and Certification
+ * Methodology v0.1 §5 — Major / Minor / Observation / Ethical concern — rather
+ * than introducing a fourth grading vocabulary into a scheme that already has
+ * three competing ones.
+ */
+export const auditFindings = pgTable('audit_findings', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  requirementId: uuid('requirement_id').references(() => auditRequirements.id, { onDelete: 'set null' }),
+  // Nullable: a finding can be raised on evidence that is absent, not just on
+  // evidence that is wrong.
+  documentId: uuid('document_id').references(() => auditDocuments.id, { onDelete: 'set null' }),
+
+  raisedBy: uuid('raised_by').notNull().references(() => users.id),
+  severity: varchar('severity', { length: 20 }).notNull(), // MAJOR | MINOR | OBSERVATION | ETHICAL_CONCERN
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+
+  status: varchar('status', { length: 30 }).notNull().default('OPEN'), // OPEN | RESPONSE_SUBMITTED | ACCEPTED | CLOSED | WITHDRAWN
+  raisedAt: timestamp('raised_at', { withTimezone: true }).notNull().defaultNow(),
+  dueAt: timestamp('due_at', { withTimezone: true }),
+  // The DB refuses a CLOSED or WITHDRAWN finding without both of these.
+  closedAt: timestamp('closed_at', { withTimezone: true }),
+  closedBy: uuid('closed_by').references(() => users.id, { onDelete: 'set null' }),
+  closureNotes: text('closure_notes'),
+
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => {
+  return {
+    orgIdIdx: index('audit_findings_org_id_idx').on(table.orgId),
+    requirementIdx: index('audit_findings_requirement_id_idx').on(table.requirementId),
+    statusIdx: index('audit_findings_status_idx').on(table.status),
+  }
+});
+
+/**
+ * The organisation's response to a finding, and AIC's review of that response.
+ * Both halves live in one row so the loop cannot be left half-open; the DB
+ * requires reviewer, timestamp and outcome together or not at all.
+ */
+export const correctiveActions = pgTable('corrective_actions', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  findingId: uuid('finding_id').notNull().references(() => auditFindings.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+
+  // The organisation's side
+  rootCause: text('root_cause'),
+  actionTaken: text('action_taken').notNull(),
+  evidenceDocumentId: uuid('evidence_document_id').references(() => auditDocuments.id, { onDelete: 'set null' }),
+  submittedBy: uuid('submitted_by').notNull().references(() => users.id),
+  submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
+
+  // AIC's side
+  reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  outcome: varchar('outcome', { length: 30 }), // ACCEPTED | REJECTED | MORE_INFO_REQUIRED
+  reviewNotes: text('review_notes'),
+
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => {
+  return {
+    findingIdx: index('corrective_actions_finding_id_idx').on(table.findingId),
+    orgIdIdx: index('corrective_actions_org_id_idx').on(table.orgId),
+  }
+});

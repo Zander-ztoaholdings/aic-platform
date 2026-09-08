@@ -7,13 +7,34 @@ import { Eyebrow } from './Eyebrow';
 interface UploadModalProps {
   label: string;
   onClose: () => void;
+  /** Evidence slot this submission fills. Defaults to a slug of the label. */
+  slotType?: string;
+  /** The requirement this evidence is offered against, where the caller knows it. */
+  requirementId?: string;
+  /** Called after a successful submission, so the caller can refresh its view. */
+  onUploaded?: () => void;
 }
 
-export function UploadModal({ label, onClose }: UploadModalProps) {
+const slugify = (s: string) =>
+  s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 50);
+
+/**
+ * Submits evidence to the vault.
+ *
+ * Until 8 Sep 2026 this component's submit handler was
+ * `await new Promise(r => setTimeout(r, 1600))` followed by "Submitted
+ * Successfully" — it called no API. A client organisation could not actually
+ * submit evidence through the interface, while being told that it had. The
+ * working upload route existed the whole time and was simply not reachable
+ * from here.
+ */
+export function UploadModal({ label, onClose, slotType, requirementId, onUploaded }: UploadModalProps) {
   const [dragging, setDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -24,10 +45,46 @@ export function UploadModal({ label, onClose }: UploadModalProps) {
 
   const handleSubmit = async () => {
     setBusy(true);
-    // Placeholder: replace with real upload API call
-    await new Promise((r) => setTimeout(r, 1600));
-    setDone(true);
-    setBusy(false);
+    setError(null);
+
+    const slot = slotType ?? slugify(label);
+    let uploaded = 0;
+
+    try {
+      // Sequential rather than parallel: each file is hashed and written to
+      // object storage server-side, and a partial failure needs to report how
+      // far it got rather than leaving the user guessing.
+      for (const file of files) {
+        const body = new FormData();
+        body.append('file', file);
+        body.append('slotType', slot);
+        if (requirementId) body.append('requirementId', requirementId);
+
+        const res = await fetch('/api/v1/vault/upload', { method: 'POST', body });
+
+        if (!res.ok) {
+          const detail = await res.json().catch(() => ({}));
+          throw new Error(
+            detail.error
+              ? `${file.name}: ${detail.error}`
+              : `${file.name}: upload failed (${res.status})`
+          );
+        }
+        uploaded += 1;
+        setUploadedCount(uploaded);
+      }
+
+      setDone(true);
+      onUploaded?.();
+    } catch (e) {
+      setError(
+        uploaded > 0
+          ? `${uploaded} of ${files.length} submitted, then: ${(e as Error).message}`
+          : (e as Error).message
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -59,7 +116,7 @@ export function UploadModal({ label, onClose }: UploadModalProps) {
               </div>
               <h3 className="font-serif text-base font-bold text-[#0f1f3d] mb-2">Submitted Successfully</h3>
               <p className="text-sm text-[#6b7280] mb-6">
-                {files.length} file{files.length !== 1 ? 's' : ''} logged. Evidence receipt (DOC-011) generated.
+                {uploadedCount} file{uploadedCount !== 1 ? 's' : ''} stored and checksummed.
               </p>
               <button
                 onClick={onClose}
@@ -119,6 +176,13 @@ export function UploadModal({ label, onClose }: UploadModalProps) {
                       </button>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Error */}
+              {error && (
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+                  <p className="text-xs text-red-700 leading-relaxed">{error}</p>
                 </div>
               )}
 

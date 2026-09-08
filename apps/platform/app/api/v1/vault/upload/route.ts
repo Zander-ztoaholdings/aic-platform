@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
-import { getSystemDb, auditDocuments } from '@aic/db';
+import { getSystemDb, auditDocuments, auditRequirements, and, eq } from '@aic/db';
 import { StorageService } from '@aic/db/storage';
 
 export async function POST(req: NextRequest) {
@@ -13,9 +13,32 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const slotType = formData.get('slotType') as string;
+    const requirementId = (formData.get('requirementId') as string) || null;
 
     if (!file || !slotType) {
       return NextResponse.json({ error: 'Missing file or slot type' }, { status: 400 });
+    }
+
+    // If the submission names a requirement, it must be one of this
+    // organisation's own — otherwise evidence could be attached to another
+    // org's requirement, and the chain would record something untrue.
+    if (requirementId) {
+      const check = getSystemDb();
+      const [req_] = await check
+        .select({ id: auditRequirements.id })
+        .from(auditRequirements)
+        .where(and(
+          eq(auditRequirements.id, requirementId),
+          eq(auditRequirements.orgId, session.user.orgId)
+        ))
+        .limit(1);
+
+      if (!req_) {
+        return NextResponse.json(
+          { error: 'Unknown requirement for this organisation' },
+          { status: 400 }
+        );
+      }
     }
 
     // 1. Persist to real Storage Backend (Minio/S3)
@@ -37,7 +60,8 @@ export async function POST(req: NextRequest) {
       fileSize: `${(file.size / 1024).toFixed(2)} KB`,
       fileChecksum: hash,
       uploadedBy: session.user.id,
-      status: 'UPLOADED'
+      status: 'UPLOADED',
+      requirementId,
     }).returning();
 
     // 3. Trigger AI Triage (Async Background Task Placeholder)

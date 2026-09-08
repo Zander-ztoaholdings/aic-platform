@@ -33,16 +33,41 @@ export async function GET(
     org = row ?? null;
   }
 
+  // A certificate past its expiry date is not current, whatever the stored
+  // status says. Deriving this at read time means the register tells the truth
+  // without depending on a scheduled job having run — and until 8 Sep 2026
+  // nothing updated this table at all, so every expired certificate still
+  // verified as ACTIVE.
+  const storedStatus = cert.status ?? 'ACTIVE';
+  const isExpired =
+    !!cert.expiryDate && new Date(cert.expiryDate).getTime() < Date.now();
+  const effectiveStatus =
+    storedStatus === 'ACTIVE' && isExpired ? 'EXPIRED' : storedStatus;
+
+  const isCurrent = effectiveStatus === 'ACTIVE';
+
   const response = NextResponse.json({
     certNumber: cert.certNumber,
     standard: cert.standard,
-    status: cert.status,
+    status: effectiveStatus,
+    // The stored value is exposed separately so a caller can tell an expired
+    // certificate from one that was actively withdrawn — those mean different
+    // things to anyone relying on the signal.
+    storedStatus,
+    isCurrent,
     issueDate: cert.issueDate,
     expiryDate: cert.expiryDate,
+    withdrawnAt: cert.revokedAt ?? cert.suspendedAt ?? null,
     verificationCode: cert.verificationCode,
     organization: org ?? null,
   });
 
-  response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  // A verification endpoint that keeps answering ACTIVE for an hour after a
+  // revocation is the failure this whole route exists to prevent, so anything
+  // not currently valid is served uncached.
+  response.headers.set(
+    'Cache-Control',
+    isCurrent ? 'public, max-age=60, s-maxage=60, must-revalidate' : 'no-store'
+  );
   return response;
 }
