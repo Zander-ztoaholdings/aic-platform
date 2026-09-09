@@ -85,14 +85,37 @@ const PUBLIC_WEB_URL = 'https://aiccertified.cloud';
  * degrades to the public URL rather than taking registration with it.
  */
 function candidateUrls(): string[] {
+  const urls: string[] = [];
+  const add = (u?: string) => {
+    const v = u?.trim().replace(/\/+$/, '');
+    if (v && !urls.includes(v)) urls.push(v);
+  };
+
+  // Tried first, and the one that actually works in this deployment.
+  //
+  // aiccertified.cloud resolves to the same VPS this container runs on, and a
+  // container generally cannot route out and back in through its own host's
+  // public IP. That is why the public URL failed in 4ms — too fast for DNS and
+  // a TLS handshake, because it never left the box. Service-to-service calls
+  // belong on the internal network anyway: they are faster, they do not depend
+  // on public DNS or the reverse proxy, and they keep working if either is
+  // having a bad day.
+  //
+  // Server-only on purpose. NEXT_PUBLIC_* variables are inlined into the client
+  // bundle at build time, so an internal hostname put there would both leak and
+  // be frozen at build.
+  add(process.env.AIC_WEB_INTERNAL_URL);
+
+  // Then whatever the app was configured with, unless it is a loopback address
+  // in production: .env.example ships NEXT_PUBLIC_WEB_URL=http://localhost:3000
+  // and an environment seeded from that file would look for the standard on its
+  // own loopback interface, where nothing is listening.
   const configured = process.env.NEXT_PUBLIC_WEB_URL?.trim();
   const isLoopback = !!configured && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(configured);
+  if (!(isLoopback && process.env.NODE_ENV === 'production')) add(configured);
 
-  const urls: string[] = [];
-  if (configured && !(isLoopback && process.env.NODE_ENV === 'production')) {
-    urls.push(configured.replace(/\/+$/, ''));
-  }
-  if (!urls.includes(PUBLIC_WEB_URL)) urls.push(PUBLIC_WEB_URL);
+  // Last resort. Correct from anywhere that is not this host.
+  add(PUBLIC_WEB_URL);
   return urls;
 }
 
