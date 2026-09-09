@@ -69,8 +69,35 @@ export const DIVISIONS: Record<number, { name: string; tagline: string; who: str
 export const isValidDivision = (d: unknown): d is number =>
   typeof d === 'number' && Number.isInteger(d) && d >= 1 && d <= 5;
 
-const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL ?? 'https://aiccertified.cloud';
+const PUBLIC_WEB_URL = 'https://aiccertified.cloud';
+
+/**
+ * Where to fetch the standard from, in order of preference.
+ *
+ * NEXT_PUBLIC_WEB_URL is honoured, but ignored in production when it points at
+ * localhost: .env.example ships `NEXT_PUBLIC_WEB_URL=http://localhost:3000`,
+ * and an environment seeded from that file would send this container looking
+ * for the standard on its own loopback interface, where nothing is listening.
+ * That is not a hypothetical — the equivalent mistake with POSTGRES_URL vs
+ * DATABASE_URL took signup down for a day.
+ *
+ * Both candidates are tried before giving up, so a misconfigured variable
+ * degrades to the public URL rather than taking registration with it.
+ */
+function candidateUrls(): string[] {
+  const configured = process.env.NEXT_PUBLIC_WEB_URL?.trim();
+  const isLoopback = !!configured && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(configured);
+
+  const urls: string[] = [];
+  if (configured && !(isLoopback && process.env.NODE_ENV === 'production')) {
+    urls.push(configured.replace(/\/+$/, ''));
+  }
+  if (!urls.includes(PUBLIC_WEB_URL)) urls.push(PUBLIC_WEB_URL);
+  return urls;
+}
+
 const CACHE_TTL_MS = 15 * 60_000;
+const FETCH_TIMEOUT_MS = 8_000;
 
 let cache: { at: number; standard: PublishedStandard } | null = null;
 
@@ -83,25 +110,52 @@ let cache: { at: number; standard: PublishedStandard } | null = null;
 export async function fetchPublishedStandard(): Promise<PublishedStandard> {
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.standard;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5_000);
+  const attempts: string[] = [];
 
-  try {
-    const res = await fetch(`${WEB_URL}/api/standard`, {
-      signal: controller.signal,
-      headers: { accept: 'application/json' },
-    });
-    if (!res.ok) throw new Error(`standard endpoint returned ${res.status}`);
+  for (const base of candidateUrls()) {
+    const url = `${base}/api/standard`;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-    const data = (await res.json()) as PublishedStandard;
-    if (!data?.version || !Array.isArray(data.requirements) || data.requirements.length === 0) {
-      throw new Error('standard endpoint returned no requirements');
+    try {
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: { accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error(`returned ${res.status}`);
+
+      const data = (await res.json()) as PublishedStandard;
+      if (!data?.version || !Array.isArray(data.requirements) || data.requirements.length === 0) {
+        throw new Error('returned no requirements');
+      }
+
+      cache = { at: Date.now(), standard: data };
+      return data;
+    } catch (error) {
+      // Named so the log says which URL failed and why. The previous version
+      // logged only the error, which made "could not load the standard"
+      // indistinguishable from a DNS failure, a 404 and a timeout.
+      attempts.push(`${url} — ${(error as Error).message}`);
+    } finally {
+      clearTimeout(timeout);
     }
+  }
 
-    cache = { at: Date.now(), standard: data };
-    return data;
-  } finally {
-    clearTimeout(timeout);
+  throw new Error(
+    `Could not load the published standard. Tried:\n  ${attempts.join('\n  ')}`
+  );
+}
+
+/**
+ * Whether the standard is reachable, and from where. Used by the health check
+ * so this dependency can be seen before a signup discovers it.
+ */
+export async function standardHealth(): Promise<{ ok: boolean; version?: string; detail?: string }> {
+  try {
+    const s = await fetchPublishedStandard();
+    return { ok: true, version: s.version };
+  } catch (error) {
+    return { ok: false, detail: (error as Error).message };
   }
 }
 

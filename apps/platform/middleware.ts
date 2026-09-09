@@ -47,6 +47,9 @@ const PUBLIC_PATHS = [
   "/signup",
   "/api/signup",
   "/onboard",
+  // A health check that requires a session cannot tell anyone the service is
+  // unhealthy. It reports status and latency only — no internal error strings.
+  "/api/health",
 ];
 
 export function middleware(req: NextRequest) {
