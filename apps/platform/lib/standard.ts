@@ -12,6 +12,8 @@
  * never asked.
  */
 
+import snapshot from './standard-snapshot.json';
+
 export type RightCode = 'HU' | 'EX' | 'EM' | 'CO' | 'TR';
 
 export interface PublishedRequirement {
@@ -124,6 +126,9 @@ const FETCH_TIMEOUT_MS = 8_000;
 
 let cache: { at: number; standard: PublishedStandard } | null = null;
 
+/** Which source last answered. Reported by /api/health. */
+export let lastSource: 'live' | 'snapshot' | null = null;
+
 /**
  * Fetches the published standard, with a short in-process cache and a hard
  * timeout. Throws rather than returning a partial or invented standard: seeding
@@ -153,6 +158,7 @@ export async function fetchPublishedStandard(): Promise<PublishedStandard> {
       }
 
       cache = { at: Date.now(), standard: data };
+      lastSource = 'live';
       return data;
     } catch (error) {
       // Named so the log says which URL failed and why. The previous version
@@ -162,6 +168,31 @@ export async function fetchPublishedStandard(): Promise<PublishedStandard> {
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  // Every live source failed. Fall back to the pinned copy rather than refusing
+  // to register anyone.
+  //
+  // This is not a second definition of the standard — it is the published
+  // standard, captured by scripts/refresh-standard-snapshot.mjs, carrying the
+  // same version an organisation would have recorded from the live fetch. The
+  // alternative, which is what shipped this morning, is that registration stops
+  // entirely whenever the platform cannot reach aic-web. That happened, and it
+  // is a poor way for a certification body to be unavailable.
+  //
+  // The tradeoff is staleness, which is why the failure is logged loudly, the
+  // capture date travels inside the file, and /api/health reports which source
+  // answered. A snapshot in use is a condition to fix, not a resting state.
+  const pinned = snapshot as unknown as PublishedStandard;
+  if (pinned?.version && Array.isArray(pinned.requirements) && pinned.requirements.length > 0) {
+    console.error(
+      `[STANDARD] Live fetch failed, using the pinned snapshot (v${pinned.version}, captured ` +
+      `${(snapshot as { _snapshot?: { capturedAt?: string } })._snapshot?.capturedAt ?? 'unknown'}). Tried:\n  ` +
+      attempts.join('\n  ')
+    );
+    cache = { at: Date.now(), standard: pinned };
+    lastSource = 'snapshot';
+    return pinned;
   }
 
   throw new Error(
@@ -176,6 +207,17 @@ export async function fetchPublishedStandard(): Promise<PublishedStandard> {
 export async function standardHealth(): Promise<{ ok: boolean; version?: string; detail?: string }> {
   try {
     const s = await fetchPublishedStandard();
+    // A snapshot answer is reported as degraded on purpose. Registration keeps
+    // working, but something is wrong with reaching aic-web and it should not
+    // be possible to stop noticing that.
+    if (lastSource === 'snapshot') {
+      const capturedAt = (snapshot as { _snapshot?: { capturedAt?: string } })._snapshot?.capturedAt;
+      return {
+        ok: false,
+        version: s.version,
+        detail: `serving the pinned snapshot (v${s.version}, captured ${capturedAt ?? 'unknown'}) — aic-web is unreachable`,
+      };
+    }
     return { ok: true, version: s.version };
   } catch (error) {
     return { ok: false, detail: (error as Error).message };
