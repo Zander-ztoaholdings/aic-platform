@@ -1,0 +1,79 @@
+import { NextResponse } from 'next/server';
+import { getSystemDb, users, eq } from '@aic/db';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
+import { signMfaGrant, MFA_GRANT_COOKIE } from '@/lib/mfa-grant';
+
+/**
+ * Issues an MFA enrolment grant to someone who has proved their password but
+ * cannot be given a session until they have a second factor.
+ *
+ * The password is verified here rather than trusted from the login attempt that
+ * preceded it: this route is reachable on its own, so it has to stand on its
+ * own. It answers identically whether or not enrolment is actually required, so
+ * it cannot be used to enumerate which addresses belong to privileged accounts.
+ */
+export async function POST(request: Request) {
+  const ip = getClientIP(request);
+  // Same budget as a login attempt. This route checks a password, so it is a
+  // password oracle if it is cheaper to call than the login form.
+  const limit = checkRateLimit(`mfa-grant:${ip}`, 5, 15 * 60 * 1000);
+  if (!limit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Try again shortly.' },
+      { status: 429 }
+    );
+  }
+
+  // Deliberately identical for every failure mode below.
+  const refuse = () =>
+    NextResponse.json({ enrolmentRequired: false }, { status: 200 });
+
+  try {
+    const { email, password } = (await request.json()) as {
+      email?: string;
+      password?: string;
+    };
+    if (!email || !password) return refuse();
+
+    const db = getSystemDb();
+    const [user] = await db
+      .select({
+        id: users.id,
+        passwordHash: users.passwordHash,
+        role: users.role,
+        isActive: users.isActive,
+        isSuperAdmin: users.isSuperAdmin,
+        lockoutUntil: users.lockoutUntil,
+        twoFactorEnabled: users.twoFactorEnabled,
+        twoFactorSecret: users.twoFactorSecret,
+      })
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()))
+      .limit(1);
+
+    if (!user || !user.isActive || !user.passwordHash) return refuse();
+    if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) return refuse();
+
+    const bcrypt = await import('bcryptjs');
+    if (!(await bcrypt.default.compare(password, user.passwordHash))) return refuse();
+
+    // Only the exact situation this exists for: mandatory MFA, none enrolled.
+    // Someone already enrolled has a working login and needs nothing from here.
+    const mandatory =
+      (user.role === 'ADMIN' || user.role === 'COMPLIANCE_OFFICER') && !user.isSuperAdmin;
+    if (!mandatory || (user.twoFactorEnabled && user.twoFactorSecret)) return refuse();
+
+    const response = NextResponse.json({ enrolmentRequired: true }, { status: 200 });
+    response.cookies.set(MFA_GRANT_COOKIE, signMfaGrant(user.id), {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 600,
+    });
+    return response;
+  } catch (error) {
+    console.error('[MFA] Grant error:', error);
+    return refuse();
+  }
+}

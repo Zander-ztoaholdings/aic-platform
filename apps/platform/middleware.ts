@@ -47,6 +47,11 @@ const PUBLIC_PATHS = [
   "/signup",
   "/api/signup",
   "/onboard",
+  // Enrolment for accounts that cannot hold a session until they have a second
+  // factor. It authorises itself against a short-lived grant cookie rather than
+  // a session — see lib/mfa-grant.ts — so a session check here would lock out
+  // exactly the people it exists for.
+  "/mfa/setup",
   // A health check that requires a session cannot tell anyone the service is
   // unhealthy. It reports status and latency only — no internal error strings.
   "/api/health",

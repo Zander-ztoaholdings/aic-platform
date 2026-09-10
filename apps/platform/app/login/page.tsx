@@ -75,11 +75,51 @@ export default function LoginPage() {
         });
 
         if (result?.error) {
+            /**
+             * Auth.js v5 collapses anything thrown inside `authorize` into a
+             * single "CredentialsSignin" string. The checks below were written
+             * against the messages the server actually throws and therefore
+             * never matched: a locked account, a missing MFA token and a wrong
+             * password all arrived here identically and all reported "Invalid
+             * credentials or insufficient permissions". They are kept because
+             * they cost nothing if a future version does propagate the reason,
+             * but nothing depends on them any more.
+             *
+             * The case that matters is asked about directly instead. An account
+             * whose role requires MFA and has none cannot be given a session by
+             * any password, so a rejection here is not evidence of a bad
+             * password — it is the expected answer, and the honest response is
+             * to send them somewhere they can enrol. That endpoint re-checks
+             * the password itself and answers the same way for a wrong one, so
+             * asking costs nothing and reveals nothing.
+             */
+            let enrolling = false;
+            try {
+                const probe = await fetch('/api/auth/mfa/grant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                });
+                if (probe.ok) {
+                    const d = await probe.json();
+                    enrolling = Boolean(d?.enrolmentRequired);
+                }
+            } catch {
+                // Fall through to the ordinary error below.
+            }
+
+            if (enrolling) {
+                router.push('/mfa/setup');
+                return;
+            }
+
             if (result.error.includes('MFA_REQUIRED')) {
                 setIsMfaRequired(true);
                 setError('MFA Token Required');
             } else if (result.error.includes('locked')) {
                 setError(result.error);
+            } else if (isMfaRequired) {
+                setError('That code was not accepted. Check the app and try again.');
             } else {
                 setError('Invalid credentials or insufficient permissions.');
             }
