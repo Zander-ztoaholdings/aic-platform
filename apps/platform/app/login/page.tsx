@@ -96,6 +96,7 @@ export default function LoginPage() {
             let enrolling = false;
             let lockedFor = 0;
             let throttled = false;
+            let needsCode = false;
             try {
                 const probe = await fetch('/api/auth/mfa/grant', {
                     method: 'POST',
@@ -106,6 +107,7 @@ export default function LoginPage() {
                     const d = await probe.json();
                     enrolling = Boolean(d?.enrolmentRequired);
                     if (d?.locked) lockedFor = Number(d.minutes) || 1;
+                    if (d?.mfaRequired) needsCode = true;
                 } else if (probe.status === 429) {
                     // Say so rather than falling through to "invalid
                     // credentials", which is what made this invisible.
@@ -129,6 +131,19 @@ export default function LoginPage() {
             if (lockedFor) {
                 setError(
                     `Your password is correct, but this account is locked after too many failed attempts. Try again in ${lockedFor} minute${lockedFor === 1 ? '' : 's'}.`
+                );
+                setIsLoading(false);
+                return;
+            }
+
+            if (needsCode) {
+                // The password was right; the second factor is what is missing
+                // or wrong. Which of the two depends on whether we sent one.
+                setIsMfaRequired(true);
+                setError(
+                    mfaToken
+                        ? 'That code was not accepted. Check your authenticator app and try again.'
+                        : 'Enter the 6-digit code from your authenticator app.'
                 );
                 setIsLoading(false);
                 return;

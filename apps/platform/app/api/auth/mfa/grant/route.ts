@@ -102,11 +102,33 @@ export async function POST(request: Request) {
       );
     }
 
+    /**
+     * Already enrolled: the password is right and the second factor is what is
+     * missing or wrong.
+     *
+     * This route was originally silent here, on the reasoning that someone
+     * enrolled has a working login and needs nothing from it. They do. The
+     * login form shows its code field when `authorize` throws MFA_REQUIRED —
+     * and v5 collapses that into "CredentialsSignin" like everything else, so
+     * the field never appeared. Enrolling therefore made the account
+     * unreachable a second time, by a second route, for the same reason as the
+     * first: a signal the server sends that the client cannot hear.
+     *
+     * Saying so costs nothing. Only a caller who has just presented the correct
+     * password is told, and anyone holding the correct password already knows a
+     * second factor is in the way, because it is.
+     */
+    if (user.twoFactorEnabled && user.twoFactorSecret) {
+      return NextResponse.json(
+        { enrolmentRequired: false, mfaRequired: true },
+        { status: 200 }
+      );
+    }
+
     // Only the exact situation this exists for: mandatory MFA, none enrolled.
-    // Someone already enrolled has a working login and needs nothing from here.
     const mandatory =
       (user.role === 'ADMIN' || user.role === 'COMPLIANCE_OFFICER') && !user.isSuperAdmin;
-    if (!mandatory || (user.twoFactorEnabled && user.twoFactorSecret)) return refuse();
+    if (!mandatory) return refuse();
 
     console.log('[MFA] enrolment grant issued for', email.toLowerCase());
     const response = NextResponse.json({ enrolmentRequired: true }, { status: 200 });
