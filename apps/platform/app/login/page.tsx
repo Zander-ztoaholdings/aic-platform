@@ -95,6 +95,7 @@ export default function LoginPage() {
              */
             let enrolling = false;
             let lockedFor = 0;
+            let throttled = false;
             try {
                 const probe = await fetch('/api/auth/mfa/grant', {
                     method: 'POST',
@@ -105,6 +106,10 @@ export default function LoginPage() {
                     const d = await probe.json();
                     enrolling = Boolean(d?.enrolmentRequired);
                     if (d?.locked) lockedFor = Number(d.minutes) || 1;
+                } else if (probe.status === 429) {
+                    // Say so rather than falling through to "invalid
+                    // credentials", which is what made this invisible.
+                    throttled = true;
                 }
             } catch {
                 // Fall through to the ordinary error below.
@@ -112,6 +117,12 @@ export default function LoginPage() {
 
             if (enrolling) {
                 router.push('/mfa/setup');
+                return;
+            }
+
+            if (throttled) {
+                setError('Too many sign-in attempts from here. Wait a few minutes and try again.');
+                setIsLoading(false);
                 return;
             }
 

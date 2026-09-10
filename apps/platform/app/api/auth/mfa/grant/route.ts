@@ -14,14 +14,26 @@ import { signMfaGrant, MFA_GRANT_COOKIE } from '@/lib/mfa-grant';
  */
 export async function POST(request: Request) {
   const ip = getClientIP(request);
-  // Same budget as a login attempt. This route checks a password, so it is a
-  // password oracle if it is cheaper to call than the login form.
-  const limit = checkRateLimit(`mfa-grant:${ip}`, 5, 15 * 60 * 1000);
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: 'Too many attempts. Try again shortly.' },
-      { status: 429 }
-    );
+  /**
+   * Budgets, and why the first one was wrong.
+   *
+   * This started at five per IP per fifteen minutes, on the reasoning that it
+   * checks a password and should therefore cost what a login costs. That
+   * reasoning ignored where it sits: the login form calls this on EVERY failed
+   * sign-in, and a user who cannot get in retries. So the fifth attempt
+   * exhausted the budget, the probe began returning 429, the page fell back to
+   * "Invalid credentials", and the enrolment redirect — the entire escape
+   * hatch — switched itself off for exactly the person who needed it, at
+   * exactly the moment they needed it. Rate-limiting the fire exit.
+   *
+   * The per-IP budget is now generous enough for real use. The protection that
+   * actually matters is per-account and bounded near the login lockout
+   * threshold, so this cannot be used to guess one account's password faster
+   * than the login form allows, from any number of addresses.
+   */
+  const perIp = checkRateLimit(`mfa-grant-ip:${ip}`, 30, 15 * 60 * 1000);
+  if (!perIp.allowed) {
+    return NextResponse.json({ throttled: true }, { status: 429 });
   }
 
   // Deliberately identical for every failure mode below.
@@ -34,6 +46,15 @@ export async function POST(request: Request) {
       password?: string;
     };
     if (!email || !password) return refuse();
+
+    const perAccount = checkRateLimit(
+      `mfa-grant-acct:${email.toLowerCase()}`,
+      10,
+      15 * 60 * 1000
+    );
+    if (!perAccount.allowed) {
+      return NextResponse.json({ throttled: true }, { status: 429 });
+    }
 
     const db = getSystemDb();
     const [user] = await db
@@ -87,6 +108,7 @@ export async function POST(request: Request) {
       (user.role === 'ADMIN' || user.role === 'COMPLIANCE_OFFICER') && !user.isSuperAdmin;
     if (!mandatory || (user.twoFactorEnabled && user.twoFactorSecret)) return refuse();
 
+    console.log('[MFA] enrolment grant issued for', email.toLowerCase());
     const response = NextResponse.json({ enrolmentRequired: true }, { status: 200 });
     response.cookies.set(MFA_GRANT_COOKIE, signMfaGrant(user.id), {
       httpOnly: true,
