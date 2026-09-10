@@ -94,6 +94,7 @@ export default function LoginPage() {
              * asking costs nothing and reveals nothing.
              */
             let enrolling = false;
+            let lockedFor = 0;
             try {
                 const probe = await fetch('/api/auth/mfa/grant', {
                     method: 'POST',
@@ -103,6 +104,7 @@ export default function LoginPage() {
                 if (probe.ok) {
                     const d = await probe.json();
                     enrolling = Boolean(d?.enrolmentRequired);
+                    if (d?.locked) lockedFor = Number(d.minutes) || 1;
                 }
             } catch {
                 // Fall through to the ordinary error below.
@@ -110,6 +112,14 @@ export default function LoginPage() {
 
             if (enrolling) {
                 router.push('/mfa/setup');
+                return;
+            }
+
+            if (lockedFor) {
+                setError(
+                    `Your password is correct, but this account is locked after too many failed attempts. Try again in ${lockedFor} minute${lockedFor === 1 ? '' : 's'}.`
+                );
+                setIsLoading(false);
                 return;
             }
 

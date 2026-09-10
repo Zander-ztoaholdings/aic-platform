@@ -52,10 +52,34 @@ export async function POST(request: Request) {
       .limit(1);
 
     if (!user || !user.isActive || !user.passwordHash) return refuse();
-    if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) return refuse();
 
     const bcrypt = await import('bcryptjs');
     if (!(await bcrypt.default.compare(password, user.passwordHash))) return refuse();
+
+    /**
+     * Lockout is checked AFTER the password, and reported.
+     *
+     * `authorize` throws a perfectly good "Account locked. Try again in N
+     * minutes" — and Auth.js v5 collapses it, along with everything else, into
+     * "CredentialsSignin". So a locked account reached the login form as
+     * "Invalid credentials or insufficient permissions", which is the one
+     * message guaranteed to send someone to reset a password that was never
+     * wrong. That is what happens when you lock yourself out testing a login.
+     *
+     * Saying so leaks nothing: only a caller who has just presented the correct
+     * password is told, and they can already tell a locked account from a wrong
+     * password by the fact that the password is right.
+     */
+    if (user.lockoutUntil && new Date(user.lockoutUntil) > new Date()) {
+      const minutes = Math.max(
+        1,
+        Math.ceil((new Date(user.lockoutUntil).getTime() - Date.now()) / 60000)
+      );
+      return NextResponse.json(
+        { enrolmentRequired: false, locked: true, minutes },
+        { status: 200 }
+      );
+    }
 
     // Only the exact situation this exists for: mandatory MFA, none enrolled.
     // Someone already enrolled has a working login and needs nothing from here.
