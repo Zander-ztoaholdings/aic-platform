@@ -6,6 +6,17 @@ import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
+/**
+ * The way back out.
+ *
+ * Signing out lands on /login, and /login had no route to the public site —
+ * the string in the corner was decoration, not a link. Anyone who logged out
+ * was stuck on a login screen with nowhere to go but back in or the browser's
+ * back button. Overridable by env so a staging deployment does not send people
+ * to production.
+ */
+const AIC_WEB = process.env.NEXT_PUBLIC_AIC_WEB_URL || 'https://aiccertified.cloud';
+
 function BrandMark() {
   return (
     <svg viewBox="0 0 110 180" className="h-16 w-auto flex-shrink-0">
@@ -208,9 +219,12 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-16 md:absolute md:bottom-12 md:left-16 text-white/20 font-mono text-[10px] tracking-widest uppercase">
+        <a
+          href={AIC_WEB}
+          className="mt-16 md:absolute md:bottom-12 md:left-16 text-white/20 hover:text-white/60 transition-colors font-mono text-[10px] tracking-widest uppercase"
+        >
           aiccertified.cloud
-        </div>
+        </a>
       </div>
 
       {/* RIGHT PANEL - White Form */}
@@ -220,11 +234,19 @@ export default function LoginPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-white border border-[#e5e7eb] rounded-2xl p-8 shadow-sm max-w-sm w-full space-y-8"
         >
-          <div className="space-y-1">
-            <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">Welcome back</h2>
-            <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.2em]">
-              AIC Platform · Client Portal
-            </p>
+          <div className="space-y-3">
+            <a
+              href={AIC_WEB}
+              className="inline-flex items-center gap-1.5 font-mono text-[9px] text-[#9ca3af] hover:text-[#c9920a] uppercase tracking-[0.2em] transition-colors"
+            >
+              <span aria-hidden="true">&larr;</span> Back to aiccertified.cloud
+            </a>
+            <div className="space-y-1">
+              <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">Welcome back</h2>
+              <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.2em]">
+                AIC Platform · Client Portal
+              </p>
+            </div>
           </div>
 
           <AnimatePresence>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
-  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes,
+  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink,
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -141,6 +141,12 @@ export function DashboardSidebar({
             <div className="font-mono text-[9px] font-bold text-white">Live — Secure</div>
           </div>
         </div>
+        <a
+          href={process.env.NEXT_PUBLIC_AIC_WEB_URL || 'https://aiccertified.cloud'}
+          className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-white/30 text-xs transition-colors hover:text-white/70"
+        >
+          <ExternalLink className="w-3.5 h-3.5" /> aiccertified.cloud
+        </a>
         <button 
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-white/30 text-xs transition-colors hover:text-red-400"
