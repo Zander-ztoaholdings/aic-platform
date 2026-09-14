@@ -1,24 +1,7 @@
 import { NextResponse } from 'next/server';
-import {
-  getTenantDb,
-  organizations,
-  issuedCertifications,
-  auditRequirements,
-  auditDocuments,
-  auditFindings,
-  aiSystems,
-  accountablePersons,
-  decisionRecords,
-  correctionRequests,
-  eq,
-  and,
-  desc,
-  count,
-  isNull,
-  max,
-} from '@aic/db';
 import { getSession } from '../../../../lib/auth';
 import { resolveApiKey } from '../../../../lib/api-key-auth';
+import { buildOrgOverview } from '../../../../lib/org-overview';
 import type { Session } from 'next-auth';
 
 /**
@@ -42,13 +25,20 @@ import type { Session } from 'next-auth';
  *
  * So this returns observations and nothing else. Counts, coverage, rates,
  * dates — each traceable to a record an assessor verified. The underwriter
- * maps that to price, because that is their job and not ours. That restraint is
- * also the strongest thing AIC can say in an insurer's boardroom: we tell you
- * what is true, you decide what it is worth.
+ * maps that to price, because that is their job and not ours.
+ *
+ * WHY IT IS A PROJECTION AND NOT ITS OWN QUERY.
+ *
+ * It reads the same buildOrgOverview() the client's own overview page reads.
+ * Two separate assemblies would eventually disagree — one gets a new field, a
+ * filter changes on one side only — and the failure mode is the worst one
+ * available here: the client managing one picture of their exposure while the
+ * underwriter prices another, with neither able to see the difference. One
+ * builder, two projections. What the insurer is told is a strict subset of
+ * what the client can already see about themselves.
  *
  * Authenticated by session (the client viewing their own extract) or by API key
- * (the insurer pulling it). Previously session-only, which locked out the one
- * party it exists for.
+ * (the insurer pulling it).
  */
 export async function GET(request: Request) {
   try {
@@ -67,150 +57,57 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const db = getTenantDb(orgId);
+    const o = await buildOrgOverview(orgId);
+    if (!o) {
+      return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
+    }
 
-    return await db.query(async (tx) => {
-      const [org] = await tx
-        .select({
-          name: organizations.name,
-          tier: organizations.tier,
-          division: organizations.division,
-          standardVersion: organizations.standardVersion,
-          integrityScore: organizations.integrityScore,
-          certificationStatus: organizations.certificationStatus,
-        })
-        .from(organizations)
-        .where(eq(organizations.id, orgId))
-        .limit(1);
-
-      if (!org) {
-        return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
-      }
-
-      const [cert] = await tx
-        .select({
-          certNumber: issuedCertifications.certNumber,
-          standard: issuedCertifications.standard,
-          status: issuedCertifications.status,
-          issueDate: issuedCertifications.issueDate,
-          expiryDate: issuedCertifications.expiryDate,
-        })
-        .from(issuedCertifications)
-        .where(eq(issuedCertifications.orgId, orgId))
-        .orderBy(desc(issuedCertifications.issueDate))
-        .limit(1);
-
-      const one = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0;
-
-      const requirementsByStatus = await tx
-        .select({ status: auditRequirements.status, n: count() })
-        .from(auditRequirements)
-        .where(eq(auditRequirements.orgId, orgId))
-        .groupBy(auditRequirements.status);
-
-      const evidenceByOutcome = await tx
-        .select({ outcome: auditDocuments.verificationOutcome, n: count() })
-        .from(auditDocuments)
-        .where(eq(auditDocuments.orgId, orgId))
-        .groupBy(auditDocuments.verificationOutcome);
-
-      const [verified] = await tx
-        .select({ last: max(auditDocuments.verifiedAt) })
-        .from(auditDocuments)
-        .where(eq(auditDocuments.orgId, orgId));
-
-      const findingsByStatus = await tx
-        .select({ status: auditFindings.status, severity: auditFindings.severity, n: count() })
-        .from(auditFindings)
-        .where(eq(auditFindings.orgId, orgId))
-        .groupBy(auditFindings.status, auditFindings.severity);
-
-      const systems = await one(
-        tx
-          .select({ n: count() })
-          .from(aiSystems)
-          .where(and(eq(aiSystems.orgId, orgId), eq(aiSystems.isActive, true)))
-      );
-
-      const persons = await one(
-        tx
-          .select({ n: count() })
-          .from(accountablePersons)
-          .where(and(eq(accountablePersons.orgId, orgId), isNull(accountablePersons.supersededAt)))
-      );
-
-      const decisions = await one(
-        tx.select({ n: count() }).from(decisionRecords).where(eq(decisionRecords.orgId, orgId))
-      );
-      const overrides = await one(
-        tx
-          .select({ n: count() })
-          .from(decisionRecords)
-          .where(and(eq(decisionRecords.orgId, orgId), eq(decisionRecords.isHumanOverride, true)))
-      );
-
-      const correctionsByStatus = await tx
-        .select({ status: correctionRequests.status, n: count() })
-        .from(correctionRequests)
-        .where(eq(correctionRequests.orgId, orgId))
-        .groupBy(correctionRequests.status);
-
-      const tally = (rows: { status: string | null; n: number }[]) =>
-        Object.fromEntries(rows.map((r) => [r.status ?? 'unspecified', Number(r.n)]));
-
-      return NextResponse.json({
-        generated_at: new Date().toISOString(),
-        audience,
-        organisation: {
-          name: org.name,
-          division: org.division,
-          standard_version: org.standardVersion,
-          tier: org.tier,
-          certification_status: org.certificationStatus,
-        },
-        certificate: cert
-          ? {
-              number: cert.certNumber,
-              standard: cert.standard,
-              status: cert.status,
-              issued: cert.issueDate,
-              expires: cert.expiryDate,
-            }
-          : null,
-        observations: {
-          integrity_score: org.integrityScore,
-          requirements_by_status: tally(requirementsByStatus),
-          evidence_by_verification_outcome: tally(
-            evidenceByOutcome.map((r) => ({ status: r.outcome, n: r.n }))
-          ),
-          last_evidence_verified_at: verified?.last ?? null,
-          open_findings: findingsByStatus
-            .filter((r) => r.status !== 'CLOSED')
-            .map((r) => ({ severity: r.severity, count: Number(r.n) })),
-          ai_systems_declared: systems,
-          accountable_persons_on_record: persons,
-          decisions_recorded: decisions,
-          human_overrides: overrides,
-          // Rate is stated alongside its denominator on purpose. A percentage
-          // with the sample size hidden is the easiest number in this payload
-          // to misread.
-          human_override_rate:
-            decisions > 0 ? Number((overrides / decisions).toFixed(4)) : null,
-          corrections_by_status: tally(correctionsByStatus),
-        },
-        underwriting:
-          'AIC issues observations only. Rating, pricing, acceptance and any ' +
-          'decision to decline are the insurer’s. AIC does not grade, score ' +
-          'for underwriting purposes, or recommend an outcome for any ' +
-          'organisation.',
-        scope:
-          'Certification assesses governance against the published AIC standard. ' +
-          'It is not a determination of legal compliance in any jurisdiction, and ' +
-          'neither substitutes for the other.',
-      });
+    return NextResponse.json({
+      generated_at: o.generatedAt,
+      audience,
+      organisation: {
+        name: o.organisation.name,
+        division: o.organisation.division,
+        standard_version: o.organisation.standardVersion,
+        tier: o.organisation.tier,
+        certification_status: o.organisation.certificationStatus,
+      },
+      certificate: o.certificate,
+      observations: {
+        integrity_score: o.organisation.integrityScore,
+        requirements_by_status: o.requirements.byStatus,
+        evidence_by_verification_outcome: o.evidence.byVerificationOutcome,
+        last_evidence_verified_at: o.evidence.lastVerifiedAt,
+        open_findings: o.findings.open.map((f) => ({ severity: f.severity, overdue: f.overdue })),
+        open_findings_count: o.findings.openCount,
+        ai_systems_declared: o.inventory.total,
+        ai_systems_in_production: o.inventory.inProduction,
+        // Named without naming: an underwriter needs to know the inventory is
+        // incomplete, but the name of an undeclared internal system is the
+        // client's information and not load-bearing for pricing.
+        ai_systems_deciding_but_undeclared: o.inventory.undeclaredButDeciding.length,
+        accountable_persons_on_record: o.accountability.onRecord,
+        decisions_recorded: o.decisions.recorded,
+        human_overrides: o.decisions.humanOverrides,
+        // Rate is stated alongside its denominator on purpose. A percentage
+        // with the sample size hidden is the easiest number in this payload
+        // to misread.
+        human_override_rate: o.decisions.humanOverrideRate,
+        corrections_by_status: o.corrections.byStatus,
+        // Codes and severities, not the prose. The prose is written for the
+        // client's own reading and would land as an accusation in a file the
+        // client never sees.
+        gaps: o.gaps.map((g) => ({ code: g.code, severity: g.severity, count: g.count ?? null })),
+      },
+      underwriting:
+        'AIC issues observations only. Rating, pricing, acceptance and any ' +
+        'decision to decline are the insurer’s. AIC does not grade, score ' +
+        'for underwriting purposes, or recommend an outcome for any ' +
+        'organisation.',
+      scope: o.scope,
     });
   } catch (error) {
-    console.error('[INSURANCE] Extract error:', error);
+    console.error('[INSURANCE] Extract error:', (error as Error).message);
     return NextResponse.json({ error: 'Failed to build extract' }, { status: 500 });
   }
 }

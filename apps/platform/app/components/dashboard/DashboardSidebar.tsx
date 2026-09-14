@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
-  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut,
+  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes,
 } from 'lucide-react';
 
 const NAV_GROUPS = [
@@ -12,6 +12,7 @@ const NAV_GROUPS = [
     section: 'My Certification',
     items: [
       { label: 'Dashboard',           href: '/',               icon: LayoutDashboard },
+      { label: 'AI Overview',         href: '/overview',       icon: Boxes },
       { label: 'Evidence Vault',      href: '/evidence',       icon: ShieldCheck },
       { label: 'Pulse Monitor',       href: '/pulse',          icon: Activity },
     ],
