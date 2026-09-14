@@ -103,6 +103,17 @@ CREATE TRIGGER estate_events_no_update
   BEFORE UPDATE OR DELETE ON estate_events
   FOR EACH ROW EXECUTE FUNCTION estate_events_append_only();
 
+-- TRUNCATE needs its own statement-level trigger, and finding that out the
+-- hard way is the reason this file was tested against a live Postgres before
+-- it shipped. A row-level BEFORE UPDATE OR DELETE trigger does not fire on
+-- TRUNCATE at all: with only the trigger above, one statement silently emptied
+-- the entire record and the append-only guarantee was worth nothing. The most
+-- destructive operation available was the one not covered.
+DROP TRIGGER IF EXISTS estate_events_no_truncate ON estate_events;
+CREATE TRIGGER estate_events_no_truncate
+  BEFORE TRUNCATE ON estate_events
+  FOR EACH STATEMENT EXECUTE FUNCTION estate_events_append_only();
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- The diff cursor.
 --
@@ -124,6 +135,39 @@ CREATE TABLE IF NOT EXISTS estate_snapshots (
 -- ─────────────────────────────────────────────────────────────────────────
 ALTER TABLE estate_events    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE estate_snapshots ENABLE ROW LEVEL SECURITY;
+
+-- FORCE, not merely ENABLE.
+--
+-- ENABLE alone exempts the table's owner, and a deployment with one
+-- DATABASE_URL pointing at the owning role is the normal case — which means
+-- every policy in rls_policies.sql is doing nothing there. Verified against a
+-- live Postgres: a non-owner sees only its own org and cannot write into
+-- another, while the owner sees every row.
+--
+-- This is forced on these two tables because the code path is exclusively
+-- getTenantDb(), which always sets app.current_org_id, so there is nothing to
+-- break. It is NOT a fix for the rest of the schema: several tables are reached
+-- through getSystemDb() by design and forcing them needs its own audit. That
+-- audit is outstanding and should not be forgotten because these two are safe.
+ALTER TABLE estate_events    FORCE ROW LEVEL SECURITY;
+ALTER TABLE estate_snapshots FORCE ROW LEVEL SECURITY;
+
+-- WHAT THIS DOES AND DOES NOT GUARANTEE, stated plainly because overclaiming
+-- it to an auditor is worse than not having it.
+--
+-- Verified against PostgreSQL 16 before shipping:
+--   * UPDATE, DELETE and TRUNCATE are refused, for the table owner too.
+--   * A non-superuser owner with app.current_org_id unset sees zero rows, and
+--     cannot write a row belonging to another organisation.
+--   * A SUPERUSER bypasses row-level security entirely, FORCE or not. The
+--     application must therefore not connect as one. This is a deployment
+--     requirement, not a database setting.
+--   * DROP TABLE still succeeds for the owner, and nothing at this layer can
+--     prevent that. The guarantee is tamper-EVIDENCE, not tamper-proofing: a
+--     record that has been quietly edited is indistinguishable from a true one,
+--     whereas a record that is missing is loud. That is the distinction worth
+--     buying, and it is the one to describe honestly in the sales material.
+--   * Off-site copies of the chain are what close the remaining gap. Not built.
 
 DROP POLICY IF EXISTS estate_events_isolation_policy ON estate_events;
 CREATE POLICY estate_events_isolation_policy ON estate_events
