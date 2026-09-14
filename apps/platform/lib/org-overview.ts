@@ -404,6 +404,12 @@ export async function buildOrgOverview(orgId: string) {
         humanOverrideRate: decisions > 0 ? Number((overrides / decisions).toFixed(4)) : null,
         lastRecordedAt: decisionTotals?.last ?? null,
         systemsLoggingDecisions: decidingSystems.length,
+        // Names, not just the count: the continuity observer needs to know
+        // which declared systems have never logged anything, and that is not
+        // derivable from a count.
+        systemNamesLoggingDecisions: decidingSystems
+          .map((d) => d.systemName)
+          .filter((n): n is string => !!n),
       },
       corrections: {
         byStatus: tally(correctionsByStatus),

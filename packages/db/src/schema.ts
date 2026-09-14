@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, smallint, boolean, timestamp, jsonb, text, pgEnum, index, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, smallint, bigint, boolean, timestamp, jsonb, text, pgEnum, index, unique, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Enums
@@ -856,4 +856,65 @@ export const correctiveActions = pgTable('corrective_actions', {
     findingIdx: index('corrective_actions_finding_id_idx').on(table.findingId),
     orgIdIdx: index('corrective_actions_org_id_idx').on(table.orgId),
   }
+});
+
+/**
+ * The continuity record — see db/manual/004_continuity_record.sql for why.
+ *
+ * Append-only at the database level, not by convention: UPDATE and DELETE are
+ * refused by trigger. To correct a wrong event you append a correcting one and
+ * both stay visible, because a record that can be quietly tidied is not a
+ * record.
+ */
+export const estateEvents = pgTable('estate_events', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+
+  /** Per-org, 1-based, gapless. A missing seq is evidence a timestamp cannot give. */
+  seq: bigint('seq', { mode: 'number' }).notNull(),
+
+  observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+
+  entityType: varchar('entity_type', { length: 40 }).notNull(),
+  entityKey: varchar('entity_key', { length: 255 }).notNull(),
+  /** The name as it read at the time. Denormalised on purpose: a later rename
+   *  must not retroactively edit history through a join. */
+  entityLabel: varchar('entity_label', { length: 255 }).notNull(),
+
+  /** DECLARED | CHANGED | WITHDRAWN | OBSERVED. OBSERVED is what AIC noticed,
+   *  never what the organisation stated — conflating the two would let AIC's
+   *  own observation masquerade as the client's declaration. */
+  changeType: varchar('change_type', { length: 30 }).notNull(),
+
+  field: varchar('field', { length: 80 }),
+  previousValue: text('previous_value'),
+  newValue: text('new_value'),
+
+  actorLabel: varchar('actor_label', { length: 255 }).notNull(),
+  actorUserId: uuid('actor_user_id').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+
+  previousHash: varchar('previous_hash', { length: 64 }),
+  hash: varchar('hash', { length: 64 }).notNull(),
+
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgSeq: index('estate_events_org_seq_idx').on(table.orgId, table.seq),
+  orgObserved: index('estate_events_org_observed_idx').on(table.orgId, table.observedAt),
+  entity: index('estate_events_entity_idx').on(table.orgId, table.entityType, table.entityKey),
+  orgSeqUnique: unique('estate_events_org_seq_unique').on(table.orgId, table.seq),
+}));
+
+/**
+ * The diff cursor — scaffolding, not evidence.
+ *
+ * Holds the last observed state so the next observation has something to
+ * compare against, and is overwritten every run. If this table were dropped
+ * entirely the record in estate_events would survive intact, which is the test
+ * of which of the two is the product.
+ */
+export const estateSnapshots = pgTable('estate_snapshots', {
+  orgId: uuid('org_id').primaryKey().references(() => organizations.id, { onDelete: 'cascade' }),
+  takenAt: timestamp('taken_at', { withTimezone: true }).notNull().defaultNow(),
+  eventSeq: bigint('event_seq', { mode: 'number' }).notNull().default(0),
+  state: jsonb('state').notNull(),
 });
