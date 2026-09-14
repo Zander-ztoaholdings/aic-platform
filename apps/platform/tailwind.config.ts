@@ -16,8 +16,12 @@ module.exports = {
       colors: {
         "aic-navy": "#0A1728",
         "aic-navy-mid": "#0A1728",
-        "aic-gold": "#c36c32",
-        "aic-gold-light": "#c36c32",
+        // The brand gold is #c9920a. The login screen and the sidebar have always
+        // hardcoded that value; this config carried #c36c32, a third colour that
+        // matches neither, so every page built with `text-aic-gold` rendered a
+        // different gold from the shell around it.
+        "aic-gold": "#c9920a",
+        "aic-gold-light": "#e0b33d",
         "aic-paper": "#F9F8F4",
         // Add white explicitly for clarity, though it's a default Tailwind color
         "aic-white": "#F9F8F4", 

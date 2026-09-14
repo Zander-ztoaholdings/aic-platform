@@ -7,36 +7,56 @@ import {
   FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink,
 } from 'lucide-react';
 
-const NAV_GROUPS = [
+/**
+ * Two products, not one menu.
+ *
+ * The AI Overview and the certification are separate offerings and separate
+ * purchases: the overview is a tool an organisation uses to understand and
+ * evidence its own AI, and is worth having whether or not a certificate ever
+ * follows. Certification is an assessment against the AIC standard. Running
+ * them together as a single undifferentiated list told every new client that
+ * the tool was a step in a certification funnel, which undersells the half
+ * that stands on its own and confuses what they are actually buying.
+ *
+ * Each product carries its own accent so the two read as distinct at a glance
+ * without becoming two separate applications — they share the same data, and
+ * one feeds the other, so a hard visual break would be a lie in the other
+ * direction.
+ */
+const PRODUCTS = [
   {
-    section: 'My Certification',
+    key: 'overview',
+    name: 'AI Overview',
+    tagline: 'What you run, and what changed',
+    accent: '#3f8f83',
     items: [
-      { label: 'Dashboard',           href: '/',               icon: LayoutDashboard },
-      { label: 'AI Overview',         href: '/overview',       icon: Boxes },
-      { label: 'Evidence Vault',      href: '/evidence',       icon: ShieldCheck },
-      { label: 'Pulse Monitor',       href: '/pulse',          icon: Activity },
+      { label: 'Continuity Record', href: '/',              icon: LayoutDashboard },
+      { label: 'AI Estate',         href: '/overview',      icon: Boxes },
+      { label: 'Decision Log',      href: '/pulse',         icon: Activity },
+      { label: 'API & Access Keys', href: '/settings/keys', icon: Key },
     ],
   },
   {
-    section: 'Review & Findings',
+    key: 'certification',
+    name: 'Certification',
+    tagline: 'Assessment against the AIC standard',
+    accent: '#c9920a',
     items: [
-      { label: 'Auditor Findings',    href: '/findings',       icon: AlertTriangle, badge: 3 },
-      { label: 'Compliance Reports',  href: '/reports',        icon: FileCheck },
-      { label: 'Correspondence',      href: '/correspondence', icon: MessageSquare, dot: true },
+      { label: 'Evidence Vault',     href: '/evidence',       icon: ShieldCheck },
+      { label: 'Assessor Findings',  href: '/findings',       icon: AlertTriangle },
+      { label: 'Reports',            href: '/reports',        icon: FileCheck },
+      { label: 'Correspondence',     href: '/correspondence', icon: MessageSquare },
+      { label: 'My Certificate',     href: '/certificate',    icon: Award },
     ],
   },
   {
-    section: 'Certification',
+    key: 'account',
+    name: 'Account',
+    tagline: null,
+    accent: '#6b7280',
     items: [
-      { label: 'My Certificate',      href: '/certificate',    icon: Award },
-      { label: 'Practitioner (CAAP)', href: '/practitioner',   icon: GraduationCap },
-    ],
-  },
-  {
-    section: 'Account',
-    items: [
-      { label: 'API & Access Keys',    href: '/settings/keys',  icon: Key },
-      { label: 'Organisation Profile', href: '/organisation',   icon: Building2 },
+      { label: 'Organisation Profile', href: '/organisation', icon: Building2 },
+      { label: 'Practitioner (CAAP)',  href: '/practitioner', icon: GraduationCap },
     ],
   },
 ];
@@ -92,10 +112,23 @@ export function DashboardSidebar({
 
       {/* Nav */}
       <div className="flex-1 px-2.5 py-4 space-y-5">
-        {NAV_GROUPS.map((group) => (
-          <div key={group.section}>
-            <div className="font-mono text-[8px] font-bold uppercase tracking-[0.3em] text-white/[0.22] px-2 mb-1">
-              {group.section}
+        {PRODUCTS.map((group) => (
+          <div key={group.key}>
+            <div
+              className="px-2 mb-2 border-l-2 pl-2.5"
+              style={{ borderColor: group.accent }}
+            >
+              <div
+                className="font-mono text-[9px] font-bold uppercase tracking-[0.22em]"
+                style={{ color: group.accent }}
+              >
+                {group.name}
+              </div>
+              {group.tagline && (
+                <div className="font-mono text-[8px] text-white/[0.28] tracking-wide mt-0.5 leading-snug">
+                  {group.tagline}
+                </div>
+              )}
             </div>
             <nav className="space-y-0.5">
               {group.items.map((item) => {
@@ -108,22 +141,16 @@ export function DashboardSidebar({
                     onClick={onClose}
                     className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-xs font-medium transition-all border-l-2 ${
                       active
-                        ? 'bg-white/[0.09] text-white border-[#c9920a]'
+                        ? 'bg-white/[0.09] text-white'
                         : 'text-white/[0.38] hover:bg-white/[0.05] hover:text-white/70 border-transparent'
                     }`}
+                    style={active ? { borderColor: group.accent } : undefined}
                   >
                     <Icon
-                      className={`w-3.5 h-3.5 flex-shrink-0 ${active ? 'text-[#c9920a]' : 'text-current'}`}
+                      className="w-3.5 h-3.5 flex-shrink-0"
+                      style={active ? { color: group.accent } : undefined}
                     />
                     <span className="flex-1">{item.label}</span>
-                    {'badge' in item && item.badge != null && (
-                      <span className="ml-auto bg-[#c9920a] text-[#0a1628] font-mono text-[8px] font-bold px-1.5 py-0.5 rounded-full">
-                        {item.badge}
-                      </span>
-                    )}
-                    {'dot' in item && item.dot && !('badge' in item && (item as { badge?: number }).badge != null) && (
-                      <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#c9920a] flex-shrink-0" />
-                    )}
                   </Link>
                 );
               })}
