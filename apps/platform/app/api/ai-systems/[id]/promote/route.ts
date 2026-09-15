@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, aiSystems, auditLedger, HashChainService, eq, and, desc } from '@aic/db';
 import { auth } from '@aic/auth';
+import { canManageEstate } from '@/lib/roles';
 
 export async function POST(
   request: NextRequest,
@@ -8,6 +9,9 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session?.user?.orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canManageEstate(session.user.role as string | undefined)) {
+    return NextResponse.json({ error: 'Your role does not allow promoting a system to formal audit.' }, { status: 403 });
+  }
 
   const { id: systemId } = await params;
   const orgId = session.user.orgId;

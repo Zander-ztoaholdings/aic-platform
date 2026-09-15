@@ -3,6 +3,7 @@ import { getTenantDb, auditRequirements, eq, and, asc } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
 import { fetchPublishedStandard } from '@/lib/standard';
+import { canManageCompliance } from '@/lib/roles';
 
 export async function GET() {
   try {
@@ -51,6 +52,9 @@ export async function PATCH(request: NextRequest) {
     const session = await getSession() as Session | null;
     if (!session || !session.user?.orgId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!canManageCompliance(session.user.role as string | undefined)) {
+        return NextResponse.json({ error: 'Your role does not allow submitting evidence.' }, { status: 403 });
     }
     const orgId = session.user.orgId;
 

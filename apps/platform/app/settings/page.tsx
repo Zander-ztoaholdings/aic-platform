@@ -1,11 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import DashboardShell from '../components/DashboardShell';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import { canEditOrgProfile, canManageTeamAndKeys } from '../../lib/roles';
 
 export default function OrganizationalSettings() {
+    const { data: session } = useSession();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    const canEditProfile = canEditOrgProfile(role);
+    const canManageTeam = canManageTeamAndKeys(role);
     const [settings, setSettings] = useState({
         name: '',
         tier: '',
@@ -161,8 +167,9 @@ export default function OrganizationalSettings() {
                             <div>
                                 <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Entity Name</label>
                                 <input
-                                    className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
+                                    className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={settings.name}
+                                    disabled={!canEditProfile}
                                     onChange={e => setSettings(prev => ({ ...prev, name: e.target.value }))}
                                 />
                             </div>
@@ -186,7 +193,13 @@ export default function OrganizationalSettings() {
                     {/* Team Management */}
                     <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
                         <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Team Management</h3>
-                        
+
+                        {!canManageTeam ? (
+                            <p className="text-sm font-serif text-gray-500 italic">
+                                Only an administrator can invite team members. Ask an admin on your team to add you.
+                            </p>
+                        ) : (
+                        <>
                         {generatedInvite && (
                             <div className="mb-10 p-6 bg-aic-black text-aic-paper rounded-2xl border border-aic-paper/10">
                                 <p className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-widest mb-3">INVITATION LINK READY</p>
@@ -273,6 +286,8 @@ export default function OrganizationalSettings() {
                                 </button>
                             </div>
                         </form>
+                        </>
+                        )}
                     </section>
 
                     {/* Security Protocol */}
@@ -369,7 +384,13 @@ export default function OrganizationalSettings() {
                     {/* Developer API Access */}
                     <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
                         <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Developer API Access</h3>
-                        
+
+                        {!canManageTeam ? (
+                            <p className="text-sm font-serif text-gray-500 italic">
+                                API keys are managed by an administrator.
+                            </p>
+                        ) : (
+                        <>
                         {generatedKey && (
                             <div className="mb-10 p-6 bg-green-50 border border-green-100 rounded-2xl">
                                 <p className="text-[10px] font-mono font-bold text-green-600 uppercase tracking-widest mb-3">NEW API KEY GENERATED</p>
@@ -435,10 +456,13 @@ export default function OrganizationalSettings() {
                                 </div>
                             </form>
                         </div>
+                        </>
+                        )}
                     </section>
                 </div>
                 )}
 
+                {canEditProfile && (
                 <div className="flex justify-end pt-12 gap-4 items-center">
                     <button
                         onClick={handleSave}
@@ -448,6 +472,7 @@ export default function OrganizationalSettings() {
                         {saving ? 'SAVING...' : 'SAVE_PROTOCOL_CHANGES'}
                     </button>
                 </div>
+                )}
             </div>
         </DashboardShell>
     );

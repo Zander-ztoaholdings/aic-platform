@@ -6,6 +6,7 @@ import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
   FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink, Users,
 } from 'lucide-react';
+import { canManageTeamAndKeys, type OrgRole } from '../../../lib/roles';
 
 /**
  * Two products, not one menu.
@@ -33,7 +34,7 @@ const PRODUCTS = [
       { label: 'Continuity Record', href: '/',              icon: LayoutDashboard },
       { label: 'AI Estate',         href: '/overview',      icon: Boxes },
       { label: 'Decision Log',      href: '/pulse',         icon: Activity },
-      { label: 'API & Access Keys', href: '/settings/keys', icon: Key },
+      { label: 'API & Access Keys', href: '/settings/keys', icon: Key, restricted: canManageTeamAndKeys },
     ],
   },
   {
@@ -56,7 +57,7 @@ const PRODUCTS = [
     accent: '#6b7280',
     items: [
       { label: 'Organisation Profile', href: '/organisation', icon: Building2 },
-      { label: 'Team',                 href: '/settings',     icon: Users },
+      { label: 'Team',                 href: '/settings',     icon: Users, restricted: canManageTeamAndKeys },
       { label: 'Practitioner (CAAP)',  href: '/practitioner', icon: GraduationCap },
     ],
   },
@@ -81,10 +82,15 @@ export function DashboardSidebar({
   show,
   onClose,
   isActive,
+  role,
 }: {
   show: boolean;
   onClose: () => void;
   isActive: (href: string) => boolean;
+  /** The signed-in person's org-level role - undefined while the session is
+   *  still loading. Items marked `restricted` stay hidden until a role that
+   *  passes the check arrives, rather than flashing visible-then-hidden. */
+  role?: OrgRole | string;
 }) {
   return (
     <aside
@@ -132,7 +138,9 @@ export function DashboardSidebar({
               )}
             </div>
             <nav className="space-y-0.5">
-              {group.items.map((item) => {
+              {group.items
+                .filter((item) => !('restricted' in item) || !item.restricted || item.restricted(role))
+                .map((item) => {
                 const active = isActive(item.href);
                 const Icon = item.icon;
                 return (

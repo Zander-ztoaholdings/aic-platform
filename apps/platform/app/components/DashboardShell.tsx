@@ -9,6 +9,7 @@ import { PulseBar } from './ui/PulseBar';
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const {
     pathname,
+    role,
     notifications,
     showNotifs,
     setShowNotifs,
@@ -25,6 +26,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         show={showMobileMenu}
         onClose={() => setShowMobileMenu(false)}
         isActive={isActive}
+        role={role}
       />
 
       {showMobileMenu && (

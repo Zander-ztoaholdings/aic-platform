@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import type { Session } from 'next-auth';
 import { getSession } from '../../lib/auth';
 import { buildOrgOverview, type Gap } from '../../lib/org-overview';
+import { canManageEstate } from '../../lib/roles';
 import DashboardShell from '../components/DashboardShell';
 import { AddSystemForm } from './components/AddSystemForm';
 
@@ -93,6 +94,7 @@ const date = (v: unknown) =>
 export default async function OrgOverviewPage() {
   const session = (await getSession()) as Session | null;
   const orgId = session?.user?.orgId as string | undefined;
+  const canDeclare = canManageEstate(session?.user?.role as string | undefined);
 
   if (!orgId) redirect('/login');
 
@@ -208,12 +210,18 @@ export default async function OrgOverviewPage() {
             />
           </div>
 
-          <div className="mb-5">
-            <AddSystemForm />
-          </div>
+          {canDeclare && (
+            <div className="mb-5">
+              <AddSystemForm />
+            </div>
+          )}
 
           {inventory.systems.length === 0 ? (
-            <p className="text-sm text-gray-400">No systems declared yet.</p>
+            <p className="text-sm text-gray-400">
+              {canDeclare
+                ? 'No systems declared yet.'
+                : 'No systems declared yet. Ask an administrator or compliance officer to add one.'}
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

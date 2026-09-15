@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, governanceBlocks, HashChainService, EmpathyScrutiny, eq, asc, and } from '@aic/db';
 import { auth } from '@aic/auth';
+import { canManageEstate } from '@/lib/roles';
 
 export async function GET(request: NextRequest) {
   const session = await auth();
@@ -34,6 +35,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canManageEstate(session.user.role as string | undefined)) {
+    return NextResponse.json({ error: 'Your role does not allow editing the governance workspace.' }, { status: 403 });
+  }
 
   try {
     const { blocks, impactMagnitude, systemId } = await request.json();

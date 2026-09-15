@@ -1,9 +1,15 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 export function useDashboardState() {
   const pathname = usePathname();
   const router = useRouter();
+  // The signed-in person's org-level role - the one thing the sidebar and
+  // every page under DashboardShell need to know to show a role-appropriate
+  // view instead of the same flat access to everyone. See lib/roles.ts.
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string } | undefined)?.role;
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     title: string;
@@ -79,6 +85,7 @@ export function useDashboardState() {
 
   return {
     pathname,
+    role,
     notifications,
     showNotifs,
     setShowNotifs,

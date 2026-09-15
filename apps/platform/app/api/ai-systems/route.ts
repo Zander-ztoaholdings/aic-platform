@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, aiSystems, eq } from '@aic/db';
 import { auth } from '@aic/auth';
+import { canManageEstate } from '@/lib/roles';
 
 export async function GET() {
   const session = await auth();
@@ -25,6 +26,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!canManageEstate(session.user.role as string | undefined)) {
+    return NextResponse.json({ error: 'Your role does not allow declaring AI systems.' }, { status: 403 });
+  }
 
   try {
     const body = await request.json();

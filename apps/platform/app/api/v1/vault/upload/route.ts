@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
 import { getSystemDb, auditDocuments, auditRequirements, and, eq } from '@aic/db';
 import { StorageService } from '@aic/db/storage';
+import { canManageCompliance } from '@/lib/roles';
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id || !session?.user?.orgId) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!canManageCompliance(session.user.role as string | undefined)) {
+    return NextResponse.json({ error: 'Your role does not allow submitting evidence.' }, { status: 403 });
   }
 
   try {

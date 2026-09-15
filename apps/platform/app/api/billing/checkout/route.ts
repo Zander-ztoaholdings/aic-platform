@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import Stripe from 'stripe';
+import { canManageTeamAndKeys } from '@/lib/roles';
 
 export async function POST(request: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
@@ -11,6 +12,9 @@ export async function POST(request: NextRequest) {
     const session: any = await getSession();
     if (!session || !session.user?.orgId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!canManageTeamAndKeys(session.user.role as string | undefined)) {
+        return NextResponse.json({ error: 'Only an administrator can manage billing.' }, { status: 403 });
     }
 
     const { priceId } = await request.json();
