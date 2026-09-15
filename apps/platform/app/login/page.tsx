@@ -221,9 +221,9 @@ export default function LoginPage() {
 
         <a
           href={AIC_WEB}
-          className="mt-16 md:absolute md:bottom-12 md:left-16 text-white/20 hover:text-white/60 transition-colors font-mono text-[10px] tracking-widest uppercase"
+          className="mt-16 md:absolute md:bottom-12 md:left-16 text-white/40 hover:text-white/80 transition-colors font-mono text-[10px] tracking-widest uppercase"
         >
-          aiccertified.cloud
+          &larr; aiccertified.cloud
         </a>
       </div>
 
@@ -237,9 +237,9 @@ export default function LoginPage() {
           <div className="space-y-3">
             <a
               href={AIC_WEB}
-              className="inline-flex items-center gap-1.5 font-mono text-[9px] text-[#9ca3af] hover:text-[#c9920a] uppercase tracking-[0.2em] transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-[#f8f9fb] px-3 py-1.5 font-mono text-[9px] font-bold text-[#6b7280] uppercase tracking-[0.2em] transition-colors hover:border-[#c9920a]/40 hover:bg-[#c9920a]/[0.06] hover:text-[#c9920a]"
             >
-              <span aria-hidden="true">&larr;</span> Back to aiccertified.cloud
+              <span aria-hidden="true" className="text-xs leading-none">&larr;</span> Back to aiccertified.cloud
             </a>
             <div className="space-y-1">
               <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">Welcome back</h2>
