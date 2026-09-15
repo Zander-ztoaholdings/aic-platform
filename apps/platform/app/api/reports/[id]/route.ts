@@ -53,12 +53,15 @@ export async function GET(
       const html = getReportTemplate(data);
       const pdfBuffer = await generatePDF(html);
 
-      // 3. Return as PDF download
-       
+      // 3. Return the PDF. ?mode=inline opens it in the browser (the "View"
+      // button); the default (also used by the "PDF" download button) forces
+      // a save-as download.
+      const disposition = request.nextUrl.searchParams.get('mode') === 'inline' ? 'inline' : 'attachment';
+
       return new NextResponse(pdfBuffer as any, {
         headers: {
           'Content-Type': 'application/pdf',
-          'Content-Disposition': `attachment; filename="AIC-Report-${report.monthYear.replace(' ', '-')}.pdf"`,
+          'Content-Disposition': `${disposition}; filename="AIC-Report-${report.monthYear.replace(' ', '-')}.pdf"`,
         },
       });
     });
