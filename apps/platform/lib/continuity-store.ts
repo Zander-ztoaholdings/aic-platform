@@ -48,7 +48,12 @@ export type ObservationResult = {
 export async function observeEstate(
   orgId: string,
   actorLabel: string = OBSERVER,
-  actorUserId: string | null = null
+  actorUserId: string | null = null,
+  // Overrides "now" for every event and the snapshot this observation writes.
+  // Exists for scripts/seed-demo-org.ts, which builds a believable multi-week
+  // history rather than a pile of events all timestamped the moment it ran -
+  // every real caller leaves this as new Date().
+  observedAt: Date = new Date()
 ): Promise<ObservationResult | null> {
   const overview = await buildOrgOverview(orgId);
   if (!overview) return null;
@@ -82,7 +87,6 @@ export async function observeEstate(
     let seq = head?.seq ?? 0;
     let previousHash: string | null = head?.hash ?? null;
     const fromSeq = changes.length > 0 ? seq + 1 : null;
-    const observedAt = new Date();
 
     for (const change of changes) {
       seq += 1;
