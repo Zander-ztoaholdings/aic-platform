@@ -79,7 +79,10 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        const inviteLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${result.token}`;
+        // Tagged so /reset-password can greet an invited person differently
+        // from someone who forgot their password - same token mechanism,
+        // different moment for the person on the other end of the link.
+        const inviteLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${result.token}&invite=1&role=${encodeURIComponent(role)}`;
         console.log(`[AUTH] User invited to ${orgId}: ${email}. Link: ${inviteLink}`);
 
         return NextResponse.json({ 

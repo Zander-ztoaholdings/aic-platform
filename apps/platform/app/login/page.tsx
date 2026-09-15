@@ -384,6 +384,15 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
+            <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.15em]">
+              New organisation?{' '}
+              <Link href="/signup" className="font-bold text-[#6b7280] hover:text-[#c9920a] transition-colors">
+                Register it &rarr;
+              </Link>
+            </p>
+          </div>
+
+          <div className="text-center">
             <p className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-wider">
               Protected by AIC Secure Auth v2.1<br/>
               Continuous integrity monitoring

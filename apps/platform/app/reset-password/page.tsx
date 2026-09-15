@@ -9,6 +9,13 @@ function ResetPasswordForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get('token');
+    // Same token mechanism as a self-serve reset, but a person arriving from
+    // an admin's invite link is doing something different - accepting a
+    // place in an organisation, not recovering an account they already had.
+    // /api/users/invite tags its link with these two params; a forgotten-
+    // password link never carries them.
+    const isInvite = searchParams.get('invite') === '1';
+    const invitedRole = searchParams.get('role');
 
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,8 +41,8 @@ function ResetPasswordForm() {
             return;
         }
 
-        if (password.length < 8) {
-            setError('Password must be at least 8 characters');
+        if (password.length < 12) {
+            setError('Password must be at least 12 characters');
             return;
         }
 
@@ -68,15 +75,21 @@ function ResetPasswordForm() {
                 <Link href="/login" className="font-serif text-3xl font-bold text-aic-black">
                     AIC<span className="text-aic-gold">.</span>
                 </Link>
-                <h1 className="text-xl font-serif font-bold text-aic-black mt-6">Secure Your Credentials</h1>
+                <h1 className="text-xl font-serif font-bold text-aic-black mt-6">
+                    {isInvite ? 'Accept your invitation' : 'Secure Your Credentials'}
+                </h1>
                 <p className="text-gray-500 font-serif mt-2 italic text-sm">
-                    Enter your new organizational password below.
+                    {isInvite
+                        ? `Set a password to activate your account${invitedRole ? ` as ${invitedRole.replace(/_/g, ' ').toLowerCase()}` : ''}.`
+                        : 'Enter your new organizational password below.'}
                 </p>
             </div>
 
             {success ? (
                 <div className="bg-green-50 border border-green-100 p-6 rounded-2xl text-center">
-                    <p className="text-sm font-serif text-green-800 italic">Institutional access restored. Redirecting to portal...</p>
+                    <p className="text-sm font-serif text-green-800 italic">
+                        {isInvite ? 'Account activated. Redirecting to portal...' : 'Institutional access restored. Redirecting to portal...'}
+                    </p>
                 </div>
             ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -113,7 +126,7 @@ function ResetPasswordForm() {
                         disabled={loading}
                         className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
                     >
-                        {loading ? 'SECURING...' : 'FINALIZE_RESET'}
+                        {loading ? 'SECURING...' : isInvite ? 'ACTIVATE_ACCOUNT' : 'FINALIZE_RESET'}
                     </button>
                 </form>
             )}

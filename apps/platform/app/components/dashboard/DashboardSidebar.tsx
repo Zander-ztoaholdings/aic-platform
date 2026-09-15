@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
-  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink,
+  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink, Users,
 } from 'lucide-react';
 
 /**
@@ -56,6 +56,7 @@ const PRODUCTS = [
     accent: '#6b7280',
     items: [
       { label: 'Organisation Profile', href: '/organisation', icon: Building2 },
+      { label: 'Team',                 href: '/settings',     icon: Users },
       { label: 'Practitioner (CAAP)',  href: '/practitioner', icon: GraduationCap },
     ],
   },

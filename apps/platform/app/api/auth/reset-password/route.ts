@@ -44,10 +44,19 @@ export async function POST(request: NextRequest) {
             // 3. Update password
             await tx
                 .update(users)
-                .set({ 
-                    passwordHash, 
+                .set({
+                    passwordHash,
                     updatedAt: new Date(),
-                    emailVerified: true // Implicit verification via reset
+                    emailVerified: true, // Implicit verification via reset
+                    // An invited user is created with isActive: false (see
+                    // /api/users/invite) so a stolen invite link can't log
+                    // in before anyone sets a password. Successfully setting
+                    // one - whether this is a first-time invite or an
+                    // ordinary self-serve reset - is exactly the point that
+                    // account should be able to sign in. Without this, an
+                    // invited user could set a password and still never get
+                    // past the "Account is deactivated" check at login.
+                    isActive: true,
                 })
                 .where(eq(users.id, validToken.userId as string));
 
