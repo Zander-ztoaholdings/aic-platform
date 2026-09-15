@@ -8,6 +8,22 @@ import DashboardShell from '../components/DashboardShell';
 export const metadata = { title: 'Organisation AI Overview | AIC' };
 export const dynamic = 'force-dynamic';
 
+/**
+ * P0 per the PRD (section 7.1): "the single highest-risk technical claim in
+ * the pitch... decide and state explicitly which of these AIC actually
+ * means" before Friday, so an on-screen boundary claim survives a technical
+ * follow-up rather than collapsing under one.
+ *
+ * NOT MY CALL TO MAKE SILENTLY - this is a claim made to an investor and an
+ * insurer about how the product actually works, not a copy tweak. Defaulted
+ * to (b), the client-scheduled export, because it is the one option that
+ * needs no new provider-side integration to be true by Friday and nothing
+ * here has built (a) or (c) yet. Zander: change this string (and only this
+ * string) if that is not the mechanism you want to stand behind in the room.
+ */
+const READ_ONLY_MECHANISM =
+  'Today, that means an export your own tooling already produces — a nightly file or webhook AIC ingests. AIC does not request or hold an API key for this.';
+
 const SEVERITY_STYLE: Record<Gap['severity'], string> = {
   BLOCKING: 'border-red-200 bg-red-50 text-red-900',
   MATERIAL: 'border-amber-200 bg-amber-50 text-amber-900',
@@ -128,6 +144,22 @@ export default async function OrgOverviewPage() {
             )}
           </div>
         </header>
+
+        {/* P0: the boundary that makes AIC's position different from a platform
+            that sits in the runtime path. Stated before the gaps, not after,
+            because it is the answer to the question this whole screen invites
+            ("so you're watching everything we do?") - no. */}
+        <div className="rounded-lg border border-aic-navy/15 bg-aic-navy/[0.03] px-5 py-4">
+          <div className="font-mono text-[10px] font-bold text-aic-navy uppercase tracking-[0.15em]">
+            What AIC does not do
+          </div>
+          <p className="mt-1.5 text-sm text-aic-navy leading-relaxed max-w-3xl">
+            AIC never holds your AI providers&apos; credentials — not even read-only,
+            not even to itself — and never sits in the path that runs, blocks or
+            approves anything your systems do. It records what you declare and
+            compares it against what it can observe. {READ_ONLY_MECHANISM}
+          </p>
+        </div>
 
         {/* Gaps lead. The counts below are context for these; on their own they
             change nothing about what anyone does next. */}
