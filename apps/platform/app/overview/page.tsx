@@ -7,10 +7,10 @@ import DashboardShell from '../components/DashboardShell';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback } from '../components/ui/avatar';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../components/ui/chart';
-import { Pie, PieChart, Cell } from 'recharts';
 import { AddSystemForm } from './components/AddSystemForm';
 import { AddAccountablePersonForm } from './components/AddAccountablePersonForm';
+import { GapMixChart } from './components/GapMixChart';
+import { SEVERITY_DOT, SEVERITY_BADGE, SEVERITY_LABEL } from './severity';
 
 export const metadata = { title: 'Organisation AI Overview | AIC' };
 export const dynamic = 'force-dynamic';
@@ -41,30 +41,6 @@ const READ_ONLY_MECHANISM =
  * object; nothing about what this page reports or how it's gated changed,
  * only how it looks.
  */
-
-const SEVERITY_DOT: Record<Gap['severity'], string> = {
-  BLOCKING: 'bg-red-500',
-  MATERIAL: 'bg-aic-gold',
-  ADVISORY: 'bg-gray-400',
-};
-
-const SEVERITY_BADGE: Record<Gap['severity'], string> = {
-  BLOCKING: 'bg-red-50 text-red-700 border-red-200',
-  MATERIAL: 'bg-aic-copper-dim text-aic-navy border-aic-gold/30',
-  ADVISORY: 'bg-gray-100 text-gray-600 border-gray-200',
-};
-
-const SEVERITY_LABEL: Record<Gap['severity'], string> = {
-  BLOCKING: 'Blocks certification',
-  MATERIAL: 'Material',
-  ADVISORY: 'Advisory',
-};
-
-const SEVERITY_CHART_COLOR: Record<Gap['severity'], string> = {
-  BLOCKING: '#ef4444',
-  MATERIAL: '#c9920a',
-  ADVISORY: '#94a3b8',
-};
 
 function SectionCard({
   title,
@@ -158,56 +134,6 @@ function AvatarStack({ people }: { people: { name: string }[] }) {
           +{people.length - shown.length}
         </div>
       )}
-    </div>
-  );
-}
-
-function GapMixChart({ gaps }: { gaps: Gap[] }) {
-  const counts: Record<Gap['severity'], number> = { BLOCKING: 0, MATERIAL: 0, ADVISORY: 0 };
-  for (const g of gaps) counts[g.severity] += 1;
-  const data = (Object.keys(counts) as Gap['severity'][])
-    .filter((s) => counts[s] > 0)
-    .map((s) => ({ severity: SEVERITY_LABEL[s], value: counts[s], key: s }));
-
-  const config: ChartConfig = {
-    value: { label: 'Gaps' },
-    BLOCKING: { label: 'Blocking', color: SEVERITY_CHART_COLOR.BLOCKING },
-    MATERIAL: { label: 'Material', color: SEVERITY_CHART_COLOR.MATERIAL },
-    ADVISORY: { label: 'Advisory', color: SEVERITY_CHART_COLOR.ADVISORY },
-  };
-
-  if (data.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-[160px] text-center">
-        <div className="size-12 rounded-full bg-green-50 border border-green-100 flex items-center justify-center text-green-600 text-lg font-bold">
-          0
-        </div>
-        <p className="mt-3 text-xs text-gray-400">No open gaps.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex items-center gap-6">
-      <ChartContainer config={config} className="h-[160px] w-[160px] aspect-square shrink-0">
-        <PieChart>
-          <ChartTooltip content={<ChartTooltipContent hideLabel />} />
-          <Pie data={data} dataKey="value" nameKey="severity" innerRadius={44} outerRadius={70} strokeWidth={3}>
-            {data.map((d) => (
-              <Cell key={d.key} fill={SEVERITY_CHART_COLOR[d.key]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ChartContainer>
-      <ul className="space-y-2">
-        {data.map((d) => (
-          <li key={d.key} className="flex items-center gap-2 text-sm">
-            <span className={`size-2.5 rounded-full ${SEVERITY_DOT[d.key]}`} />
-            <span className="text-gray-600">{d.severity}</span>
-            <span className="font-mono font-bold text-aic-navy tabular-nums">{d.value}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }
