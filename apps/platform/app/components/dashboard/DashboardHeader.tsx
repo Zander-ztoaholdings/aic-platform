@@ -2,6 +2,9 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, Menu } from 'lucide-react';
+import { Badge } from '../ui/badge';
+import { Avatar, AvatarFallback } from '../ui/avatar';
+import { ROLE_LABEL, type OrgRole } from '@/lib/roles';
 
 interface DashboardHeaderProps {
   pathname: string;
@@ -17,6 +20,15 @@ interface DashboardHeaderProps {
     created_at: string;
   }>;
   markAsRead: (id: string) => Promise<void> | void;
+  /** Real org fields from /api/shell-summary - null while still loading. */
+  orgName: string | null;
+  division: number | null;
+  divisionName: string | null;
+  certificationStatus: string | null;
+  /** The signed-in person, from their own session - not the org. */
+  userName: string | null;
+  userEmail: string | null;
+  userRole?: string;
 }
 
 const PAGE_TITLES: Record<string, string> = {
@@ -32,6 +44,29 @@ const PAGE_TITLES: Record<string, string> = {
   '/organisation':   'Organisation Profile',
 };
 
+// Certification status is a real, stored field (organizations.certification_status)
+// - this only maps it to a colour so the badge reads at a glance. An
+// unrecognised or missing status falls back to the neutral/grey style rather
+// than guessing a more finished-looking one.
+const STATUS_BADGE_STYLE: Record<string, string> = {
+  CERTIFIED: 'bg-green-50 border-green-200 text-green-700',
+  APPROVED: 'bg-green-50 border-green-200 text-green-700',
+  PENDING_REVIEW: 'bg-amber-50 border-amber-200 text-amber-700',
+  UNDER_REVIEW: 'bg-amber-50 border-amber-200 text-amber-700',
+  IN_REVIEW: 'bg-amber-50 border-amber-200 text-amber-700',
+  DRAFT: 'bg-gray-100 border-gray-200 text-gray-600',
+};
+
+function getInitials(nameOrEmail: string): string {
+  const trimmed = nameOrEmail.trim();
+  if (!trimmed) return '—';
+  const namePart = trimmed.includes('@') ? trimmed.split('@')[0] : trimmed;
+  const parts = namePart.split(/[\s._-]+/).filter(Boolean);
+  if (parts.length === 0) return '—';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
 export function DashboardHeader({
   pathname,
   onMenuOpen,
@@ -40,8 +75,21 @@ export function DashboardHeader({
   setShowNotifs,
   notifications,
   markAsRead,
+  orgName,
+  division,
+  divisionName,
+  certificationStatus,
+  userName,
+  userEmail,
+  userRole,
 }: DashboardHeaderProps) {
   const pageTitle = PAGE_TITLES[pathname] ?? pathname.split('/').pop()?.replace(/-/g, ' ') ?? 'Dashboard';
+  const roleLabel = userRole ? ROLE_LABEL[userRole as OrgRole] ?? userRole.replace(/_/g, ' ') : null;
+  const displayName = userName ?? userEmail ?? 'Signed in';
+  const initials = getInitials(userName ?? userEmail ?? '');
+  const statusStyle = certificationStatus
+    ? STATUS_BADGE_STYLE[certificationStatus] ?? 'bg-gray-100 border-gray-200 text-gray-600'
+    : null;
 
   return (
     <header className="bg-white border-b border-[#e5e7eb] px-7 py-3.5 flex items-center justify-between gap-4">
@@ -61,23 +109,32 @@ export function DashboardHeader({
             </span>
           </div>
           <h1 className="font-serif text-[20px] font-bold text-[#0f1f3d] leading-none tracking-tight">
-            Example Organisation (demo data)
+            {orgName ?? 'Loading organisation…'}
           </h1>
         </div>
       </div>
 
       {/* Right: badges + bell + user */}
       <div className="flex items-center gap-2.5">
-        {/* Division badge */}
-        <div className="hidden md:flex items-center gap-1.5 border border-[#e5e7eb] rounded-full px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#6b7280]">
-          <span className="text-[#c9920a]">◆</span> Division 2 — Supervised
-        </div>
+        {/* Division badge - only shown once the org actually has one set */}
+        {divisionName && (
+          <Badge
+            variant="outline"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-full border-[#e5e7eb] px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#6b7280]"
+          >
+            <span className="text-[#c9920a]">◆</span> Division {division} — {divisionName}
+          </Badge>
+        )}
 
-        {/* Integrity badge */}
-        <div className="hidden md:flex items-center gap-1.5 bg-green-50 border border-green-200 rounded-full px-3 py-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] flex-shrink-0" />
-          <span className="font-mono text-[9px] font-bold text-green-700 uppercase tracking-[0.12em]">Demonstration data</span>
-        </div>
+        {/* Certification status badge - real value, coloured by status */}
+        {certificationStatus && (
+          <div className={`hidden md:flex items-center gap-1.5 border rounded-full px-3 py-1.5 ${statusStyle}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.12em]">
+              {certificationStatus.replace(/_/g, ' ')}
+            </span>
+          </div>
+        )}
 
         {/* Notification bell */}
         <div className="relative">
@@ -141,17 +198,21 @@ export function DashboardHeader({
           </AnimatePresence>
         </div>
 
-        {/* User */}
+        {/* User - the signed-in person, from their own session */}
         <div className="flex items-center gap-2.5 border-l border-[#e5e7eb] pl-3">
           <div className="text-right hidden sm:block">
-            <div className="text-xs font-semibold text-[#0f1f3d] leading-none">A. Example</div>
-            <div className="font-mono text-[8px] text-[#c9920a] uppercase tracking-[0.12em] font-bold mt-0.5">
-              Accountable Person
-            </div>
+            <div className="text-xs font-semibold text-[#0f1f3d] leading-none">{displayName}</div>
+            {roleLabel && (
+              <div className="font-mono text-[8px] text-[#c9920a] uppercase tracking-[0.12em] font-bold mt-0.5">
+                {roleLabel}
+              </div>
+            )}
           </div>
-          <div className="w-9 h-9 rounded-lg bg-[#0f1f3d] flex items-center justify-center font-mono text-[10px] font-bold text-[#c9920a]">
-            SC
-          </div>
+          <Avatar className="w-9 h-9 rounded-lg">
+            <AvatarFallback className="rounded-lg bg-[#0f1f3d] font-mono text-[10px] font-bold text-[#c9920a]">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
         </div>
       </div>
     </header>

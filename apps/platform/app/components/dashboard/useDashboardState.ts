@@ -2,6 +2,23 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
+export interface OrgSummary {
+  organisation: {
+    name: string;
+    division: number | null;
+    divisionName: string | null;
+    certificationStatus: string | null;
+    integrityScore: number | null;
+  };
+  decisions: {
+    recorded: number;
+    humanOverrideRate: number | null;
+  };
+  corrections: {
+    open: number;
+  };
+}
+
 export function useDashboardState() {
   const pathname = usePathname();
   const router = useRouter();
@@ -10,6 +27,8 @@ export function useDashboardState() {
   // view instead of the same flat access to everyone. See lib/roles.ts.
   const { data: session } = useSession();
   const role = (session?.user as { role?: string } | undefined)?.role;
+  const userName = session?.user?.name ?? null;
+  const userEmail = session?.user?.email ?? null;
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     title: string;
@@ -20,6 +39,11 @@ export function useDashboardState() {
   const [showNotifs, setShowNotifs] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  // The real org name, division, certification status and pulse counters
+  // for the header/phase-tracker/pulse-bar - see /api/shell-summary. Starts
+  // null so those components render an honest loading/empty state instead
+  // of a placeholder number while this resolves.
+  const [orgSummary, setOrgSummary] = useState<OrgSummary | null>(null);
 
   const fetchNotifs = async () => {
     try {
@@ -31,8 +55,20 @@ export function useDashboardState() {
     }
   };
 
+  const fetchOrgSummary = async () => {
+    try {
+      const res = await fetch('/api/shell-summary');
+      if (!res.ok) return;
+      const data = await res.json();
+      setOrgSummary(data);
+    } catch (err) {
+      console.error('Failed to fetch org summary:', err);
+    }
+  };
+
   useEffect(() => {
     fetchNotifs();
+    fetchOrgSummary();
 
     // Task M34: Institutional Real-Time Connectivity (SSE)
     const eventSource = new EventSource('/api/events');
@@ -42,6 +78,7 @@ export function useDashboardState() {
         const data = JSON.parse(event.data);
         if (data.type !== 'connected') {
           fetchNotifs();
+          fetchOrgSummary();
         }
       } catch {
         console.error('[SSE] Failed to parse event block');
@@ -54,7 +91,10 @@ export function useDashboardState() {
     };
 
     // Fallback Polling (Resilience Override)
-    const interval = setInterval(fetchNotifs, 30000);
+    const interval = setInterval(() => {
+      fetchNotifs();
+      fetchOrgSummary();
+    }, 30000);
 
     return () => {
       eventSource.close();
@@ -86,6 +126,8 @@ export function useDashboardState() {
   return {
     pathname,
     role,
+    userName,
+    userEmail,
     notifications,
     showNotifs,
     setShowNotifs,
@@ -96,6 +138,7 @@ export function useDashboardState() {
     handleSearch,
     markAsRead,
     isActive,
+    orgSummary,
     unreadCount: notifications.filter(n => n.status === 'UNREAD').length
   };
 }

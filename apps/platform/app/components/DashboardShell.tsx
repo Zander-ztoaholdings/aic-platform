@@ -3,13 +3,15 @@
 import { useDashboardState } from './dashboard/useDashboardState';
 import { DashboardSidebar } from './dashboard/DashboardSidebar';
 import { DashboardHeader } from './dashboard/DashboardHeader';
-import { PhaseTracker } from './ui/PhaseTracker';
+import { PhaseTracker, phaseFromCertificationStatus } from './ui/PhaseTracker';
 import { PulseBar } from './ui/PulseBar';
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const {
     pathname,
     role,
+    userName,
+    userEmail,
     notifications,
     showNotifs,
     setShowNotifs,
@@ -18,7 +20,10 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     markAsRead,
     isActive,
     unreadCount,
+    orgSummary,
   } = useDashboardState();
+
+  const currentPhase = phaseFromCertificationStatus(orgSummary?.organisation.certificationStatus);
 
   return (
     <div className="min-h-screen flex bg-[#f0f4f8]">
@@ -47,9 +52,21 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             setShowNotifs={setShowNotifs}
             notifications={notifications}
             markAsRead={markAsRead}
+            orgName={orgSummary?.organisation.name ?? null}
+            division={orgSummary?.organisation.division ?? null}
+            divisionName={orgSummary?.organisation.divisionName ?? null}
+            certificationStatus={orgSummary?.organisation.certificationStatus ?? null}
+            userName={userName}
+            userEmail={userEmail}
+            userRole={role}
           />
-          <PhaseTracker currentPhase={2} />
-          <PulseBar />
+          <PhaseTracker currentPhase={currentPhase} />
+          <PulseBar
+            decisions={orgSummary?.decisions.recorded ?? null}
+            overrideRate={orgSummary?.decisions.humanOverrideRate ?? null}
+            integrityScore={orgSummary?.organisation.integrityScore ?? null}
+            openCorrections={orgSummary?.corrections.open ?? null}
+          />
         </div>
 
         <main className="flex-1 px-7 py-6 fade-up">{children}</main>
