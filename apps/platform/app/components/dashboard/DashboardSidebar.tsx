@@ -4,9 +4,19 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
-  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink, Users,
+  FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink, Users, Sparkles,
+  type LucideIcon,
 } from 'lucide-react';
 import { canManageTeamAndKeys, type OrgRole } from '../../../lib/roles';
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  restricted?: (role?: OrgRole | string) => boolean;
+  /** Short pill shown next to the label, e.g. 'Soon' for an explainer-only page. */
+  badge?: string;
+}
 
 /**
  * Two products, not one menu.
@@ -24,7 +34,7 @@ import { canManageTeamAndKeys, type OrgRole } from '../../../lib/roles';
  * one feeds the other, so a hard visual break would be a lie in the other
  * direction.
  */
-const PRODUCTS = [
+const PRODUCTS: { key: string; name: string; tagline: string | null; accent: string; items: NavItem[] }[] = [
   {
     key: 'overview',
     name: 'AI Overview',
@@ -33,6 +43,7 @@ const PRODUCTS = [
     items: [
       { label: 'Continuity Record', href: '/',              icon: LayoutDashboard },
       { label: 'AI Estate',         href: '/overview',      icon: Boxes },
+      { label: 'Register Drafter',   href: '/register-drafter', icon: Sparkles, badge: 'Soon' },
       { label: 'Decision Log',      href: '/pulse',         icon: Activity },
       { label: 'API & Access Keys', href: '/settings/keys', icon: Key, restricted: canManageTeamAndKeys },
     ],
@@ -160,6 +171,11 @@ export function DashboardSidebar({
                       style={active ? { color: group.accent } : undefined}
                     />
                     <span className="flex-1">{item.label}</span>
+                    {'badge' in item && item.badge && (
+                      <span className="font-mono text-[7px] font-bold uppercase tracking-wide text-white/40 bg-white/[0.06] px-1.5 py-0.5 rounded flex-shrink-0">
+                        {item.badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
