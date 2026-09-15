@@ -55,6 +55,12 @@ const PUBLIC_PATHS = [
   // A health check that requires a session cannot tell anyone the service is
   // unhealthy. It reports status and latency only — no internal error strings.
   "/api/health",
+  // The citizen appeal portal (POPIA s71 right to representation) and the
+  // endpoint it posts to. Its entire audience is people who, by definition,
+  // have no account with AIC or the org they're appealing to — gating it
+  // behind a session cookie locked out exactly the people it exists for.
+  "/appeal",
+  "/api/incidents/public",
 ];
 
 export function middleware(req: NextRequest) {

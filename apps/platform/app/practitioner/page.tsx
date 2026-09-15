@@ -1,6 +1,8 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
+import { useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { ArrowRight, Check } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { Eyebrow, SectionCard, CopperTag } from '../components/ui/Eyebrow';
 
@@ -40,6 +42,35 @@ const FEES = [
 ];
 
 export default function PractitionerPage() {
+  const { data: session } = useSession();
+  const [registered, setRegistered] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleRegisterInterest = async () => {
+    if (registered || submitting) return;
+    const email = session?.user?.email;
+    if (!email) return;
+    setSubmitting(true);
+    try {
+      // /api/leads takes the org from the session but still requires an
+      // email on the body itself - it's a public-lead endpoint at heart, so
+      // the signed-in user's own address is what identifies them here.
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'CAAP_INTEREST' }),
+      });
+      // The endpoint's own catch block still returns 201 on an internal
+      // error, deliberately, so a genuine failure here is rare - but treat
+      // anything other than a created/updated response as not registered.
+      if (res.ok) {
+        setRegistered(true);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <DashboardShell>
       <div className="space-y-5">
@@ -126,8 +157,19 @@ export default function PractitionerPage() {
                 CAAP launches Q3 2027. Register now to be notified when enrolment opens and to secure Founding
                 Partner pricing.
               </p>
-              <button type="button" className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full py-2.5 hover:bg-[#b07d08] transition-colors">
-                Register Interest <ArrowRight className="w-3 h-3" />
+              <button
+                type="button"
+                onClick={handleRegisterInterest}
+                disabled={submitting || registered}
+                className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-60"
+              >
+                {registered ? (
+                  <>Registered <Check className="w-3 h-3" /></>
+                ) : submitting ? (
+                  'Registering…'
+                ) : (
+                  <>Register Interest <ArrowRight className="w-3 h-3" /></>
+                )}
               </button>
             </SectionCard>
           </div>
