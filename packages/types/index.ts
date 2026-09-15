@@ -8,9 +8,10 @@ import { z } from 'zod';
 export * from './errors';
 
 export type CertificationTier = 'TIER_1' | 'TIER_2' | 'TIER_3';
-export type UserRole = 'ADMIN' | 'COMPLIANCE_OFFICER' | 'AUDITOR' | 'VIEWER';
+// 4-tier model (2026-09) - see apps/platform/lib/roles.ts for the full mapping rationale.
+export type UserRole = 'AIC_SUPER_ADMIN' | 'AIC_AUDITOR' | 'ORG_ADMIN' | 'ORG_USER';
 
-export const ROLE_HIERARCHY: UserRole[] = ['VIEWER', 'AUDITOR', 'COMPLIANCE_OFFICER', 'ADMIN'];
+export const ROLE_HIERARCHY: UserRole[] = ['ORG_USER', 'ORG_ADMIN', 'AIC_AUDITOR', 'AIC_SUPER_ADMIN'];
 
 /**
  * Check if a user has at least the required role

@@ -92,7 +92,7 @@ async function findOrCreateUser(
   orgId: string | null,
   email: string,
   name: string,
-  role: 'ADMIN' | 'AUDITOR' | 'COMPLIANCE_OFFICER' | 'VIEWER'
+  role: 'ORG_ADMIN' | 'AIC_AUDITOR' | 'ORG_USER'
 ) {
   const existing = await sysDb.select().from(users).where(eq(users.email, email)).limit(1);
   if (existing[0]) return existing[0];
@@ -234,21 +234,21 @@ async function main() {
     org.id,
     'naledi.mokoena@karoocoastal-demo.example',
     'Naledi Mokoena',
-    'ADMIN'
+    'ORG_ADMIN'
   );
   const pieter = await findOrCreateUser(
     sysDb,
     org.id,
     'pieter.vanwyk@karoocoastal-demo.example',
     'Pieter van Wyk',
-    'COMPLIANCE_OFFICER'
+    'ORG_USER'
   );
   const assessor = await findOrCreateUser(
     sysDb,
     null,
     'assessor@aiccertified.cloud.demo',
     'AIC Assessor (Demo)',
-    'AUDITOR'
+    'AIC_AUDITOR'
   );
 
   // ── Day -18: the org signs up. Two accountable persons, four declared

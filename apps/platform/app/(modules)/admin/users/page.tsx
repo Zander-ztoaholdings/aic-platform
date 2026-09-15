@@ -32,7 +32,7 @@ export default function UserManagementPage() {
         name: '',
         email: '',
         password: '',
-        role: 'VIEWER',
+        role: 'ORG_USER',
         org_id: ''
     });
 
@@ -74,7 +74,7 @@ export default function UserManagementPage() {
             if (res.ok) {
                 toast.success('User registered in registry.');
                 setDrawerMode(null);
-                setNewUser({ name: '', email: '', password: '', role: 'VIEWER', org_id: '' });
+                setNewUser({ name: '', email: '', password: '', role: 'ORG_USER', org_id: '' });
                 fetchUsers();
             } else {
                 const err = await res.json();
@@ -216,10 +216,10 @@ export default function UserManagementPage() {
                                 value={newUser.role}
                                 onChange={e => setNewUser(prev => ({ ...prev, role: e.target.value }))}
                             >
-                                <option value="VIEWER">VIEWER</option>
-                                <option value="AUDITOR">AUDITOR</option>
-                                <option value="COMPLIANCE_OFFICER">OFFICER</option>
-                                <option value="ADMIN">ADMIN</option>
+                                <option value="ORG_USER">ORG USER (org member)</option>
+                                <option value="ORG_ADMIN">ORG ADMIN (org member)</option>
+                                <option value="AIC_AUDITOR">AIC AUDITOR (AIC staff)</option>
+                                <option value="AIC_SUPER_ADMIN">AIC SUPER ADMIN (AIC staff)</option>
                             </select>
                         </div>
                         <div>

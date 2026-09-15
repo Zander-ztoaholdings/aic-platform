@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest) {
         const orgId = session.user.orgId;
         const userRole = session.user.role;
 
-        if (userRole && userRole !== 'ADMIN' && userRole !== 'COMPLIANCE_OFFICER') {
+        if (userRole && userRole !== 'ORG_ADMIN' && userRole !== 'ORG_USER') {
             return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
         }
 

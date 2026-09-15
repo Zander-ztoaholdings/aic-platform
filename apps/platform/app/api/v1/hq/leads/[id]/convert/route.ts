@@ -11,7 +11,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getSession() as Session | null;
-  if (!session?.user || session.user.role !== 'ADMIN') {
+  /* AIC-staff-only gate: was `role !== 'ADMIN'`, which is the same field a client org's own admin holds - see lib/roles.ts's file header and the AIMS route comment for why that's a bug class, already fixed once elsewhere. Checks isSuperAdmin as well so this can't newly lock out anyone who already passes other isSuperAdmin-gated checks. */
+  if (!session?.user || !(session.user.role === 'AIC_SUPER_ADMIN' || session.user.isSuperAdmin)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -48,7 +49,7 @@ export async function POST(
 
   await db.insert(inviteCodes).values({
     code: inviteCode,
-    role: 'ADMIN',
+    role: 'ORG_ADMIN',
     orgId: newOrg.id,
     maxUses: 1,
     expiresAt,

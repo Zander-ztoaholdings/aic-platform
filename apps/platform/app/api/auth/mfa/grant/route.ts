@@ -127,7 +127,7 @@ export async function POST(request: Request) {
 
     // Only the exact situation this exists for: mandatory MFA, none enrolled.
     const mandatory =
-      (user.role === 'ADMIN' || user.role === 'COMPLIANCE_OFFICER') && !user.isSuperAdmin;
+      (user.role === 'ORG_ADMIN' || user.role === 'ORG_USER') && !user.isSuperAdmin;
     if (!mandatory) return refuse();
 
     console.log('[MFA] enrolment grant issued for', email.toLowerCase());

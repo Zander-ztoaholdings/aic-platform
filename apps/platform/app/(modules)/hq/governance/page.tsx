@@ -27,7 +27,9 @@ export default function GovernancePage() {
     if (!email) return;
     const password = prompt("Temporary Password:");
     if (!password) return;
-    const role = prompt("Role (ADMIN, AUDITOR, VIEWER):", "AUDITOR");
+    // 4-tier model (2026-09): AIC's own personnel are AIC_SUPER_ADMIN or
+    // AIC_AUDITOR now, not ADMIN/AUDITOR/VIEWER - see lib/roles.ts.
+    const role = prompt("Role (AIC_SUPER_ADMIN, AIC_AUDITOR):", "AIC_AUDITOR");
     if (!role) return;
 
     try {
@@ -41,10 +43,10 @@ export default function GovernancePage() {
                 role,
                 permissions: {
                     view_dashboard: true,
-                    view_crm: role === 'ADMIN',
-                    view_cms: role === 'ADMIN',
-                    view_audits: role !== 'VIEWER',
-                    verify_evidence: role === 'AUDITOR' || role === 'ADMIN',
+                    view_crm: role === 'AIC_SUPER_ADMIN',
+                    view_cms: role === 'AIC_SUPER_ADMIN',
+                    view_audits: true,
+                    verify_evidence: role === 'AIC_AUDITOR' || role === 'AIC_SUPER_ADMIN',
                     view_academy: true
                 }
             })
@@ -124,7 +126,7 @@ export default function GovernancePage() {
                             </td>
                             <td className="p-6">
                                 <span className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
-                                    user.role === 'ADMIN' ? 'border-aic-gold text-aic-gold bg-aic-gold/5' : 'border-aic-paper/10 text-gray-400'
+                                    user.role === 'AIC_SUPER_ADMIN' ? 'border-aic-gold text-aic-gold bg-aic-gold/5' : 'border-aic-paper/10 text-gray-400'
                                 }`}>
                                     {user.role}
                                 </span>

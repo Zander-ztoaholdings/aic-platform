@@ -53,7 +53,7 @@ export async function POST(request: Request) {
             email: email.toLowerCase(),
             passwordHash: hash,
             orgId: invite?.orgId || null, // Auto-link to org if invite has it
-            role: invite?.role || 'ADMIN',
+            role: invite?.role || 'ORG_ADMIN',
             isActive: true,
             emailVerified: true
         }).returning({ id: users.id });

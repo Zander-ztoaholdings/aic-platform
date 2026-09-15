@@ -15,7 +15,7 @@ export async function PATCH(
     }
 
     // Task M12: RBAC check (require ADMIN or COMPLIANCE_OFFICER)
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'COMPLIANCE_OFFICER') {
+    if (session.user.role !== 'ORG_ADMIN' && session.user.role !== 'ORG_USER') {
         return NextResponse.json({ error: 'Institutional review requires Compliance Officer privileges' }, { status: 403 });
     }
 

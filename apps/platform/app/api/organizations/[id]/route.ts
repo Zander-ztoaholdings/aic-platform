@@ -90,7 +90,7 @@ export async function PUT(
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if ((session.user.orgId !== id || session.user.role !== 'ADMIN') && !session.user.isSuperAdmin) {
+    if ((session.user.orgId !== id || session.user.role !== 'ORG_ADMIN') && !session.user.isSuperAdmin) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

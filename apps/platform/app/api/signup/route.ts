@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
             // 2. The admin user
             const userResult = await tx(
                 `INSERT INTO users (name, email, password_hash, role, org_id)
-                 VALUES ($1, $2, $3, 'ADMIN', $4) RETURNING id, name, email, role`,
+                 VALUES ($1, $2, $3, 'ORG_ADMIN', $4) RETURNING id, name, email, role`,
                 [name.trim(), email.toLowerCase(), hashedPassword, orgId]
             );
 

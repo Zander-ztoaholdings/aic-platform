@@ -75,7 +75,7 @@ export async function PUT(
     const userRole = session.user.role;
 
     // RBAC: institutional verification restricted to specific roles
-    if (userRole !== 'ADMIN' && userRole !== 'COMPLIANCE_OFFICER' && userRole !== 'AUDITOR') {
+    if (userRole !== 'ORG_ADMIN' && userRole !== 'ORG_USER') {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

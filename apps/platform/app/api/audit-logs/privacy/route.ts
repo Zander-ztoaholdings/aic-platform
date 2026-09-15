@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        if (session.user.role !== 'ADMIN' && session.user.role !== 'COMPLIANCE_OFFICER') {
+        if (session.user.role !== 'ORG_ADMIN' && session.user.role !== 'ORG_USER') {
             return NextResponse.json({ error: 'Compliance Officer privileges required' }, { status: 403 });
         }
 

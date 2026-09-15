@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Task M14: RBAC Enforcement - API keys are restricted to administrators
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== 'ORG_ADMIN') {
         return NextResponse.json({ error: 'Only institutional administrators can generate API keys' }, { status: 403 });
     }
 
@@ -92,7 +92,7 @@ export async function DELETE(request: NextRequest) {
     if (!session || !session.user?.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (session.user.role !== 'ADMIN') {
+    if (session.user.role !== 'ORG_ADMIN') {
       return NextResponse.json({ error: 'Only administrators can revoke API keys' }, { status: 403 });
     }
 

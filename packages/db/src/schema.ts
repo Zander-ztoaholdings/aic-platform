@@ -3,7 +3,19 @@ import { sql } from 'drizzle-orm';
 
 // Enums
 export const tierEnum = pgEnum('tier_enum', ['TIER_1', 'TIER_2', 'TIER_3']);
-export const userRoleEnum = pgEnum('user_role_enum', ['ADMIN', 'AUDITOR', 'COMPLIANCE_OFFICER', 'VIEWER']);
+/**
+ * 4-tier model (Zander, 2026-09): AIC_SUPER_ADMIN > AIC_AUDITOR > ORG_ADMIN >
+ * ORG_USER. Replaces the old client-only ADMIN/AUDITOR/COMPLIANCE_OFFICER/
+ * VIEWER set - see apps/platform/lib/roles.ts for the full mapping rationale
+ * and apps/platform/db/manual/005_role_tiers.sql for the data migration.
+ * The legacy values are kept in the Postgres type (values can't be cheaply
+ * dropped from an enum) but no code path should assign them to a new row
+ * once 005_role_tiers.sql has run.
+ */
+export const userRoleEnum = pgEnum('user_role_enum', [
+  'ADMIN', 'AUDITOR', 'COMPLIANCE_OFFICER', 'VIEWER', // legacy — do not assign
+  'AIC_SUPER_ADMIN', 'AIC_AUDITOR', 'ORG_ADMIN', 'ORG_USER',
+]);
 export const auditStatusEnum = pgEnum('audit_status_enum', ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'FLAGGED', 'VERIFIED']);
 export const incidentStatusEnum = pgEnum('incident_status_enum', ['OPEN', 'INVESTIGATING', 'RESOLVED', 'DISMISSED', 'CLOSED']);
 export const auditScheduledStatusEnum = pgEnum('audit_scheduled_status_enum', ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
@@ -233,7 +245,7 @@ export const users = pgTable('users', {
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   roleId: uuid('role_id').references(() => roles.id),
-  role: userRoleEnum('role').default('VIEWER'),
+  role: userRoleEnum('role').default('ORG_USER'),
   orgId: uuid('org_id').references((): AnyPgColumn => organizations.id),
   isActive: boolean('is_active').default(true),
   emailVerified: boolean('email_verified').default(false),
@@ -594,7 +606,7 @@ export const governanceBlocks = pgTable('governance_blocks', {
 export const inviteCodes = pgTable('invite_codes', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   code: varchar('code', { length: 50 }).unique().notNull(),
-  role: userRoleEnum('role').default('VIEWER'),
+  role: userRoleEnum('role').default('ORG_USER'),
   orgId: uuid('org_id').references(() => organizations.id),
   maxUses: integer('max_uses').default(1),
   uses: integer('uses').default(0),

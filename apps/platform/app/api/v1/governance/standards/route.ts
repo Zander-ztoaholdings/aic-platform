@@ -32,7 +32,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  if (!session?.user?.id || session.user.role !== 'ADMIN') {
+  /* AIC-staff-only gate: was `role !== 'ADMIN'`, which is the same field a client org's own admin holds - see lib/roles.ts's file header and the AIMS route comment for why that's a bug class, already fixed once elsewhere. Checks isSuperAdmin as well so this can't newly lock out anyone who already passes other isSuperAdmin-gated checks. */
+  if (!session?.user?.id || !(session.user.role === 'AIC_SUPER_ADMIN' || session.user.isSuperAdmin)) {
     return NextResponse.json({ error: 'Forbidden: AIC Governance access only' }, { status: 403 });
   }
 

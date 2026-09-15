@@ -28,7 +28,7 @@ export default function OrganizationalSettings() {
     const [generatedKey, setGeneratedKey] = useState<string | null>(null);
     const [inviteEmail, setInviteEmail] = useState('');
     const [inviteName, setInviteName] = useState('');
-    const [inviteRole, setInviteRole] = useState('VIEWER');
+    const [inviteRole, setInviteRole] = useState('ORG_USER');
     const [generatedInvite, setGeneratedInvite] = useState<string | null>(null);
     const [mfaSetup, setMfaSetup] = useState<{ secret: string, qrCode: string } | null>(null);
     const [mfaToken, setMfaToken] = useState('');
@@ -269,10 +269,8 @@ export default function OrganizationalSettings() {
                                         value={inviteRole}
                                         onChange={e => setInviteRole(e.target.value)}
                                     >
-                                        <option value="VIEWER">VIEWER (READ-ONLY)</option>
-                                        <option value="AUDITOR">AUDITOR (VERIFICATION)</option>
-                                        <option value="COMPLIANCE_OFFICER">COMPLIANCE OFFICER (WRITE)</option>
-                                        <option value="ADMIN">ADMINISTRATOR (FULL)</option>
+                                        <option value="ORG_USER">ORG USER (day-to-day access)</option>
+                                        <option value="ORG_ADMIN">ORG ADMIN (full org access)</option>
                                     </select>
                                 </div>
                             </div>

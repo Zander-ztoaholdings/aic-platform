@@ -9,7 +9,7 @@ const CreateUserSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(['ADMIN', 'AUDITOR', 'COMPLIANCE_OFFICER', 'VIEWER']),
+  role: z.enum(['AIC_SUPER_ADMIN', 'AIC_AUDITOR', 'ORG_ADMIN', 'ORG_USER']),
   orgId: z.string().uuid().optional().nullable(),
 });
 
@@ -66,13 +66,18 @@ export async function POST(req: NextRequest) {
 
     const hash = await bcrypt.hash(password, 12);
 
+    // Keep the boolean that actually gates AIC-staff security actions
+    // (lib/rbac.ts, and every hasCapability/isSuperAdmin check) in sync with
+    // the label this form assigns - see lib/roles.ts's file header for why
+    // `role` alone must never become that gate.
     const [newUser] = await db.insert(users).values({
       name,
       email: email.toLowerCase(),
       passwordHash: hash,
       role,
       orgId: orgId || null,
-      isActive: true
+      isActive: true,
+      isSuperAdmin: role === 'AIC_SUPER_ADMIN',
     }).returning({ id: users.id });
 
     return NextResponse.json({ success: true, userId: newUser.id }, { status: 201 });

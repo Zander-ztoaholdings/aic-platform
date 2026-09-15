@@ -12,7 +12,7 @@ export async function GET() {
     // 1. Prepare Certificate Data
     const certData = {
       name: session.user.name || 'System Practitioner',
-      level: session.user.role === 'ADMIN' ? 'LEVEL 3 CHIEF ETHICS OFFICER' : 'LEVEL 2 SENIOR AUDITOR',
+      level: session.user.role === 'ORG_ADMIN' ? 'LEVEL 3 CHIEF ETHICS OFFICER' : 'LEVEL 2 SENIOR AUDITOR',
       licenseNumber: `AIC-ZA-2026-${session.user.id.substring(0, 4).toUpperCase()}`,
       validUntil: 'DEC 31, 2026'
     };

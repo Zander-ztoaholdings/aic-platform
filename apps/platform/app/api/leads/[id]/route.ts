@@ -7,7 +7,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.isSuperAdmin && session?.user?.role !== 'ADMIN') {
+  if (!session?.user?.isSuperAdmin && session?.user?.role !== 'AIC_SUPER_ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

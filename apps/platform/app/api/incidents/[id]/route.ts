@@ -16,7 +16,7 @@ export async function PATCH(
 
     // Task M11: RBAC check (require ADMIN or COMPLIANCE_OFFICER or AUDITOR)
     // Note: AUDITOR can often resolve minor issues, but let's stick to CO+ for formal resolutions
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'COMPLIANCE_OFFICER') {
+    if (session.user.role !== 'ORG_ADMIN' && session.user.role !== 'ORG_USER') {
         return NextResponse.json({ error: 'Institutional resolution requires Compliance Officer privileges' }, { status: 403 });
     }
 

@@ -5,7 +5,8 @@ import type { Session } from 'next-auth';
 
 export async function GET() {
   const session = await getSession() as Session | null;
-  if (!session?.user || !['ADMIN', 'AUDITOR', 'COMPLIANCE_OFFICER'].includes(session.user.role ?? '')) {
+  /* AIC-staff-only gate: was `role !== 'ADMIN'`, which is the same field a client org's own admin holds - see lib/roles.ts's file header and the AIMS route comment for why that's a bug class, already fixed once elsewhere. Checks isSuperAdmin as well so this can't newly lock out anyone who already passes other isSuperAdmin-gated checks. */
+  if (!session?.user || !(['AIC_SUPER_ADMIN', 'AIC_AUDITOR'].includes(session.user.role ?? '') || session.user.isSuperAdmin)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

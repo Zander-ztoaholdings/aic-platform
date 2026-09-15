@@ -157,7 +157,7 @@ export const authConfig: NextAuthConfig = {
             }
 
             // Institutional Hardening: MFA Check
-            const isMfaMandatory = (user.role === 'ADMIN' || user.role === 'COMPLIANCE_OFFICER') && !user.isSuperAdmin;
+            const isMfaMandatory = (user.role === 'ORG_ADMIN' || user.role === 'ORG_USER') && !user.isSuperAdmin;
 
             if (user.twoFactorEnabled && user.twoFactorSecret) {
               if (!mfaToken) {
@@ -313,7 +313,7 @@ export const authConfig: NextAuthConfig = {
                 email: (user.email || "").toLowerCase(),
                 name: user.name || "SSO User",
                 orgId: org.id,
-                role: 'VIEWER',
+                role: 'ORG_USER',
                 passwordHash: 'SSO_ONLY',
                 isActive: true,
                 emailVerified: true

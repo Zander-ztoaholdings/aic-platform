@@ -4,7 +4,8 @@ import { getSession } from '@/lib/auth'
 
 export async function GET() {
   const session: any = await getSession()
-  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'AUDITOR')) {
+  /* AIC-staff-only gate: was `role !== 'ADMIN'`, which is the same field a client org's own admin holds - see lib/roles.ts's file header and the AIMS route comment for why that's a bug class, already fixed once elsewhere. Checks isSuperAdmin as well so this can't newly lock out anyone who already passes other isSuperAdmin-gated checks. */
+  if (!session || !((session.user.role === 'AIC_SUPER_ADMIN' || session.user.role === 'AIC_AUDITOR') || session.user.isSuperAdmin)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -28,7 +29,7 @@ export async function GET() {
 
     // Active auditors (users with AUDITOR role)
     const auditorsResult = await query(
-      `SELECT COUNT(*) as total FROM users WHERE role = 'AUDITOR' OR role = 'COMPLIANCE_OFFICER'`
+      `SELECT COUNT(*) as total FROM users WHERE role = 'AIC_AUDITOR'`
     )
 
     // Open incidents (citizen appeals)

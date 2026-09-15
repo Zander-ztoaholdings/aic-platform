@@ -6,13 +6,15 @@ import { isValidTransition } from '@/lib/state-machine';
 import { hasCapability } from '@/lib/rbac';
 
 /**
- * IMPORTANT: session.user.role is an ORG-LEVEL role (ADMIN / AUDITOR /
- * COMPLIANCE_OFFICER / VIEWER) held by a customer's own staff — /api/signup
- * hands 'ADMIN' to the first user of every self-registered organisation. It is
- * not an AIC staff role. Until 8 Sep 2026 the guards below compared that
- * org-level role against a URL-supplied orgId, so any customer admin could read
- * and drive ANOTHER organisation's certification assessment, including
- * transitioning it to CERTIFIED and clearing its impartiality check.
+ * IMPORTANT: session.user.role can now (2026-09, the 4-tier model - see
+ * lib/roles.ts) be an AIC-side value too (AIC_SUPER_ADMIN / AIC_AUDITOR), not
+ * only an org-level one (ORG_ADMIN / ORG_USER held by a customer's own staff
+ * — /api/signup hands 'ORG_ADMIN' to the first user of every self-registered
+ * organisation). That makes it MORE important, not less, that this file never
+ * gates on session.user.role directly. Until 8 Sep 2026 the guards below
+ * compared an org-level role against a URL-supplied orgId, so any customer
+ * admin could read and drive ANOTHER organisation's certification assessment,
+ * including transitioning it to CERTIFIED and clearing its impartiality check.
  *
  * Certification decisions about an organisation must never be reachable by that
  * organisation. AIC-staff actions are therefore gated on capabilities, which

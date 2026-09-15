@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Task M13: Institutional RBAC Enforcement
-    if (session.user.role !== 'ADMIN' && session.user.role !== 'COMPLIANCE_OFFICER') {
+    if (session.user.role !== 'ORG_ADMIN' && session.user.role !== 'ORG_USER') {
         return NextResponse.json({ error: 'Elevated privileges required to execute audits' }, { status: 403 });
     }
 
@@ -115,7 +115,7 @@ export async function PATCH(request: NextRequest) {
           return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
 
-      if (session.user.role !== 'ADMIN' && session.user.role !== 'COMPLIANCE_OFFICER') {
+      if (session.user.role !== 'ORG_ADMIN' && session.user.role !== 'ORG_USER') {
           return NextResponse.json({ error: 'Elevated privileges required to execute audits' }, { status: 403 });
       }
 

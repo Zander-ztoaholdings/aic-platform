@@ -8,13 +8,13 @@ import { z } from 'zod';
 const InviteSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1),
-  role: z.enum(['ADMIN', 'COMPLIANCE_OFFICER', 'AUDITOR', 'VIEWER'])
+  role: z.enum(['ORG_ADMIN', 'ORG_USER'])
 });
 
 export async function POST(request: NextRequest) {
     try {
         const session = await auth();
-        if (!session || !session.user?.orgId || session.user.role !== 'ADMIN') {
+        if (!session || !session.user?.orgId || session.user.role !== 'ORG_ADMIN') {
             return NextResponse.json({ error: 'Only institutional administrators can invite users' }, { status: 403 });
         }
 
