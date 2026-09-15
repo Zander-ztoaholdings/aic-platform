@@ -28,14 +28,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, riskTier, lifecycleStage, isSandbox } = body;
+    const { name, purpose, riskTier, lifecycleStage, isSandbox } = body;
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return NextResponse.json({ error: 'A system name is required' }, { status: 400 });
+    }
     const orgId = session.user.orgId;
     const db = getTenantDb(orgId);
 
     const [newSystem] = await db.query(async (tx) => {
       return await tx.insert(aiSystems).values({
         orgId,
-        name,
+        name: name.trim(),
+        purpose: typeof purpose === 'string' && purpose.trim() ? purpose.trim() : null,
         riskTier: riskTier || 1,
         lifecycleStage: lifecycleStage || 'DEVELOPMENT',
         isSandbox: isSandbox !== undefined ? isSandbox : true,

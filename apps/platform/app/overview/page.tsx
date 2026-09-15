@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Session } from 'next-auth';
 import { getSession } from '../../lib/auth';
 import { buildOrgOverview, type Gap } from '../../lib/org-overview';
 import DashboardShell from '../components/DashboardShell';
+import { AddSystemForm } from './components/AddSystemForm';
 
 export const metadata = { title: 'Organisation AI Overview | AIC' };
 export const dynamic = 'force-dynamic';
@@ -208,14 +208,12 @@ export default async function OrgOverviewPage() {
             />
           </div>
 
+          <div className="mb-5">
+            <AddSystemForm />
+          </div>
+
           {inventory.systems.length === 0 ? (
-            <p className="text-sm text-gray-400">
-              No systems declared.{' '}
-              <Link href="/workspace" className="text-aic-gold underline">
-                Add the first one
-              </Link>
-              .
-            </p>
+            <p className="text-sm text-gray-400">No systems declared yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
