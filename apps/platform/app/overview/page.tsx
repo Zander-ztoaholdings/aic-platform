@@ -2,9 +2,10 @@ import { redirect } from 'next/navigation';
 import type { Session } from 'next-auth';
 import { getSession } from '../../lib/auth';
 import { buildOrgOverview, type Gap } from '../../lib/org-overview';
-import { canManageEstate } from '../../lib/roles';
+import { canManageEstate, canEditOrgProfile } from '../../lib/roles';
 import DashboardShell from '../components/DashboardShell';
 import { AddSystemForm } from './components/AddSystemForm';
+import { AddAccountablePersonForm } from './components/AddAccountablePersonForm';
 
 export const metadata = { title: 'Organisation AI Overview | AIC' };
 export const dynamic = 'force-dynamic';
@@ -95,6 +96,7 @@ export default async function OrgOverviewPage() {
   const session = (await getSession()) as Session | null;
   const orgId = session?.user?.orgId as string | undefined;
   const canDeclare = canManageEstate(session?.user?.role as string | undefined);
+  const canDeclareAccountablePerson = canEditOrgProfile(session?.user?.role as string | undefined);
 
   if (!orgId) redirect('/login');
 
@@ -263,9 +265,9 @@ export default async function OrgOverviewPage() {
             note="A named individual who has accepted a declaration. A job title alone is not an accountable person."
           >
             {accountability.persons.length === 0 ? (
-              <p className="text-sm text-red-600">No current declaration on record.</p>
+              <p className="text-sm text-red-600 mb-3">No current declaration on record.</p>
             ) : (
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-gray-100 mb-3">
                 {accountability.persons.map((p) => (
                   <li key={p.id} className="py-3">
                     <div className="font-bold text-aic-navy text-sm">{p.name}</div>
@@ -277,6 +279,13 @@ export default async function OrgOverviewPage() {
                 ))}
               </ul>
             )}
+            {canDeclareAccountablePerson ? (
+              <AddAccountablePersonForm />
+            ) : accountability.persons.length === 0 ? (
+              <p className="text-xs text-gray-400">
+                Ask an administrator or compliance officer to declare one.
+              </p>
+            ) : null}
           </Panel>
 
           <Panel
