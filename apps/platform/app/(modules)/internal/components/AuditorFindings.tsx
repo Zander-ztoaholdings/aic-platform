@@ -142,9 +142,7 @@ export default function AuditorFindings() {
                       Updated: {new Date(f.updatedAt).toLocaleDateString()}
                     </span>
                     <div className="ml-auto flex gap-2">
-                      <button className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-3 py-1.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
-                        Request Extension
-                      </button>
+                      {/* Request Extension: paused pending research on the extension-request workflow (2026-09). Intentionally hidden, not deleted. */}
                       <button
                         onClick={() => setUploadLabel(f.title)}
                         className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold bg-[#c9920a] text-white rounded-full px-3 py-1.5 hover:bg-[#b07d08] transition-colors"
