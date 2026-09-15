@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, smallint, bigint, boolean, timestamp, jsonb, text, pgEnum, index, unique, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, smallint, bigint, numeric, boolean, timestamp, jsonb, text, pgEnum, index, unique, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Enums
@@ -930,3 +930,53 @@ export const estateSnapshots = pgTable('estate_snapshots', {
   eventSeq: bigint('event_seq', { mode: 'number' }).notNull().default(0),
   state: jsonb('state').notNull(),
 });
+
+/**
+ * Provider/model usage and spend, as reported by the organisation's own
+ * tooling - a nightly export or webhook, exactly like every other read-only
+ * ingestion path documented in app/overview/page.tsx's "What AIC does not
+ * do" boundary. AIC never holds an Anthropic/OpenAI/DeepSeek credential and
+ * never calls a provider itself; this table only stores numbers someone
+ * else's system already computed and chose to send.
+ *
+ * systemName is optional and free text, deliberately mirroring
+ * decision_records.system_name: if the org's export happens to label which
+ * declared system a block of usage belongs to, deriveGaps() can cross-check
+ * it against the inventory the same way it already does for decisions
+ * (HU-3-UNDECLARED-SYSTEM). If it's absent - most raw provider usage
+ * exports have no concept of "system" at all - the row is still stored and
+ * counted, just not attributed. Silence about attribution is not treated as
+ * a gap; a false claim of attribution would be.
+ *
+ * The unique constraint makes re-posting the same period (a retried
+ * webhook, a cron re-run) a no-op rather than a duplicate. NULL model rows
+ * fall outside it - Postgres treats NULLs as distinct in a unique index -
+ * which is an accepted looseness for now rather than a reason to force
+ * every caller to supply a model name it may not have.
+ */
+export const llmUsageRecords = pgTable('llm_usage_records', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  provider: varchar('provider', { length: 100 }).notNull(), // 'anthropic' | 'openai' | 'deepseek' | ...
+  model: varchar('model', { length: 150 }),
+  systemName: varchar('system_name', { length: 255 }), // optional link to aiSystems.name / decisionRecords.systemName
+  periodStart: timestamp('period_start', { withTimezone: true }).notNull(),
+  periodEnd: timestamp('period_end', { withTimezone: true }).notNull(),
+  requests: integer('requests'),
+  inputTokens: bigint('input_tokens', { mode: 'number' }),
+  outputTokens: bigint('output_tokens', { mode: 'number' }),
+  costUsd: numeric('cost_usd', { precision: 12, scale: 4 }),
+  // Where the provider processed this traffic, if the export says - not yet
+  // cross-checked against the org's declared Division. A wrong inference
+  // here would look like evidence; leaving it unused until there's a real
+  // provider-region reference table is the honest choice.
+  region: varchar('region', { length: 100 }),
+  source: varchar('source', { length: 50 }).notNull().default('export'), // 'export' | 'webhook' | 'manual'
+  ingestedVia: varchar('ingested_via', { length: 20 }).notNull(), // 'api_key' | 'session'
+  submittedBy: uuid('submitted_by').references(() => users.id), // set when ingestedVia = 'session'
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  orgProvider: index('llm_usage_org_provider_idx').on(table.orgId, table.provider),
+  orgPeriod: index('llm_usage_org_period_idx').on(table.orgId, table.periodStart),
+  dedupe: unique('llm_usage_dedupe').on(table.orgId, table.provider, table.model, table.periodStart, table.periodEnd),
+}));

@@ -15,6 +15,7 @@ const clean: GapFacts = {
   accountablePersons: 2,
   declaredSystems: 3,
   undeclaredButDeciding: [],
+  undeclaredButUsing: [],
   systemsWithoutPurpose: [],
   overdueFindings: [],
   evidenceRejected: 0,
@@ -57,6 +58,22 @@ describe('deriveGaps', () => {
     expect(gap.count).toBe(2);
   });
 
+  it('blocks when usage is attributed to a system that is not declared', () => {
+    // Same shape of problem as HU-3-UNDECLARED-SYSTEM, different evidence
+    // source: a usage export named a system nobody declared.
+    const facts = { undeclaredButUsing: [{ name: 'internal-copilot', provider: 'openai' }] };
+    expect(codes(facts)).toContain('HU-3-UNDECLARED-USAGE');
+    expect(bySeverity(facts, 'HU-3-UNDECLARED-USAGE')).toBe('BLOCKING');
+  });
+
+  it('does not raise HU-3-UNDECLARED-USAGE when usage simply has no system attribution', () => {
+    // Absence of attribution is not evidence of an undeclared system - most
+    // raw provider usage exports have no concept of "system" at all, and
+    // treating silence as a violation would punish every org whose export
+    // tooling just doesn't send that field.
+    expect(codes({ undeclaredButUsing: [] })).not.toContain('HU-3-UNDECLARED-USAGE');
+  });
+
   it('blocks on an empty inventory', () => {
     expect(codes({ declaredSystems: 0 })).toContain('HU-3-EMPTY-INVENTORY');
   });
@@ -87,6 +104,7 @@ describe('deriveGaps', () => {
       accountablePersons: 0,
       declaredSystems: 0,
       undeclaredButDeciding: [{ name: 'x', decisions: 1 }],
+      undeclaredButUsing: [],
       systemsWithoutPurpose: ['y'],
       overdueFindings: ['late finding'],
       evidenceRejected: 2,
@@ -106,6 +124,7 @@ describe('deriveGaps', () => {
       accountablePersons: 0,
       declaredSystems: 0,
       undeclaredButDeciding: [{ name: 'x', decisions: 1 }],
+      undeclaredButUsing: [],
       systemsWithoutPurpose: ['y'],
       overdueFindings: ['z'],
       evidenceRejected: 1,

@@ -115,7 +115,7 @@ export default async function OrgOverviewPage() {
     );
   }
 
-  const { organisation, certificate, inventory, accountability, requirements, evidence, findings, decisions, corrections, gaps } =
+  const { organisation, certificate, inventory, accountability, requirements, evidence, findings, decisions, corrections, usage, gaps } =
     overview;
 
   return (
@@ -306,6 +306,58 @@ export default async function OrgOverviewPage() {
             </div>
             <div className="mt-6 pt-4 border-t border-gray-100 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400">
               Last record {date(decisions.lastRecordedAt)}
+            </div>
+          </Panel>
+
+          <Panel
+            title="Provider &amp; model usage"
+            note="Spend and volume as reported by your own tooling - a nightly export or webhook. AIC never calls a provider directly."
+          >
+            {usage.byProviderModel.length === 0 ? (
+              <p className="text-sm text-gray-400">No usage reported yet.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-6 pb-5 mb-5 border-b border-gray-100">
+                  <Figure label="Providers reporting" value={usage.providers} />
+                  <Figure
+                    label="Total spend"
+                    value={`$${usage.totalCostUsd.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  />
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 border-b border-gray-100">
+                        <th className="pb-2 pr-4 font-bold">Provider</th>
+                        <th className="pb-2 pr-4 font-bold">Model</th>
+                        <th className="pb-2 pr-4 font-bold text-right">Requests</th>
+                        <th className="pb-2 pr-4 font-bold text-right">Tokens</th>
+                        <th className="pb-2 font-bold text-right">Spend</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {usage.byProviderModel.map((u, i) => (
+                        <tr key={`${u.provider}-${u.model ?? 'unspecified'}-${i}`}>
+                          <td className="py-2.5 pr-4 font-medium text-aic-navy">{u.provider}</td>
+                          <td className="py-2.5 pr-4 text-gray-600">{u.model ?? '—'}</td>
+                          <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-gray-600">
+                            {u.requests.toLocaleString('en-ZA')}
+                          </td>
+                          <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-gray-600">
+                            {(u.inputTokens + u.outputTokens).toLocaleString('en-ZA')}
+                          </td>
+                          <td className="py-2.5 text-right font-mono tabular-nums text-aic-navy">
+                            ${u.costUsd.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+            <div className="mt-5 pt-4 border-t border-gray-100 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400">
+              Last reported {date(usage.lastIngestedAt)}
             </div>
           </Panel>
 

@@ -9,12 +9,15 @@ import {
   accountablePersons,
   decisionRecords,
   correctionRequests,
+  llmUsageRecords,
   eq,
   and,
   desc,
   count,
   isNull,
+  isNotNull,
   max,
+  sum,
 } from '@aic/db';
 
 /**
@@ -65,6 +68,13 @@ export type GapFacts = {
   accountablePersons: number;
   declaredSystems: number;
   undeclaredButDeciding: { name: string; decisions: number }[];
+  // Same shape of problem as undeclaredButDeciding, different evidence
+  // source: usage records that named a system on their own initiative
+  // (attribution is optional, see llmUsageRecords) and that name is not on
+  // the inventory. Left empty whenever an org's usage exports don't carry
+  // system attribution at all - absence of attribution is not evidence of
+  // an undeclared system, only a false attribution is.
+  undeclaredButUsing: { name: string; provider: string }[];
   systemsWithoutPurpose: string[];
   overdueFindings: string[];
   evidenceRejected: number;
@@ -96,6 +106,18 @@ export function deriveGaps(f: GapFacts): Gap[] {
         f.undeclaredButDeciding.map((u) => `${u.name} (${u.decisions})`).join(', ') +
         ' — each of these has recorded a decision but does not appear in the declared AI inventory.',
       count: f.undeclaredButDeciding.length,
+    });
+  }
+
+  if (f.undeclaredButUsing.length > 0) {
+    gaps.push({
+      code: 'HU-3-UNDECLARED-USAGE',
+      severity: 'BLOCKING',
+      title: 'Provider usage attributed to systems that are not on the inventory',
+      detail:
+        f.undeclaredButUsing.map((u) => `${u.name} (${u.provider})`).join(', ') +
+        ' — usage records name these as the system responsible, but none appears in the declared AI inventory.',
+      count: f.undeclaredButUsing.length,
     });
   }
 
@@ -292,6 +314,34 @@ export async function buildOrgOverview(orgId: string) {
       .from(decisionRecords)
       .where(and(eq(decisionRecords.orgId, orgId), eq(decisionRecords.isHumanOverride, true)));
 
+    // Usage/spend as reported by the org's own tooling - see
+    // llmUsageRecords's own comment for why AIC only ever reads rows someone
+    // else pushed, never a provider directly. Aggregated by provider+model
+    // rather than returned row-by-row, matching this file's "counts, not
+    // raw logs" convention everywhere else.
+    const usageByProviderModel = await tx
+      .select({
+        provider: llmUsageRecords.provider,
+        model: llmUsageRecords.model,
+        requests: sum(llmUsageRecords.requests),
+        inputTokens: sum(llmUsageRecords.inputTokens),
+        outputTokens: sum(llmUsageRecords.outputTokens),
+        costUsd: sum(llmUsageRecords.costUsd),
+      })
+      .from(llmUsageRecords)
+      .where(eq(llmUsageRecords.orgId, orgId))
+      .groupBy(llmUsageRecords.provider, llmUsageRecords.model);
+
+    const usageWithSystemName = await tx
+      .selectDistinct({ systemName: llmUsageRecords.systemName, provider: llmUsageRecords.provider })
+      .from(llmUsageRecords)
+      .where(and(eq(llmUsageRecords.orgId, orgId), isNotNull(llmUsageRecords.systemName)));
+
+    const [usageLast] = await tx
+      .select({ last: max(llmUsageRecords.createdAt), periodEnd: max(llmUsageRecords.periodEnd) })
+      .from(llmUsageRecords)
+      .where(eq(llmUsageRecords.orgId, orgId));
+
     const correctionsByStatus = await tx
       .select({ status: correctionRequests.status, n: count() })
       .from(correctionRequests)
@@ -308,6 +358,10 @@ export async function buildOrgOverview(orgId: string) {
     const undeclared = decidingSystems
       .filter((d) => d.systemName && !declaredNames.has(d.systemName.trim().toLowerCase()))
       .map((d) => ({ name: d.systemName, decisions: Number(d.n) }));
+
+    const undeclaredUsing = usageWithSystemName
+      .filter((u) => u.systemName && !declaredNames.has(u.systemName.trim().toLowerCase()))
+      .map((u) => ({ name: u.systemName as string, provider: u.provider }));
 
     const openFindings = findings.filter((f) => f.status !== 'CLOSED' && f.status !== 'WITHDRAWN');
     const now = Date.now();
@@ -329,6 +383,7 @@ export async function buildOrgOverview(orgId: string) {
       accountablePersons: persons.length,
       declaredSystems: systems.length,
       undeclaredButDeciding: undeclared,
+      undeclaredButUsing: undeclaredUsing,
       systemsWithoutPurpose: systemsWithoutPurpose.map((s) => s.name),
       overdueFindings: overdueFindings.map((f) => f.title),
       evidenceRejected,
@@ -413,6 +468,27 @@ export async function buildOrgOverview(orgId: string) {
       },
       corrections: {
         byStatus: tally(correctionsByStatus),
+      },
+      // Provider/model spend as reported by the org's own tooling. Never a
+      // score, same as everything else here - just what's been pushed to
+      // AIC and when. See llmUsageRecords for why AIC never calls a
+      // provider itself to get these numbers.
+      usage: {
+        byProviderModel: usageByProviderModel.map((u) => ({
+          provider: u.provider,
+          model: u.model,
+          requests: Number(u.requests ?? 0),
+          inputTokens: Number(u.inputTokens ?? 0),
+          outputTokens: Number(u.outputTokens ?? 0),
+          costUsd: Number(u.costUsd ?? 0),
+        })),
+        providers: usageByProviderModel.length > 0
+          ? Array.from(new Set(usageByProviderModel.map((u) => u.provider))).length
+          : 0,
+        totalCostUsd: usageByProviderModel.reduce((acc, u) => acc + Number(u.costUsd ?? 0), 0),
+        lastIngestedAt: usageLast?.last ?? null,
+        lastPeriodEnd: usageLast?.periodEnd ?? null,
+        undeclaredAttributions: undeclaredUsing,
       },
       gaps,
       scope:
