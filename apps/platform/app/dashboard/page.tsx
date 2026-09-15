@@ -4,9 +4,10 @@ import type { Session } from 'next-auth';
 import { getSession } from '../../lib/auth';
 import { readContinuity } from '../../lib/continuity-store';
 import { buildOrgOverview } from '../../lib/org-overview';
-import type { ChainLink, Drift } from '../../lib/continuity';
+import type { Drift } from '../../lib/continuity';
 import DashboardShell from '../components/DashboardShell';
 import { ObserveButton } from './components/ObserveButton';
+import { ContinuityFeed } from './components/ContinuityFeed';
 
 export const metadata = { title: 'Continuity Record | AIC' };
 export const dynamic = 'force-dynamic';
@@ -24,21 +25,6 @@ export const dynamic = 'force-dynamic';
 
 const DAY = 24 * 60 * 60 * 1000;
 
-const CHANGE_VERB: Record<string, string> = {
-  DECLARED: 'declared',
-  CHANGED: 'changed',
-  WITHDRAWN: 'withdrawn',
-  OBSERVED: 'observed by AIC',
-};
-
-const ENTITY_LABEL: Record<string, string> = {
-  AI_SYSTEM: 'System',
-  ACCOUNTABLE_PERSON: 'Accountable person',
-  FINDING: 'Finding',
-  CERTIFICATE: 'Certificate',
-  UNDECLARED_SYSTEM: 'Undeclared system',
-};
-
 const SEVERITY_STYLE: Record<Drift['severity'], string> = {
   BLOCKING: 'border-red-200 bg-red-50 text-red-900',
   MATERIAL: 'border-amber-200 bg-amber-50 text-amber-900',
@@ -52,46 +38,6 @@ function ago(iso: string, now: number) {
     return h <= 0 ? 'just now' : `${h}h ago`;
   }
   return d === 1 ? 'yesterday' : `${d}d ago`;
-}
-
-function describe(e: ChainLink) {
-  const verb = CHANGE_VERB[e.changeType] ?? e.changeType.toLowerCase();
-  if (e.changeType === 'CHANGED' && e.field) {
-    return `${e.field}: ${e.previousValue ?? '—'} → ${e.newValue ?? '—'}`;
-  }
-  if (e.changeType === 'OBSERVED' && e.field === 'decisions') {
-    return e.previousValue
-      ? `decisions logged: ${e.previousValue} → ${e.newValue}`
-      : `${e.newValue} decisions logged, never declared`;
-  }
-  if (e.changeType === 'DECLARED' && e.newValue) return `${e.field}: ${e.newValue}`;
-  return verb;
-}
-
-function EventRow({ e, now }: { e: ChainLink; now: number }) {
-  const emphatic = e.entityType === 'UNDECLARED_SYSTEM' || e.changeType === 'WITHDRAWN';
-  return (
-    <li className="py-3 flex items-start gap-4">
-      <span className="font-mono text-[10px] text-gray-300 tabular-nums pt-0.5 w-12 shrink-0">
-        #{e.seq}
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">
-            {ENTITY_LABEL[e.entityType] ?? e.entityType}
-          </span>
-          <span className={`text-sm font-bold ${emphatic ? 'text-red-700' : 'text-aic-navy'}`}>
-            {e.entityLabel}
-          </span>
-        </div>
-        <div className="mt-0.5 text-xs text-gray-600 break-words">{describe(e)}</div>
-      </div>
-      <div className="text-right shrink-0">
-        <div className="font-mono text-[10px] text-gray-400">{ago(e.observedAt, now)}</div>
-        <div className="font-mono text-[9px] text-gray-300 truncate max-w-[10rem]">{e.actorLabel}</div>
-      </div>
-    </li>
-  );
 }
 
 export default async function ContinuityDashboard() {
@@ -206,19 +152,7 @@ export default async function ContinuityDashboard() {
               Current estate →
             </Link>
           </header>
-          <div className="px-6 pb-2">
-            {firstRun ? (
-              <p className="py-10 text-sm text-gray-400 text-center">
-                No entries yet.
-              </p>
-            ) : (
-              <ul className="divide-y divide-gray-50">
-                {record.events.map((e) => (
-                  <EventRow key={e.seq} e={e} now={now} />
-                ))}
-              </ul>
-            )}
-          </div>
+          <ContinuityFeed events={record.events} now={now} />
           {record.total > record.events.length && (
             <footer className="px-6 py-3 border-t border-gray-100 font-mono text-[10px] text-gray-400 uppercase tracking-[0.15em]">
               Showing the most recent {record.events.length} of {record.total}

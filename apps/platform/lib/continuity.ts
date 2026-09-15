@@ -465,6 +465,79 @@ export function deriveDrift(
 }
 
 /**
+ * The record narrated in one sentence, next to the raw entry it explains -
+ * the compliance officer reading this is not the engineer reading the hash
+ * chain. Guild's own audit log does the same thing ("Changed Alex Rivera
+ * role to Member" next to the raw operation code) and it is the right shape
+ * to borrow: nothing here changes what was recorded, only how it reads.
+ *
+ * Pure and total - every (entityType, changeType, field) combination the rest
+ * of this file can produce has a sentence, and an unrecognised one falls back
+ * to something honest rather than throwing.
+ */
+export function narrateEvent(e: {
+  entityType: string;
+  entityLabel: string;
+  changeType: string;
+  field?: string | null;
+  previousValue?: string | null;
+  newValue?: string | null;
+}): string {
+  const { entityType, entityLabel: name, changeType, field, previousValue: prev, newValue: next } = e;
+
+  if (entityType === 'AI_SYSTEM') {
+    if (changeType === 'DECLARED') return `Declared ${name}.`;
+    if (changeType === 'WITHDRAWN') return `Withdrew ${name} from the inventory.`;
+    if (changeType === 'CHANGED') {
+      if (field === 'purpose') {
+        return prev
+          ? `Changed ${name}'s stated purpose.`
+          : `Added a stated purpose to ${name}.`;
+      }
+      if (field === 'lifecycleStage') return `Moved ${name} from ${prev ?? 'undeclared'} to ${next}.`;
+      if (field === 'status') return `${name}'s status changed from ${prev ?? '—'} to ${next}.`;
+      if (field === 'riskTier') return `${name}'s risk tier changed from ${prev ?? '—'} to ${next}.`;
+      if (field === 'isSandbox') return `${name} ${next === 'true' ? 'moved into a sandbox' : 'left the sandbox'}.`;
+      return `Changed ${name}'s ${field ?? 'record'} from ${prev ?? '—'} to ${next ?? '—'}.`;
+    }
+  }
+
+  if (entityType === 'ACCOUNTABLE_PERSON') {
+    if (changeType === 'DECLARED') return `${name} accepted accountability (declaration ${next}).`;
+    if (changeType === 'WITHDRAWN') return `${name} is no longer the accountable person.`;
+    if (changeType === 'CHANGED') {
+      if (field === 'declarationVersion') return `${name} re-accepted accountability under declaration ${next}.`;
+      if (field === 'jobTitle') return `${name}'s title changed from ${prev ?? '—'} to ${next}.`;
+      return `Changed ${name}'s ${field ?? 'record'} from ${prev ?? '—'} to ${next ?? '—'}.`;
+    }
+  }
+
+  if (entityType === 'FINDING') {
+    if (changeType === 'OBSERVED') return `AIC raised a finding: "${name}"${next ? ` (${next})` : ''}.`;
+    if (changeType === 'CHANGED' && field === 'status') return `Finding "${name}" moved from ${prev ?? '—'} to ${next}.`;
+  }
+
+  if (entityType === 'CERTIFICATE') {
+    if (changeType === 'DECLARED') return `Certificate ${name} issued${next ? `, status ${next}` : ''}.`;
+    if (changeType === 'WITHDRAWN') return `Certificate ${name} withdrawn.`;
+    if (changeType === 'CHANGED') {
+      if (field === 'number') return `Certificate number changed from ${prev} to ${next}.`;
+      return `Certificate ${name} status changed from ${prev ?? '—'} to ${next}.`;
+    }
+  }
+
+  if (entityType === 'UNDECLARED_SYSTEM' && changeType === 'OBSERVED') {
+    return prev
+      ? `${name}, still undeclared, logged decisions ${prev} → ${next}.`
+      : `${name} logged ${next} decision${next === '1' ? '' : 's'} without being on the declared inventory.`;
+  }
+
+  // Unrecognised combination - still honest, never blank.
+  const bits = [field, prev, next].filter(Boolean).join(' ');
+  return `${changeType.charAt(0) + changeType.slice(1).toLowerCase()}: ${name}${bits ? ` (${bits})` : ''}.`;
+}
+
+/**
  * The link hash.
  *
  * Deliberately the same construction as HashChainService.computeHash — one
