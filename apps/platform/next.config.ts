@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     '@aws-sdk/s3-request-presigner',
     'puppeteer',
     'pg',
+    'bullmq',
   ],
   async headers() {
     return [
