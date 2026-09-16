@@ -264,12 +264,6 @@ export async function buildOrgOverview(orgId: string) {
       .where(eq(auditRequirements.orgId, orgId))
       .groupBy(auditRequirements.status);
 
-    const requirementsByRight = await tx
-      .select({ right: auditRequirements.rightCode, status: auditRequirements.status, n: count() })
-      .from(auditRequirements)
-      .where(eq(auditRequirements.orgId, orgId))
-      .groupBy(auditRequirements.rightCode, auditRequirements.status);
-
     const evidenceByOutcome = await tx
       .select({ outcome: auditDocuments.verificationOutcome, n: count() })
       .from(auditDocuments)
@@ -427,11 +421,6 @@ export async function buildOrgOverview(orgId: string) {
       },
       requirements: {
         byStatus: requirementTally,
-        byRight: requirementsByRight.map((r) => ({
-          right: r.right ?? 'UNSPECIFIED',
-          status: r.status ?? 'UNSPECIFIED',
-          count: Number(r.n),
-        })),
         total: requirementsTotal,
       },
       evidence: {
