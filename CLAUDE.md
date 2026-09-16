@@ -89,18 +89,30 @@ npm run test:e2e                  # End-to-end tests (Playwright)
 
 ## Authentication & RBAC
 
-### Role Hierarchy (lowest to highest)
-1. `VIEWER` - Read-only dashboard access
-2. `AUDITOR` - Can view audit logs, triage certification queue
-3. `COMPLIANCE_OFFICER` - Can write audit logs, manage incidents
-4. `ADMIN` - Full system access, RBAC management, revenue metrics
+### Role Model (4-tier, see `apps/platform/lib/roles.ts`)
+
+`users.role` is a single enum spanning both AIC's own staff and a client
+organisation's staff:
+
+- `ORG_USER` / `ORG_ADMIN` - a client organisation's own people. Both can
+  operate the estate day to day (declare/edit systems, submit evidence,
+  record decisions); only `ORG_ADMIN` can invite teammates, manage API
+  keys/billing. There is no read-only org-side tier.
+- `AIC_AUDITOR` / `AIC_SUPER_ADMIN` - AIC's own people, not org members.
+
+`role` is used only for coarse, low-stakes purposes (sidebar, name badge,
+what a client-org member can do in their own org). It is **not** the access
+gate for AIC-staff actions - that stays on `hasCapability(userId, slug)`
+(`apps/platform/lib/rbac.ts`) and the `isSuperAdmin` boolean, to avoid a
+previously-shipped bug where an org's own admin satisfied a check meant for
+AIC staff.
 
 ## Key Rules
 
 - **SQL Injection Prevention:** Always use parameterized queries via Drizzle ORM.
 - **Multi-tenancy:** Enforce tenant isolation using the `org_id` filter and `getTenantDb` helper.
 - **Audit trail:** All sensitive operations must generate a SHA-256 hash-chained log with RSA signatures.
-- **RBAC:** Use the `hasCapability(userId, slug)` helper from `packages/db` for granular permissions.
+- **RBAC:** Use the `hasCapability(userId, slug)` helper from `apps/platform/lib/rbac.ts` for granular (AIC-staff) permissions; use `apps/platform/lib/roles.ts` only for coarse org-role checks.
 
 ## Project Documentation
 
