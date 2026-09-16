@@ -74,7 +74,6 @@ export async function GET(request: Request) {
       },
       certificate: o.certificate,
       observations: {
-        integrity_score: o.organisation.integrityScore,
         requirements_by_status: o.requirements.byStatus,
         evidence_by_verification_outcome: o.evidence.byVerificationOutcome,
         last_evidence_verified_at: o.evidence.lastVerifiedAt,
