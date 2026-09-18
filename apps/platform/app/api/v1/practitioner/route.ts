@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, practitionerCertifications, cpdLogs, eq, and, sql } from '@aic/db';
 import { auth } from '@aic/auth';
 import { z } from 'zod';
+import { requireOrgId } from '@/lib/guard';
 
 const CPDLogSchema = z.object({
   title: z.string().min(1),
@@ -52,10 +53,15 @@ export async function POST(request: NextRequest) {
     const session = await auth();
     if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    // `orgId as string` compiled and then threw out of getTenantDb at runtime
+    // for any session without one, which is every AIC staff account.
+    const org = requireOrgId(session.user.orgId);
+    if (org instanceof NextResponse) return org;
+
     const body = await request.json();
     const data = CPDLogSchema.parse(body);
 
-    const db = getTenantDb(session.user.orgId as string);
+    const db = getTenantDb(org.orgId);
     return await db.transaction(async (tx) => {
       const [newLog] = await tx.insert(cpdLogs).values({
         userId: session.user.id,

@@ -228,6 +228,16 @@ export const issuedCertifications = pgTable('issued_certifications', {
 // Human-in-the-Loop (HITL) Logs (Immutable Accountability)
 export const hitlLogs = pgTable('hitl_logs', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+
+  // Added by db/manual/009_hitl_org_scope.sql. A human-oversight record is
+  // evidence FOR an organisation — HU-2 is satisfied by showing that a named
+  // person was answerable for a decision this organisation made. Without
+  // org_id the row could not be produced as that organisation's evidence, and
+  // could not be covered by row-level security. Nullable because rows written
+  // before the column existed cannot be attributed after the fact, and
+  // inventing an attribution is worse than admitting the gap.
+  orgId: uuid('org_id').references(() => organizations.id, { onDelete: 'cascade' }),
+
   actorId: uuid('actor_id').references(() => users.id),
   targetType: varchar('target_type', { length: 50 }), // 'DOCUMENT', 'RISK_SCORE', 'CERT_STATUS'
   targetId: uuid('target_id'),

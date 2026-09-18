@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generatePDF } from '@/lib/pdf-generator';
 import { getModelCardTemplate } from '@/lib/artifact-generator';
 import { auth } from '@aic/auth';
+import { requireOrgId } from '@/lib/guard';
 
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Checked `session?.user` only, so any authenticated identity — including
+  // AIC staff with no organisation — could render an artefact carrying its own
+  // name as the responsible person.
+  const org = requireOrgId(session.user.orgId);
+  if (org instanceof NextResponse) return org;
 
   try {
     const data = await request.json();

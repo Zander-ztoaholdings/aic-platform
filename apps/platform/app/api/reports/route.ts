@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { getTenantDb, complianceReports, organizations, incidents, eq, desc, sql, and } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageCompliance } from '@/lib/roles';
 
 export async function GET() {
   try {
@@ -35,6 +37,8 @@ export async function POST() {
         if (!session || !session.user?.orgId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        const refusal = requireOrgCapability(session?.user?.role, canManageCompliance, 'generate a report');
+        if (refusal) return refusal;
         const orgId = session.user.orgId;
         const db = getTenantDb(orgId);
 

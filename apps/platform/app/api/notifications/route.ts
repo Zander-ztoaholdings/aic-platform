@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, notifications, eq, and, desc } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageCompliance } from '@/lib/roles';
 
 export async function GET() {
   try {
@@ -34,6 +36,8 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user?.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const refusal = requireOrgCapability(session?.user?.role, canManageCompliance, 'raise a notification');
+    if (refusal) return refusal;
     const orgId = session.user.orgId;
     const { title, message, type } = await request.json();
 
@@ -64,6 +68,8 @@ export async function PATCH(request: NextRequest) {
     if (!session || !session.user?.orgId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const refusal = requireOrgCapability(session?.user?.role, canManageCompliance, 'change notifications');
+    if (refusal) return refusal;
     const orgId = session.user.orgId;
 
     const body = await request.json();

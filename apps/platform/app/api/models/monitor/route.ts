@@ -3,6 +3,8 @@ import { getTenantDb, models, decisionRecords, notifications, organizations, eq,
 import { getSession } from '../../../../lib/auth';
 import { NotificationService } from '@aic/notifications';
 import type { Session } from 'next-auth';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageEstate } from '@/lib/roles';
 
 const ENGINE_URL = process.env.ENGINE_URL || 'http://localhost:8000';
 const ENGINE_API_KEY = process.env.ENGINE_API_KEY || '';
@@ -13,6 +15,8 @@ export async function POST() {
     if (!session || !session.user?.orgId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const refusal = requireOrgCapability(session?.user?.role, canManageEstate, 'record model monitoring');
+    if (refusal) return refusal;
     const orgId = session.user.orgId;
     const db = getTenantDb(orgId);
 

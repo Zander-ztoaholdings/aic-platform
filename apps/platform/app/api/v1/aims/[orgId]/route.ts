@@ -124,6 +124,7 @@ export async function POST(
         // [SECURITY] Record High-Stakes Stage Transition in HITL Logs
         const { hitlLogs } = await import('@aic/db');
         await tx.insert(hitlLogs).values({
+            orgId,
             actorId: session.user.id,
             targetType: 'AIMS_STAGE_TRANSITION',
             targetId: orgId,

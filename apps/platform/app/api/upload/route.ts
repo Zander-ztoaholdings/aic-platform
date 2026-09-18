@@ -4,6 +4,8 @@ import { join } from 'path';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageCompliance } from '@/lib/roles';
 
 function getS3Client(): S3Client | null {
   if (!process.env.MINIO_ENDPOINT) return null;
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user?.orgId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const refusal = requireOrgCapability(session?.user?.role, canManageCompliance, 'upload evidence');
+    if (refusal) return refusal;
 
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;

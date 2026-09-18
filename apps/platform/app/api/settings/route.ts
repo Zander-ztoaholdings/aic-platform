@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, organizations, users, eq } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import type { Session } from 'next-auth';
+import { requireOrgCapability } from '@/lib/guard';
+import { canEditOrgProfile } from '@/lib/roles';
 
 export async function GET() {
     try {
@@ -49,11 +51,17 @@ export async function PATCH(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
         const orgId = session.user.orgId;
-        const userRole = session.user.role;
 
-        if (userRole && userRole !== 'ORG_ADMIN' && userRole !== 'ORG_USER') {
-            return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
-        }
+        // Was: `if (userRole && userRole !== 'ORG_ADMIN' && ...)`. The leading
+        // truthiness test meant a session carrying no role at all skipped the
+        // check entirely and edited the organisation profile — the one case
+        // most worth refusing. canEditOrgProfile fails closed on null.
+        const refusal = requireOrgCapability(
+            session?.user?.role,
+            canEditOrgProfile,
+            'edit the organisation profile'
+        );
+        if (refusal) return refusal;
 
         const body = await request.json();
         const { name } = body;

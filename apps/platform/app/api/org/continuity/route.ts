@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import type { Session } from 'next-auth';
 import { getSession } from '../../../../lib/auth';
 import { observeEstate, readContinuity } from '../../../../lib/continuity-store';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageEstate } from '@/lib/roles';
 
 /**
  * The organisation's continuity record.
@@ -36,6 +38,8 @@ export async function POST() {
     const session = (await getSession()) as Session | null;
     const orgId = session?.user?.orgId as string | undefined;
     if (!orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const refusal = requireOrgCapability(session?.user?.role, canManageEstate, 'record a continuity event');
+    if (refusal) return refusal;
 
     // Attributed to the person who triggered it, not to the observer. An
     // on-demand observation is a human act and the record should say so —

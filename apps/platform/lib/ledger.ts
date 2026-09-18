@@ -46,6 +46,7 @@ export async function recordDecisionWithLedger(data: any) {
     if (data.isHumanOverride) {
       const { hitlLogs } = await import('@aic/db');
       await tx.insert(hitlLogs).values({
+        orgId: data.orgId,
         actorId: data.overriddenBy,
         targetType: 'DECISION_OVERRIDE',
         targetId: decision.id,

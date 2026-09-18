@@ -89,6 +89,7 @@ export async function POST(req: NextRequest) {
       // [SECURITY] Record High-Stakes HITL Event
       const { hitlLogs } = await import('@aic/db');
       await tx.insert(hitlLogs).values({
+        orgId,
         actorId: session.user.id,
         targetType: 'CERTIFICATION_ISSUANCE',
         targetId: orgId,

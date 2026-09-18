@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, auditLogs, organizations, eq, and, sql } from '@aic/db';
 import { getSession } from '../../../../lib/auth';
 import type { Session } from 'next-auth';
+import { requireOrgCapability } from '@/lib/guard';
+import { canManageCompliance } from '@/lib/roles';
 
 // GET /api/audit-logs/:id - Get single audit log
 export async function GET(
@@ -71,6 +73,8 @@ export async function PUT(
     if (!session || !session.user?.orgId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    const refusal = requireOrgCapability(session?.user?.role, canManageCompliance, 'amend an audit record');
+    if (refusal) return refusal;
     const orgId = session.user.orgId;
     const userRole = session.user.role;
 

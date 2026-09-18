@@ -131,6 +131,7 @@ export async function PATCH(
       }
 
       await tx.insert(hitlLogs).values({
+        orgId: cert.orgId,
         actorId: actor,
         targetType: 'CERTIFICATION_LIFECYCLE',
         targetId: cert.id,
