@@ -53,7 +53,15 @@ const check = (cond, good, bad_) => {
   else { console.log(bad(bad_)); failures++; }
 };
 
-await client.connect();
+try {
+  await client.connect();
+} catch (error) {
+  console.error(`\nCould not connect: ${error.message}`);
+  console.error('Check DATABASE_URL, and that this shell can reach the database host.\n');
+  process.exit(1);
+}
+
+try {
 
 const who = await one(
   `SELECT current_user AS who,
@@ -125,6 +133,12 @@ console.log(
     ? ok('TENANT_DATABASE_URL is set — tenant queries use the restricted role')
     : warn('TENANT_DATABASE_URL is not set — tenant queries still run as the owner, so RLS is not enforced')
 );
+
+} catch (error) {
+  console.error(`\nStopped: ${error.message}`);
+  await client.end().catch(() => {});
+  process.exit(1);
+}
 
 await client.end();
 
