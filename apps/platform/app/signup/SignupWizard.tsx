@@ -108,18 +108,30 @@ const itemVariants = {
 function Field({
   label,
   hint,
+  htmlFor,
   children,
 }: {
   label: string;
   hint?: string;
+  htmlFor?: string;
   children: React.ReactNode;
 }) {
+  const text = (
+    <>
+      {label}
+      {hint && <span className="text-[#b6bdc9] font-normal"> · {hint}</span>}
+    </>
+  );
+  const cls = "block text-[11px] font-medium text-[#8a93a3] mb-1.5 tracking-wide";
   return (
     <motion.div variants={itemVariants} className="min-w-0">
-      <label className="block text-[11px] font-medium text-[#8a93a3] mb-1.5 tracking-wide">
-        {label}
-        {hint && <span className="text-[#b6bdc9] font-normal"> · {hint}</span>}
-      </label>
+      {htmlFor ? (
+        <label htmlFor={htmlFor} className={cls}>
+          {text}
+        </label>
+      ) : (
+        <span className={cls}>{text}</span>
+      )}
       {children}
     </motion.div>
   );
@@ -135,11 +147,13 @@ function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 }
 
 function SelectInput({
+  id,
   value,
   onChange,
   options,
   placeholder,
 }: {
+  id: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
@@ -148,6 +162,7 @@ function SelectInput({
   return (
     <div className="relative">
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className={`${inputClass} appearance-none pr-10 ${value ? "" : "text-[#b6bdc9]"}`}
@@ -443,48 +458,54 @@ export default function SignupWizard() {
                   <motion.div variants={reduceMotion ? undefined : listVariants} initial="enter" animate="center">
                     {step === 0 && (
                       <div className="space-y-4">
-                        <Field label="Trading name">
+                        <Field label="Trading name" htmlFor="su-org">
                           <TextInput
                             autoFocus
+                            id="su-org"
                             value={form.orgName}
                             onChange={(e) => set("orgName", e.target.value)}
                             placeholder="What people call you"
                           />
                         </Field>
                         <div className="grid sm:grid-cols-2 gap-4">
-                          <Field label="Registered legal name" hint="if different">
+                          <Field label="Registered legal name" hint="if different" htmlFor="su-legal">
                             <TextInput
-                              value={form.legalName}
+                              id="su-legal"
+                            value={form.legalName}
                               onChange={(e) => set("legalName", e.target.value)}
                               placeholder="As registered"
                             />
                           </Field>
-                          <Field label="Registration number" hint="optional">
+                          <Field label="Registration number" hint="optional" htmlFor="su-reg">
                             <TextInput
-                              value={form.registrationNumber}
+                              id="su-reg"
+                            value={form.registrationNumber}
                               onChange={(e) => set("registrationNumber", e.target.value)}
                               placeholder="2019/123456/07"
                             />
                           </Field>
                         </div>
-                        <Field label="Website" hint="optional">
+                        <Field label="Website" hint="optional" htmlFor="su-web">
                           <TextInput
+                            id="su-web"
                             value={form.website}
                             onChange={(e) => set("website", e.target.value)}
                             placeholder="example.co.za"
                           />
                         </Field>
                         <div className="grid sm:grid-cols-2 gap-4">
-                          <Field label="Jurisdiction">
+                          <Field label="Jurisdiction" htmlFor="su-country">
                             <SelectInput
+                              id="su-country"
                               value={form.country}
                               onChange={(v) => set("country", v)}
                               options={COUNTRIES}
                               placeholder="Select a country"
                             />
                           </Field>
-                          <Field label="Sector">
+                          <Field label="Sector" htmlFor="su-sector">
                             <SelectInput
+                              id="su-sector"
                               value={form.sector}
                               onChange={(v) => set("sector", v)}
                               options={SECTORS}
@@ -604,43 +625,48 @@ export default function SignupWizard() {
                     {step === 3 && (
                       <div className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-4">
-                          <Field label="Full name">
+                          <Field label="Full name" htmlFor="su-name">
                             <TextInput
                               autoFocus
-                              value={form.name}
+                              id="su-name"
+                            value={form.name}
                               onChange={(e) => set("name", e.target.value)}
                               placeholder="Your name"
                             />
                           </Field>
-                          <Field label="Role">
+                          <Field label="Role" htmlFor="su-role">
                             <TextInput
-                              value={form.jobTitle}
+                              id="su-role"
+                            value={form.jobTitle}
                               onChange={(e) => set("jobTitle", e.target.value)}
                               placeholder="e.g. Head of Risk"
                             />
                           </Field>
                         </div>
-                        <Field label="Work email">
+                        <Field label="Work email" htmlFor="su-email">
                           <TextInput
                             type="email"
+                            id="su-email"
                             value={form.email}
                             onChange={(e) => set("email", e.target.value)}
                             placeholder="you@company.co.za"
                           />
                         </Field>
                         <div className="grid sm:grid-cols-2 gap-4">
-                          <Field label="Password" hint="8 characters minimum">
+                          <Field label="Password" hint="8 characters minimum" htmlFor="su-pass">
                             <TextInput
                               type="password"
-                              value={form.password}
+                              id="su-pass"
+                            value={form.password}
                               onChange={(e) => set("password", e.target.value)}
                               placeholder="Choose a password"
                             />
                           </Field>
-                          <Field label="Confirm password">
+                          <Field label="Confirm password" htmlFor="su-confirm">
                             <TextInput
                               type="password"
-                              value={form.confirmPassword}
+                              id="su-confirm"
+                            value={form.confirmPassword}
                               onChange={(e) => set("confirmPassword", e.target.value)}
                               placeholder="Type it again"
                             />
@@ -665,8 +691,9 @@ export default function SignupWizard() {
                           </div>
                         )}
 
-                        <Field label="How did you hear about AIC?" hint="optional">
+                        <Field label="How did you hear about AIC?" hint="optional" htmlFor="su-referral">
                           <SelectInput
+                            id="su-referral"
                             value={form.referralSource}
                             onChange={(v) => set("referralSource", v)}
                             options={REFERRAL_SOURCES}
