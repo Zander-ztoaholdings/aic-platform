@@ -70,6 +70,19 @@ a policy with `USING` and no `WITH CHECK` applies its `USING` expression to
 inserts, and `app.current_org_id` is not set while the organisation being
 created does not yet exist.
 
+## Order matters: migrations before deploy
+
+Run every outstanding migration **before** the next deploy, not after. The
+commit that adds `org_id` to `hitl_logs` also writes that column from six
+places in the application. Deploy first and certificate issuance, AIMS stage
+transitions, lifecycle changes and decision overrides all fail on "column
+org_id does not exist" until the migration catches up.
+
+The reverse order is safe. Every one of these migrations is additive, and the
+currently deployed code neither reads nor writes the new columns — and while
+the application still connects as the owning role, it bypasses every policy
+they add. Applying them changes nothing until the code that uses them ships.
+
 ## Procedure
 
 **1. Apply the migration.** From the repo root, against production:
