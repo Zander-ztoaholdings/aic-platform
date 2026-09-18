@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
 import { hasCapability } from './rbac';
+import type { Capability } from './capabilities';
 
 /**
  * Higher-Order Function for API Handlers to enforce capability checks.
  * Usage: export const POST = withCapability('upload_bias_report', async (req) => { ... });
  */
 export function withCapability(
-  capability: string,
+  capability: Capability,
   handler: (req: NextRequest, context: unknown) => Promise<NextResponse>
 ) {
   return async (req: NextRequest, context: unknown) => {

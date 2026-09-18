@@ -2,10 +2,28 @@ import { NextResponse } from 'next/server';
 import { getSystemDb, organizations, sql } from '@aic/db';
 import { count } from 'drizzle-orm';
 import { auth } from '@aic/auth';
+import { hasCapability } from '@/lib/rbac';
 
+/**
+ * Institutional metrics across the whole register: pipeline distribution, total
+ * organisations, average integrity, labour hours invested.
+ *
+ * This was session-only, over getSystemDb(), which meant any signed-in client
+ * user could read AIC's entire book of business — how many organisations are on
+ * the platform, where each sits in the pipeline, and the aggregate score. That
+ * is commercial information about AIC and, at this cohort size, close to
+ * disclosure about other clients. It is now gated on access_hq.
+ */
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  if (!(await hasCapability(session.user.id, 'access_hq'))) {
+    return NextResponse.json(
+      { error: 'Forbidden', message: 'Missing capability: access_hq' },
+      { status: 403 }
+    );
+  }
 
   try {
     const db = getSystemDb();

@@ -31,11 +31,12 @@ export async function POST(request: Request) {
         ))
         .limit(1);
 
+    // A shared literal invite code ('ALPHA2026') used to be accepted here as a
+    // "prototype fallback", which meant anybody who read it in the public
+    // repository could mint an ORG_ADMIN account on any deployment. An invite
+    // must now exist, be unexhausted, and be looked up — there is no bypass.
     if (!invite) {
-        // Prototype Fallback: Allow "ALPHA2026" for testing
-        if (inviteCode !== 'ALPHA2026') {
-            return NextResponse.json({ error: 'Invalid or expired invite code' }, { status: 403 });
-        }
+        return NextResponse.json({ error: 'Invalid or expired invite code' }, { status: 403 });
     }
 
     // 2. Check for existing user
