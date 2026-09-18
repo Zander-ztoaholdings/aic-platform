@@ -113,6 +113,27 @@ export const organizations = pgTable('organizations', {
   renewalDate: timestamp('renewal_date', { withTimezone: true }),
   laborHoursInvested: integer('labor_hours_invested').default(0), // For Unit Economics
   
+  // ── Registration profile (db/manual/007_signup_profile.sql) ──────────────
+  // Captured by the signup wizard so that an organisation arrives with its
+  // jurisdiction, sector and AI footprint on the record instead of having to
+  // be chased for them later.
+  //
+  // `affectsIndividuals` and `solelyAutomated` are the two conditions POPIA
+  // Section 71 turns on, stored as 'Yes' | 'No' | 'Not sure' rather than
+  // booleans: "not sure" is a real answer at registration, and a null that
+  // could mean either unanswered or no is no use to an assessor.
+  legalName: varchar('legal_name', { length: 255 }),
+  registrationNumber: varchar('registration_number', { length: 100 }),
+  website: varchar('website', { length: 255 }),
+  country: varchar('country', { length: 100 }),
+  sector: varchar('sector', { length: 100 }),
+  sizeBand: varchar('size_band', { length: 50 }),
+  aiSystemsBand: varchar('ai_systems_band', { length: 30 }),
+  affectsIndividuals: varchar('affects_individuals', { length: 20 }),
+  solelyAutomated: varchar('solely_automated', { length: 20 }),
+  referralSource: varchar('referral_source', { length: 100 }),
+  signupCompletedAt: timestamp('signup_completed_at', { withTimezone: true }),
+
   apiKey: varchar('api_key', { length: 255 }),
   auditorId: uuid('auditor_id').references(() => users.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
@@ -261,6 +282,12 @@ export const users = pgTable('users', {
   lockoutUntil: timestamp('lockout_until', { withTimezone: true }),
   twoFactorSecret: text('two_factor_secret'),
   twoFactorEnabled: boolean('two_factor_enabled').default(false),
+  // Asked for at registration (db/manual/007_signup_profile.sql). HU-1 wants a
+  // named individual rather than a role, so the person who registers says
+  // outright whether the accountable person is them.
+  jobTitle: varchar('job_title', { length: 150 }),
+  isAccountablePerson: boolean('is_accountable_person').default(false),
+
   lastLogin: timestamp('last_login', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),

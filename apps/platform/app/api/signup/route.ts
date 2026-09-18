@@ -24,6 +24,84 @@ import {
  * recording the clause it came from and the standard version it belongs to.
  */
 
+/** Trim, cap and null out an optional free-text profile value. */
+function clip(value: unknown, max: number): string | null {
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    return trimmed.slice(0, max);
+}
+
+/**
+ * The extended profile the registration wizard collects, written after the
+ * main transaction has already committed. That ordering is deliberate.
+ *
+ * These columns arrive with db/manual/007_signup_profile.sql. Registration is
+ * the one path in this application that must not break because a migration
+ * lagged a deploy, so if the columns are not there yet the organisation is
+ * still created correctly, with its Division and its requirement set, and the
+ * omission is logged loudly instead of taking somebody's account down with it.
+ */
+async function storeExtendedProfile(
+    orgId: string,
+    userId: string,
+    email: string,
+    adminName: string,
+    profile: Record<string, unknown> | null | undefined
+) {
+    if (!profile || typeof profile !== 'object') return;
+
+    try {
+        await query(
+            `UPDATE organizations SET
+                legal_name          = $2,
+                registration_number = $3,
+                website             = $4,
+                country             = $5,
+                sector              = $6,
+                size_band           = $7,
+                ai_systems_band     = $8,
+                affects_individuals = $9,
+                solely_automated    = $10,
+                referral_source     = $11,
+                contact_email       = $12,
+                primary_ai_officer  = COALESCE($13, primary_ai_officer),
+                signup_completed_at = NOW()
+             WHERE id = $1`,
+            [
+                orgId,
+                clip(profile.legalName, 255),
+                clip(profile.registrationNumber, 100),
+                clip(profile.website, 255),
+                clip(profile.country, 100),
+                clip(profile.sector, 100),
+                clip(profile.sizeBand, 50),
+                clip(profile.aiSystemsBand, 30),
+                clip(profile.affectsIndividuals, 20),
+                clip(profile.solelyAutomated, 20),
+                clip(profile.referralSource, 100),
+                email.toLowerCase(),
+                // HU-1 asks for a named individual, not a role. If the person
+                // registering says that is them, record it now rather than
+                // waiting for someone to fill in a settings page later.
+                profile.isAccountablePerson === true ? clip(adminName, 255) : null,
+            ]
+        );
+
+        await query(
+            `UPDATE users SET job_title = $2, is_accountable_person = $3 WHERE id = $1`,
+            [userId, clip(profile.jobTitle, 150), profile.isAccountablePerson === true]
+        );
+    } catch (error) {
+        console.error(
+            '[SIGNUP] Extended profile could not be stored for org ' + orgId +
+            '. Has db/manual/007_signup_profile.sql been applied to this database? ' +
+            'The organisation and its admin user were created correctly regardless.',
+            error
+        );
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         // This endpoint writes an organisation and a user row per call, and it
@@ -39,7 +117,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { orgName, division, name, email, password } = body;
+        const { orgName, division, name, email, password, profile } = body;
 
         // Input validation
         if (!orgName || typeof orgName !== 'string' || orgName.trim().length < 2 || orgName.length > 200) {
@@ -141,6 +219,8 @@ export async function POST(request: NextRequest) {
 
             return { orgId, user: userResult.rows[0] };
         });
+
+        await storeExtendedProfile(result.orgId, result.user.id, email, name, profile);
 
         return NextResponse.json({
             success: true,
