@@ -46,79 +46,76 @@ export async function GET() {
         .orderBy(desc(auditLogs.createdAt))
         .limit(10);
 
-      // Task M37: Institutional Rights Calculation
-      // 1. Human Agency: Based on bias audit status
-      const humanAgencyScore = flagged === 0 ? 100 : Math.max(20, 100 - (flagged * 15));
-      
-      // 2. Explanation: Based on presence of model metadata and XAI usage
-      const modelCount = await tx.select({ count: sql<number>`count(*)` }).from(models).where(eq(models.orgId, orgId));
-      const explanationLogs = await tx.select({ count: sql<number>`count(*)` })
+      // Rights indicators, from this organisation's own records only.
+      //
+      // These used to fall back to invented baselines when there was no data —
+      // empathy 75, correction 90, truth 85, explanation 50 — so an
+      // organisation that had recorded nothing at all was shown a respectable
+      // score. Where there is nothing to measure, the score is null and the
+      // status says so. A certification body cannot show a client a number it
+      // made up.
+      type Indicator = { name: string; status: string; score: number | null };
+      const noData = (name: string): Indicator => ({ name, status: 'NO_DATA', score: null });
+
+      const auditCount = Number(stats.total) || 0;
+      const human_agency: Indicator = auditCount > 0
+        ? (() => {
+            const score = flagged === 0 ? 100 : Math.max(0, Math.round(100 - (flagged / auditCount) * 100));
+            return { name: 'Right to Human Agency', status: score >= 80 ? 'COMPLIANT' : 'ATTENTION_NEEDED', score };
+          })()
+        : noData('Right to Human Agency');
+
+      const [explanationLogs] = await tx.select({ count: sql<number>`count(*)` })
         .from(auditLogs)
         .where(and(eq(auditLogs.orgId, orgId), eq(auditLogs.eventType, 'TRANSPARENCY_EXPLANATION')));
-      const explanationScore = Number(modelCount[0].count) > 0 
-        ? Math.min(100, 60 + (Number(explanationLogs[0].count) * 10)) 
-        : 50;
+      const [modelCount] = await tx.select({ count: sql<number>`count(*)` }).from(models).where(eq(models.orgId, orgId));
+      const explanation: Indicator = Number(modelCount.count) > 0 && Number(explanationLogs.count) > 0
+        ? (() => {
+            const score = Math.min(100, Math.round((Number(explanationLogs.count) / Number(modelCount.count)) * 100));
+            return { name: 'Right to Explanation', status: score >= 80 ? 'COMPLIANT' : 'PARTIAL', score };
+          })()
+        : noData('Right to Explanation');
 
-      // 3. Empathy: Based on Empathy Audit results
       const empathyLogs = await tx.select()
         .from(auditLogs)
         .where(and(eq(auditLogs.orgId, orgId), eq(auditLogs.eventType, 'EMPATHY_CHECK')))
+        .orderBy(desc(auditLogs.createdAt))
         .limit(5);
-      const avgEmpathy = empathyLogs.length > 0
-        ? empathyLogs.reduce((acc, log) => acc + (Number((log.details as Record<string, unknown>)?.empathy_score) || 0), 0) / empathyLogs.length
-        : 75; // Default baseline
-      const empathyScore = Math.round(avgEmpathy);
+      const empathyScores = empathyLogs
+        .map((log) => Number((log.details as Record<string, unknown>)?.empathy_score))
+        .filter((n) => Number.isFinite(n));
+      const empathy: Indicator = empathyScores.length > 0
+        ? (() => {
+            const score = Math.round(empathyScores.reduce((a, n) => a + n, 0) / empathyScores.length);
+            return { name: 'Right to Empathy', status: score >= 70 ? 'COMPLIANT' : 'NEEDS_REWRITE', score };
+          })()
+        : noData('Right to Empathy');
 
-      // 4. Correction: Based on Appeal resolution time and volume
-      const totalAppeals = await tx.select({ count: sql<number>`count(*)` }).from(correctionRequests).where(eq(correctionRequests.orgId, orgId));
-      const resolvedAppeals = await tx.select({ count: sql<number>`count(*)` })
+      const [totalAppeals] = await tx.select({ count: sql<number>`count(*)` }).from(correctionRequests).where(eq(correctionRequests.orgId, orgId));
+      const [resolvedAppeals] = await tx.select({ count: sql<number>`count(*)` })
         .from(correctionRequests)
         .where(and(eq(correctionRequests.orgId, orgId), eq(correctionRequests.status, 'RESOLVED')));
-      const correctionScore = Number(totalAppeals[0].count) > 0
-        ? Math.round((Number(resolvedAppeals[0].count) / Number(totalAppeals[0].count)) * 100)
-        : 90; // Standard process baseline
+      const correction: Indicator = Number(totalAppeals.count) > 0
+        ? (() => {
+            const score = Math.round((Number(resolvedAppeals.count) / Number(totalAppeals.count)) * 100);
+            return { name: 'Right to Correction', status: score >= 80 ? 'COMPLIANT' : 'SLUGGISH', score };
+          })()
+        : noData('Right to Correction');
 
-      // 5. Truth: Based on AI Disclosure audits
-      const disclosureLogs = await tx.select()
-        .from(auditLogs)
-        .where(and(eq(auditLogs.orgId, orgId), eq(auditLogs.eventType, 'INSURANCE_SYNC'))); // Example proxy
-      const truthScore = disclosureLogs.length > 0 ? 95 : 85;
+      // Nothing in the record measures disclosure yet. Said plainly rather than
+      // proxied from an unrelated event type, as it was.
+      const truth = noData('Right to Truth');
 
-      const integrityScore = org.integrityScore || 0;
+      const integrityScore = org.integrityScore ?? null;
 
-      const rightsCompliance = {
-        human_agency: {
-          name: 'Right to Human Agency',
-          status: humanAgencyScore >= 80 ? 'COMPLIANT' : 'ATTENTION_NEEDED',
-          score: humanAgencyScore
-        },
-        explanation: {
-          name: 'Right to Explanation',
-          status: explanationScore >= 80 ? 'COMPLIANT' : 'PARTIAL',
-          score: explanationScore
-        },
-        empathy: {
-          name: 'Right to Empathy',
-          status: empathyScore >= 70 ? 'COMPLIANT' : 'NEEDS_REWRITE',
-          score: empathyScore
-        },
-        correction: {
-          name: 'Right to Correction',
-          status: correctionScore >= 80 ? 'COMPLIANT' : 'SLUGGISH',
-          score: correctionScore
-        },
-        truth: {
-          name: 'Right to Truth',
-          status: truthScore >= 90 ? 'COMPLIANT' : 'PARTIAL',
-          score: truthScore
-        }
-      };
+      const rightsCompliance = { human_agency, explanation, empathy, correction, truth };
 
-      // Overall rights score
-      const rightsScores = Object.values(rightsCompliance).map(r => r.score);
-      const overallRightsScore = Math.round(
-        rightsScores.reduce((a, b) => a + b, 0) / rightsScores.length
-      );
+      const measured = Object.values(rightsCompliance)
+        .map((r) => r.score)
+        .filter((n): n is number => n !== null);
+      const overallRightsScore = measured.length > 0
+        ? Math.round(measured.reduce((a, b) => a + b, 0) / measured.length)
+        : null;
 
       // 6. Action items
       const actionItems = [];
@@ -148,9 +145,9 @@ export async function GET() {
         },
         integrity: {
           score: integrityScore,
-          trend: 0,
-          status: integrityScore >= 80 ? 'HEALTHY' : integrityScore >= 60 ? 'ATTENTION' : 'CRITICAL'
+          status: integrityScore === null ? 'NOT_ASSESSED' : integrityScore >= 80 ? 'HEALTHY' : integrityScore >= 60 ? 'ATTENTION' : 'CRITICAL'
         },
+        rights_measured: measured.length,
         audit_summary: {
           total: Number(stats.total) || 0,
           verified: Number(stats.verified) || 0,

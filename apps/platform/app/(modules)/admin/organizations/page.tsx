@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AdminShell from "@/app/components/admin/AdminShell";
 import { 
   CreditCard, 
   UserCheck, 
@@ -60,7 +61,8 @@ export default function AdminOrganizations() {
   const filtered = orgs.filter(o => o.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-8">
+    <AdminShell>
+    <div className="p-2 md:p-4">
       <div className="max-w-[1600px] mx-auto">
         <header className="mb-8 flex justify-between items-center">
           <div>
@@ -213,5 +215,6 @@ export default function AdminOrganizations() {
         </div>
       </div>
     </div>
+    </AdminShell>
   );
 }

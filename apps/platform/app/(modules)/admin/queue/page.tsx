@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AdminShell from "@/app/components/admin/AdminShell";
 import { 
   Search, 
   Filter, 
@@ -48,7 +49,8 @@ export default function AdminQueue() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <AdminShell>
+    <div>
       <div className="max-w-[1600px] mx-auto px-8 py-8">
         <header className="flex justify-between items-center mb-8">
           <div>
@@ -241,5 +243,6 @@ export default function AdminQueue() {
         )}
       </Drawer>
     </div>
+    </AdminShell>
   );
 }

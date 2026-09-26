@@ -53,7 +53,7 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'AI Overview',
     summary: 'What you run, what it decided, and who answered for it.',
     items: [
-      { label: 'Continuity Record', href: '/', icon: LayoutDashboard, description: 'The standing record of your AI estate and every change to it.' },
+      { label: 'Continuity Record', href: '/dashboard', icon: LayoutDashboard, description: 'The standing record of your AI estate and every change to it.' },
       { label: 'AI Estate', href: '/overview', icon: Boxes, description: 'Each system, its purpose, and the person accountable for it.' },
       { label: 'Decision Log', href: '/pulse', icon: Activity, description: 'Decisions recorded, the overrides, and who made them.' },
       { label: 'Register Drafter', href: '/register-drafter', icon: Sparkles, badge: 'Soon', description: 'A draft AI register built from what you have declared.' },

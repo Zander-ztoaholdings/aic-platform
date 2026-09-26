@@ -76,7 +76,7 @@ export function staffCan(user: WorkspaceUser | null | undefined, capability: Cap
 export function homeFor(user: WorkspaceUser | null | undefined): string {
   if (!user) return '/login';
   if (isStaff(user)) return '/admin';
-  if (canUseClientWorkspace(user)) return '/';
+  if (canUseClientWorkspace(user)) return '/dashboard';
   // Signed in, but neither staff nor a member of an organisation — an account
   // whose organisation was removed, say. There is no workspace to show them.
   return '/unauthorized';

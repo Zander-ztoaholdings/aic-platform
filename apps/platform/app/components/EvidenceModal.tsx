@@ -36,7 +36,8 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
                     const uploadData = await uploadRes.json();
                     finalUrl = uploadData.url;
                 } else {
-                    throw new Error('File upload failed');
+                    const err = await uploadRes.json().catch(() => ({}));
+                    throw new Error(err.error || 'File upload failed');
                 }
             }
 
@@ -50,8 +51,8 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
             setUrl('');
             setFile(null);
             onClose();
-        } catch {
-            toast.error('Evidence transmission failed.');
+        } catch (e) {
+            toast.error(e instanceof Error && e.message ? e.message : 'Evidence could not be uploaded.');
         } finally {
             setIsUploading(false);
         }

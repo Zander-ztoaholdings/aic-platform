@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AdminShell from "@/app/components/admin/AdminShell";
 import { 
   Shield, 
   Plus, 
@@ -49,7 +50,8 @@ export default function AdminPermissions() {
   const categories = Array.from(new Set(availableCapabilities.map(c => c.category)));
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <AdminShell>
+    <div className="p-2 md:p-4">
       <div className="max-w-[1600px] mx-auto">
         <header className="mb-8 flex justify-between items-center">
           <div>
@@ -211,5 +213,6 @@ export default function AdminPermissions() {
         </div>
       </div>
     </div>
+    </AdminShell>
   );
 }

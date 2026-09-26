@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
 import { getSession } from '@/lib/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { requireOrgCapability } from '@/lib/guard';
 import { canManageCompliance } from '@/lib/roles';
+
+const MAX_BYTES = 25 * 1024 * 1024;
+const ALLOWED_EXT = new Set([
+  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'txt', 'md', 'json',
+  'png', 'jpg', 'jpeg', 'webp', 'zip',
+]);
 
 function getS3Client(): S3Client | null {
   if (!process.env.MINIO_ENDPOINT) return null;
@@ -36,9 +40,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'No file provided' });
     }
 
+    if (file.size > MAX_BYTES) {
+      return NextResponse.json({ success: false, error: 'File is larger than 25 MB.' }, { status: 413 });
+    }
+    // The extension comes from the client. Allowlisted so a file named
+    // "x.html" cannot be stored as HTML and later served from this origin.
+    const ext = (file.name.split('.').pop() ?? '').toLowerCase();
+    if (!ALLOWED_EXT.has(ext)) {
+      return NextResponse.json(
+        { success: false, error: `Files of type .${ext || '?'} are not accepted as evidence.` },
+        { status: 415 }
+      );
+    }
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const ext = file.name.split('.').pop();
     const filename = `${uuidv4()}.${ext}`;
 
     const s3 = getS3Client();
@@ -54,11 +70,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, url });
     }
 
-    // Local disk fallback
-    const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadsDir, { recursive: true });
-    await writeFile(join(uploadsDir, filename), buffer);
-    return NextResponse.json({ success: true, url: `/uploads/${filename}` });
+    // No object storage configured. This used to write the file into
+    // public/uploads — served to anyone, without a session, at a guessable
+    // path — and in the standalone production build that directory is not
+    // served at all, so the upload "succeeded" and the evidence was lost.
+    // Client evidence goes to private storage or nowhere.
+    console.error('[UPLOAD] MINIO_ENDPOINT is not set; refusing to store evidence on local disk.');
+    return NextResponse.json(
+      { success: false, error: 'Evidence storage is not configured. Please contact AIC support.' },
+      { status: 503 }
+    );
   } catch (error) {
     console.error('Upload Error:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });

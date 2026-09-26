@@ -5,7 +5,13 @@ import { getSession } from '@/lib/auth';
 export async function GET() {
     try {
         const session: any = await getSession();
-        const orgId = session?.user?.orgId || 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+        // No fallback organisation. This used to substitute a hardcoded org id
+        // when the session had none, which served that organisation's metrics
+        // to any signed-in account without one — AIC staff included.
+        const orgId = session?.user?.orgId as string | undefined;
+        if (!orgId) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         // Bias stability: % of bias audits that passed in last 30 days
         const biasResult = await query(

@@ -39,8 +39,8 @@ describe('who is staff', () => {
 
 describe('where people land after signing in', () => {
   it('sends clients to their workspace', () => {
-    expect(homeFor(client)).toBe('/');
-    expect(homeFor(member)).toBe('/');
+    expect(homeFor(client)).toBe('/dashboard');
+    expect(homeFor(member)).toBe('/dashboard');
   });
 
   it('sends AIC staff to the staff workspace, not the client dashboard', () => {
@@ -93,7 +93,7 @@ describe('the next= deep link', () => {
   });
 
   it('ignores a path the person may not open, rather than bouncing them into a refusal', () => {
-    expect(resolveLanding(client, '/admin/users')).toBe('/');
+    expect(resolveLanding(client, '/admin/users')).toBe('/dashboard');
     expect(resolveLanding(auditor, '/hq/growth/revenue')).toBe('/admin');
   });
 
@@ -116,7 +116,7 @@ describe('the next= deep link', () => {
     // literal path on this origin — the router never decodes them into headers.
     expect(safePath('/evidence\u0000')).toBeNull();
     expect(safePath('/a\r\nLocation: x')).toBeNull();
-    expect(resolveLanding(client, 'https://evil.example')).toBe('/');
+    expect(resolveLanding(client, 'https://evil.example')).toBe('/dashboard');
   });
 });
 
