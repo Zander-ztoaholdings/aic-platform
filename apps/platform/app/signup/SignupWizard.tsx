@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -246,6 +246,13 @@ export default function SignupWizard() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  // Arriving from the website's AIC Aware results carries the organisation
+  // name typed there; prefill it, still editable, rather than ask twice.
+  useEffect(() => {
+    const org = new URLSearchParams(window.location.search).get("organisation")?.trim().slice(0, 200);
+    if (org) setForm((f) => (f.orgName ? f : { ...f, orgName: org }));
+  }, []);
+
   const division = useMemo(
     () => DIVISIONS.find((d) => d.value === form.division) ?? null,
     [form.division]
@@ -349,7 +356,11 @@ export default function SignupWizard() {
         return;
       }
       setDone(true);
-      setTimeout(() => router.push("/login?registered=true"), 1100);
+      // Arriving from the website's AIC Aware results (?intent=aware) lands the
+      // new account on AIC Aware after sign-in, where the badge is issued.
+      const intent = new URLSearchParams(window.location.search).get("intent");
+      const after = intent === "aware" ? "&next=%2Faware" : "";
+      setTimeout(() => router.push(`/login?registered=true${after}`), 1100);
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);

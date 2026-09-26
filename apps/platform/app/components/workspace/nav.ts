@@ -75,6 +75,7 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'AIC Certification',
     summary: 'Where your assessment stands against the AIC standard.',
     items: [
+      { label: 'AIC Aware', href: '/aware', icon: BadgeCheck, description: 'Declare your AI awareness and hold a verifiable badge.' },
       { label: 'My Certificate', href: '/certificate', icon: Award, description: 'Your current status, and what stands between you and the next.' },
       { label: 'Correspondence', href: '/correspondence', icon: MessageSquare, description: 'Messages with your assessor, on the record.' },
     ],

@@ -86,7 +86,7 @@ const PUBLIC_WEB_URL = 'https://aiccertified.cloud';
  * Both candidates are tried before giving up, so a misconfigured variable
  * degrades to the public URL rather than taking registration with it.
  */
-function candidateUrls(): string[] {
+export function candidateUrls(): string[] {
   const urls: string[] = [];
   const add = (u?: string) => {
     const v = u?.trim().replace(/\/+$/, '');

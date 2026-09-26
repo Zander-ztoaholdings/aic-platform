@@ -61,6 +61,10 @@ const PUBLIC_PATHS = [
   // behind a session cookie locked out exactly the people it exists for.
   "/appeal",
   "/api/incidents/public",
+  // AIC Aware badge verification and the public directory. Read-only, no
+  // scores or personal data; the badge image and verify page on aiccertified.cloud
+  // read from here. Only this prefix — the rest of /api/public stays gated.
+  "/api/public/aware",
 ];
 
 export function middleware(req: NextRequest) {

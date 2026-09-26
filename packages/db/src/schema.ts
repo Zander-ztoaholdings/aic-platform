@@ -824,9 +824,42 @@ export const awareAssessments = pgTable('aware_assessments', {
   startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   submittedAt: timestamp('submitted_at', { withTimezone: true }),
+
+  // db/manual/010_aware_badges.sql — who attested, when, and the scorer's result.
+  attestedAt: timestamp('attested_at', { withTimezone: true }),
+  attestedBy: uuid('attested_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  result: jsonb('result'),
 }, (table) => ({
   byOrg: index('aware_assessments_org_idx').on(table.orgId),
   byUser: index('aware_assessments_user_idx').on(table.userId),
+}));
+
+/**
+ * An AIC Aware badge (db/manual/010_aware_badges.sql).
+ *
+ * Issued only when a registered organisation with a signed accountable-person
+ * declaration submits AIC Aware in the platform. Replaces the website's badge,
+ * which was looked up by company name and could be claimed for any company by
+ * anyone. The public code is what a badge image and its verify page key on;
+ * the organisation name is frozen at issue; expiry is twelve months.
+ */
+export const awareBadges = pgTable('aware_badges', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar('code', { length: 20 }).notNull().unique(),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  assessmentId: uuid('assessment_id').notNull().references(() => awareAssessments.id, { onDelete: 'cascade' }),
+  accountablePersonId: uuid('accountable_person_id').references(() => accountablePersons.id, { onDelete: 'set null' }),
+  issuedBy: uuid('issued_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  orgNameAtIssue: varchar('org_name_at_issue', { length: 255 }).notNull(),
+  questionSetVersion: varchar('question_set_version', { length: 20 }).notNull(),
+  listed: boolean('listed').notNull().default(false),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: uuid('revoked_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  revocationReason: text('revocation_reason'),
+}, (table) => ({
+  byOrg: index('aware_badges_org_idx').on(table.orgId),
 }));
 
 
