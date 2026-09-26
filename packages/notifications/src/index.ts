@@ -21,7 +21,9 @@ export class NotificationService {
 
     try {
       const { data, error } = await resend.emails.send({
-        from: 'AIC Intelligence <alerts@aic-pulse.org>',
+        // aic-pulse.org is not a domain AIC sends from; Resend rejects mail
+        // from an unverified domain, so every one of these was failing.
+        from: process.env.EMAIL_FROM || 'AIC <no-reply@aiccertified.cloud>',
         to: options.to,
         subject: options.subject,
         html: options.html,
