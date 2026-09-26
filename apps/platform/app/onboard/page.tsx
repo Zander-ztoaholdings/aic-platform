@@ -1,134 +1,100 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AuthFrame, inputClass, labelClass, PrimaryButton, Notice } from '../components/auth/AuthFrame';
 
+/**
+ * Account creation for an organisation AIC has approved from a lead (the HQ
+ * "convert" action emails this link with a single-use code). Self-serve
+ * organisations register at /signup; invited colleagues accept at /invite.
+ */
 function OnboardContent() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
-    
-    const code = searchParams.get('code');
-    const orgId = searchParams.get('org');
+  const params = useSearchParams();
+  const router = useRouter();
+  const code = params.get('code');
+  const orgId = params.get('org');
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-    });
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    if (form.password.length < 12) return setError('Use at least 12 characters for your password.');
+    if (form.password !== form.confirmPassword) return setError('The two passwords do not match.');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/onboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, email: form.email, password: form.password, inviteCode: code, orgId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setDone(true);
+        setTimeout(() => router.push(`/login?activated=1&email=${encodeURIComponent(form.email)}`), 1400);
+      } else {
+        setError(data.error === 'Invalid or expired invite code' ? 'This link has expired or has already been used. Contact AIC for a new one.' : data.error || 'Could not create your account.');
+      }
+    } catch {
+      setError('Could not reach AIC. Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match");
-            return;
-        }
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [k]: e.target.value });
 
-        setLoading(true);
-        try {
-            const res = await fetch('/api/auth/onboard', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...formData,
-                    inviteCode: code,
-                    orgId: orgId
-                })
-            });
-
-            if (res.ok) {
-                setSuccess(true);
-                setTimeout(() => router.push('/login'), 3000);
-            } else {
-                const err = await res.json();
-                alert(err.error || "Onboarding failed");
-            }
-        } catch {
-            alert("Connection error");
-        } finally {
-            setLoading(false);
-        }
-    };
-
+  if (!code) {
     return (
-        <div className="min-h-screen bg-aic-paper flex items-center justify-center p-6">
-            <div className="max-w-md w-full bg-aic-paper border border-aic-black/5 rounded-[2.5rem] p-12 shadow-2xl">
-                <div className="mb-12 text-center">
-                    <span className="text-4xl block mb-6">🥂</span>
-                    <h1 className="text-3xl font-serif font-bold text-aic-black">Alpha Welcome.</h1>
-                    <p className="text-gray-500 font-serif mt-4 italic">Initialize your organization's administrative core.</p>
-                </div>
-
-                {!success ? (
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div>
-                            <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
-                            <input 
-                                type="text" required
-                                className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
-                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Work Email</label>
-                            <input 
-                                type="email" required
-                                className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
-                                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
-                                <input 
-                                    type="password" required
-                                    className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
-                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Confirm</label>
-                                <input 
-                                    type="password" required
-                                    className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
-                                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                                />
-                            </div>
-                        </div>
-
-                        <button 
-                            type="submit"
-                            disabled={loading || !code}
-                            className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
-                        >
-                            {loading ? 'INITIALIZING...' : 'CLAIM ACCESS'}
-                        </button>
-                    </form>
-                ) : (
-                    <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center"
-                    >
-                        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                            <span className="text-3xl">🎉</span>
-                        </div>
-                        <h3 className="text-2xl font-serif font-bold text-aic-black mb-4">Onboarding Complete</h3>
-                        <p className="text-gray-500 font-serif italic">Redirecting you to the AIC Intelligence Center...</p>
-                    </motion.div>
-                )}
-            </div>
-        </div>
+      <AuthFrame title="This link is incomplete">
+        <Notice tone="error">The account link is missing its code. Use the link from your email, or contact AIC.</Notice>
+      </AuthFrame>
     );
+  }
+
+  return (
+    <AuthFrame
+      title={done ? 'Your account is ready' : 'Create your account'}
+      subtitle={done ? undefined : 'Your organisation has been approved for AIC. Set up the administrator account to get started.'}
+    >
+      {done ? (
+        <Notice tone="success">Taking you to sign in…</Notice>
+      ) : (
+        <form onSubmit={submit} className="space-y-4">
+          {error && <Notice tone="error">{error}</Notice>}
+          <div>
+            <label htmlFor="name" className={labelClass}>Full name</label>
+            <input id="name" required autoComplete="name" className={inputClass} value={form.name} onChange={set('name')} />
+          </div>
+          <div>
+            <label htmlFor="email" className={labelClass}>Work email</label>
+            <input id="email" type="email" required autoComplete="email" className={inputClass} value={form.email} onChange={set('email')} />
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="pw" className={labelClass}>Password</label>
+              <input id="pw" type="password" required autoComplete="new-password" className={inputClass} value={form.password} onChange={set('password')} />
+            </div>
+            <div>
+              <label htmlFor="pw2" className={labelClass}>Confirm</label>
+              <input id="pw2" type="password" required autoComplete="new-password" className={inputClass} value={form.confirmPassword} onChange={set('confirmPassword')} />
+            </div>
+          </div>
+          <p className="text-[12px] text-[#a3abb8]">At least 12 characters.</p>
+          <PrimaryButton type="submit" disabled={loading}>{loading ? 'Creating…' : 'Create account'}</PrimaryButton>
+        </form>
+      )}
+    </AuthFrame>
+  );
 }
 
 export default function OnboardPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen bg-aic-paper flex items-center justify-center text-gray-400 font-serif italic">Loading secure invitation...</div>}>
-            <OnboardContent />
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={null}>
+      <OnboardContent />
+    </Suspense>
+  );
 }

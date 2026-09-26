@@ -4,7 +4,7 @@ import { getTenantDb, awareAssessments, awareBadges, and, eq, isNull } from '@ai
 import { canEditOrgProfile } from '@/lib/roles';
 import { fetchAwareInstrument, validateCompleteAnswers, scoreWithPublisher } from '@/lib/aware/instrument';
 import { generateBadgeCode, badgeExpiry } from '@/lib/aware/badge';
-import { readAwareState, orgName } from '@/lib/aware/state';
+import { readAwareState, orgName, emailVerified } from '@/lib/aware/state';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,6 +34,12 @@ export async function POST(request: NextRequest) {
   }
 
   const userId = session!.user.id as string;
+  if (!(await emailVerified(userId))) {
+    return NextResponse.json(
+      { error: 'Confirm your email address first. A badge is published in your organisation’s name, so AIC needs to know the address is yours.', code: 'EMAIL_UNVERIFIED' },
+      { status: 409 }
+    );
+  }
   const instrument = await fetchAwareInstrument();
   const name = await orgName(orgId);
   if (!name) return NextResponse.json({ error: 'Organisation not found.' }, { status: 404 });

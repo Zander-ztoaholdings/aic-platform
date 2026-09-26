@@ -33,6 +33,7 @@ interface AwareState {
   badge: Badge | null;
   canAnswer: boolean;
   canDeclare: boolean;
+  emailVerified: boolean;
 }
 
 function webBase(): string {
@@ -232,7 +233,9 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
 
       <SectionCard className="!rounded-2xl !p-6">
         <StepHeader n={3} title="Declare and receive your badge" done={false} active={hasPerson && complete} />
-        {hasPerson && complete ? (
+        {hasPerson && complete && !state.emailVerified ? (
+          <VerifyEmailPrompt />
+        ) : hasPerson && complete ? (
           state.canDeclare ? <Declare personName={state.accountablePerson!.name} onDone={onChanged} /> : (
             <p className="mt-3 text-sm text-gray-500">An organisation admin needs to make the declaration.</p>
           )
@@ -289,6 +292,27 @@ function AccountablePersonForm({ onDone }: { onDone: () => Promise<void> }) {
         {busy ? 'Saving…' : 'Name accountable person'}
       </button>
     </form>
+  );
+}
+
+function VerifyEmailPrompt() {
+  const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function resend() {
+    setBusy(true);
+    const res = await fetch('/api/auth/verify-email/resend', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    setMsg(data.message || data.error || (data.alreadyVerified ? 'Already confirmed — refresh this page.' : ''));
+    setBusy(false);
+  }
+  return (
+    <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3.5 text-sm text-amber-900">
+      <p>Confirm your email address to receive the badge. We sent a link when you registered.</p>
+      <button onClick={resend} disabled={busy} className="mt-2 font-medium underline underline-offset-2 disabled:opacity-50">
+        {busy ? 'Sending…' : 'Send the link again'}
+      </button>
+      {msg && <p className="mt-2 text-amber-800">{msg}</p>}
+    </div>
   );
 }
 

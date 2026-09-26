@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
+import { sendVerificationEmail } from '@/lib/verification';
 import {
   fetchPublishedStandard,
   requirementsForDivision,
@@ -136,8 +137,8 @@ export async function POST(request: NextRequest) {
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return NextResponse.json({ error: 'Valid email is required' }, { status: 400 });
         }
-        if (!password || password.length < 8) {
-            return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+        if (!password || password.length < 12) {
+            return NextResponse.json({ error: 'Password must be at least 12 characters' }, { status: 400 });
         }
 
         // Check if email already exists
@@ -221,6 +222,11 @@ export async function POST(request: NextRequest) {
         });
 
         await storeExtendedProfile(result.orgId, result.user.id, email, name, profile);
+
+        // Best-effort, after commit: a failed email must not undo a registration.
+        await sendVerificationEmail(result.user.id, email.toLowerCase(), name.trim()).catch((error) =>
+            console.error('[SIGNUP] verification email failed:', error)
+        );
 
         return NextResponse.json({
             success: true,

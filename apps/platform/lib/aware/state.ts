@@ -1,5 +1,5 @@
 import {
-  accountablePersons, awareAssessments, awareBadges, organizations,
+  accountablePersons, awareAssessments, awareBadges, organizations, users,
   and, eq, isNull, desc, getSystemDb,
 } from '@aic/db';
 import type { TenantTransaction } from '@aic/db';
@@ -64,4 +64,14 @@ export async function orgName(orgId: string): Promise<string | null> {
     .where(eq(organizations.id, orgId))
     .limit(1);
   return org?.name ?? null;
+}
+
+/** Whether this person has confirmed their email. Badges wait on it. */
+export async function emailVerified(userId: string): Promise<boolean> {
+  const [u] = await getSystemDb()
+    .select({ v: users.emailVerified })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  return !!u?.v;
 }

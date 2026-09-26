@@ -1,98 +1,112 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTenantDb, users, passwordResetTokens, eq } from '@aic/db';
+import { getSystemDb, users, organizations, eq } from '@aic/db';
 import { auth } from '@aic/auth';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { canManageTeamAndKeys, ROLE_LABEL, type OrgRole } from '@/lib/roles';
+import { issueToken, TOKEN_TTL } from '@/lib/auth-tokens';
+import { sendEmail } from '@/lib/email';
+import { appUrl } from '@/lib/app-url';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 const InviteSchema = z.object({
   email: z.string().email(),
-  name: z.string().min(1),
-  role: z.enum(['ORG_ADMIN', 'ORG_USER'])
+  name: z.string().trim().min(1).max(255),
+  role: z.enum(['ORG_ADMIN', 'ORG_USER']),
 });
 
+/**
+ * Invite a colleague into the caller's organisation.
+ *
+ * Before: the invite was created and its link printed to the server log — the
+ * invited person was never told. It linked to the password-reset page. And a
+ * second invite to someone who had not yet accepted silently did nothing.
+ *
+ * Now: an email with a link to /invite, which names the organisation and the
+ * person who invited them. Re-inviting a pending member of the same
+ * organisation issues a fresh link. An address that already belongs to an
+ * active account, or to another organisation, is refused with the same
+ * message as success would give the outside world — but the inviting admin is
+ * told plainly, because they are authenticated and it is their own team.
+ */
 export async function POST(request: NextRequest) {
-    try {
-        const session = await auth();
-        if (!session || !session.user?.orgId || session.user.role !== 'ORG_ADMIN') {
-            return NextResponse.json({ error: 'Only institutional administrators can invite users' }, { status: 403 });
-        }
-
-        const orgId = session.user.orgId;
-        const body = await request.json();
-        const validation = InviteSchema.safeParse(body);
-
-        if (!validation.success) {
-            return NextResponse.json({ error: 'Validation failed', details: validation.error.format() }, { status: 400 });
-        }
-
-        const { email, name, role } = validation.data;
-        const db = getTenantDb(orgId);
-
-        const result = await db.query(async (tx) => {
-            // 1. Check if user already exists
-            const [existingUser] = await tx
-                .select({ id: users.id })
-                .from(users)
-                .where(eq(users.email, email.toLowerCase()))
-                .limit(1);
-
-            if (existingUser) {
-                // Return success to mitigate email enumeration, but don't actually send new invite
-                // in a real system we would send a 'you are already invited' email.
-                return { success: true, alreadyExists: true };
-            }
-
-            // 2. Create user with hashed dummy password and is_active = FALSE
-            // Standardizing on Institutional Cost Factor 12
-            const dummyRaw = crypto.randomBytes(32).toString('hex');
-            const salt = await bcrypt.genSalt(12);
-            const passwordHash = await bcrypt.hash(dummyRaw, salt);
-
-            const [newUser] = await tx.insert(users).values({
-                email: email.toLowerCase(),
-                passwordHash,
-                name,
-                role,
-                orgId,
-                isActive: false,
-                emailVerified: false
-            }).returning({ id: users.id });
-
-            // 3. Generate invite/reset token
-            const token = crypto.randomBytes(32).toString('hex');
-            const expiresAt = new Date(Date.now() + 604800000); // 7 days
-
-            await tx.insert(passwordResetTokens).values({
-                userId: newUser.id,
-                token,
-                expiresAt
-            });
-
-            return { success: true, token };
-        });
-
-        if (result.alreadyExists) {
-            return NextResponse.json({ 
-                success: true, 
-                message: 'Institutional invitation issued successfully.' 
-            });
-        }
-
-        // Tagged so /reset-password can greet an invited person differently
-        // from someone who forgot their password - same token mechanism,
-        // different moment for the person on the other end of the link.
-        const inviteLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${result.token}&invite=1&role=${encodeURIComponent(role)}`;
-        console.log(`[AUTH] User invited to ${orgId}: ${email}. Link: ${inviteLink}`);
-
-        return NextResponse.json({ 
-            success: true, 
-            inviteLink,
-            message: 'Institutional invitation issued successfully.' 
-        });
-
-    } catch (error) {
-        console.error('[SECURITY] Invite User Failure:', error);
-        return NextResponse.json({ error: 'Technical validation failed during invitation' }, { status: 500 });
+  try {
+    const session = await auth();
+    const orgId = session?.user?.orgId as string | undefined;
+    if (!orgId || !canManageTeamAndKeys(session!.user.role as string | undefined)) {
+      return NextResponse.json({ error: 'Only an organisation admin can invite people.' }, { status: 403 });
     }
+    if (!checkRateLimit(`invite:${session!.user.id}`, 30, 60 * 60_000).allowed) {
+      return NextResponse.json({ error: 'Too many invitations in a short time. Please try again later.' }, { status: 429 });
+    }
+
+    const parsed = InviteSchema.safeParse(await request.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'A name, a valid email and a role are required.' }, { status: 400 });
+    }
+    const email = parsed.data.email.toLowerCase();
+    const { name, role } = parsed.data;
+
+    // Cross-organisation by nature: an email address is unique across the system.
+    const db = getSystemDb();
+    const [existing] = await db
+      .select({ id: users.id, orgId: users.orgId, isActive: users.isActive })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    let userId: string;
+    if (existing) {
+      if (existing.orgId !== orgId) {
+        return NextResponse.json({ error: 'That address already has an AIC account with another organisation.' }, { status: 409 });
+      }
+      if (existing.isActive) {
+        return NextResponse.json({ error: 'That person is already a member of your organisation.' }, { status: 409 });
+      }
+      userId = existing.id; // pending invite: send a fresh link
+      await db.update(users).set({ name, role }).where(eq(users.id, userId));
+    } else {
+      // Unusable random password; the account cannot sign in until the invite
+      // is accepted and a password chosen.
+      const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
+      const [created] = await db
+        .insert(users)
+        .values({ email, passwordHash, name, role, orgId, isActive: false, emailVerified: false })
+        .returning({ id: users.id });
+      userId = created.id;
+    }
+
+    const token = await issueToken(userId, TOKEN_TTL.invite);
+    const [org] = await db.select({ name: organizations.name }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
+    const inviter = (session!.user.name as string | undefined) || 'A colleague';
+    const orgName = org?.name ?? 'your organisation';
+    const inviteLink = `${appUrl()}/invite?token=${token}`;
+
+    const delivery = await sendEmail({
+      to: email,
+      subject: `${inviter} invited you to ${orgName} on AIC`,
+      paragraphs: [
+        `Hello ${name.split(' ')[0]},`,
+        `${inviter} has invited you to join ${orgName} on AIC — AI Integrity Certification — as ${ROLE_LABEL[role as OrgRole] ?? role}.`,
+        'Accept the invitation to choose your password. The link works once and expires in seven days.',
+      ],
+      action: { label: 'Accept invitation', url: inviteLink },
+      footnote: 'If you were not expecting this, you can ignore it; no account is active until the invitation is accepted.',
+    });
+
+    return NextResponse.json({
+      success: true,
+      emailed: delivery.sent,
+      // Only when the email could not be sent, so the admin can pass it on
+      // another way. Never logged.
+      ...(delivery.sent ? {} : { inviteLink }),
+      message: delivery.sent
+        ? `Invitation sent to ${email}.`
+        : `The invitation was created but the email could not be sent. Share this link with ${name} directly.`,
+    });
+  } catch (error) {
+    console.error('[SECURITY] Invite User Failure:', error);
+    return NextResponse.json({ error: 'The invitation could not be created.' }, { status: 500 });
+  }
 }

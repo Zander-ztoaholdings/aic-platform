@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { AuthFrame, inputClass, labelClass, PrimaryButton, Notice } from '../../components/auth/AuthFrame';
 
 /**
  * Enrolment, for someone who cannot sign in until they have enrolled.
@@ -71,59 +72,38 @@ export default function MfaSetupPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a1628] text-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white/[0.03] border border-white/10 rounded-2xl p-8">
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-[#c9920a]">
-          One more step
-        </span>
-        <h1 className="text-2xl font-bold mt-2 mb-3">Set up your authenticator</h1>
+    <AuthFrame
+      title={done ? 'Two-factor is on' : 'Set up your authenticator'}
+      subtitle={state === 'ready' && !done ? 'Your role requires a second factor, so this is done once before you can sign in.' : undefined}
+    >
+      {state === 'loading' && <p className="text-sm text-[#8a93a3]">Preparing your setup key…</p>}
 
-        {state === 'loading' && (
-          <p className="text-white/60 text-sm">Preparing your setup key…</p>
-        )}
+      {state === 'denied' && (
+        <div className="space-y-5">
+          <Notice>This setup link has expired, or your account already has an authenticator. Sign in again to start over.</Notice>
+          <a href="/login" className="inline-flex w-full items-center justify-center rounded-full bg-[#0A1728] px-5 py-3 text-sm font-medium text-white hover:bg-[#13233b]">
+            Back to sign in
+          </a>
+        </div>
+      )}
 
-        {state === 'denied' && (
-          <div className="text-sm text-white/70 leading-relaxed">
-            <p className="mb-4">
-              This setup link has expired, or your account already has an
-              authenticator. Sign in again to start over.
-            </p>
-            <a
-              href="/login"
-              className="inline-flex items-center justify-center w-full bg-[#c9920a] text-[#0a1628] font-semibold rounded-lg px-4 py-3"
-            >
-              Back to sign in
-            </a>
-          </div>
-        )}
-
-        {state === 'ready' && !done && (
-          <>
-            <p className="text-white/60 text-sm leading-relaxed mb-6">
-              Your role requires a second factor, so this has to be done once
-              before you can sign in. Scan this with any authenticator app, then
-              enter the six-digit code it shows.
-            </p>
-
-            {qr && (
-              <div className="bg-white rounded-xl p-4 flex justify-center mb-4">
-                <Image src={qr} alt="Authenticator QR code" width={200} height={200} unoptimized />
-              </div>
-            )}
-
-            <details className="mb-6">
-              <summary className="text-xs text-white/50 cursor-pointer hover:text-white/80">
-                Can&apos;t scan it?
-              </summary>
-              <p className="mt-2 text-xs text-white/60 break-all font-mono bg-black/30 rounded-lg p-3">
-                {secret}
-              </p>
-            </details>
-
-            <form onSubmit={submit}>
-              <label htmlFor="mfa-code" className="block text-sm text-white/70 mb-2">
-                Six-digit code
-              </label>
+      {state === 'ready' && !done && (
+        <div className="space-y-5">
+          <p className="text-sm leading-relaxed text-[#6b7485]">
+            Scan this with any authenticator app, then enter the six-digit code it shows.
+          </p>
+          {qr && (
+            <div className="flex justify-center rounded-2xl bg-[#f7f8fa] p-5">
+              <Image src={qr} alt="Authenticator QR code" width={184} height={184} unoptimized className="rounded-lg" />
+            </div>
+          )}
+          <details>
+            <summary className="cursor-pointer text-[12px] text-[#8a93a3] hover:text-[#0A1728]">Can&apos;t scan it?</summary>
+            <p className="mt-2 break-all rounded-xl bg-[#f7f8fa] p-3 font-mono text-xs text-[#4b5566]">{secret}</p>
+          </details>
+          <form onSubmit={submit} className="space-y-4">
+            <div>
+              <label htmlFor="mfa-code" className={labelClass}>Six-digit code</label>
               <input
                 id="mfa-code"
                 value={code}
@@ -131,27 +111,20 @@ export default function MfaSetupPage() {
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 placeholder="000000"
-                className="w-full bg-black/30 border border-white/15 rounded-lg px-4 py-3 tracking-[0.4em] text-center font-mono focus:outline-none focus:border-[#c9920a]"
+                className={`${inputClass} text-center font-mono text-lg tracking-[0.4em]`}
               />
-              {error && <p className="text-sm text-red-400 mt-3">{error}</p>}
-              <button
-                type="submit"
-                disabled={saving || code.length !== 6}
-                className="w-full mt-5 bg-[#c9920a] text-[#0a1628] font-semibold rounded-lg px-4 py-3 disabled:opacity-40 transition-opacity"
-              >
-                {saving ? 'Checking…' : 'Turn on two-factor'}
-              </button>
-            </form>
-          </>
-        )}
+            </div>
+            {error && <Notice tone="error">{error}</Notice>}
+            <PrimaryButton type="submit" disabled={saving || code.length !== 6}>
+              {saving ? 'Checking…' : 'Turn on two-factor'}
+            </PrimaryButton>
+          </form>
+        </div>
+      )}
 
-        {done && (
-          <p className="text-sm text-white/80 leading-relaxed">
-            Two-factor is on. Taking you back to sign in — you will need your
-            password and a code from the app.
-          </p>
-        )}
-      </div>
-    </div>
+      {done && (
+        <Notice tone="success">Taking you back to sign in — you’ll need your password and a code from the app.</Notice>
+      )}
+    </AuthFrame>
   );
 }

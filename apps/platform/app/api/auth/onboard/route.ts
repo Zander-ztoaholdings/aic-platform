@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getSystemDb, users, inviteCodes, eq, sql, and } from '@aic/db';
+import { getSystemDb, users, inviteCodes, organizations, eq, sql, and } from '@aic/db';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
 const OnboardSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(12),
   inviteCode: z.string(),
   orgId: z.string().uuid().optional().nullable(),
 });
@@ -27,7 +27,9 @@ export async function POST(request: Request) {
     const [invite] = await db.select().from(inviteCodes)
         .where(and(
             eq(inviteCodes.code, inviteCode),
-            sql`${inviteCodes.uses} < ${inviteCodes.maxUses}`
+            sql`${inviteCodes.uses} < ${inviteCodes.maxUses}`,
+            // The code's own expiry was stored and never checked.
+            sql`(${inviteCodes.expiresAt} IS NULL OR ${inviteCodes.expiresAt} > now())`
         ))
         .limit(1);
 
@@ -45,6 +47,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Account already exists' }, { status: 409 });
     }
 
+    // The code was emailed to the organisation's contact address. Only that
+    // address counts as verified by using it — anyone holding the link could
+    // otherwise register a different address and have it marked verified.
+    let contactEmail: string | null = null;
+    if (invite.orgId) {
+        const [org] = await db.select({ contactEmail: organizations.contactEmail }).from(organizations).where(eq(organizations.id, invite.orgId)).limit(1);
+        contactEmail = org?.contactEmail?.toLowerCase() ?? null;
+    }
+    const verified = !!contactEmail && contactEmail === email.toLowerCase();
+
     // 3. Create User & Update Invite in Transaction
     const hash = await bcrypt.hash(password, 12);
     
@@ -56,7 +68,7 @@ export async function POST(request: Request) {
             orgId: invite?.orgId || null, // Auto-link to org if invite has it
             role: invite?.role || 'ORG_ADMIN',
             isActive: true,
-            emailVerified: true
+            emailVerified: verified
         }).returning({ id: users.id });
 
         if (invite) {

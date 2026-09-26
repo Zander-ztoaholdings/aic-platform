@@ -1,105 +1,69 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { Loader2, CheckCircle2 } from 'lucide-react';
+import { AuthFrame, Notice } from '../components/auth/AuthFrame';
 
 function VerifyEmailContent() {
-    const searchParams = useSearchParams();
-    const router = useRouter();
-    const token = searchParams.get('token');
+  const token = useSearchParams().get('token');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState('');
+  const ran = useRef(false);
 
-    const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-    const [message, setMessage] = useState('');
+  useEffect(() => {
+    // Tokens are single-use; React's development double-invoke would burn it.
+    if (ran.current) return;
+    ran.current = true;
+    if (!token) { setStatus('error'); setMessage('This verification link is incomplete.'); return; }
+    fetch('/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) setStatus('success');
+        else { setStatus('error'); setMessage(data.error || 'This link has expired or has already been used.'); }
+      })
+      .catch(() => { setStatus('error'); setMessage('Could not reach AIC. Check your connection and try again.'); });
+  }, [token]);
 
-    useEffect(() => {
-        const verify = async () => {
-            if (!token) {
-                setStatus('error');
-                setMessage('Verification token is missing.');
-                return;
-            }
-
-            try {
-                const res = await fetch('/api/auth/verify-email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token })
-                });
-                const data = await res.json();
-
-                if (res.ok) {
-                    setStatus('success');
-                    setMessage(data.message);
-                    setTimeout(() => router.push('/login'), 3000);
-                } else {
-                    setStatus('error');
-                    setMessage(data.error);
-                }
-            } catch {
-                setStatus('error');
-                setMessage('Connection failure.');
-            }
-        };
-
-        verify();
-    }, [token, router]);
-
-    return (
-        <div className="text-center">
-            <Link href="/" className="font-serif text-3xl font-bold text-aic-black inline-block mb-10">
-                AIC<span className="text-aic-gold">.</span>
-            </Link>
-
-            {status === 'loading' && (
-                <div className="space-y-6">
-                    <div className="h-12 w-12 border-4 border-aic-gold border-t-transparent rounded-full animate-spin mx-auto" />
-                    <p className="font-serif italic text-gray-500">Verifying Institutional Credentials...</p>
-                </div>
-            )}
-
-            {status === 'success' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div className="h-16 w-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <h1 className="text-xl font-serif font-bold text-aic-black mb-4">Credentials Verified</h1>
-                    <p className="text-gray-500 font-serif mb-8">{message}</p>
-                    <Link href="/login" className="font-mono text-[10px] font-bold text-aic-black uppercase tracking-widest border-b border-aic-black pb-1 hover:text-aic-gold hover:border-aic-gold transition-all">
-                        Proceed to Portal
-                    </Link>
-                </motion.div>
-            )}
-
-            {status === 'error' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div className="h-16 w-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </div>
-                    <h1 className="text-xl font-serif font-bold text-aic-black mb-4">Verification Failed</h1>
-                    <p className="text-red-500 font-serif text-sm mb-8">{message}</p>
-                    <Link href="/login" className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-aic-black transition-all">
-                        ← Back to Login
-                    </Link>
-                </motion.div>
-            )}
+  return (
+    <AuthFrame
+      title={status === 'success' ? 'Email confirmed' : status === 'error' ? 'We couldn’t confirm that link' : 'Confirming your email'}
+    >
+      {status === 'loading' && (
+        <div className="flex items-center gap-2 text-sm text-[#8a93a3]"><Loader2 className="h-4 w-4 animate-spin" /> One moment</div>
+      )}
+      {status === 'success' && (
+        <div className="space-y-5">
+          <div className="flex items-center gap-3 text-sm text-[#4b5566]">
+            <CheckCircle2 className="h-5 w-5 text-emerald-500" /> Thank you — your address is confirmed.
+          </div>
+          <Link href="/start" className="inline-flex w-full items-center justify-center rounded-full bg-[#0A1728] px-5 py-3 text-sm font-medium text-white hover:bg-[#13233b]">
+            Continue to AIC
+          </Link>
         </div>
-    );
+      )}
+      {status === 'error' && (
+        <div className="space-y-4">
+          <Notice tone="error">{message}</Notice>
+          <p className="text-[13px] leading-relaxed text-[#6b7485]">
+            If you’re signed in, you can send a new link from AIC Aware. Links expire after 48 hours.
+          </p>
+          <Link href="/start" className="text-sm font-medium text-[#0A1728] hover:text-[#c9920a]">Go to AIC →</Link>
+        </div>
+      )}
+    </AuthFrame>
+  );
 }
 
 export default function VerifyEmailPage() {
-    return (
-        <div className="min-h-screen bg-aic-paper flex items-center justify-center p-6">
-            <div className="w-full max-w-md bg-aic-paper border border-aic-black/5 rounded-[2.5rem] p-12 shadow-2xl">
-                <Suspense fallback={<div>Loading...</div>}>
-                    <VerifyEmailContent />
-                </Suspense>
-            </div>
-        </div>
-    );
+  return (
+    <Suspense fallback={null}>
+      <VerifyEmailContent />
+    </Suspense>
+  );
 }

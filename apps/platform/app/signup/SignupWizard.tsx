@@ -291,7 +291,7 @@ export default function SignupWizard() {
       if (form.name.trim().length < 2) return "Your full name, please.";
       if (form.jobTitle.trim().length < 2) return "Your role — a certificate names a person, not a mailbox.";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return "That email address does not look right.";
-      if (form.password.length < 8) return "Passwords need at least 8 characters.";
+      if (form.password.length < 12) return "Passwords need at least 12 characters.";
       if (form.password !== form.confirmPassword) return "The two passwords do not match.";
       return null;
     }
@@ -664,7 +664,7 @@ export default function SignupWizard() {
                           />
                         </Field>
                         <div className="grid sm:grid-cols-2 gap-4">
-                          <Field label="Password" hint="8 characters minimum" htmlFor="su-pass">
+                          <Field label="Password" hint="12 characters minimum" htmlFor="su-pass">
                             <TextInput
                               type="password"
                               id="su-pass"

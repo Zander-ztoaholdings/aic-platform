@@ -43,6 +43,13 @@ const SESSION_COOKIES = [
 const PUBLIC_PATHS = [
   "/login",
   "/forgot-password",
+  // Reached from a link in an email, by definition without a session. Both
+  // were gated, so a reset or verification link bounced to /login and the
+  // token was never used.
+  "/reset-password",
+  "/verify-email",
+  // Invite acceptance, for the same reason.
+  "/invite",
   "/api/auth",
   "/signup",
   "/api/signup",

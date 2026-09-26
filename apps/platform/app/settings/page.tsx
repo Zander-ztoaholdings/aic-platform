@@ -214,7 +214,7 @@ export default function OrganizationalSettings() {
                                         Dismiss
                                     </button>
                                 </div>
-                                <p className="text-[10px] font-mono text-gray-500 mt-3 uppercase italic">Share this link with your team member to grant access.</p>
+                                <p className="text-[10px] font-mono text-gray-500 mt-3 uppercase italic">The email could not be sent. Share this link with them directly — it works once and expires in seven days.</p>
                             </div>
                         )}
 
@@ -229,10 +229,12 @@ export default function OrganizationalSettings() {
                                 });
                                 const data = await res.json();
                                 if (res.ok) {
-                                    setGeneratedInvite(data.inviteLink);
+                                    // The link is only returned when the email could not be sent.
+                                    setGeneratedInvite(data.inviteLink ?? null);
                                     setInviteEmail('');
                                     setInviteName('');
-                                    toast.success('Institutional invitation link generated.');
+                                    if (data.emailed) toast.success(data.message || 'Invitation sent.');
+                                    else toast.warning(data.message || 'Invitation created, but the email could not be sent.');
                                 } else {
                                     toast.error(data.error || 'Failed to generate invitation');
                                 }
@@ -245,7 +247,7 @@ export default function OrganizationalSettings() {
                                     <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Full Name</label>
                                     <input
                                         className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
-                                        placeholder="Dr. Thabo Mbeki"
+                                        placeholder="Full name"
                                         value={inviteName}
                                         onChange={e => setInviteName(e.target.value)}
                                         required
@@ -255,7 +257,7 @@ export default function OrganizationalSettings() {
                                     <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Institutional Email</label>
                                     <input
                                         className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
-                                        placeholder="thabo@bank.co.za"
+                                        placeholder="name@company.com"
                                         type="email"
                                         value={inviteEmail}
                                         onChange={e => setInviteEmail(e.target.value)}
