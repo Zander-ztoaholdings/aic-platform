@@ -365,8 +365,10 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
   const badge = state.badge!;
   const web = webBase();
   const imageUrl = `${web}/api/aware-badge/${badge.code}`;
-  const verifyUrl = `${web}/aware/verify/${badge.code}`;
-  const embed = `<a href="${verifyUrl}" target="_blank" rel="noopener"><img src="${imageUrl}" alt="AIC Aware — verify ${badge.code}" width="200" height="60" /></a>`;
+  // The badge's entry in the AIC public registry. Every embed links here.
+  const verifyUrl = `${web}/registry/aware/${badge.code}`;
+  const embed = `<a href="${verifyUrl}" target="_blank" rel="noopener" title="Verify this badge in the AIC Public Registry"><img src="${imageUrl}" alt="${badge.orgNameAtIssue} — AIC Aware badge ${badge.code}, verify in the AIC Public Registry" width="400" height="120" style="max-width:100%;height:auto" /></a>`;
+  const [linkCopied, setLinkCopied] = useState(false);
   const [copied, setCopied] = useState(false);
   const [listed, setListed] = useState(badge.listed);
   const [busy, setBusy] = useState(false);
@@ -416,14 +418,22 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
       <SectionCard className="!rounded-2xl !p-6">
         <h2 className="text-[17px] font-semibold text-aic-navy">Use your badge</h2>
         <div className="mt-4 flex flex-wrap items-center gap-5">
-          <img src={imageUrl} alt={`AIC Aware badge ${badge.code}`} width={200} height={60} className="rounded-lg border border-gray-100" />
+          <a href={verifyUrl} target="_blank" rel="noopener noreferrer" title="Open the registry entry">
+            <img src={imageUrl} alt={`AIC Aware badge ${badge.code}`} width={300} height={90} className="rounded-lg border border-gray-100" />
+          </a>
           <div className="flex flex-wrap gap-2">
             <a href={`${imageUrl}?download=1`} className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm text-aic-navy hover:bg-gray-50">
               <Download className="h-4 w-4" /> Download
             </a>
             <a href={verifyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm text-aic-navy hover:bg-gray-50">
-              <ExternalLink className="h-4 w-4" /> Verify page
+              <ExternalLink className="h-4 w-4" /> Registry entry
             </a>
+            <button
+              onClick={() => { navigator.clipboard.writeText(verifyUrl); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 1500); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-4 py-2 text-sm text-aic-navy hover:bg-gray-50"
+            >
+              {linkCopied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />} Copy registry link
+            </button>
           </div>
         </div>
         <label className={`${label} mt-6`}>Embed on your website</label>
@@ -437,7 +447,11 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
             {copied ? <Check className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
           </button>
         </div>
-        <p className="mt-2 text-xs text-gray-400">The badge links to its verify page, so anyone can check it is yours and current.</p>
+        <p className="mt-2 text-xs text-gray-400">
+          Embedded, the badge links to its entry in the AIC Public Registry, where anyone can check it is yours and current.
+          A downloaded image cannot carry a link, so the code and the registry address are printed on it — for slides,
+          PDFs and email signatures, link the image to the registry link above.
+        </p>
       </SectionCard>
 
       <SectionCard className="!rounded-2xl !p-6">
