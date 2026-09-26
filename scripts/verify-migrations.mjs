@@ -83,6 +83,7 @@ check(
   '008 tenant isolation MISSING'
 );
 check(await hasColumn('hitl_logs', 'org_id'), '009 hitl org scope', '009 hitl org scope MISSING  <-- certificate issuance fails once the new code deploys');
+check(await hasTable('aware_badges') && await hasColumn('aware_assessments', 'attested_at'), '010 aware badges', '010 aware badges MISSING  <-- /aware and badge verification fail without this');
 
 console.log('\nRow-level security');
 const rls = await one(`
