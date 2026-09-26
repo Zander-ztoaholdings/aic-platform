@@ -2,7 +2,7 @@
 
 import { Check } from 'lucide-react';
 
-const PHASES = [
+export const PHASES = [
   { id: 0, label: 'Intake',      sub: '& Classification' },
   { id: 1, label: 'Onboarding',  sub: 'Agreements' },
   { id: 2, label: 'Evidence',    sub: 'Submission' },

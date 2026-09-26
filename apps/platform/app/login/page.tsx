@@ -32,6 +32,18 @@ function BrandMark() {
   );
 }
 
+/**
+ * Where to go once signed in. The middleware appends ?next= when it bounces a
+ * deep link to this page; that used to be read by nothing, so a bookmarked
+ * page always dropped the person on the dashboard instead. It is passed through
+ * to /start, which validates it — nothing here trusts it.
+ */
+function startUrl(): string {
+  if (typeof window === 'undefined') return '/start';
+  const next = new URLSearchParams(window.location.search).get('next');
+  return next ? `/start?next=${encodeURIComponent(next)}` : '/start';
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -172,7 +184,10 @@ export default function LoginPage() {
             }
             setIsLoading(false);
         } else {
-            router.push('/');
+            // Routed by /start on the server, which knows the person's role:
+            // staff to the staff workspace, clients to theirs, and back to the
+            // page they were heading for only if it is safe and theirs to open.
+            router.push(startUrl());
         }
     } catch {
         setError('A system error occurred. Please try again later.');
@@ -269,7 +284,7 @@ export default function LoginPage() {
               {ssoProviders.includes('google') && (
               <button
                 type="button"
-                onClick={() => signIn('google', { callbackUrl: '/' })}
+                onClick={() => signIn('google', { callbackUrl: startUrl() })}
                 className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[10px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -284,7 +299,7 @@ export default function LoginPage() {
               {ssoProviders.includes('microsoft-entra-id') && (
               <button
                 type="button"
-                onClick={() => signIn('microsoft-entra-id', { callbackUrl: '/' })}
+                onClick={() => signIn('microsoft-entra-id', { callbackUrl: startUrl() })}
                 className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[10px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 23 23">

@@ -13,10 +13,10 @@ import {
   CheckCircle2,
   XCircle
 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
-import { Card } from "../../components/ui/card";
-import { Drawer } from "../../components/ui/drawer";
+import { Button } from "@/app/components/ui/button";
+import { Badge } from "@/app/components/ui/badge";
+import { Card } from "@/app/components/ui/card";
+import { Drawer } from "@/app/components/ui/drawer";
 import { cn } from "@/lib/utils";
 
 export default function AdminQueue() {
