@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ViewAsBanner } from './workspace/ViewAsBanner';
+import { OnboardingTour, startTour } from './workspace/OnboardingTour';
+import { Compass } from 'lucide-react';
 import { useDashboardState } from './dashboard/useDashboardState';
 import { phaseFromCertificationStatus } from './ui/PhaseTracker';
 import { WorkspaceTopBar } from './workspace/WorkspaceTopBar';
@@ -72,23 +74,25 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           email: userEmail,
           roleLabel: role ? ROLE_LABEL[role as OrgRole] ?? null : null,
         }}
+        menuExtras={[{ label: 'Take the tour', onSelect: startTour, icon: Compass }]}
         actions={
-          <NotificationBell
+          <span data-tour="notifications" className="inline-flex"><NotificationBell
             notifications={notifications}
             unreadCount={unreadCount}
             open={showNotifs}
             setOpen={setShowNotifs}
             markAsRead={markAsRead}
-          />
+          /></span>
         }
       />
-      <WorkspaceStatusStrip
+      <div data-tour="status"><WorkspaceStatusStrip
         phase={phaseFromCertificationStatus(org?.certificationStatus)}
         decisions={orgSummary?.decisions.recorded ?? null}
         overrideRate={orgSummary?.decisions.humanOverrideRate ?? null}
         integrityScore={org?.integrityScore ?? null}
         openCorrections={orgSummary?.corrections.open ?? null}
-      />
+      /></div>
+      <OnboardingTour orgName={org?.name ?? null} />
       <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-7 fade-up">{children}</main>
     </div>
   );

@@ -6,6 +6,8 @@ import { readContinuity } from '../../lib/continuity-store';
 import { buildOrgOverview } from '../../lib/org-overview';
 import type { Drift } from '../../lib/continuity';
 import DashboardShell from '../components/DashboardShell';
+import { StandingSeal } from '../components/workspace/StandingSeal';
+import { phaseFromCertificationStatus } from '@/lib/phases';
 import { ObserveButton } from './components/ObserveButton';
 import { ContinuityFeed } from './components/ContinuityFeed';
 
@@ -57,15 +59,14 @@ export default async function ContinuityDashboard() {
   return (
     <DashboardShell>
       <div className="max-w-[1100px] mx-auto px-6 py-10 space-y-6">
-        <header className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div>
-            <div className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">
-              Continuity Record
-            </div>
-            <h1 className="mt-2 font-serif text-3xl font-bold text-aic-navy tracking-tight">
+        <header className="flex flex-col md:flex-row md:items-center gap-8 pb-8 border-b border-[#dde2e8]" data-tour="standing">
+          <StandingSeal phase={phaseFromCertificationStatus(overview?.organisation.certificationStatus)} />
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-medium text-[#8a6a1f]">Continuity record</p>
+            <h1 className="mt-1 font-serif text-[40px] leading-[1.05] font-semibold text-[#0e1b2c] tracking-[-0.01em]">
               {overview?.organisation.name ?? 'Your organisation'}
             </h1>
-            <p className="mt-2 text-sm text-gray-600 max-w-xl leading-relaxed">
+            <p className="mt-3 text-[15px] text-[#5e6b7b] max-w-xl leading-relaxed">
               {firstRun
                 ? 'Nothing recorded yet. The first observation sets the opening balance — every AI system you have declared, everyone accountable for one, and the state each is in today.'
                 : `${record.total} change${record.total === 1 ? '' : 's'} recorded since ${new Date(
@@ -84,16 +85,16 @@ export default async function ContinuityDashboard() {
           >
             <div className="flex items-baseline justify-between gap-4 flex-wrap">
               <span
-                className={`font-mono text-[10px] font-bold uppercase tracking-[0.2em] ${
-                  chainOk ? 'text-emerald-700' : 'text-red-700'
+                className={`text-[13px] font-semibold ${
+                  chainOk ? 'text-emerald-800' : 'text-red-700'
                 }`}
               >
                 {chainOk ? 'Chain intact' : `Chain broken at #${record.chain.brokenAtSeq}`}
               </span>
-              <span className="font-mono text-[10px] text-gray-500">
+              <span className="text-[12px] text-gray-500">
                 {record.total} links verified
                 {record.lastObservedAt
-                  ? ` · last observed ${ago(record.lastObservedAt, now)}`
+                  ? `, last observed ${ago(record.lastObservedAt, now)}`
                   : ''}
               </span>
             </div>
@@ -122,14 +123,12 @@ export default async function ContinuityDashboard() {
                 >
                   <div className="flex items-baseline justify-between gap-4">
                     <h3 className="text-sm font-bold">{d.title}</h3>
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] shrink-0">
-                      {d.severity}
+                    <span className="text-[11px] font-semibold shrink-0">
+                      {d.severity.charAt(0) + d.severity.slice(1).toLowerCase()}
                     </span>
                   </div>
                   <p className="mt-1 text-xs leading-relaxed opacity-90">{d.detail}</p>
-                  <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.15em] opacity-50">
-                    {d.code}
-                  </div>
+                  <div className="mt-1 text-[11px] opacity-50">{d.code}</div>
                 </li>
               ))}
             </ul>
@@ -147,14 +146,14 @@ export default async function ContinuityDashboard() {
             </div>
             <Link
               href="/overview"
-              className="font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-aic-gold hover:underline shrink-0"
+              className="text-[13px] font-medium text-[#8a6a1f] hover:underline shrink-0"
             >
-              Current estate →
+              See the current estate
             </Link>
           </header>
           <ContinuityFeed events={record.events} now={now} />
           {record.total > record.events.length && (
-            <footer className="px-6 py-3 border-t border-gray-100 font-mono text-[10px] text-gray-400 uppercase tracking-[0.15em]">
+            <footer className="px-6 py-3 border-t border-gray-100 text-[12px] text-gray-400">
               Showing the most recent {record.events.length} of {record.total}
             </footer>
           )}

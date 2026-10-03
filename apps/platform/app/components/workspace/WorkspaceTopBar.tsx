@@ -72,6 +72,8 @@ export interface WorkspaceTopBarProps {
   user: { name: string | null; email: string | null; roleLabel: string | null };
   /** Notifications and anything else that belongs beside the person menu. */
   actions?: React.ReactNode;
+  /** Extra entries at the foot of the person menu, e.g. "Take the tour". */
+  menuExtras?: { label: string; onSelect: () => void; icon: React.ComponentType<{ className?: string }> }[];
 }
 
 function initialsOf(nameOrEmail: string): string {
@@ -92,6 +94,7 @@ export function WorkspaceTopBar({
   isActive,
   user,
   actions,
+  menuExtras = [],
 }: WorkspaceTopBarProps) {
   const t = TONE[tone];
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -133,6 +136,7 @@ export function WorkspaceTopBar({
               return (
                 <NavigationMenu.Item key={group.key} className="relative">
                   <NavigationMenu.Trigger
+                    data-tour={`nav-${group.key}`}
                     className={`group inline-flex items-center gap-1 h-9 px-3 rounded-lg text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#c9920a]/40 ${t.trigger} ${groupActive ? t.triggerActive : ''}`}
                   >
                     {group.label}
@@ -186,6 +190,7 @@ export function WorkspaceTopBar({
           {/* The person — and the account pages that belong to them, not to the work. */}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger
+              data-tour="account"
               className={`flex items-center gap-2.5 rounded-xl pl-1.5 pr-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#c9920a]/40 ${t.trigger}`}
             >
               <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold ${t.avatar}`}>
@@ -223,6 +228,13 @@ export function WorkspaceTopBar({
                     </DropdownMenu.Item>
                   );
                 })}
+                {menuExtras.map((x) => (
+                  <DropdownMenu.Item key={x.label} onSelect={x.onSelect}
+                    className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] outline-none cursor-pointer ${t.item}`}>
+                    <x.icon className={`w-4 h-4 ${t.muted}`} />
+                    {x.label}
+                  </DropdownMenu.Item>
+                ))}
                 <div className={`h-px my-1 ${t.divider}`} />
                 <DropdownMenu.Item
                   onSelect={() => signOut({ callbackUrl: '/login' })}

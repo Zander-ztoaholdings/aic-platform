@@ -2,12 +2,9 @@
 
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2.5 mb-4">
-      <span className="w-4 h-px bg-[#c9920a] flex-shrink-0" />
-      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#c9920a]">
-        {children}
-      </span>
-    </div>
+    // Sentence case, no rule, no tracking: a quiet note of where you are,
+    // not a label shouting over the heading below it.
+    <div className="mb-3 text-[13px] font-medium text-[#8a6a1f]">{children}</div>
   );
 }
 
@@ -22,7 +19,7 @@ export function SectionCard({
 }) {
   return (
     <div
-      className={`bg-white border border-[#e5e7eb] rounded-xl p-5 shadow-[0_1px_4px_rgba(10,22,40,0.06)] ${className}`}
+      className={`bg-white border border-[#dde2e8] rounded-xl p-5 ${className}`}
       style={style}
     >
       {children}
@@ -32,7 +29,7 @@ export function SectionCard({
 
 export function CopperTag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="font-mono text-[8px] font-bold uppercase tracking-[0.2em] text-[#c9920a] bg-amber-50 px-2 py-0.5 rounded">
+    <span className="text-[11px] font-medium text-[#8a6a1f] bg-[#a8772a]/10 px-2 py-0.5 rounded-full">
       {children}
     </span>
   );

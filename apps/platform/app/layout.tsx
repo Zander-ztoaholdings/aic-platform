@@ -1,36 +1,39 @@
 import type { Metadata, Viewport } from "next";
-import { Crimson_Pro, IBM_Plex_Mono, Space_Grotesk, Merriweather } from "next/font/google";
+import { Source_Serif_4, Public_Sans, IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 import Script from "next/script";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
 import "./globals.css";
 
-const crimsonPro = Crimson_Pro({
-  variable: "--font-crimson-pro",
+// Type. Source Serif 4 sets names and headings the way a record or a
+// certificate is set; Public Sans, drawn for public-service interfaces, carries
+// the working UI. Space Grotesk is kept only because the AIC mark is drawn in it.
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const merriweather = Merriweather({
-  variable: "--font-merriweather",
+const publicSans = Public_Sans({
+  variable: "--font-public-sans",
   subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   display: "swap",
 });
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["500", "700"],
   display: "swap",
 });
 
@@ -40,7 +43,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AIC Pulse | Compliance Dashboard",
+  title: "AIC",
   description: "Real-time AI integrity monitoring.",
   robots: "noindex, nofollow",
 };
@@ -68,7 +71,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${crimsonPro.variable} ${merriweather.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} antialiased font-sans`}>
+      <body className={`${sourceSerif.variable} ${publicSans.variable} ${ibmPlexMono.variable} ${spaceGrotesk.variable} antialiased font-sans`}>
         <Providers>
           {children}
           <Toaster position="bottom-right" richColors />

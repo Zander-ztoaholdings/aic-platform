@@ -27,8 +27,8 @@ module.exports = {
         "aic-white": "#F9F8F4", 
       },
       fontFamily: {
-        sans: ["var(--font-space-grotesk)", "sans-serif"],
-        serif: ["var(--font-crimson-pro)", "serif"],
+        sans: ["var(--font-public-sans)", "system-ui", "sans-serif"],
+        serif: ["var(--font-source-serif)", "Georgia", "serif"],
         mono: ["var(--font-ibm-plex-mono)", "monospace"],
       },
       // Add other theme extensions as needed, mimicking existing styles

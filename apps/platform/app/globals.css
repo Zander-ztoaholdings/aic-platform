@@ -2,9 +2,9 @@
 
 @theme {
   /* ─── Typography ──────────────────────────────────────────────── */
-  --font-serif:       var(--font-merriweather), var(--font-crimson-pro), Georgia, serif;
+  --font-serif:       var(--font-source-serif), Georgia, serif;
   --font-mono:        var(--font-ibm-plex-mono), monospace;
-  --font-sans:        var(--font-space-grotesk), system-ui, sans-serif;
+  --font-sans:        var(--font-public-sans), system-ui, sans-serif;
 
   /* ─── AIC Brand Palette ───────────────────────────────────────── */
   --color-aic-navy:         #0A1728;
