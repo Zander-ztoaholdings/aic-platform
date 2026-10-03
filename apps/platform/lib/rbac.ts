@@ -1,5 +1,6 @@
 import { getSystemDb, users, capabilities, roleCapabilities, userCapabilities, and, eq } from '@aic/db';
 import { roleHasCapability, type Capability } from './capabilities';
+import { readViewAsCookie } from '@aic/auth';
 
 export type { Capability } from './capabilities';
 
@@ -58,6 +59,18 @@ export async function hasCapability(userId: string, capability: Capability): Pro
   if (user.isActive === false) {
     deny(userId, capability, 'account deactivated');
     return false;
+  }
+
+  // 0. Super-admin preview: answer as the previewed role would, from the
+  //    static matrix only. Never widens anything — a super admin already
+  //    holds every capability.
+  if (user.isSuperAdmin) {
+    const preview = await readViewAsCookie();
+    if (preview) {
+      const granted = roleHasCapability(preview.role, capability);
+      if (!granted) deny(userId, capability, `previewing as ${preview.role}`);
+      return granted;
+    }
   }
 
   // 1. Explicit per-user override.

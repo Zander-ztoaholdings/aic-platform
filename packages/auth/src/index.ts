@@ -7,6 +7,7 @@ import { getSystemDb, users, organizations, auditLogs, eq, like } from "@aic/db"
 import { UserRole, CertificationTier, Permissions } from "@aic/types"
 import jwt from 'jsonwebtoken';
 import { MFAService } from "./services/mfa";
+import { readViewAsCookie, type ViewAs } from "./view-as";
 
 const PRIVATE_KEY = process.env.PLATFORM_PRIVATE_KEY?.replace(/\\n/g, '\n');
 const PUBLIC_KEY = process.env.PLATFORM_PUBLIC_KEY?.replace(/\\n/g, '\n');
@@ -390,6 +391,22 @@ export const authConfig: NextAuthConfig = {
         session.user.tier = token.tier
         session.user.isSuperAdmin = token.isSuperAdmin
         session.user.permissions = token.permissions
+        session.user.realIsSuperAdmin = !!token.isSuperAdmin
+        session.user.viewAs = null
+
+        // Super-admin preview (see view-as.ts). Only ever narrows: the
+        // previewed role replaces the real one and isSuperAdmin goes false,
+        // so every role check downstream sees exactly what that role would.
+        if (token.isSuperAdmin) {
+          const preview = await readViewAsCookie()
+          if (preview) {
+            session.user.viewAs = preview
+            session.user.role = preview.role as unknown as UserRole
+            session.user.isSuperAdmin = false
+            session.user.orgId = (preview.orgId ?? null) as unknown as string
+            session.user.orgName = (preview.orgName ?? null) as unknown as string
+          }
+        }
       }
       return session
     }
@@ -411,6 +428,10 @@ declare module "next-auth" {
     tier: CertificationTier;
     isSuperAdmin: boolean;
     permissions: Permissions;
+    /** True when the signed-in account is a super admin, even while previewing another role. */
+    realIsSuperAdmin?: boolean;
+    /** Set while a super admin is previewing another role. */
+    viewAs?: ViewAs | null;
   }
   interface Session {
     user: User;
@@ -434,3 +455,4 @@ export * from "./services/signing"
 export * from "./services/revocation"
 export * from "./services/mfa"
 export * from "./helpers"
+export * from "./view-as"

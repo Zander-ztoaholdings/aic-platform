@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import AdminShell from './components/AdminShell';
+import { ViewAsPicker } from '@/app/components/workspace/ViewAsPicker';
 import { STAFF_NAV, visibleGroups } from '@/app/components/workspace/nav';
 import type { WorkspaceUser } from '@/lib/workspace';
 
@@ -30,6 +31,8 @@ export default function StaffHome() {
           everything else stays out of the way.
         </p>
       </div>
+
+      <ViewAsPicker />
 
       {groups.length === 0 && session && (
         <p className="text-white/60 text-sm">Your account has no staff capabilities yet. Ask a super admin to grant them.</p>

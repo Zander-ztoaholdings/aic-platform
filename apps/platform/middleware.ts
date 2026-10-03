@@ -83,8 +83,29 @@ function finish(res: NextResponse): NextResponse {
   return res;
 }
 
+// Mirrors VIEW_AS_COOKIE in @aic/auth (not imported: the middleware stays
+// free of package imports so nothing in it can fail to build on the edge).
+const VIEW_AS_COOKIE = "aic_view_as";
+const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // A super-admin preview is read-only. Refusing writes here, before any
+  // route runs, means no handler has to remember to check for it. Signing out
+  // and leaving the preview stay open.
+  if (
+    req.cookies.has(VIEW_AS_COOKIE) &&
+    !SAFE_METHODS.has(req.method) &&
+    pathname.startsWith("/api/") &&
+    !pathname.startsWith("/api/view-as") &&
+    !pathname.startsWith("/api/auth")
+  ) {
+    return finish(NextResponse.json(
+      { error: "Preview mode is read-only. Exit the preview to make changes." },
+      { status: 403 }
+    ));
+  }
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return finish(NextResponse.next());

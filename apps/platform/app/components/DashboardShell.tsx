@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { ViewAsBanner } from './workspace/ViewAsBanner';
 import { useDashboardState } from './dashboard/useDashboardState';
 import { phaseFromCertificationStatus } from './ui/PhaseTracker';
 import { WorkspaceTopBar } from './workspace/WorkspaceTopBar';
@@ -57,6 +58,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#fbfcfd_0%,#f3f5f8_100%)]">
+      <ViewAsBanner />
       <WorkspaceTopBar
         tone="light"
         homeHref="/"

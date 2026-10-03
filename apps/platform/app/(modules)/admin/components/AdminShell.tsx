@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { ViewAsBanner } from '@/app/components/workspace/ViewAsBanner';
 import { ReactNode } from 'react';
 import { WorkspaceTopBar } from '@/app/components/workspace/WorkspaceTopBar';
 import { STAFF_NAV, visibleGroups } from '@/app/components/workspace/nav';
@@ -36,6 +37,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-aic-navy text-aic-paper font-sans">
+      <ViewAsBanner />
       <WorkspaceTopBar
         tone="dark"
         homeHref="/admin"
