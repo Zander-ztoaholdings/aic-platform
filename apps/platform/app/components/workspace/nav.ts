@@ -116,6 +116,7 @@ export const STAFF_NAV: NavGroup[] = [
     items: [
       { label: 'Organisations', href: '/admin/organizations', icon: Building2, description: 'The client files assigned to you.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Certifications', href: '/admin/certifications', icon: Award, description: 'Issued certificates and their lifecycle.', visible: (u) => staffCan(u, 'conduct_assessment') },
+      { label: 'AIC Aware badges', href: '/admin/aware', icon: BadgeCheck, description: 'Issued badges, their status, and revocation.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Reports', href: '/admin/reports', icon: FileBarChart, description: 'Assessment reports across the register.', visible: (u) => staffCan(u, 'conduct_assessment') },
       { label: 'Practitioners', href: '/admin/practitioner', icon: GraduationCap, description: 'CAAP practitioner records.', visible: (u) => staffCan(u, 'conduct_assessment') },
     ],

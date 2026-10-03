@@ -74,21 +74,30 @@ const PUBLIC_PATHS = [
   "/api/public/aware",
 ];
 
+// Staging must never be indexed, even if its password protection is switched
+// off. Set AIC_ENV=staging on the staging apps only.
+const IS_STAGING = process.env.AIC_ENV === "staging";
+
+function finish(res: NextResponse): NextResponse {
+  if (IS_STAGING) res.headers.set("X-Robots-Tag", "noindex, nofollow");
+  return res;
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
-    return NextResponse.next();
+    return finish(NextResponse.next());
   }
 
   const hasSession = SESSION_COOKIES.some((name) => req.cookies.has(name));
-  if (hasSession) return NextResponse.next();
+  if (hasSession) return finish(NextResponse.next());
 
   const url = req.nextUrl.clone();
   url.pathname = "/login";
   // So a bookmarked deep link still lands where it was going after sign-in.
   url.searchParams.set("next", pathname);
-  return NextResponse.redirect(url);
+  return finish(NextResponse.redirect(url));
 }
 
 export const config = {

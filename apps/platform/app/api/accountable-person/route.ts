@@ -4,6 +4,7 @@ import { auth } from '@aic/auth';
 import { canEditOrgProfile } from '@/lib/roles';
 import { getClientIP } from '@/lib/rate-limit';
 import crypto from 'node:crypto';
+import { ACCOUNTABLE_PERSON_DECLARATION } from '@/lib/aware/declarations';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
           name: name.trim(),
           jobTitle: typeof jobTitle === 'string' && jobTitle.trim() ? jobTitle.trim() : null,
           email: email.trim().toLowerCase(),
-          declarationVersion: 'v1',
+          declarationVersion: ACCOUNTABLE_PERSON_DECLARATION.version,
           declarationAcceptedAt: now,
           acceptedIpHash,
         })

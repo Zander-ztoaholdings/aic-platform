@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ACCOUNTABLE_PERSON_DECLARATION } from '@/lib/aware/declarations';
 
 const inputClass =
   'w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-aic-navy focus:outline-none focus:border-aic-gold transition-colors bg-white';
@@ -140,10 +141,7 @@ export function AddAccountablePersonForm() {
           onChange={(e) => setAccepted(e.target.checked)}
           className="mt-0.5 rounded border-gray-300"
         />
-        <span>
-          I, the named individual above, accept personal accountability for the AI systems this
-          organisation declares to AIC, consistent with Human Agency requirement HU-2.
-        </span>
+        <span>{ACCOUNTABLE_PERSON_DECLARATION.text('this organisation')}</span>
       </label>
 
       {error && <p className="text-xs text-red-600">{error}</p>}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Copy, Download, ExternalLink, Loader2, RotateCcw, ShieldCheck, UserCheck } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
+import { ACCOUNTABLE_PERSON_DECLARATION, SUBMISSION_ATTESTATION, BADGE_RULES_URL } from '@/lib/aware/declarations';
 import { Eyebrow, SectionCard } from '../components/ui/Eyebrow';
 
 /**
@@ -34,6 +35,7 @@ interface AwareState {
   canAnswer: boolean;
   canDeclare: boolean;
   emailVerified: boolean;
+  organisation: string;
 }
 
 function webBase(): string {
@@ -175,7 +177,7 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
             </div>
           </div>
         ) : state.canDeclare ? (
-          <AccountablePersonForm onDone={onChanged} />
+          <AccountablePersonForm orgName={state.organisation} onDone={onChanged} />
         ) : (
           <p className="mt-3 text-sm text-gray-500">An organisation admin needs to name the accountable person first.</p>
         )}
@@ -236,7 +238,7 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
         {hasPerson && complete && !state.emailVerified ? (
           <VerifyEmailPrompt />
         ) : hasPerson && complete ? (
-          state.canDeclare ? <Declare personName={state.accountablePerson!.name} onDone={onChanged} /> : (
+          state.canDeclare ? <Declare orgName={state.organisation} personName={state.accountablePerson!.name} onDone={onChanged} /> : (
             <p className="mt-3 text-sm text-gray-500">An organisation admin needs to make the declaration.</p>
           )
         ) : (
@@ -247,7 +249,7 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
   );
 }
 
-function AccountablePersonForm({ onDone }: { onDone: () => Promise<void> }) {
+function AccountablePersonForm({ orgName, onDone }: { orgName: string; onDone: () => Promise<void> }) {
   const [name, setName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [email, setEmail] = useState('');
@@ -284,8 +286,7 @@ function AccountablePersonForm({ onDone }: { onDone: () => Promise<void> }) {
       <div><label className={label}>Email</label><input type="email" className={input} value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
       <label className="flex items-start gap-3 text-sm text-gray-600">
         <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#0A1728]" checked={accepted} onChange={(e) => setAccepted(e.target.checked)} />
-        {/* Placeholder wording — AIC's own declaration text to be confirmed. */}
-        <span>This person has agreed to be named as accountable for our organisation&apos;s use of AI.</span>
+        <span>{ACCOUNTABLE_PERSON_DECLARATION.text(orgName)}</span>
       </label>
       {err && <p className="text-sm text-red-600">{err}</p>}
       <button disabled={busy || !accepted} className="rounded-full bg-aic-navy px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#13233b] disabled:opacity-40">
@@ -316,7 +317,7 @@ function VerifyEmailPrompt() {
   );
 }
 
-function Declare({ personName, onDone }: { personName: string; onDone: () => Promise<void> }) {
+function Declare({ orgName, personName, onDone }: { orgName: string; personName: string; onDone: () => Promise<void> }) {
   const [attested, setAttested] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -345,9 +346,8 @@ function Declare({ personName, onDone }: { personName: string; onDone: () => Pro
       <label className="flex items-start gap-3 text-sm text-gray-600">
         <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#0A1728]" checked={attested} onChange={(e) => setAttested(e.target.checked)} />
         <span>
-          These answers are a true account of how our organisation uses AI today, given on behalf of the organisation with{' '}
-          {personName} as the accountable person. I understand the badge is a self-declaration, valid for twelve months, and can be
-          revoked if it is found to be untrue.
+          {SUBMISSION_ATTESTATION.text(orgName, personName)}{' '}
+          <a href={BADGE_RULES_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Read the badge rules</a>.
         </span>
       </label>
       {err && <p className="text-sm text-red-600">{err}</p>}

@@ -3,7 +3,7 @@ import { auth } from '@aic/auth';
 import { getTenantDb, awareAssessments, and, eq, sql } from '@aic/db';
 import { canManageCompliance, canEditOrgProfile } from '@/lib/roles';
 import { fetchAwareInstrument, sanitisePartialAnswers, lastInstrumentSource } from '@/lib/aware/instrument';
-import { readAwareState, emailVerified } from '@/lib/aware/state';
+import { readAwareState, emailVerified, orgName } from '@/lib/aware/state';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +40,7 @@ export async function GET() {
     canAnswer: canManageCompliance(role),
     canDeclare: canEditOrgProfile(role),
     emailVerified: await emailVerified(session!.user.id as string),
+    organisation: (await orgName(orgId)) ?? 'your organisation',
   });
 }
 
