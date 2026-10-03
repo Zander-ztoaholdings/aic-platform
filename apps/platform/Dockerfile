@@ -33,6 +33,12 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3001
+# Next's standalone server listens on $HOSTNAME. Docker sets that to the
+# container's own ID, so the server answered only on the container's network
+# address and Coolify's health check (which calls localhost) was refused and
+# rolled every deploy back. 0.0.0.0 listens on all interfaces, including
+# localhost and the address other containers reach it on.
+ENV HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser  --system --uid 1001 nextjs
