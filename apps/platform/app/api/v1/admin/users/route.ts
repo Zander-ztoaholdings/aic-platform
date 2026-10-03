@@ -1,88 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@aic/auth';
 import { getSystemDb, sql, users, eq } from '@aic/db';
-import { hasCapability } from '@/lib/rbac';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
+import { adminActor, recordAdminAction, ROLES, isStaffRole } from '@/lib/admin';
 
 const CreateUserSchema = z.object({
-  name: z.string().min(2),
+  name: z.string().trim().min(2),
   email: z.string().email(),
-  password: z.string().min(8),
-  role: z.enum(['AIC_SUPER_ADMIN', 'AIC_AUDITOR', 'ORG_ADMIN', 'ORG_USER']),
+  password: z.string().min(12),
+  role: z.enum(ROLES),
   orgId: z.string().uuid().optional().nullable(),
 });
 
+/** Every account, with what an administrator needs to manage it. */
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const actor = await adminActor('manage_users');
+  if (!actor) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const authorized = await hasCapability(session.user.id, 'manage_users');
-  if (!authorized) return NextResponse.json({ error: 'Forbidden', message: 'Missing capability: manage_users' }, { status: 403 });
-
-  try {
-    const db = getSystemDb();
-    const allUsers = await db.execute(sql`
-      SELECT 
-        u.id, 
-        u.name, 
-        u.email, 
-        u.role, 
-        u.is_active as "isActive",
-        o.name as "orgName"
-      FROM users u
-      LEFT JOIN organizations o ON u.org_id = o.id
-      ORDER BY u.created_at DESC
-    `);
-    return NextResponse.json(allUsers.rows);
-  } catch (_error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
-  }
+  const rows = await getSystemDb().execute(sql`
+    SELECT u.id, u.name, u.email, u.role, u.org_id AS "orgId", o.name AS "orgName",
+           COALESCE(u.is_active, true) AS "isActive", COALESCE(u.is_super_admin, false) AS "isSuperAdmin",
+           COALESCE(u.email_verified, false) AS "emailVerified",
+           (COALESCE(u.mfa_enabled, false) OR COALESCE(u.two_factor_enabled, false)) AS "mfaEnabled",
+           u.lockout_until AS "lockoutUntil", u.last_login AS "lastLogin", u.created_at AS "createdAt"
+    FROM users u LEFT JOIN organizations o ON o.id = u.org_id
+    WHERE u.email NOT LIKE '%@removed.invalid'
+    ORDER BY u.created_at DESC
+  `);
+  return NextResponse.json({ users: rows.rows, me: actor.id, canGrantSuperAdmin: actor.isSuperAdmin });
 }
 
+/** Create an account directly (staff accounts, mostly; clients normally register or are invited). */
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const actor = await adminActor('manage_users');
+  if (!actor) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const authorized = await hasCapability(session.user.id, 'manage_users');
-  if (!authorized) return NextResponse.json({ error: 'Forbidden', message: 'Missing capability: manage_users' }, { status: 403 });
+  const parsed = CreateUserSchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Check the form.' }, { status: 400 });
+  const { name, email, password, role, orgId } = parsed.data;
 
-  try {
-    const body = await req.json();
-    const validation = CreateUserSchema.safeParse(body);
-    
-    if (!validation.success) {
-      return NextResponse.json({ error: 'Validation failed', details: validation.error.format() }, { status: 400 });
-    }
-
-    const { name, email, password, role, orgId } = validation.data;
-    const db = getSystemDb();
-
-    // Institutional integrity check: email uniqueness
-    const [existing] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
-    if (existing) {
-        return NextResponse.json({ error: 'Identity conflict', message: 'Email already registered' }, { status: 409 });
-    }
-
-    const hash = await bcrypt.hash(password, 12);
-
-    // Keep the boolean that actually gates AIC-staff security actions
-    // (lib/rbac.ts, and every hasCapability/isSuperAdmin check) in sync with
-    // the label this form assigns - see lib/roles.ts's file header for why
-    // `role` alone must never become that gate.
-    const [newUser] = await db.insert(users).values({
-      name,
-      email: email.toLowerCase(),
-      passwordHash: hash,
-      role,
-      orgId: orgId || null,
-      isActive: true,
-      isSuperAdmin: role === 'AIC_SUPER_ADMIN',
-    }).returning({ id: users.id });
-
-    return NextResponse.json({ success: true, userId: newUser.id }, { status: 201 });
-  } catch (error) {
-    console.error('[ADMIN_USER_CREATE_ERROR]', error);
-    return NextResponse.json({ error: 'Internal system failure during user creation' }, { status: 500 });
+  if (role === 'AIC_SUPER_ADMIN' && !actor.isSuperAdmin) {
+    return NextResponse.json({ error: 'Only a super admin can create another super admin.' }, { status: 403 });
   }
+  if (!isStaffRole(role) && !orgId) {
+    return NextResponse.json({ error: 'A client account needs an organisation.' }, { status: 400 });
+  }
+
+  const db = getSystemDb();
+  const [existing] = await db.select({ id: users.id }).from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+  if (existing) return NextResponse.json({ error: 'That email already has an account.' }, { status: 409 });
+
+  const [created] = await db.insert(users).values({
+    name,
+    email: email.toLowerCase(),
+    passwordHash: await bcrypt.hash(password, 12),
+    role,
+    orgId: isStaffRole(role) ? null : orgId,
+    isActive: true,
+    isSuperAdmin: role === 'AIC_SUPER_ADMIN',
+  }).returning({ id: users.id });
+
+  await recordAdminAction({ actorId: actor.id, orgId: isStaffRole(role) ? null : orgId ?? null, targetType: 'ADMIN_USER', targetId: created.id, previous: null, next: { created: true, role, email: email.toLowerCase() }, reason: 'Account created by an administrator' });
+  return NextResponse.json({ id: created.id }, { status: 201 });
 }

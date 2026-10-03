@@ -363,6 +363,34 @@ export const authConfig: NextAuthConfig = {
         console.warn("[AUTH] Revocation check skipped:", revocationError);
       }
 
+      // Keep the token in step with the account. Role, organisation and
+      // super-admin status used to be fixed at sign-in for the life of the
+      // session, so promoting, demoting, moving or deactivating someone in the
+      // admin console did nothing until they signed out. Re-read at most once
+      // a minute; a removed or deactivated account loses its session here.
+      if (!user && token.id) {
+        const now = Date.now()
+        const synced = (token.syncedAt as number | undefined) ?? 0
+        if (now - synced > 60_000) {
+          try {
+            const [current] = await getSystemDb()
+              .select({ role: users.role, orgId: users.orgId, isSuperAdmin: users.isSuperAdmin, isActive: users.isActive })
+              .from(users)
+              .where(eq(users.id, token.id))
+              .limit(1)
+            if (!current || current.isActive === false) return null
+            if (current.orgId !== token.orgId) token.orgName = undefined as unknown as string
+            token.role = current.role as UserRole
+            token.orgId = current.orgId as string
+            token.isSuperAdmin = !!current.isSuperAdmin
+            token.syncedAt = now
+          } catch {
+            // Database unreachable: keep the session as it was rather than
+            // signing everyone out.
+          }
+        }
+      }
+
       if (token.orgId && !token.orgName) {
         const db = getSystemDb();
         try {
@@ -448,6 +476,7 @@ declare module "next-auth/jwt" {
     isSuperAdmin: boolean;
     permissions: Permissions;
     jti?: string;
+    syncedAt?: number;
   }
 }
 

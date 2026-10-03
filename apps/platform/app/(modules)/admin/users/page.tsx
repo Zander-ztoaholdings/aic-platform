@@ -1,310 +1,221 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import AdminShell from '@/app/components/admin/AdminShell';
-import { toast } from 'sonner';
-import { Badge } from "@/app/components/ui/badge";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
-import { Drawer } from "@/app/components/ui/drawer";
-import { cn } from "@/lib/utils";
-import { 
-  UserPlus, 
-  Search, 
-  Shield, 
-  MoreVertical, 
-  Loader2,
-  Mail,
-  Building,
-  UserCheck,
-  Calendar,
-  Lock,
-  History
-} from "lucide-react";
+import { Button, Panel, Pill, Section, field, ROLE_LABEL, ago } from '@/app/components/admin/ui';
 
-export default function UserManagementPage() {
-    const [users, setUsers] = useState<any[]>([]);
-    const [organizations, setOrganizations] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [drawerMode, setDrawerMode] = useState<'create' | 'view' | null>(null);
-    const [selectedUser, setSelectedUser] = useState<any>(null);
-    const [newUser, setNewUser] = useState({
-        name: '',
-        email: '',
-        password: '',
-        role: 'ORG_USER',
-        org_id: ''
-    });
+interface Person {
+  id: string; name: string; email: string; role: string; orgId: string | null; orgName: string | null;
+  isActive: boolean; isSuperAdmin: boolean; emailVerified: boolean; mfaEnabled: boolean;
+  lockoutUntil: string | null; lastLogin: string | null; createdAt: string;
+}
+interface Org { id: string; name: string }
 
-    const fetchUsers = async () => {
-        try {
-            const res = await fetch('/api/v1/admin/users');
-            const data = await res.json();
-            setUsers(data || []);
-        } catch {
-            toast.error('Failed to sync institutional users.');
-        } finally {
-            setLoading(false);
-        }
-    };
+const ROLES = ['ORG_USER', 'ORG_ADMIN', 'AIC_AUDITOR', 'AIC_SUPER_ADMIN'];
+const isStaff = (r: string) => r === 'AIC_SUPER_ADMIN' || r === 'AIC_AUDITOR';
+const locked = (p: Person) => !!p.lockoutUntil && new Date(p.lockoutUntil) > new Date();
 
-    const fetchOrgs = async () => {
-        try {
-            const res = await fetch('/api/v1/admin/organizations');
-            const data = await res.json();
-            setOrganizations(data || []);
-        } catch (err) {
-            console.error(err);
-        }
-    };
+function PeoplePage() {
+  const qs = useSearchParams();
+  const [people, setPeople] = useState<Person[] | null>(null);
+  const [orgs, setOrgs] = useState<Org[]>([]);
+  const [me, setMe] = useState('');
+  const [canGrant, setCanGrant] = useState(false);
+  const [error, setError] = useState('');
+  const [q, setQ] = useState('');
+  const [roleF, setRoleF] = useState('');
+  const [orgF, setOrgF] = useState(qs.get('org') ?? '');
+  const [statusF, setStatusF] = useState('');
+  const [open, setOpen] = useState<Person | null>(null);
+  const [creating, setCreating] = useState(false);
 
-    useEffect(() => {
-        fetchUsers();
-        fetchOrgs();
-    }, []);
+  const load = useCallback(async () => {
+    const [u, o] = await Promise.all([fetch('/api/v1/admin/users', { cache: 'no-store' }), fetch('/api/v1/admin/organizations', { cache: 'no-store' })]);
+    const ud = await u.json().catch(() => ({}));
+    if (!u.ok) { setError(ud.error || 'You do not have access to manage people.'); setPeople([]); return; }
+    setPeople(ud.users); setMe(ud.me); setCanGrant(!!ud.canGrantSuperAdmin);
+    const od = await o.json().catch(() => []);
+    if (Array.isArray(od)) setOrgs(od.map((x: Org) => ({ id: x.id, name: x.name })));
+  }, []);
+  useEffect(() => { load(); }, [load]);
 
-    const handleCreateUser = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const res = await fetch('/api/v1/admin/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser)
-            });
-            if (res.ok) {
-                toast.success('User registered in registry.');
-                setDrawerMode(null);
-                setNewUser({ name: '', email: '', password: '', role: 'ORG_USER', org_id: '' });
-                fetchUsers();
-            } else {
-                const err = await res.json();
-                toast.error(err.error || 'Registration failed.');
-            }
-        } catch {
-            toast.error('Network error during registration.');
-        }
-    };
+  const shown = useMemo(() => (people ?? []).filter((p) => {
+    const s = q.trim().toLowerCase();
+    if (s && !`${p.name} ${p.email} ${p.orgName ?? ''}`.toLowerCase().includes(s)) return false;
+    if (roleF && (roleF === 'AIC_SUPER_ADMIN' ? !p.isSuperAdmin : p.role !== roleF || p.isSuperAdmin)) return false;
+    if (orgF && p.orgId !== orgF) return false;
+    if (statusF === 'active' && !p.isActive) return false;
+    if (statusF === 'inactive' && p.isActive) return false;
+    if (statusF === 'locked' && !locked(p)) return false;
+    return true;
+  }), [people, q, roleF, orgF, statusF]);
 
-    return (
-        <AdminShell>
-            <div className="space-y-8">
-                <div className="flex justify-between items-end">
-                    <div>
-                        <h1 className="text-2xl font-black text-gray-900 tracking-tight">Institutional Registry</h1>
-                        <p className="text-sm text-gray-500 mt-1">
-                            Global user management and identity provisioning.
-                        </p>
-                    </div>
-                    <Button 
-                        onClick={() => setDrawerMode('create')}
-                        className="bg-[#0A1728] text-aic-paper hover:bg-[#1a3160]"
-                    >
-                        <UserPlus className="w-4 h-4 mr-2" /> Register New Identity
-                    </Button>
-                </div>
+  return (
+    <AdminShell>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-white">People</h1>
+          <p className="mt-1 text-sm text-white/55">Every account on the platform. Change roles, move people between organisations, and control access.</p>
+        </div>
+        <Button variant="primary" onClick={() => setCreating(true)}>Add an account</Button>
+      </div>
 
-                <div className="bg-aic-paper border border-gray-200 rounded-2xl shadow-sm overflow-hidden min-h-[600px]">
-                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-4">
-                        <div className="relative flex-1 max-w-md">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <Input placeholder="Search registry by name or email..." className="pl-10 bg-aic-paper border-gray-200 shadow-none h-9 text-xs" />
-                        </div>
-                    </div>
+      <div className="mt-6 grid gap-2 sm:grid-cols-4">
+        <input className={field} placeholder="Search name, email or organisation" value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className={field} value={roleF} onChange={(e) => setRoleF(e.target.value)}>
+          <option value="">All roles</option>
+          {ROLES.map((r) => <option key={r} value={r} className="text-black">{ROLE_LABEL[r]}</option>)}
+        </select>
+        <select className={field} value={orgF} onChange={(e) => setOrgF(e.target.value)}>
+          <option value="">All organisations</option>
+          {orgs.map((o) => <option key={o.id} value={o.id} className="text-black">{o.name}</option>)}
+        </select>
+        <select className={field} value={statusF} onChange={(e) => setStatusF(e.target.value)}>
+          <option value="">Any status</option>
+          <option value="active" className="text-black">Active</option>
+          <option value="inactive" className="text-black">Deactivated</option>
+          <option value="locked" className="text-black">Locked out</option>
+        </select>
+      </div>
 
-                    <table className="w-full text-left">
-                        <thead className="bg-aic-paper border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                            <tr>
-                                <th className="px-6 py-4">Identity</th>
-                                <th className="px-6 py-4">Institutional Scope</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Access Level</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50">
-                            {loading ? (
-                                <tr><td colSpan={5} className="py-20 text-center"><Loader2 className="w-8 h-8 animate-spin text-[#c36c32] mx-auto mb-2" /><p className="text-xs text-gray-400">Synchronizing with registry...</p></td></tr>
-                            ) : users.map((user) => (
-                                <tr 
-                                    key={user.id} 
-                                    onClick={() => { setSelectedUser(user); setDrawerMode('view'); }}
-                                    className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
-                                >
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">
-                                                {user.name[0]}
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-bold text-gray-900">{user.name}</p>
-                                                <p className="text-[10px] text-gray-400 font-medium flex items-center gap-1"><Mail className="w-3 h-3" /> {user.email}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
-                                            <Building className="w-3.5 h-3.5 text-gray-400" />
-                                            {user.orgName || 'AIC GLOBAL'}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <Badge variant="outline" className={user.isActive ? "bg-green-50 text-green-700 border-green-100 shadow-none" : "bg-red-50 text-red-700 border-red-100 shadow-none"}>
-                                            {user.isActive ? 'ACTIVE' : 'SUSPENDED'}
-                                        </Badge>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
-                                            <Shield className="w-3.5 h-3.5 text-[#c36c32]" />
-                                            {user.role}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <MoreVertical className="w-4 h-4" />
-                                        </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+      {error && <p className="mt-4 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+
+      <div className="mt-4 overflow-x-auto rounded-xl border border-white/[0.08]">
+        <table className="w-full min-w-[760px] text-left text-sm">
+          <thead className="bg-white/[0.03] text-xs text-white/45">
+            <tr><th className="px-4 py-3 font-medium">Person</th><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Last sign-in</th><th /></tr>
+          </thead>
+          <tbody>
+            {people === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>}
+            {people && shown.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-white/40">No one matches these filters.</td></tr>}
+            {shown.map((p) => (
+              <tr key={p.id} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
+                <td className="px-4 py-3"><div className="font-medium text-white">{p.name}{p.id === me && <span className="ml-2 text-xs text-white/40">you</span>}</div><div className="text-xs text-white/45">{p.email}</div></td>
+                <td className="px-4 py-3 text-white/70">{p.orgName ?? <span className="text-white/35">AIC</span>}</td>
+                <td className="px-4 py-3"><Pill tone={p.isSuperAdmin ? 'gold' : 'neutral'}>{p.isSuperAdmin ? 'Super admin' : ROLE_LABEL[p.role] ?? p.role}</Pill></td>
+                <td className="px-4 py-3 space-x-1">
+                  {!p.isActive ? <Pill tone="bad">Deactivated</Pill> : locked(p) ? <Pill tone="warn">Locked out</Pill> : <Pill tone="good">Active</Pill>}
+                  {!p.emailVerified && <Pill>Email unconfirmed</Pill>}
+                </td>
+                <td className="px-4 py-3 text-white/55">{ago(p.lastLogin)}</td>
+                <td className="px-4 py-3 text-right"><Button variant="ghost" onClick={() => setOpen(p)}>Manage</Button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {open && <ManagePerson person={open} orgs={orgs} isMe={open.id === me} canGrant={canGrant} onClose={() => setOpen(null)} onDone={async () => { setOpen(null); await load(); }} />}
+      {creating && <CreatePerson orgs={orgs} canGrant={canGrant} onClose={() => setCreating(false)} onDone={async () => { setCreating(false); await load(); }} />}
+    </AdminShell>
+  );
+}
+
+function ManagePerson({ person, orgs, isMe, canGrant, onClose, onDone }: { person: Person; orgs: Org[]; isMe: boolean; canGrant: boolean; onClose: () => void; onDone: () => Promise<void> }) {
+  const [role, setRole] = useState(person.isSuperAdmin ? 'AIC_SUPER_ADMIN' : person.role);
+  const [orgId, setOrgId] = useState(person.orgId ?? '');
+  const [reason, setReason] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  async function act(body: object, method: 'PATCH' | 'DELETE' = 'PATCH') {
+    if (reason.trim().length < 3) { setMsg('Write a short reason first; it goes on the record.'); return; }
+    setBusy(true); setMsg('');
+    const res = await fetch(`/api/v1/admin/users/${person.id}`, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, reason }) });
+    const d = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) { setMsg(d.error || 'That did not work.'); return; }
+    await onDone();
+  }
+
+  const roleOptions = ROLES.filter((r) => r !== 'AIC_SUPER_ADMIN' || canGrant);
+
+  return (
+    <Panel title={person.name} onClose={onClose}>
+      <p className="-mt-4 mb-5 text-sm text-white/50">{person.email}</p>
+      {isMe ? (
+        <p className="text-sm text-white/60">This is your own account. Another super admin has to change your role or access, so nobody can lock themselves out by accident.</p>
+      ) : (
+        <>
+          <Section title="Reason for the change" hint="Recorded with every change below, with your name and the time.">
+            <input className={field} value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Took over as compliance lead" />
+          </Section>
+
+          <Section title="Role" hint="Takes effect within a minute, even if they are signed in.">
+            <select className={field} value={role} onChange={(e) => setRole(e.target.value)}>
+              {roleOptions.map((r) => <option key={r} value={r} className="text-black">{ROLE_LABEL[r]}</option>)}
+            </select>
+            <Button disabled={busy || role === (person.isSuperAdmin ? 'AIC_SUPER_ADMIN' : person.role)} onClick={() => act({ action: 'set_role', role })}>Change role</Button>
+            {isStaff(role) && !isStaff(person.role) && <p className="text-xs text-amber-300/80">Staff roles leave their client organisation.</p>}
+          </Section>
+
+          {!isStaff(person.role) && (
+            <Section title="Organisation">
+              <select className={field} value={orgId} onChange={(e) => setOrgId(e.target.value)}>
+                {orgs.map((o) => <option key={o.id} value={o.id} className="text-black">{o.name}</option>)}
+              </select>
+              <Button disabled={busy || orgId === (person.orgId ?? '')} onClick={() => act({ action: 'move_org', orgId })}>Move to this organisation</Button>
+            </Section>
+          )}
+
+          <Section title="Access">
+            <div className="flex flex-wrap gap-2">
+              {person.isActive
+                ? <Button disabled={busy} onClick={() => act({ action: 'deactivate' })}>Deactivate</Button>
+                : <Button disabled={busy} onClick={() => act({ action: 'reactivate' })}>Reactivate</Button>}
+              {locked(person) && <Button disabled={busy} onClick={() => act({ action: 'unlock' })}>Unlock sign-in</Button>}
             </div>
+            <p className="text-xs text-white/45">Deactivating signs them out within a minute and keeps everything they recorded.</p>
+          </Section>
 
-            {/* Create User Drawer */}
-            <Drawer 
-                isOpen={drawerMode === 'create'} 
-                onClose={() => setDrawerMode(null)}
-                title="Register New Identity"
-            >
-                <form onSubmit={handleCreateUser} className="space-y-6">
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Full Name</label>
-                            <Input 
-                                placeholder="e.g. Dr. Helena Thorne"
-                                className="bg-gray-50 border-gray-100"
-                                value={newUser.name}
-                                onChange={e => setNewUser(prev => ({ ...prev, name: e.target.value }))}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Compliance Email</label>
-                            <Input 
-                                type="email"
-                                placeholder="h.thorne@mfg.com"
-                                className="bg-gray-50 border-gray-100"
-                                value={newUser.email}
-                                onChange={e => setNewUser(prev => ({ ...prev, email: e.target.value }))}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Initial Password</label>
-                            <Input 
-                                type="password"
-                                className="bg-gray-50 border-gray-100"
-                                value={newUser.password}
-                                onChange={e => setNewUser(prev => ({ ...prev, password: e.target.value }))}
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Access Level (Fallback Role)</label>
-                            <select 
-                                className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-[#c36c32]/20 outline-none"
-                                value={newUser.role}
-                                onChange={e => setNewUser(prev => ({ ...prev, role: e.target.value }))}
-                            >
-                                <option value="ORG_USER">ORG USER (org member)</option>
-                                <option value="ORG_ADMIN">ORG ADMIN (org member)</option>
-                                <option value="AIC_AUDITOR">AIC AUDITOR (AIC staff)</option>
-                                <option value="AIC_SUPER_ADMIN">AIC SUPER ADMIN (AIC staff)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Organization Scope</label>
-                            <select 
-                                className="w-full bg-gray-50 border border-gray-100 rounded-lg p-2 text-sm focus:ring-2 focus:ring-[#c36c32]/20 outline-none"
-                                value={newUser.org_id}
-                                onChange={e => setNewUser(prev => ({ ...prev, org_id: e.target.value }))}
-                            >
-                                <option value="">Global (No Organization)</option>
-                                {organizations.map(o => (
-                                    <option key={o.id} value={o.id}>{o.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                    <div className="pt-6 border-t border-gray-100 space-y-3">
-                        <Button type="submit" className="w-full bg-[#0A1728] text-aic-paper">Provision Identity</Button>
-                        <Button variant="ghost" type="button" onClick={() => setDrawerMode(null)} className="w-full text-gray-400">Cancel</Button>
-                    </div>
-                </form>
-            </Drawer>
+          <Section title="Remove account" hint="Erases their name, email and credentials for good. Their past records stay, attributed to a removed account. Cannot be undone.">
+            <input className={field} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={`Type ${person.email} to confirm`} />
+            <Button variant="danger" disabled={busy || confirm.trim().toLowerCase() !== person.email.toLowerCase()} onClick={() => act({ confirmEmail: confirm }, 'DELETE')}>Remove account</Button>
+          </Section>
+        </>
+      )}
+      {msg && <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</p>}
+    </Panel>
+  );
+}
 
-            {/* View User Detail Drawer */}
-            <Drawer
-                isOpen={drawerMode === 'view' && selectedUser}
-                onClose={() => setDrawerMode(null)}
-                title="Identity Insight"
-            >
-                {selectedUser && (
-                    <div className="space-y-8">
-                        <div className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-                            <div className="w-20 h-20 rounded-full bg-aic-paper shadow-sm flex items-center justify-center text-3xl font-black text-[#0A1728] mb-4">
-                                {selectedUser.name[0]}
-                            </div>
-                            <h4 className="text-xl font-bold text-gray-900 leading-none">{selectedUser.name}</h4>
-                            <p className="text-xs text-gray-400 mt-2 font-mono uppercase tracking-tighter">{selectedUser.id}</p>
-                        </div>
+function CreatePerson({ orgs, canGrant, onClose, onDone }: { orgs: Org[]; canGrant: boolean; onClose: () => void; onDone: () => Promise<void> }) {
+  const [f, setF] = useState({ name: '', email: '', password: '', role: 'AIC_AUDITOR', orgId: orgs[0]?.id ?? '' });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  async function submit(e: React.FormEvent) {
+    e.preventDefault(); setBusy(true); setMsg('');
+    const res = await fetch('/api/v1/admin/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...f, orgId: isStaff(f.role) ? null : f.orgId }) });
+    const d = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) { setMsg(d.error || 'Could not create the account.'); return; }
+    await onDone();
+  }
+  return (
+    <Panel title="Add an account" onClose={onClose}>
+      <p className="-mt-3 mb-5 text-sm text-white/50">For AIC staff, mostly. Clients usually register themselves, or their admin invites them.</p>
+      <form onSubmit={submit} className="space-y-3">
+        <input className={field} placeholder="Full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required />
+        <input className={field} type="email" placeholder="Email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required />
+        <input className={field} type="password" placeholder="Temporary password, 12+ characters" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} required minLength={12} />
+        <select className={field} value={f.role} onChange={(e) => setF({ ...f, role: e.target.value })}>
+          {ROLES.filter((r) => r !== 'AIC_SUPER_ADMIN' || canGrant).map((r) => <option key={r} value={r} className="text-black">{ROLE_LABEL[r]}</option>)}
+        </select>
+        {!isStaff(f.role) && (
+          <select className={field} value={f.orgId} onChange={(e) => setF({ ...f, orgId: e.target.value })}>
+            {orgs.map((o) => <option key={o.id} value={o.id} className="text-black">{o.name}</option>)}
+          </select>
+        )}
+        {msg && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</p>}
+        <Button variant="primary" disabled={busy} type="submit" className="w-full">{busy ? 'Creating…' : 'Create account'}</Button>
+      </form>
+    </Panel>
+  );
+}
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="p-4 bg-aic-paper border border-gray-100 rounded-xl">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                                <div className="flex items-center gap-2">
-                                    <div className={cn("w-2 h-2 rounded-full", selectedUser.isActive ? "bg-green-500" : "bg-red-500")} />
-                                    <span className="text-sm font-bold text-gray-700">{selectedUser.isActive ? 'Active' : 'Suspended'}</span>
-                                </div>
-                            </div>
-                            <div className="p-4 bg-aic-paper border border-gray-100 rounded-xl">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Access Level</p>
-                                <div className="flex items-center gap-2">
-                                    <Shield className="w-3.5 h-3.5 text-[#c36c32]" />
-                                    <span className="text-sm font-bold text-gray-700">{selectedUser.role}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h5 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100 pb-2">Institutional Activity</h5>
-                            <div className="flex items-start gap-3">
-                                <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-700 font-medium">Last Login</p>
-                                    <p className="text-xs text-gray-400">Feb 25, 2026 • 14:22 UTC</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <UserCheck className="w-4 h-4 text-gray-400 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-700 font-medium">MFA Status</p>
-                                    <p className="text-xs text-green-600 font-bold">Enabled (TOTP)</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="pt-8 border-t border-gray-100 grid grid-cols-2 gap-3">
-                            <Button variant="outline" className="text-red-600 border-red-100 hover:bg-red-50">
-                                <Lock className="w-4 h-4 mr-2" /> Suspend
-                            </Button>
-                            <Button variant="outline">
-                                <History className="w-4 h-4 mr-2" /> Audit Trail
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </Drawer>
-        </AdminShell>
-    );
+export default function Page() {
+  return <Suspense fallback={null}><PeoplePage /></Suspense>;
 }

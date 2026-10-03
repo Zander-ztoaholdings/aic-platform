@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
-import { getSystemDb, organizations, eq } from '@aic/db';
+import { getSystemDb, organizations, eq, sql } from '@aic/db';
 import { hasCapability } from '@/lib/rbac';
 
 /**
@@ -28,7 +28,11 @@ export async function GET() {
     const db = getSystemDb();
 
     const rows = session.user.isSuperAdmin
-      ? await db.select().from(organizations).orderBy(organizations.name)
+      ? (await db.execute(sql`
+          SELECT o.*, o.created_at AS "createdAt",
+                 (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid') AS "memberCount",
+                 (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND COALESCE(u.is_active, true) AND u.email NOT LIKE '%@removed.invalid') AS "activeMembers"
+          FROM organizations o ORDER BY o.name`)).rows
       : await db
           .select()
           .from(organizations)
