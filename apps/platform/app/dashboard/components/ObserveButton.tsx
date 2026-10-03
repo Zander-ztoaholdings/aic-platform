@@ -41,16 +41,16 @@ export function ObserveButton({ firstRun }: { firstRun: boolean }) {
   };
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className="flex flex-col items-stretch sm:items-end gap-2">
       <button
         onClick={observe}
         disabled={busy || pending}
-        className="px-5 h-10 rounded-full bg-aic-navy text-white font-mono text-[10px] font-bold uppercase tracking-[0.15em] disabled:opacity-50 hover:bg-aic-gold transition-colors"
+        className="px-5 h-12 sm:h-10 rounded-full bg-aic-navy text-white text-[14px] font-semibold disabled:opacity-50 hover:bg-[#a8772a] transition-colors"
       >
         {busy || pending ? 'Observing…' : firstRun ? 'Begin the record' : 'Take an observation'}
       </button>
-      {result && <p className="text-xs text-gray-500 max-w-xs text-right">{result}</p>}
-      {error && <p className="text-xs text-red-600 max-w-xs text-right">{error}</p>}
+      {result && <p className="text-xs text-gray-500 sm:max-w-xs sm:text-right">{result}</p>}
+      {error && <p className="text-xs text-red-600 sm:max-w-xs sm:text-right">{error}</p>}
     </div>
   );
 }

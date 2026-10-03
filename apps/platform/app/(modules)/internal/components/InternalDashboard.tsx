@@ -91,7 +91,7 @@ export default function InternalDashboard() {
             >
               <SectionCard className="p-4">
                 <div className="flex justify-between items-start mb-3">
-                  <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#6b7280]">
+                  <span className="text-[12px] font-bold first-cap text-[#6b7280]">
                     {s.label}
                   </span>
                   <s.Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: s.color }} />
@@ -114,12 +114,12 @@ export default function InternalDashboard() {
             {/* Evidence by Algorithmic Right */}
             <SectionCard>
               <div className="flex justify-between items-center mb-4">
-                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+                <span className="text-[12px] font-bold first-cap text-[#6b7280]">
                   Evidence by Algorithmic Right
                 </span>
                 <a
                   href="/evidence"
-                  className="font-mono text-[9px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
+                  className="font-mono text-[11px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
                 >
                   View All <ArrowRight className="w-3 h-3" />
                 </a>
@@ -132,7 +132,7 @@ export default function InternalDashboard() {
                       <CopperTag>{r.tag}</CopperTag>
                       <span className="flex-1 text-xs font-semibold text-[#0f1f3d]">{r.label}</span>
                       {r.flagged > 0 && (
-                        <span className="font-mono text-[8px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                        <span className="font-mono text-[11px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
                           {r.flagged} FLAGGED
                         </span>
                       )}
@@ -157,12 +157,12 @@ export default function InternalDashboard() {
             {/* Recent Correspondence */}
             <SectionCard>
               <div className="flex justify-between items-center mb-4">
-                <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+                <span className="text-[12px] font-bold first-cap text-[#6b7280]">
                   Recent Correspondence
                 </span>
                 <a
                   href="/correspondence"
-                  className="font-mono text-[9px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
+                  className="font-mono text-[11px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
                 >
                   View All <ArrowRight className="w-3 h-3" />
                 </a>
@@ -170,7 +170,7 @@ export default function InternalDashboard() {
               <div className="divide-y divide-[#f3f4f6]">
                 {MSGS.map((m) => (
                   <div key={m.id} className="flex gap-3 py-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#f0f4f8] flex items-center justify-center font-mono text-[9px] font-bold text-[#c9920a] flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#f0f4f8] flex items-center justify-center font-mono text-[11px] font-bold text-[#c9920a] flex-shrink-0">
                       AIC
                     </div>
                     <div className="flex-1 min-w-0">
@@ -178,11 +178,11 @@ export default function InternalDashboard() {
                         <span className="text-xs font-semibold text-[#0f1f3d]">{m.author}</span>
                         <div className="flex items-center gap-2">
                           {m.unread && (
-                            <span className="font-mono text-[8px] font-bold text-[#c9920a] bg-amber-50 px-1.5 py-0.5 rounded">
+                            <span className="font-mono text-[11px] font-bold text-[#c9920a] bg-amber-50 px-1.5 py-0.5 rounded">
                               UNREAD
                             </span>
                           )}
-                          <span className="font-mono text-[8px] text-[#9ca3af]">{m.time}</span>
+                          <span className="font-mono text-[11px] text-[#9ca3af]">{m.time}</span>
                         </div>
                       </div>
                       <p className="text-xs text-[#6b7280] leading-relaxed line-clamp-2">{m.text}</p>
@@ -200,7 +200,7 @@ export default function InternalDashboard() {
                   {data.activeOrgs.map((org, i) => (
                     <div key={i}>
                       <div className="flex justify-between text-xs font-mono mb-1.5">
-                        <span className="font-bold text-[#0f1f3d] uppercase tracking-wide">{org.name}</span>
+                        <span className="font-bold text-[#0f1f3d] first-cap">{org.name}</span>
                         <span className="text-[#6b7280]">{org.tier} — {org.integrity_score}%</span>
                       </div>
                       <div className="h-1 w-full bg-[#f0f4f8] rounded-full overflow-hidden">
@@ -222,7 +222,7 @@ export default function InternalDashboard() {
           {/* Right rail */}
           <div className="space-y-4">
             {/* Score ring card */}
-            <SectionCard className="text-center p-6">
+            <SectionCard className="text-center p-4 sm:p-6">
               <div className="flex justify-center mb-4">
                 <ScoreRing value={overall} size={100} thickness={6} />
               </div>
@@ -232,7 +232,7 @@ export default function InternalDashboard() {
               </p>
               <button
                 onClick={() => setUploadLabel('All Outstanding Evidence')}
-                className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors shadow-lg shadow-amber-500/20"
+                className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors shadow-lg shadow-amber-500/20"
               >
                 Submit Evidence <ArrowRight className="w-3 h-3" />
               </button>
@@ -240,7 +240,7 @@ export default function InternalDashboard() {
 
             {/* Upcoming actions */}
             <SectionCard className="p-4">
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                 Upcoming Actions
               </div>
               <div className="divide-y divide-[#f3f4f6]">
@@ -252,7 +252,7 @@ export default function InternalDashboard() {
                       {a.label}
                     </span>
                     <span
-                      className={`font-mono text-[9px] font-bold ${
+                      className={`font-mono text-[11px] font-bold ${
                         a.urgent ? 'text-red-600' : 'text-[#9ca3af]'
                       }`}
                     >
@@ -266,7 +266,7 @@ export default function InternalDashboard() {
             {/* Live API stats */}
             {data?.stats && (
               <SectionCard className="p-4">
-                <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+                <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                   Registry
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -277,7 +277,7 @@ export default function InternalDashboard() {
                     { l: 'Audits Ran',    v: data.stats.auditsTotal },
                   ].map((s) => (
                     <div key={s.l}>
-                      <div className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-wide mb-0.5">{s.l}</div>
+                      <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">{s.l}</div>
                       <div className="font-mono text-lg font-bold text-[#0f1f3d]">{s.v}</div>
                     </div>
                   ))}

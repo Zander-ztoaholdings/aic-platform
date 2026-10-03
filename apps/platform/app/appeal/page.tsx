@@ -37,10 +37,10 @@ export default function AppealPortal() {
     };
 
     return (
-        <div className="min-h-screen bg-aic-paper flex flex-col items-center justify-center p-6">
-            <div className="max-w-2xl w-full bg-aic-paper border border-aic-black/5 rounded-[3rem] p-12 shadow-2xl">
+        <div className="min-h-screen bg-aic-paper flex flex-col items-center justify-center p-4 sm:p-6">
+            <div className="max-w-2xl w-full bg-aic-paper border border-aic-black/5 rounded-[3rem] p-6 md:p-12 shadow-2xl">
                 <div className="mb-12 text-center">
-                    <span className="text-4xl block mb-6">⚖️</span>
+                    <span className="text-3xl md:text-4xl block mb-6">⚖️</span>
                     <h1 className="text-3xl font-serif font-bold text-aic-black">Citizen Appeal Portal</h1>
                     <p className="text-gray-500 font-serif mt-4 italic">Exercise your Right to Representation under POPIA Section 71.</p>
                 </div>
@@ -53,10 +53,10 @@ export default function AppealPortal() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <h3 className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.4em] mb-8 text-center">Identify the Decision</h3>
+                            <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-8 text-center">Identify the Decision</h3>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Organization Name</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">Organization Name</label>
                                     <input 
                                         type="text" 
                                         className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
@@ -65,7 +65,7 @@ export default function AppealPortal() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">System/Model Name (Optional)</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">System/Model Name (Optional)</label>
                                     <input 
                                         type="text" 
                                         className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
@@ -75,7 +75,7 @@ export default function AppealPortal() {
                                 </div>
                                 <button 
                                     onClick={() => setStep(2)}
-                                    className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold hover:text-black transition-all"
+                                    className="w-full bg-aic-black text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all"
                                 >
                                     PROCEED TO APPEAL
                                 </button>
@@ -90,10 +90,10 @@ export default function AppealPortal() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                         >
-                            <h3 className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.4em] mb-8 text-center">Lodge Your Representation</h3>
+                            <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-8 text-center">Lodge Your Representation</h3>
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Your Email Address</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">Your Email Address</label>
                                     <input 
                                         type="email" required
                                         className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
@@ -101,7 +101,7 @@ export default function AppealPortal() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Reason for Appeal</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">Reason for Appeal</label>
                                     <textarea 
                                         required rows={4}
                                         className="w-full bg-aic-paper border border-aic-black/10 rounded-xl p-4 font-serif focus:border-aic-gold outline-none transition-all"
@@ -113,14 +113,14 @@ export default function AppealPortal() {
                                     <button 
                                         type="button"
                                         onClick={() => setStep(1)}
-                                        className="flex-1 border border-aic-black/10 py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-paper transition-all"
+                                        className="flex-1 border border-aic-black/10 py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-paper transition-all"
                                     >
                                         BACK
                                     </button>
                                     <button 
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-[2] bg-aic-black text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold hover:text-black transition-all"
+                                        className="flex-[2] bg-aic-black text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all"
                                     >
                                         {loading ? 'SUBMITTING...' : 'SUBMIT APPEAL'}
                                     </button>
@@ -143,14 +143,14 @@ export default function AppealPortal() {
                             <p className="text-gray-500 font-serif italic mb-8">
                                 Your representation has been securely hashed and recorded in the organization's accountability queue. A human officer is required to review this within 72 hours.
                             </p>
-                            <p className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">Tracking Reference</p>
+                            <p className="text-[12px] font-bold text-gray-400 first-cap">Tracking Reference</p>
                             <p className="font-mono text-xs text-aic-gold select-all">{trackingRef || 'AIC-INC-\u2026'}</p>
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
             
-            <p className="mt-12 text-[10px] font-mono font-bold text-gray-400 uppercase tracking-[0.2em]">
+            <p className="mt-12 text-[12px] font-bold text-gray-400 first-cap">
                 Powered by the AIC Immutable Trust Registry
             </p>
         </div>

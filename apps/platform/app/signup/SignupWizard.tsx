@@ -452,11 +452,11 @@ export default function SignupWizard() {
                   {/* Step header */}
                   <div className="mb-7">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#c9920a] font-semibold">
+                      <span className="text-[12px] first-cap text-[#c9920a] font-semibold">
                         Step {step + 1}
                       </span>
                       <span className="text-[#dde1e8]">/</span>
-                      <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-[#b6bdc9]">
+                      <span className="text-[12px] first-cap text-[#b6bdc9]">
                         {STEPS.length}
                       </span>
                     </div>
@@ -832,7 +832,7 @@ export default function SignupWizard() {
                       whileHover={loading ? undefined : { y: -1 }}
                       whileTap={loading ? undefined : { scale: 0.99 }}
                       transition={SPRING}
-                      className="ml-auto inline-flex items-center justify-center gap-2 bg-[#0A1728] text-white rounded-full px-7 py-3.5 text-[13px] font-semibold disabled:opacity-55 transition-colors hover:bg-[#12243c]"
+                      className="ml-auto inline-flex items-center justify-center gap-2 bg-[#0A1728] text-white rounded-full px-5 md:px-7 py-3.5 text-[13px] font-semibold disabled:opacity-55 transition-colors hover:bg-[#12243c]"
                       style={{ boxShadow: "0 6px 20px -8px rgba(10,23,40,0.5)" }}
                     >
                       {loading ? (

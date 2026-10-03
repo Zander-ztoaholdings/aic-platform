@@ -40,21 +40,21 @@ export default function EmpathyDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-8">
+    <div className="min-h-screen bg-gray-50/50 p-5 md:p-8">
       <div className="max-w-[1600px] mx-auto">
         <header className="mb-12">
           <div className="flex items-center gap-2 text-[#c36c32] mb-1">
             <Heart className="w-5 h-5 fill-current" />
-            <span className="text-xs font-bold uppercase tracking-widest">Right to Empathy</span>
+            <span className="text-xs font-bold first-cap">Right to Empathy</span>
           </div>
           <h1 className="text-3xl font-bold text-[#0A1728]">Empathy Scrutiny Engine (B0-2)</h1>
           <p className="text-gray-500 max-w-2xl">Analyze automated rejection letters and AI-generated communications for violations of human dignity and emotional intelligence.</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12">
           {/* Input Area */}
           <div className="space-y-6">
-            <Card className="p-6 border-none shadow-sm">
+            <Card className="p-4 sm:p-6 border-none shadow-sm">
               <h3 className="font-bold text-[#0A1728] mb-4 flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-[#c36c32]" />
                 Communication Draft
@@ -70,7 +70,7 @@ export default function EmpathyDemo() {
                 <Button 
                   onClick={analyzeEmpathy}
                   disabled={loading || !text}
-                  className="bg-[#0A1728] text-aic-paper px-8"
+                  className="bg-[#0A1728] text-aic-paper px-5 md:px-8"
                 >
                   {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
                   Analyze for Dignity
@@ -78,7 +78,7 @@ export default function EmpathyDemo() {
               </div>
             </Card>
 
-            <div className="p-6 bg-aic-paper rounded-2xl border border-blue-100 flex items-start gap-4 shadow-sm">
+            <div className="p-4 sm:p-6 bg-aic-paper rounded-2xl border border-blue-100 flex items-start gap-4 shadow-sm">
               <ShieldAlert className="w-6 h-6 text-blue-600 shrink-0" />
               <div>
                 <h4 className="font-bold text-sm text-blue-900 mb-1">Why Empathy Matters</h4>
@@ -91,13 +91,13 @@ export default function EmpathyDemo() {
           <div className="space-y-6">
             {result ? (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-                <Card className="p-8 border-none shadow-md overflow-hidden relative">
+                <Card className="p-5 md:p-8 border-none shadow-md overflow-hidden relative">
                   <div className="absolute top-0 left-0 w-1 h-full bg-[#c36c32]"></div>
                   
                   <div className="flex justify-between items-start mb-8">
                     <div>
-                      <div className="text-xs font-bold text-gray-400 uppercase mb-1">Dignity Score</div>
-                      <div className="text-5xl font-black text-[#0A1728]">
+                      <div className="text-xs font-bold text-gray-400 first-cap mb-1">Dignity Score</div>
+                      <div className="text-[2rem] leading-tight md:text-5xl font-black text-[#0A1728]">
                         {Math.round(result.score * 100)}<span className="text-[#c36c32] font-normal text-2xl">%</span>
                       </div>
                     </div>
@@ -108,7 +108,7 @@ export default function EmpathyDemo() {
 
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-bold text-sm text-[#0A1728] mb-3 uppercase tracking-tighter">AI Analysis Findings</h4>
+                      <h4 className="font-bold text-sm text-[#0A1728] mb-3 first-cap tracking-tighter">AI Analysis Findings</h4>
                       <div className="space-y-2">
                         {result.violations?.length > 0 ? (
                           result.violations.map((v: string, i: number) => (
@@ -125,7 +125,7 @@ export default function EmpathyDemo() {
                     </div>
 
                     <div className="p-4 bg-gray-50 rounded-xl">
-                      <h4 className="font-bold text-xs text-gray-400 mb-2 uppercase">Auditor Suggestion</h4>
+                      <h4 className="font-bold text-xs text-gray-400 mb-2 first-cap">Auditor Suggestion</h4>
                       <p className="text-sm text-gray-700 italic">"{result.suggestion}"</p>
                     </div>
 
@@ -136,7 +136,7 @@ export default function EmpathyDemo() {
                 </Card>
               </motion.div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-gray-200 rounded-3xl opacity-50">
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 md:p-12 border-2 border-dashed border-gray-200 rounded-3xl opacity-50">
                 <Heart className="w-12 h-12 text-gray-300 mb-4" />
                 <h3 className="font-bold text-gray-400">Analysis Results</h3>
                 <p className="text-sm text-gray-400">Run the scrutiny engine to see results here.</p>

@@ -7,7 +7,7 @@ export { PHASES, phaseFromCertificationStatus } from '@/lib/phases';
 
 export function PhaseTracker({ currentPhase = 2 }: { currentPhase?: number }) {
   return (
-    <div className="bg-white border-b border-[#e5e7eb] px-6 py-3">
+    <div className="bg-white border-b border-[#e5e7eb] px-4 sm:px-6 py-3">
       <div className="max-w-5xl mx-auto">
         <div className="relative flex items-center">
           {/* Track line */}
@@ -38,7 +38,7 @@ export function PhaseTracker({ currentPhase = 2 }: { currentPhase?: number }) {
                     <Check className="w-3 h-3 text-white stroke-[2.5]" />
                   ) : (
                     <span
-                      className={`font-mono text-[9px] font-bold ${
+                      className={`font-mono text-[11px] font-bold ${
                         active ? 'text-[#c9920a]' : 'text-[#9ca3af]'
                       }`}
                     >
@@ -50,14 +50,14 @@ export function PhaseTracker({ currentPhase = 2 }: { currentPhase?: number }) {
                 {/* Labels */}
                 <div className="text-center">
                   <div
-                    className={`text-[10px] font-semibold whitespace-nowrap ${
+                    className={`text-[11.5px] font-semibold whitespace-nowrap ${
                       done || active ? 'text-[#0f1f3d]' : 'text-[#9ca3af]'
                     }`}
                   >
                     {phase.label}
                   </div>
                   <div
-                    className={`font-mono text-[8px] whitespace-nowrap ${
+                    className={`font-mono text-[11px] whitespace-nowrap ${
                       active ? 'text-[#c9920a]' : 'text-[#9ca3af]'
                     }`}
                   >

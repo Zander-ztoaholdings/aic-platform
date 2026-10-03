@@ -108,25 +108,25 @@ function AuditsContent() {
                         <h1 className="text-3xl font-serif font-bold text-aic-black underline decoration-aic-gold underline-offset-8">Technical Audit Logs</h1>
                         <p className="text-gray-500 font-serif mt-4">Immutable verification of your algorithmic outcomes via the AIC Engine.</p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-2 sm:gap-4">
                         <button 
                             onClick={handleVerifyChain}
                             disabled={isVerifying}
-                            className="bg-aic-paper text-aic-black border border-aic-black/10 px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:border-aic-black transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+                            className="bg-[#0e1b2c] text-white border border-aic-black/10 px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:border-aic-black transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
                         >
                             {isVerifying ? (
                                 <>
                                     <div className="h-3 w-3 border-2 border-aic-gold border-t-transparent rounded-full animate-spin" />
                                     VERIFYING...
                                 </>
-                            ) : 'INTEGRITY CHECK'}
+                            ) : 'Integrity check'}
                         </button>
                         <button 
                             onClick={handleRunAudit}
                             disabled={isRunning}
-                            className="bg-aic-black text-aic-paper px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold hover:text-black transition-all shadow-xl disabled:opacity-50"
+                            className="bg-white text-[#0e1b2c] px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all shadow-xl disabled:opacity-50"
                         >
-                            {isRunning ? 'ANALYZING...' : 'RUN BIAS AUDIT'}
+                            {isRunning ? 'Analysing…' : 'Run bias audit'}
                         </button>
                         <button 
                             onClick={async () => {
@@ -150,9 +150,9 @@ function AuditsContent() {
                                 } finally { setIsRunning(false); }
                             }}
                             disabled={isRunning}
-                            className="border border-aic-black text-aic-black px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-red hover:text-aic-paper transition-all disabled:opacity-50"
+                            className="border border-aic-black text-aic-black px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-aic-red hover:text-[#0e1b2c] transition-all disabled:opacity-50"
                         >
-                            RUN ADVANCED ODDS AUDIT
+                            Run equalised-odds audit
                         </button>
                         <button 
                             onClick={async () => {
@@ -170,9 +170,9 @@ function AuditsContent() {
                                 } finally { setIsRunning(false); }
                             }}
                             disabled={isRunning}
-                            className="border border-aic-black text-aic-black px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-red hover:text-aic-paper transition-all disabled:opacity-50"
+                            className="border border-aic-black text-aic-black px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-aic-red hover:text-[#0e1b2c] transition-all disabled:opacity-50"
                         >
-                            RUN PRIVACY AUDIT
+                            Run privacy audit
                         </button>
                         <button 
                             onClick={async () => {
@@ -192,9 +192,9 @@ function AuditsContent() {
                                 } finally { setIsRunning(false); }
                             }}
                             disabled={isRunning}
-                            className="border border-aic-black text-aic-black px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-green-600 hover:text-aic-paper transition-all disabled:opacity-50"
+                            className="border border-aic-black text-aic-black px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-green-600 hover:text-[#0e1b2c] transition-all disabled:opacity-50"
                         >
-                            RUN LABOR AGENCY AUDIT
+                            Run labour agency audit
                         </button>
                     </div>
                 </div>
@@ -202,37 +202,37 @@ function AuditsContent() {
                 <div className="bg-aic-paper border border-aic-black/5 rounded-3xl overflow-hidden shadow-sm">
                     {q && (
                         <div className="bg-aic-paper p-4 border-b border-aic-black/5 flex justify-between items-center">
-                            <span className="text-[10px] font-mono text-gray-500 uppercase">Search Results for: <strong className="text-aic-black">{q}</strong></span>
-                            <button onClick={() => window.location.href = '/audits'} className="text-[10px] font-mono font-bold text-aic-red uppercase underline">Clear Search</button>
+                            <span className="text-[12px] text-gray-500 first-cap">Search Results for: <strong className="text-aic-black">{q}</strong></span>
+                            <button onClick={() => window.location.href = '/audits'} className="text-[12px] font-bold text-aic-red first-cap underline">Clear Search</button>
                         </div>
                     )}
-                    <table className="w-full text-left text-sm font-serif">
-                        <thead className="bg-aic-paper/50 border-b border-aic-black/5">
+                    <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left text-sm font-serif">
+                        <thead className="bg-[#f5f7f9] border-b border-aic-black/5">
                             <tr>
-                                <th className="p-6 font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">Timestamp</th>
-                                <th className="p-6 font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">System / Version</th>
-                                <th className="p-6 font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">Audit Event</th>
-                                <th className="p-6 font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">Verification</th>
-                                <th className="p-6 text-right font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">Integrity Hash</th>
+                                <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">Timestamp</th>
+                                <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">System / Version</th>
+                                <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">Audit Event</th>
+                                <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">Verification</th>
+                                <th className="p-4 sm:p-6 text-right text-[12px] font-bold text-gray-500 first-cap">Integrity Hash</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-aic-black/5">
                             {loading ? (
-                                <tr><td colSpan={4} className="p-12 text-center text-gray-400 italic">Syncing with secure logs...</td></tr>
+                                <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic">Syncing with secure logs...</td></tr>
                             ) : logs.map((log, i) => (
                                 <motion.tr 
                                     key={log.id}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="hover:bg-aic-paper/30 transition-colors group"
+                                    className="hover:bg-[#eef1f5] transition-colors group"
                                 >
-                                    <td className="p-6 text-gray-400 font-mono text-[10px]">{new Date(log.created_at).toLocaleString()}</td>
-                                    <td className="p-6 font-bold text-aic-black">{log.system_name}</td>
-                                    <td className="p-6 font-mono text-xs">{log.event_type}</td>
-                                    <td className="p-6">
+                                    <td className="p-4 sm:p-6 text-gray-500 font-mono text-[11.5px]">{new Date(log.created_at).toLocaleString()}</td>
+                                    <td className="p-4 sm:p-6 font-bold text-aic-black">{log.system_name}</td>
+                                    <td className="p-4 sm:p-6 font-mono text-xs">{log.event_type}</td>
+                                    <td className="p-4 sm:p-6">
                                         {verificationResults[log.id] ? (
-                                            <span className={`inline-flex items-center gap-1.5 text-[9px] font-bold font-mono px-2 py-0.5 rounded uppercase ${
+                                            <span className={`inline-flex items-center gap-1.5 text-[12px] font-bold px-2 py-0.5 rounded first-cap ${
                                                 verificationResults[log.id] === 'VERIFIED' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                                             }`}>
                                                 {verificationResults[log.id] === 'VERIFIED' ? (
@@ -242,37 +242,37 @@ function AuditsContent() {
                                                 )}
                                             </span>
                                         ) : (
-                                            <span className="text-[9px] font-mono text-gray-300 italic">Unverified</span>
+                                            <span className="text-[11px] font-mono text-gray-700 italic">Unverified</span>
                                         )}
                                     </td>
-                                    <td className="p-6 text-right">
-                                        <span className="font-mono text-[9px] bg-gray-100 px-2 py-1 rounded text-gray-500 select-all group-hover:text-aic-gold transition-colors">
+                                    <td className="p-4 sm:p-6 text-right">
+                                        <span className="font-mono text-[11px] bg-gray-100 px-2 py-1 rounded text-gray-500 select-all group-hover:text-[#8a6a1f] transition-colors">
                                             {log.integrity_hash ? log.integrity_hash.substring(0, 16) : 'PENDING'}...
                                         </span>
                                     </td>
                                 </motion.tr>
                             ))}
                             {!loading && logs.length === 0 && (
-                                <tr><td colSpan={4} className="p-12 text-center text-gray-400 italic font-serif">No technical audit logs found matching your query.</td></tr>
+                                <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic font-serif">No technical audit logs found matching your query.</td></tr>
                             )}
                         </tbody>
-                    </table>
+                    </table></div>
                     
                     {pagination.pages > 1 && (
-                        <div className="p-6 border-t border-aic-black/5 bg-aic-paper/20 flex justify-between items-center">
-                            <p className="text-[10px] font-mono font-bold text-gray-400 uppercase">Page {pagination.page} of {pagination.pages} • {pagination.total} Records</p>
+                        <div className="p-4 sm:p-6 border-t border-aic-black/5 bg-[#f5f7f9] flex justify-between items-center">
+                            <p className="text-[12px] font-bold text-gray-500 first-cap">Page {pagination.page} of {pagination.pages} • {pagination.total} Records</p>
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => fetchLogs(pagination.page - 1)}
                                     disabled={pagination.page <= 1}
-                                    className="px-4 py-2 border border-aic-black/10 rounded-lg font-mono text-[10px] font-bold uppercase hover:bg-aic-black hover:text-aic-paper transition-all disabled:opacity-30"
+                                    className="px-4 py-2 border border-aic-black/10 rounded-lg text-[12px] font-bold first-cap hover:bg-[#eef1f5] hover:text-[#0e1b2c] transition-all disabled:opacity-30"
                                 >
                                     Previous
                                 </button>
                                 <button 
                                     onClick={() => fetchLogs(pagination.page + 1)}
                                     disabled={pagination.page >= pagination.pages}
-                                    className="px-4 py-2 border border-aic-black/10 rounded-lg font-mono text-[10px] font-bold uppercase hover:bg-aic-black hover:text-aic-paper transition-all disabled:opacity-30"
+                                    className="px-4 py-2 border border-aic-black/10 rounded-lg text-[12px] font-bold first-cap hover:bg-[#eef1f5] hover:text-[#0e1b2c] transition-all disabled:opacity-30"
                                 >
                                     Next
                                 </button>
@@ -281,10 +281,10 @@ function AuditsContent() {
                     )}
                 </div>
 
-                <div className="mt-12 p-8 bg-aic-black rounded-3xl text-aic-paper flex items-center justify-between border border-aic-paper/5 shadow-2xl">
+                <div className="mt-12 p-5 md:p-8 bg-white rounded-3xl text-[#0e1b2c] flex items-center justify-between border border-[#dde2e8] shadow-2xl">
                     <div>
-                        <h4 className="font-serif text-xl mb-2 italic text-aic-gold">Evidence Hardening</h4>
-                        <p className="text-gray-400 text-sm font-serif">Every audit log is cryptographically hashed. This provides tamper-proof evidence for your Lead Auditor during certification review.</p>
+                        <h4 className="font-serif text-xl mb-2 italic text-[#8a6a1f]">Evidence Hardening</h4>
+                        <p className="text-gray-500 text-sm font-serif">Every audit log is cryptographically hashed. This provides tamper-proof evidence for your Lead Auditor during certification review.</p>
                     </div>
                     <div className="w-16 h-16 rounded-full border border-aic-gold/30 flex items-center justify-center">
                         <div className="w-2 h-2 rounded-full bg-aic-gold animate-ping" />
@@ -297,7 +297,7 @@ function AuditsContent() {
 
 export default function AuditsPage() {
     return (
-        <Suspense fallback={<DashboardShell><div className="py-20 text-center italic font-serif text-gray-400">Loading audit infrastructure...</div></DashboardShell>}>
+        <Suspense fallback={<DashboardShell><div className="py-20 text-center italic font-serif text-gray-500">Loading audit infrastructure...</div></DashboardShell>}>
             <AuditsContent />
         </Suspense>
     );

@@ -43,11 +43,11 @@ export default function ReportsPage() {
 
         <div className="space-y-3">
           {loading ? (
-            <SectionCard className="p-8 text-center">
+            <SectionCard className="p-5 md:p-8 text-center">
               <p className="text-xs text-[#9ca3af]">Loading reports…</p>
             </SectionCard>
           ) : reports.length === 0 ? (
-            <SectionCard className="p-8 text-center">
+            <SectionCard className="p-5 md:p-8 text-center">
               <p className="text-xs text-[#9ca3af]">No reports generated yet. Reports are created automatically on the 1st of each month.</p>
             </SectionCard>
           ) : (
@@ -63,16 +63,16 @@ export default function ReportsPage() {
                     <div className="flex items-center gap-2.5 mb-1.5">
                       <span className="font-serif text-sm font-bold text-[#0f1f3d]">{label}</span>
                       {isFirst && <CopperTag>Current</CopperTag>}
-                      <span className="font-mono text-[9px] font-bold text-[#6b7280]">{r.status}</span>
+                      <span className="font-mono text-[11px] font-bold text-[#6b7280]">{r.status}</span>
                     </div>
                     <div className="flex gap-1.5 flex-wrap">
                       {r.findingsCount > 0 && (
-                        <span className="font-mono text-[8px] text-[#9ca3af] bg-[#f9fafb] border border-[#e5e7eb] rounded px-2 py-0.5">
+                        <span className="font-mono text-[11px] text-[#9ca3af] bg-[#f9fafb] border border-[#e5e7eb] rounded px-2 py-0.5">
                           {r.findingsCount} finding{r.findingsCount !== 1 ? 's' : ''}
                         </span>
                       )}
                       {r.title && (
-                        <span className="font-mono text-[8px] text-[#9ca3af] bg-[#f9fafb] border border-[#e5e7eb] rounded px-2 py-0.5">
+                        <span className="font-mono text-[11px] text-[#9ca3af] bg-[#f9fafb] border border-[#e5e7eb] rounded px-2 py-0.5">
                           {r.title}
                         </span>
                       )}
@@ -83,13 +83,13 @@ export default function ReportsPage() {
                       href={`/api/reports/${r.id}?mode=inline`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-3 py-1.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                      className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-3 py-1.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
                     >
                       <Eye className="w-3 h-3" /> View
                     </a>
                     <a
                       href={`/api/reports/${r.id}`}
-                      className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-3 py-1.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                      className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-3 py-1.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
                     >
                       <Download className="w-3 h-3" /> PDF
                     </a>
@@ -101,7 +101,7 @@ export default function ReportsPage() {
         </div>
 
         <SectionCard className="bg-[#f9fafb] p-4">
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-1.5">
+          <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-1.5">
             Report Frequency
           </div>
           <p className="text-xs text-[#6b7280] leading-relaxed">

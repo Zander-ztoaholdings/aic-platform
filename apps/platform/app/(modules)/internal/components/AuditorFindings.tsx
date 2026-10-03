@@ -71,7 +71,7 @@ export default function AuditorFindings() {
               style={{ background: s.bg, borderColor: `${s.color}30` }}
             >
               <span className="font-mono text-xl font-bold" style={{ color: s.color }}>{s.count}</span>
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: s.color }}>
+              <span className="text-[12px] font-bold first-cap" style={{ color: s.color }}>
                 {s.label}
               </span>
             </div>
@@ -79,11 +79,11 @@ export default function AuditorFindings() {
         </div>
 
         {loading ? (
-          <SectionCard className="p-8 text-center">
+          <SectionCard className="p-5 md:p-8 text-center">
             <p className="text-xs text-[#9ca3af]">Loading findings…</p>
           </SectionCard>
         ) : findings.length === 0 ? (
-          <SectionCard className="p-8 text-center">
+          <SectionCard className="p-5 md:p-8 text-center">
             <p className="text-sm font-semibold text-[#0f1f3d] mb-2">No Open Findings</p>
             <p className="text-xs text-[#9ca3af]">All audit requirements are currently satisfied.</p>
           </SectionCard>
@@ -99,7 +99,7 @@ export default function AuditorFindings() {
                 >
                   <div className="flex flex-wrap items-center gap-2.5 mb-3">
                     <span
-                      className="font-mono text-[9px] font-bold px-2 py-1 rounded"
+                      className="font-mono text-[11px] font-bold px-2 py-1 rounded"
                       style={{ background: s.bg, color: s.color }}
                     >
                       {f.id.slice(0, 8).toUpperCase()}
@@ -119,7 +119,7 @@ export default function AuditorFindings() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
                       {f.description && (
                         <div>
-                          <div className="font-mono text-[8px] font-bold uppercase tracking-[0.15em] text-[#9ca3af] mb-2">
+                          <div className="text-[12px] font-bold first-cap text-[#9ca3af] mb-2">
                             Requirement
                           </div>
                           <p className="text-xs text-[#0f1f3d] leading-relaxed">{f.description}</p>
@@ -127,7 +127,7 @@ export default function AuditorFindings() {
                       )}
                       {f.findings && (
                         <div>
-                          <div className="font-mono text-[8px] font-bold uppercase tracking-[0.15em] text-[#9ca3af] mb-2">
+                          <div className="text-[12px] font-bold first-cap text-[#9ca3af] mb-2">
                             Finding
                           </div>
                           <p className="text-xs text-[#0f1f3d] leading-relaxed">{f.findings}</p>
@@ -138,14 +138,14 @@ export default function AuditorFindings() {
 
                   <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#f3f4f6]">
                     <Clock className="w-3.5 h-3.5 text-[#9ca3af]" />
-                    <span className="font-mono text-[9px] text-[#9ca3af]">
+                    <span className="font-mono text-[11px] text-[#9ca3af]">
                       Updated: {new Date(f.updatedAt).toLocaleDateString()}
                     </span>
                     <div className="ml-auto flex gap-2">
                       {/* Request Extension: paused pending research on the extension-request workflow (2026-09). Intentionally hidden, not deleted. */}
                       <button
                         onClick={() => setUploadLabel(f.title)}
-                        className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold bg-[#c9920a] text-white rounded-full px-3 py-1.5 hover:bg-[#b07d08] transition-colors"
+                        className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold bg-[#c9920a] text-white rounded-full px-3 py-1.5 hover:bg-[#b07d08] transition-colors"
                       >
                         <Upload className="w-3 h-3" /> Submit Remediation
                       </button>

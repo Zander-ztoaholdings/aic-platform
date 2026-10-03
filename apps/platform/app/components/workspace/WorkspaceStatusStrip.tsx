@@ -38,12 +38,30 @@ export function WorkspaceStatusStrip({
     { label: 'Open corrections', value: fmt(openCorrections, (v) => `${v}`), warn: openCorrections !== null && openCorrections > 0 },
   ];
 
+  const flagged = stats.filter((s) => s.warn);
+
   return (
     <div className="border-b border-[#0a1728]/[0.05] bg-white/60">
-      <div className="max-w-[1400px] mx-auto h-11 px-4 md:px-8 flex items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
+      {/* Phones: the stage, and only the figures that need attention. The full
+          line scrolled sideways and cut off mid-word at 390px. */}
+      <div className="sm:hidden px-5 py-2.5 flex items-center justify-between gap-3 text-[13px]">
+        {stage && (
+          <span className="flex items-center gap-2 text-[#6b7280] min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a] shrink-0" aria-hidden />
+            <span className="font-semibold text-[#0A1728] truncate">{stage.label}</span>
+            <span className="text-[#9ca3af] shrink-0">{phase + 1} of {PHASES.length}</span>
+          </span>
+        )}
+        {flagged.map((s) => (
+          <span key={s.label} className="shrink-0 text-[#b45309]">
+            {s.label === 'Open corrections' ? `${s.value} open` : `${s.label} ${s.value}`}
+          </span>
+        ))}
+      </div>
+      <div className="hidden sm:flex max-w-[1400px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
         {stage && (
           <span className="flex items-center gap-2 text-[#6b7280]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c9920a]" aria-hidden />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a]" aria-hidden />
             Stage
             <span className="font-semibold text-[#0A1728]">{stage.label}</span>
             <span className="text-[#9ca3af]">

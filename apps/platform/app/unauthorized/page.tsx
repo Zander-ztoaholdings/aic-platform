@@ -7,9 +7,9 @@ export default function UnauthorizedPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
-          <div className="w-20 h-20 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-6">
+          <div className="w-20 h-20 mx-auto bg-red-50 rounded-full flex items-center justify-center mb-6">
             <svg
-              className="w-10 h-10 text-red-500"
+              className="w-10 h-10 text-red-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -22,17 +22,17 @@ export default function UnauthorizedPage() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-aic-paper mb-2">Access Denied</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-[#0e1b2c] mb-2">Access Denied</h1>
+          <p className="text-gray-500">
             You don&apos;t have permission to access this resource.
           </p>
         </div>
 
-        <div className="bg-aic-paper/5 backdrop-blur-xl rounded-2xl p-6 border border-aic-paper/10 mb-6">
-          <h2 className="text-sm font-mono text-gray-400 uppercase tracking-wider mb-4">
+        <div className="bg-[#f5f7f9] backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-[#dde2e8] mb-6">
+          <h2 className="text-sm text-gray-500 first-cap mb-4">
             Your Current Role
           </h2>
-          <p className="text-aic-paper text-lg">
+          <p className="text-[#0e1b2c] text-lg">
             Contact your administrator if you believe this is an error.
           </p>
         </div>
@@ -40,13 +40,13 @@ export default function UnauthorizedPage() {
         <div className="space-y-3">
           <Link
             href="/"
-            className="block w-full py-3 px-4 bg-aic-paper text-black font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            className="block w-full py-3 px-4 bg-[#0e1b2c] text-white font-semibold rounded-lg hover:bg-[#22344a] transition-colors"
           >
             Return to Dashboard
           </Link>
           <Link
             href="/login"
-            className="block w-full py-3 px-4 bg-transparent text-aic-paper border border-aic-paper/20 rounded-lg hover:bg-aic-paper/5 transition-colors"
+            className="block w-full py-3 px-4 bg-transparent text-[#0e1b2c] border border-[#dde2e8] rounded-lg hover:bg-[#eef1f5] transition-colors"
           >
             Sign in with different account
           </Link>

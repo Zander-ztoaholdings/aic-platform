@@ -11,17 +11,17 @@ interface CPDProgressBarProps {
 
 export const CPDProgressBar = ({ progress, label, sublabel }: CPDProgressBarProps) => {
   return (
-    <div className="bg-aic-paper p-8 rounded-[2.5rem] border border-aic-black/5 shadow-lg">
+    <div className="bg-aic-paper p-5 md:p-8 rounded-[2.5rem] border border-aic-black/5 shadow-lg">
       <div className="flex justify-between items-end mb-6">
         <div>
-          <span className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.3em]">
+          <span className="text-[12px] font-bold text-[#8a6a1f] first-cap">
             ISO 17024 CPD Portfolio
           </span>
           <h3 className="font-serif text-2xl font-bold mt-2">{label}</h3>
-          {sublabel && <p className="text-xs text-gray-400 italic font-serif mt-1">{sublabel}</p>}
+          {sublabel && <p className="text-xs text-gray-500 italic font-serif mt-1">{sublabel}</p>}
         </div>
         <div className="text-right">
-          <span className="text-4xl font-serif font-medium">{progress}%</span>
+          <span className="text-3xl md:text-4xl font-serif font-medium">{progress}%</span>
         </div>
       </div>
 
@@ -30,18 +30,18 @@ export const CPDProgressBar = ({ progress, label, sublabel }: CPDProgressBarProp
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 1.5, ease: "easeOut" }}
-          className="h-full bg-aic-black"
+          className="h-full bg-white"
         />
       </div>
 
       <div className="mt-6 grid grid-cols-2 gap-4">
-        <div className="p-4 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
-          <p className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-1">Hours Earned</p>
+        <div className="p-4 bg-[#f5f7f9] rounded-2xl border border-aic-black/5">
+          <p className="text-[12px] font-bold text-gray-500 first-cap mb-1">Hours Earned</p>
           <p className="text-lg font-serif font-bold">24 / 40</p>
         </div>
-        <div className="p-4 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
-          <p className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
-          <p className="text-lg font-serif font-bold text-aic-green uppercase">Compliant</p>
+        <div className="p-4 bg-[#f5f7f9] rounded-2xl border border-aic-black/5">
+          <p className="text-[12px] font-bold text-gray-500 first-cap mb-1">Status</p>
+          <p className="text-lg font-serif font-bold text-aic-green first-cap">Compliant</p>
         </div>
       </div>
     </div>

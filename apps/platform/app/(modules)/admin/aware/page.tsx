@@ -50,7 +50,7 @@ export default function AdminAwareBadges() {
     <AdminShell>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-black text-gray-900 tracking-tight">AIC Aware badges</h1>
+          <h1 className="text-2xl font-bold text-[#0e1b2c]">AIC Aware badges</h1>
           <p className="text-sm text-gray-500 mt-1">Every badge issued, its status, and revocation. A revoked badge shows as revoked on its registry entry and on every site that embeds it.</p>
         </div>
 
@@ -58,21 +58,21 @@ export default function AdminAwareBadges() {
 
         <div className="bg-white border border-gray-200 rounded-2xl overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+            <thead className="border-b border-gray-100 text-[12px] font-bold text-gray-500 first-cap">
               <tr>
                 <th className="px-5 py-3">Code</th><th className="px-5 py-3">Organisation</th><th className="px-5 py-3">Accountable</th>
                 <th className="px-5 py-3">Issued</th><th className="px-5 py-3">Expires</th><th className="px-5 py-3">Status</th><th className="px-5 py-3" />
               </tr>
             </thead>
             <tbody>
-              {badges === null && <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-400">Loading…</td></tr>}
-              {badges?.length === 0 && <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-400">No badges have been issued yet.</td></tr>}
+              {badges === null && <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-500">Loading…</td></tr>}
+              {badges?.length === 0 && <tr><td colSpan={7} className="px-5 py-8 text-center text-gray-500">No badges have been issued yet.</td></tr>}
               {badges?.map((b) => (
                 <tr key={b.id} className="border-t border-gray-100 align-top">
                   <td className="px-5 py-3 font-mono text-xs"><a href={`${WEB}/registry/aware/${b.code}`} target="_blank" rel="noreferrer" className="hover:underline">{b.code}</a></td>
                   <td className="px-5 py-3">
                     <div className="font-medium text-gray-900">{b.orgNameAtIssue}</div>
-                    {b.orgNameNow && b.orgNameNow !== b.orgNameAtIssue && <div className="text-xs text-gray-400">now {b.orgNameNow}</div>}
+                    {b.orgNameNow && b.orgNameNow !== b.orgNameAtIssue && <div className="text-xs text-gray-500">now {b.orgNameNow}</div>}
                     {b.listed && <div className="text-xs text-emerald-600">Listed in directory</div>}
                   </td>
                   <td className="px-5 py-3 text-gray-600">{b.accountablePerson ?? '—'}</td>
@@ -80,7 +80,7 @@ export default function AdminAwareBadges() {
                   <td className="px-5 py-3 text-gray-600 whitespace-nowrap">{fmt(b.expiresAt)}</td>
                   <td className="px-5 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PILL[b.status]}`}>{b.status}</span>
-                    {b.revocationReason && <div className="mt-1 max-w-[220px] text-xs text-gray-400">{b.revocationReason}</div>}
+                    {b.revocationReason && <div className="mt-1 max-w-[220px] text-xs text-gray-500">{b.revocationReason}</div>}
                   </td>
                   <td className="px-5 py-3 text-right">
                     {canRevoke && !b.revokedAt && (

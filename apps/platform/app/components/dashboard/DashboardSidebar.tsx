@@ -114,7 +114,7 @@ export function DashboardSidebar({
         <Link href="/" onClick={onClose} className="flex items-center gap-3 min-w-0">
           <BrandMark />
           <div className="min-w-0">
-            <div className="font-mono text-[8px] font-bold tracking-[0.2em] uppercase text-white/35">Client Portal</div>
+            <div className="text-[12px] font-bold first-cap text-white/35">Client Portal</div>
             <div className="text-xs font-semibold text-white/85 mt-0.5 truncate">Example Organisation</div>
           </div>
         </Link>
@@ -137,13 +137,13 @@ export function DashboardSidebar({
               style={{ borderColor: group.accent }}
             >
               <div
-                className="font-mono text-[9px] font-bold uppercase tracking-[0.22em]"
+                className="text-[12px] font-bold first-cap"
                 style={{ color: group.accent }}
               >
                 {group.name}
               </div>
               {group.tagline && (
-                <div className="font-mono text-[8px] text-white/[0.28] tracking-wide mt-0.5 leading-snug">
+                <div className="font-mono text-[11px] text-white/[0.28] tracking-wide mt-0.5 leading-snug">
                   {group.tagline}
                 </div>
               )}
@@ -172,7 +172,7 @@ export function DashboardSidebar({
                     />
                     <span className="flex-1">{item.label}</span>
                     {'badge' in item && item.badge && (
-                      <span className="font-mono text-[7px] font-bold uppercase tracking-wide text-white/40 bg-white/[0.06] px-1.5 py-0.5 rounded flex-shrink-0">
+                      <span className="text-[12px] font-bold first-cap text-white/40 bg-white/[0.06] px-1.5 py-0.5 rounded flex-shrink-0">
                         {item.badge}
                       </span>
                     )}
@@ -189,8 +189,8 @@ export function DashboardSidebar({
         <div className="bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-2 flex items-center gap-2.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shadow-[0_0_6px_#22c55e] animate-pulse flex-shrink-0" />
           <div>
-            <div className="font-mono text-[7px] uppercase tracking-[0.15em] text-white/30">Pulse</div>
-            <div className="font-mono text-[9px] font-bold text-white">Live — Secure</div>
+            <div className="text-[12px] first-cap text-white/30">Pulse</div>
+            <div className="font-mono text-[11px] font-bold text-white">Live — Secure</div>
           </div>
         </div>
         <a

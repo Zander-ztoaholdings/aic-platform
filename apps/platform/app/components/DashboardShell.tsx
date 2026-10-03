@@ -93,7 +93,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         openCorrections={orgSummary?.corrections.open ?? null}
       /></div>
       <OnboardingTour orgName={org?.name ?? null} />
-      <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-7 fade-up">{children}</main>
+      <main className="max-w-[1400px] mx-auto px-5 md:px-8 pt-6 pb-16 md:py-7 fade-up">{children}</main>
     </div>
   );
 }

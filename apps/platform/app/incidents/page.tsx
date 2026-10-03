@@ -59,13 +59,13 @@ export default function IncidentsPage() {
                     <p className="text-gray-500 font-serif mt-4 italic">Resolve citizen appeals and maintain POPIA Section 71 compliance.</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-12">
                     {/* List View */}
                     <div className="lg:col-span-2 space-y-6">
                         {loading ? (
-                            <div className="p-12 text-center text-gray-500 italic">Syncing with appeal registry...</div>
+                            <div className="p-6 md:p-12 text-center text-gray-500 italic">Syncing with appeal registry...</div>
                         ) : incidents.length === 0 ? (
-                            <div className="p-12 border border-dashed border-aic-black/10 rounded-[2rem] text-center">
+                            <div className="p-6 md:p-12 border border-dashed border-aic-black/10 rounded-[2rem] text-center">
                                 <p className="text-gray-400 font-serif italic">No open appeals found. Your systems are maintaining human dignity.</p>
                             </div>
                         ) : incidents.map((inc) => (
@@ -73,7 +73,7 @@ export default function IncidentsPage() {
                                 key={inc.id}
                                 layoutId={inc.id}
                                 onClick={() => setSelectedIncident(inc)}
-                                className={`p-8 bg-aic-paper border rounded-[2rem] cursor-pointer transition-all hover:shadow-xl ${
+                                className={`p-5 md:p-8 bg-aic-paper border rounded-[2rem] cursor-pointer transition-all hover:shadow-xl ${
                                     selectedIncident?.id === inc.id ? 'border-aic-gold shadow-lg' : 'border-aic-black/5'
                                 }`}
                             >
@@ -84,15 +84,15 @@ export default function IncidentsPage() {
                                             inc.status === 'INVESTIGATING' ? 'bg-aic-gold animate-pulse' :
                                             inc.status === 'CLOSED' ? 'bg-gray-400' : 'bg-green-500'
                                         }`} />
-                                        <span className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">{inc.status}</span>
+                                        <span className="text-[12px] font-bold text-gray-400 first-cap">{inc.status}</span>
                                     </div>
-                                    <span className="text-[10px] font-mono text-gray-400">{new Date(inc.created_at).toLocaleDateString()}</span>
+                                    <span className="text-[11.5px] font-mono text-gray-400">{new Date(inc.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-aic-black mb-2">{inc.citizen_email}</h3>
                                 <p className="text-sm font-serif text-gray-500 italic truncate mb-4">"{inc.description}"</p>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-widest">{inc.system_name}</span>
-                                    <span className="text-[10px] font-mono text-gray-400">View Details →</span>
+                                    <span className="text-[12px] font-bold text-aic-gold first-cap">{inc.system_name}</span>
+                                    <span className="text-[11.5px] font-mono text-gray-400">View Details →</span>
                                 </div>
                             </motion.div>
                         ))}
@@ -107,23 +107,23 @@ export default function IncidentsPage() {
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
-                                    className="bg-aic-black text-aic-paper p-12 rounded-[2.5rem] shadow-2xl h-fit border border-aic-paper/5"
+                                    className="bg-aic-black text-aic-paper p-6 md:p-12 rounded-[2.5rem] shadow-2xl h-fit border border-aic-paper/5"
                                 >
-                                    <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-8">Incident Detail</h3>
+                                    <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-8">Incident Detail</h3>
                                     <div className="space-y-6 mb-12">
                                         <div>
-                                            <p className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest mb-1">Citizen</p>
+                                            <p className="text-[12px] font-bold text-gray-500 first-cap mb-1">Citizen</p>
                                             <p className="font-serif text-lg">{selectedIncident.citizen_email}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-mono font-bold text-gray-500 uppercase tracking-widest mb-1">Description</p>
+                                            <p className="text-[12px] font-bold text-gray-500 first-cap mb-1">Description</p>
                                             <p className="font-serif text-sm text-gray-400 leading-relaxed italic">"{selectedIncident.description}"</p>
                                         </div>
                                     </div>
 
-                                    <h3 className="text-[10px] font-mono font-bold text-gray-500 uppercase tracking-[0.4em] mb-6">Human Review Findings</h3>
+                                    <h3 className="text-[12px] font-bold text-gray-500 first-cap mb-6">Human Review Findings</h3>
                                     <textarea 
-                                        className="w-full bg-aic-paper/5 border border-aic-paper/10 rounded-2xl p-6 font-serif text-sm text-aic-paper focus:border-aic-gold outline-none transition-all mb-6"
+                                        className="w-full bg-aic-paper/5 border border-aic-paper/10 rounded-2xl p-4 sm:p-6 font-serif text-sm text-aic-paper focus:border-aic-gold outline-none transition-all mb-6"
                                         rows={4}
                                         placeholder="Document your investigation and resolution..."
                                         value={resolution}
@@ -134,7 +134,7 @@ export default function IncidentsPage() {
                                         {selectedIncident.status === 'OPEN' && (
                                             <button 
                                                 onClick={() => handleResolve(selectedIncident.id, 'INVESTIGATING')}
-                                                className="w-full bg-aic-gold text-black py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-paper transition-all"
+                                                className="w-full bg-aic-gold text-black py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-paper transition-all"
                                             >
                                                 START INVESTIGATION
                                             </button>
@@ -144,13 +144,13 @@ export default function IncidentsPage() {
                                             <>
                                                 <button 
                                                     onClick={() => handleResolve(selectedIncident.id, 'RESOLVED')}
-                                                    className="w-full bg-aic-paper text-black py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold transition-all"
+                                                    className="w-full bg-aic-paper text-black py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold transition-all"
                                                 >
                                                     MARK AS RESOLVED
                                                 </button>
                                                 <button 
                                                     onClick={() => handleResolve(selectedIncident.id, 'DISMISSED')}
-                                                    className="w-full border border-aic-paper/20 text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-red transition-all"
+                                                    className="w-full border border-aic-paper/20 text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-red transition-all"
                                                 >
                                                     DISMISS APPEAL
                                                 </button>
@@ -160,7 +160,7 @@ export default function IncidentsPage() {
                                         {selectedIncident.status === 'RESOLVED' && (
                                             <button 
                                                 onClick={() => handleResolve(selectedIncident.id, 'CLOSED')}
-                                                className="w-full bg-gray-800 text-aic-paper py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-gray-700 transition-all"
+                                                className="w-full bg-gray-800 text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-gray-700 transition-all"
                                             >
                                                 ARCHIVE & CLOSE
                                             </button>
@@ -168,7 +168,7 @@ export default function IncidentsPage() {
                                     </div>
                                 </motion.div>
                             ) : (
-                                <div className="p-12 border border-dashed border-aic-black/10 rounded-[2.5rem] text-center bg-aic-paper/30">
+                                <div className="p-6 md:p-12 border border-dashed border-aic-black/10 rounded-[2.5rem] text-center bg-aic-paper/30">
                                     <p className="text-gray-400 font-serif italic text-sm">Select an incident from the queue to perform human review.</p>
                                 </div>
                             )}

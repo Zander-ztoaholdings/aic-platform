@@ -21,10 +21,9 @@ import type { WorkspaceUser } from '@/lib/workspace';
  *   - "Execute New Audit" POSTed an audit against a hardcoded org id labelled
  *     "Default Alpha Org", whichever client the staff member was looking at.
  *
- * Staff pages were written for the dark canvas, so the staff workspace keeps
- * it — which is also useful on its own terms: AIC staff should never be in
- * doubt about whether they are looking at their own console or a client's
- * workspace. Navigation is the same component the client workspace uses, fed
+ * Staff, HQ and client workspaces share one look (Zander, Oct 2026): the same
+ * light canvas, top bar and type. Whose console this is, is said in words —
+ * "AIC Staff" beside the mark — rather than by a different colour scheme. Navigation is the same component the client workspace uses, fed
  * from the same config, filtered by what this person's role can reach.
  */
 export default function AdminShell({ children }: { children: ReactNode }) {
@@ -36,10 +35,10 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     href === '/admin' ? pathname === '/admin' : pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <div className="min-h-screen bg-aic-navy text-aic-paper font-sans">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fbfcfd_0%,#f3f5f8_100%)] text-[#0e1b2c] font-sans">
       <ViewAsBanner />
       <WorkspaceTopBar
-        tone="dark"
+        tone="light"
         homeHref="/admin"
         contextLabel="AIC Staff"
         contextDetail={user.isSuperAdmin ? 'Super admin' : user.role === 'AIC_AUDITOR' ? 'Auditor' : null}
@@ -48,7 +47,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         isActive={isActive}
         user={{ name: user.name ?? null, email: user.email ?? null, roleLabel: null }}
       />
-      <main className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 text-aic-paper">{children}</main>
+      <main className="max-w-[1400px] mx-auto px-5 md:px-8 pt-6 pb-16 md:py-8 text-[#0e1b2c] fade-up">{children}</main>
     </div>
   );
 }

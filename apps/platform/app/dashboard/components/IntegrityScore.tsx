@@ -39,7 +39,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
   const c = 2 * Math.PI * r;
 
   return (
-    <Card className="p-6 bg-white border-gray-200 shadow-sm col-span-1 lg:col-span-2">
+    <Card className="p-4 sm:p-6 bg-white border-gray-200 shadow-sm col-span-1 lg:col-span-2">
       <div className="flex flex-col md:flex-row items-start md:items-center gap-8">
         {/* Ring + score */}
         <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
@@ -59,7 +59,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className={`font-mono text-3xl font-bold ${col} leading-none`}>{overall}</span>
-            <span className="font-mono text-[10px] text-gray-400">/ 100</span>
+            <span className="font-mono text-[11.5px] text-gray-400">/ 100</span>
           </div>
         </div>
 
@@ -90,7 +90,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
             </div>
             <button 
               onClick={() => setShowMethod(!showMethod)}
-              className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-wider flex items-center gap-1.5 hover:text-aic-gold-light transition-colors"
+              className="text-[12px] font-bold text-aic-gold first-cap flex items-center gap-1.5 hover:text-aic-gold-light transition-colors"
             >
               Score methodology 
               <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showMethod ? 'rotate-180' : ''}`} />
@@ -104,9 +104,9 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
                 const mbc = m.score >= 71 ? 'bg-emerald-500' : m.score >= 41 ? 'bg-aic-gold' : 'bg-red-600';
                 return (
                   <div key={m.label} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-tight mb-2 truncate">{m.label}</div>
+                    <div className="text-[12px] font-bold text-gray-500 first-cap tracking-tight mb-2 truncate">{m.label}</div>
                     <div className="flex justify-between items-end mb-1.5">
-                      <span className="font-mono text-[9px] text-gray-400 uppercase tracking-widest">Weight {m.weight}%</span>
+                      <span className="text-[12px] text-gray-400 first-cap">Weight {m.weight}%</span>
                       <span className={`font-mono text-sm font-bold ${mc}`}>{m.score}</span>
                     </div>
                     <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -124,10 +124,10 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
 
         {/* Action */}
         <div className="flex flex-col gap-2 w-full md:w-auto flex-shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
-          <Button className="bg-aic-gold hover:bg-aic-gold-light text-white font-mono text-[11px] uppercase tracking-widest px-6 h-11 rounded-full">
+          <Button className="bg-aic-gold hover:bg-aic-gold-light text-white text-[12.5px] first-cap px-4 sm:px-6 h-11 rounded-full">
             Submit Evidence
           </Button>
-          <div className="font-mono text-[9px] text-gray-400 text-center uppercase tracking-widest">
+          <div className="text-[12px] text-gray-400 text-center first-cap">
             14 days to deadline
           </div>
         </div>

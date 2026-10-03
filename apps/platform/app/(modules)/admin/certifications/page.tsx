@@ -16,16 +16,16 @@ interface Certification {
 }
 
 const tierInfo = {
-  TIER_1: { label: 'Critical', color: 'text-red-400', bg: 'bg-red-500/20' },
-  TIER_2: { label: 'Elevated', color: 'text-orange-400', bg: 'bg-orange-500/20' },
-  TIER_3: { label: 'Standard', color: 'text-green-400', bg: 'bg-green-500/20' },
+  TIER_1: { label: 'Critical', color: 'text-red-700', bg: 'bg-red-50' },
+  TIER_2: { label: 'Elevated', color: 'text-orange-700', bg: 'bg-orange-50' },
+  TIER_3: { label: 'Standard', color: 'text-green-700', bg: 'bg-green-50' },
 }
 
 const statusInfo = {
-  ACTIVE: { label: 'Active', color: 'text-green-400', bg: 'bg-green-500/20' },
-  EXPIRING_SOON: { label: 'Expiring Soon', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-  EXPIRED: { label: 'Expired', color: 'text-red-400', bg: 'bg-red-500/20' },
-  SUSPENDED: { label: 'Suspended', color: 'text-gray-400', bg: 'bg-gray-500/20' },
+  ACTIVE: { label: 'Active', color: 'text-green-700', bg: 'bg-green-50' },
+  EXPIRING_SOON: { label: 'Expiring Soon', color: 'text-amber-700', bg: 'bg-yellow-50' },
+  EXPIRED: { label: 'Expired', color: 'text-red-700', bg: 'bg-red-50' },
+  SUSPENDED: { label: 'Suspended', color: 'text-gray-500', bg: 'bg-gray-500/20' },
 }
 
 export default function CertificationsPage() {
@@ -105,52 +105,52 @@ export default function CertificationsPage() {
     <AdminShell>
       <div className="space-y-8">
         {/* Stats */}
-        <div className="grid grid-cols-5 gap-6">
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Total Active</p>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Total Active</p>
             <p className="text-3xl font-bold">{stats.total}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Tier 1 (Critical)</p>
-            <p className="text-3xl font-bold text-red-500">{stats.tier1}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Tier 1 (Critical)</p>
+            <p className="text-3xl font-bold text-red-700">{stats.tier1}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Tier 2 (Elevated)</p>
-            <p className="text-3xl font-bold text-orange-500">{stats.tier2}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Tier 2 (Elevated)</p>
+            <p className="text-3xl font-bold text-orange-700">{stats.tier2}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Tier 3 (Standard)</p>
-            <p className="text-3xl font-bold text-green-500">{stats.tier3}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Tier 3 (Standard)</p>
+            <p className="text-3xl font-bold text-green-700">{stats.tier3}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-yellow-800/50">
-            <p className="text-yellow-500 text-xs uppercase mb-2">Expiring Soon</p>
-            <p className="text-3xl font-bold text-yellow-500">{stats.expiringSoon}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-yellow-200">
+            <p className="text-amber-700 text-xs first-cap mb-2">Expiring Soon</p>
+            <p className="text-3xl font-bold text-amber-700">{stats.expiringSoon}</p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0">
           {['ALL', 'TIER_1', 'TIER_2', 'TIER_3'].map((tier) => (
             <button
               key={tier}
               onClick={() => setSelectedTier(tier)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 selectedTier === tier
-                  ? 'bg-blue-600 text-aic-paper'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                  ? 'bg-[#0e1b2c] text-aic-paper'
+                  : 'bg-[#f5f7f9] text-gray-500 hover:bg-[#eef1f5]'
               }`}
             >
-              {tier === 'ALL' ? 'All Tiers' : tier.replace('_', ' ')}
+              {tier === 'ALL' ? 'All tiers' : tier.replace('TIER_', 'Tier ')}
             </button>
           ))}
         </div>
 
         {/* Certifications Grid */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           {filtered.map((cert) => (
             <div
               key={cert.id}
-              className="bg-[#1c1c1c] rounded-xl border border-gray-800 p-6 hover:border-gray-700 transition-colors"
+              className="bg-white rounded-xl border border-[#dde2e8] p-4 sm:p-6 hover:border-[#dde2e8] transition-colors"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -167,33 +167,33 @@ export default function CertificationsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase">Integrity Score</p>
+                  <p className="text-xs text-gray-500 first-cap">Integrity Score</p>
                   <p className={`text-2xl font-bold ${
-                    cert.integrity_score >= 90 ? 'text-green-500' :
-                    cert.integrity_score >= 70 ? 'text-yellow-500' : 'text-red-500'
+                    cert.integrity_score >= 90 ? 'text-green-700' :
+                    cert.integrity_score >= 70 ? 'text-amber-700' : 'text-red-700'
                   }`}>
                     {cert.integrity_score}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase">AI Systems</p>
+                  <p className="text-xs text-gray-500 first-cap">AI Systems</p>
                   <p className="text-2xl font-bold">{cert.ai_systems}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 uppercase">Last Audit</p>
+                  <p className="text-xs text-gray-500 first-cap">Last Audit</p>
                   <p className="text-sm font-mono">{cert.last_audit}</p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm border-t border-gray-800 pt-4">
+              <div className="flex items-center justify-between text-sm border-t border-[#dde2e8] pt-4">
                 <div className="text-gray-500">
-                  Valid until: <span className="text-aic-paper">{cert.expires_at}</span>
+                  Valid until: <span className="text-[#0e1b2c]">{cert.expires_at}</span>
                 </div>
                 <div className="flex gap-3">
-                  <button className="text-blue-400 hover:text-blue-300">View Details</button>
-                  <button className="text-gray-400 hover:text-gray-300">Schedule Audit</button>
+                  <button className="text-blue-700 hover:text-blue-700">View Details</button>
+                  <button className="text-gray-500 hover:text-gray-700">Schedule Audit</button>
                 </div>
               </div>
             </div>

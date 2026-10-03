@@ -23,7 +23,7 @@ export function StatusChip({ status }: { status: ChipStatus }) {
   const s = STATUS_MAP[status] ?? STATUS_MAP.missing;
   return (
     <span
-      className="inline-flex items-center gap-1.5 font-mono text-[8px] font-bold uppercase tracking-[0.15em] px-2 py-1 rounded"
+      className="inline-flex items-center gap-1.5 text-[12px] font-bold first-cap px-2 py-1 rounded"
       style={{ background: s.bg, color: s.color }}
     >
       <span

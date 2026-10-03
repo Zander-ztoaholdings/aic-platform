@@ -9,19 +9,19 @@ export default function RegionalExpansionPage() {
     return (
         <div className="space-y-16">
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
-            <div className="flex justify-between items-end border-b border-aic-paper/5 pb-12">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
                 <div>
-                    <h1 className="text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4 text-aic-paper">Global Expansion</h1>
+                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4 text-[#0e1b2c]">Global Expansion</h1>
                     <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
                         Strategic tracking of AIC institutional entry across global jurisdictions.
                     </p>
                 </div>
-                <div className="text-right text-aic-gold font-mono text-[10px] font-bold uppercase tracking-[0.4em]">
+                <div className="text-right text-[#8a6a1f] text-[12px] font-bold first-cap">
                     Global Scale: v1.0:apps/hq/app/governance/expansion/page.tsx
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-8">
+            <div className="grid grid-cols-1 gap-4 md:gap-8">
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
                 {registry.map((j: any, i) => (
                     <motion.div 
@@ -29,26 +29,26 @@ export default function RegionalExpansionPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-[#080808] border border-aic-paper/5 p-12 rounded-[3rem] relative overflow-hidden group hover:border-aic-gold/20 transition-all"
+                        className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-[3rem] relative overflow-hidden group hover:border-aic-gold/20 transition-all"
                     >
-                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12 relative z-10">
-                            <div className="lg:col-span-1 border-r border-aic-paper/5 pr-12">
-                                <span className="text-[10px] font-mono font-bold text-gray-600 uppercase tracking-widest mb-4 block">Jurisdiction</span>
-                                <h3 className="text-3xl font-serif font-bold text-aic-paper mb-2">{j.jurisdiction || j.country}</h3>:apps/hq/app/governance/expansion/page.tsx
-                                <span className={`text-[8px] font-mono font-bold px-2 py-1 rounded border ${
-                                    j.status === 'GOLD_STANDARD' ? 'border-green-500/20 text-green-500' : 'border-aic-gold/20 text-aic-gold'
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-12 relative z-10">
+                            <div className="lg:col-span-1 border-r border-[#dde2e8] pr-12">
+                                <span className="text-[12px] font-bold text-gray-600 first-cap mb-4 block">Jurisdiction</span>
+                                <h3 className="text-3xl font-serif font-bold text-[#0e1b2c] mb-2">{j.jurisdiction || j.country}</h3>:apps/hq/app/governance/expansion/page.tsx
+                                <span className={`text-[11px] font-mono font-bold px-2 py-1 rounded border ${
+                                    j.status === 'GOLD_STANDARD' ? 'border-green-200 text-green-700' : 'border-aic-gold/20 text-[#8a6a1f]'
                                 }`}>
                                     {j.status}
                                 </span>
                             </div>
 
                             <div className="lg:col-span-2">
-                                <span className="text-[10px] font-mono font-bold text-gray-600 uppercase tracking-widest mb-4 block">Regulatory Mapping</span>
-                                <p className="text-sm font-serif italic text-gray-400 mb-6">"{j.law}"</p>
+                                <span className="text-[12px] font-bold text-gray-600 first-cap mb-4 block">Regulatory Mapping</span>
+                                <p className="text-sm font-serif italic text-gray-500 mb-6">"{j.law}"</p>
                                 <div className="flex flex-wrap gap-2">
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
                                     {j.rights.map((r: string) => (
-                                        <span key={r} className="px-3 py-1 bg-aic-paper/5 rounded-lg text-[9px] font-mono text-gray-500 uppercase tracking-tighter italic">:apps/hq/app/governance/expansion/page.tsx
+                                        <span key={r} className="px-3 py-1 bg-[#f5f7f9] rounded-lg text-[12px] text-gray-500 first-cap tracking-tighter italic">:apps/hq/app/governance/expansion/page.tsx
                                             {r}
                                         </span>
                                     ))}
@@ -56,10 +56,10 @@ export default function RegionalExpansionPage() {
                             </div>
 
                             <div className="lg:col-span-1 flex flex-col justify-center">
-                                <p className="text-[8px] font-mono text-gray-600 uppercase mb-2">Authority Engagement</p>
+                                <p className="text-[12px] text-gray-600 first-cap mb-2">Authority Engagement</p>
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
-                                <p className="text-sm font-serif text-aic-paper mb-8 italic">{j.enforcement_body}</p>
-                                <button className="bg-aic-paper text-black py-3 rounded-xl font-mono text-[9px] font-bold uppercase tracking-widest hover:bg-aic-gold transition-all">:apps/hq/app/governance/expansion/page.tsx
+                                <p className="text-sm font-serif text-[#0e1b2c] mb-8 italic">{j.enforcement_body}</p>
+                                <button className="bg-[#0e1b2c] text-white py-3 rounded-xl text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all">:apps/hq/app/governance/expansion/page.tsx
                                     INITIATE_ENTRY_PROTOCOL
                                 </button>
                             </div>

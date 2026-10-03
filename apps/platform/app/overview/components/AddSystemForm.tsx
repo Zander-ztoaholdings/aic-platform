@@ -8,7 +8,7 @@ type LifecycleStage = (typeof LIFECYCLE_STAGES)[number];
 
 const inputClass =
   'w-full border border-gray-200 rounded-md px-3 py-2 text-sm text-aic-navy focus:outline-none focus:border-aic-gold transition-colors bg-white';
-const labelClass = 'block font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5';
+const labelClass = 'block text-[12px] font-bold first-cap text-gray-400 mb-1.5';
 
 /**
  * Declare an AI system from the AI Overview page.
@@ -189,7 +189,7 @@ export function AddSystemForm() {
         <button
           type="submit"
           disabled={submitting}
-          className="bg-aic-navy text-white rounded-md px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider disabled:opacity-50"
+          className="bg-aic-navy text-white rounded-md px-4 py-2 text-xs font-bold first-cap disabled:opacity-50"
         >
           {submitting ? 'Declaring…' : 'Declare system'}
         </button>

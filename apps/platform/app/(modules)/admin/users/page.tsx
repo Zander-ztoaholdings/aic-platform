@@ -56,8 +56,8 @@ function PeoplePage() {
     <AdminShell>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">People</h1>
-          <p className="mt-1 text-sm text-white/55">Every account on the platform. Change roles, move people between organisations, and control access.</p>
+          <h1 className="text-2xl font-semibold text-[#0e1b2c]">People</h1>
+          <p className="mt-1 text-sm text-[#5e6b7b]">Every account on the platform. Change roles, move people between organisations, and control access.</p>
         </div>
         <Button variant="primary" onClick={() => setCreating(true)}>Add an account</Button>
       </div>
@@ -80,26 +80,26 @@ function PeoplePage() {
         </select>
       </div>
 
-      {error && <p className="mt-4 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+      {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-white/[0.08]">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-[#dde2e8]">
         <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-white/[0.03] text-xs text-white/45">
+          <thead className="bg-[#f5f7f9] text-xs text-[#8a95a3]">
             <tr><th className="px-4 py-3 font-medium">Person</th><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Last sign-in</th><th /></tr>
           </thead>
           <tbody>
-            {people === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>}
-            {people && shown.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-white/40">No one matches these filters.</td></tr>}
+            {people === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
+            {people && shown.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">No one matches these filters.</td></tr>}
             {shown.map((p) => (
-              <tr key={p.id} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
-                <td className="px-4 py-3"><div className="font-medium text-white">{p.name}{p.id === me && <span className="ml-2 text-xs text-white/40">you</span>}</div><div className="text-xs text-white/45">{p.email}</div></td>
-                <td className="px-4 py-3 text-white/70">{p.orgName ?? <span className="text-white/35">AIC</span>}</td>
+              <tr key={p.id} className="border-t border-[#dde2e8] hover:bg-[#eef1f5]">
+                <td className="px-4 py-3"><div className="font-medium text-[#0e1b2c]">{p.name}{p.id === me && <span className="ml-2 text-xs text-[#8a95a3]">you</span>}</div><div className="text-xs text-[#8a95a3]">{p.email}</div></td>
+                <td className="px-4 py-3 text-[#5e6b7b]">{p.orgName ?? <span className="text-[#8a95a3]">AIC</span>}</td>
                 <td className="px-4 py-3"><Pill tone={p.isSuperAdmin ? 'gold' : 'neutral'}>{p.isSuperAdmin ? 'Super admin' : ROLE_LABEL[p.role] ?? p.role}</Pill></td>
                 <td className="px-4 py-3 space-x-1">
                   {!p.isActive ? <Pill tone="bad">Deactivated</Pill> : locked(p) ? <Pill tone="warn">Locked out</Pill> : <Pill tone="good">Active</Pill>}
                   {!p.emailVerified && <Pill>Email unconfirmed</Pill>}
                 </td>
-                <td className="px-4 py-3 text-white/55">{ago(p.lastLogin)}</td>
+                <td className="px-4 py-3 text-[#5e6b7b]">{ago(p.lastLogin)}</td>
                 <td className="px-4 py-3 text-right"><Button variant="ghost" onClick={() => setOpen(p)}>Manage</Button></td>
               </tr>
             ))}
@@ -135,9 +135,9 @@ function ManagePerson({ person, orgs, isMe, canGrant, onClose, onDone }: { perso
 
   return (
     <Panel title={person.name} onClose={onClose}>
-      <p className="-mt-4 mb-5 text-sm text-white/50">{person.email}</p>
+      <p className="-mt-4 mb-5 text-sm text-[#8a95a3]">{person.email}</p>
       {isMe ? (
-        <p className="text-sm text-white/60">This is your own account. Another super admin has to change your role or access, so nobody can lock themselves out by accident.</p>
+        <p className="text-sm text-[#5e6b7b]">This is your own account. Another super admin has to change your role or access, so nobody can lock themselves out by accident.</p>
       ) : (
         <>
           <Section title="Reason for the change" hint="Recorded with every change below, with your name and the time.">
@@ -168,7 +168,7 @@ function ManagePerson({ person, orgs, isMe, canGrant, onClose, onDone }: { perso
                 : <Button disabled={busy} onClick={() => act({ action: 'reactivate' })}>Reactivate</Button>}
               {locked(person) && <Button disabled={busy} onClick={() => act({ action: 'unlock' })}>Unlock sign-in</Button>}
             </div>
-            <p className="text-xs text-white/45">Deactivating signs them out within a minute and keeps everything they recorded.</p>
+            <p className="text-xs text-[#8a95a3]">Deactivating signs them out within a minute and keeps everything they recorded.</p>
           </Section>
 
           <Section title="Remove account" hint="Erases their name, email and credentials for good. Their past records stay, attributed to a removed account. Cannot be undone.">
@@ -177,7 +177,7 @@ function ManagePerson({ person, orgs, isMe, canGrant, onClose, onDone }: { perso
           </Section>
         </>
       )}
-      {msg && <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</p>}
+      {msg && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{msg}</p>}
     </Panel>
   );
 }
@@ -196,7 +196,7 @@ function CreatePerson({ orgs, canGrant, onClose, onDone }: { orgs: Org[]; canGra
   }
   return (
     <Panel title="Add an account" onClose={onClose}>
-      <p className="-mt-3 mb-5 text-sm text-white/50">For AIC staff, mostly. Clients usually register themselves, or their admin invites them.</p>
+      <p className="-mt-3 mb-5 text-sm text-[#8a95a3]">For AIC staff, mostly. Clients usually register themselves, or their admin invites them.</p>
       <form onSubmit={submit} className="space-y-3">
         <input className={field} placeholder="Full name" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} required />
         <input className={field} type="email" placeholder="Email" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required />
@@ -209,7 +209,7 @@ function CreatePerson({ orgs, canGrant, onClose, onDone }: { orgs: Org[]; canGra
             {orgs.map((o) => <option key={o.id} value={o.id} className="text-black">{o.name}</option>)}
           </select>
         )}
-        {msg && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</p>}
+        {msg && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{msg}</p>}
         <Button variant="primary" disabled={busy} type="submit" className="w-full">{busy ? 'Creating…' : 'Create account'}</Button>
       </form>
     </Panel>

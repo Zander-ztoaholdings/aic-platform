@@ -25,10 +25,10 @@ export function ActionItems({ items, onAction }: ActionItemsProps) {
   const urgBorder = { high: 'border-red-600', medium: 'border-aic-gold', low: 'border-gray-300' };
 
   return (
-    <Card className="p-6 bg-white border-gray-200 shadow-sm flex flex-col h-full">
+    <Card className="p-4 sm:p-6 bg-white border-gray-200 shadow-sm flex flex-col h-full">
       <div className="flex items-center gap-2 mb-6">
         <div className="w-4 h-0.5 bg-aic-gold" />
-        <span className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">Action Items</span>
+        <span className="text-[12px] font-bold text-aic-gold first-cap">Action Items</span>
       </div>
 
       <div className="space-y-3 flex-1">
@@ -55,7 +55,7 @@ export function ActionItems({ items, onAction }: ActionItemsProps) {
                   <h3 className="text-xs font-bold text-aic-navy leading-snug">{a.title}</h3>
                   <Badge 
                     variant="outline" 
-                    className={`h-4 text-[8px] uppercase font-bold tracking-widest px-1.5 border-none ${ub} ${uc}`}
+                    className={`h-4 text-[12px] first-cap font-bold px-1.5 border-none ${ub} ${uc}`}
                   >
                     {a.urgency}
                   </Badge>
@@ -66,12 +66,12 @@ export function ActionItems({ items, onAction }: ActionItemsProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
                     <Clock className="w-3 h-3 text-gray-300" />
-                    <span className="font-mono text-[9px] text-gray-400 uppercase tracking-widest">Due {a.deadline}</span>
+                    <span className="text-[12px] text-gray-400 first-cap">Due {a.deadline}</span>
                   </div>
                   <Button 
                     size="sm" 
                     onClick={() => onAction(a.id, a.cta)}
-                    className="bg-aic-gold hover:bg-aic-gold-light text-white font-mono text-[9px] uppercase tracking-widest h-7 px-3 rounded-full"
+                    className="bg-aic-gold hover:bg-aic-gold-light text-white text-[12px] first-cap h-7 px-3 rounded-full"
                   >
                     {a.cta === 'Evidence Vault' ? 'Upload Evidence' : 'Reply to Auditor'} <ChevronRight className="w-2.5 h-2.5 ml-1" />
                   </Button>

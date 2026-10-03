@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { auth } from '@aic/auth';
 import { canUseHq, homeFor, type WorkspaceUser } from '@/lib/workspace';
+import AdminShell from '@/app/(modules)/admin/components/AdminShell';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,5 +20,8 @@ export default async function HqLayout({ children }: { children: React.ReactNode
   const user = session.user as WorkspaceUser;
   if (!canUseHq(user)) redirect(homeFor(user));
 
-  return <>{children}</>;
+  // HQ pages had no shell at all, so there was no way back out of them and
+  // nothing to navigate with on a phone. They share the staff shell, whose
+  // menu already lists HQ.
+  return <AdminShell>{children}</AdminShell>;
 }

@@ -35,16 +35,16 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       className={cn(
-        "group relative p-6 bg-aic-paper rounded-3xl border border-aic-black/5 shadow-sm hover:shadow-md transition-all",
+        "group relative p-4 sm:p-6 bg-aic-paper rounded-3xl border border-aic-black/5 shadow-sm hover:shadow-md transition-all",
         block.isMandatory && "border-l-4 border-l-red-700 bg-red-50/30"
       )}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           {block.type === 'human-context' && <UserCheck className="w-4 h-4 text-red-700" />}
-          {block.type === 'model-card' && <Shield className="w-4 h-4 text-aic-gold" />}
-          {block.type === 'text' && <Activity className="w-4 h-4 text-gray-400" />}
-          <span className="text-[9px] font-mono font-bold text-gray-400 uppercase tracking-widest">
+          {block.type === 'model-card' && <Shield className="w-4 h-4 text-[#8a6a1f]" />}
+          {block.type === 'text' && <Activity className="w-4 h-4 text-gray-500" />}
+          <span className="text-[12px] font-bold text-gray-500 first-cap">
             {block.type.replace('-', ' ')} {block.isMandatory && "(MANDATORY)"}
           </span>
         </div>
@@ -52,7 +52,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
         {!block.isMandatory && (
           <button 
             onClick={() => onDelete(block.id)}
-            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 text-red-400 rounded-xl transition-all"
+            className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-50 text-red-700 rounded-xl transition-all"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -70,14 +70,14 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
 
       {block.type === 'human-context' && (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 p-3 bg-red-700/5 rounded-xl border border-red-700/10">
+          <div className="flex items-center gap-2 p-3 bg-red-50 rounded-xl border border-red-200">
             <Info className="w-4 h-4 text-red-700" />
             <p className="text-[11px] text-red-800 font-medium">
               High Human Impact detected ({impactMagnitude}/10). Qualitative rationale required for ISO 42001 alignment.
             </p>
           </div>
           <textarea
-            className="w-full bg-aic-paper/50 border border-red-200 rounded-2xl p-4 font-serif text-lg focus:border-red-700 outline-none transition-all"
+            className="w-full bg-[#f5f7f9] border border-red-200 rounded-2xl p-4 font-serif text-lg focus:border-red-200 outline-none transition-all"
             placeholder="Describe the human stakeholders affected and mitigation strategies..."
             value={block.content.rationale || ''}
             onChange={(e) => onUpdate(block.id, { ...block.content, rationale: e.target.value })}
@@ -87,9 +87,9 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
 
       {block.type === 'model-card' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-aic-paper/30 p-6 rounded-2xl border border-dashed border-aic-black/10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-[#f5f7f9] p-4 sm:p-6 rounded-2xl border border-dashed border-aic-black/10">
             <div className="space-y-4">
-              <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">Model Name</label>
+              <label className="block text-[12px] font-bold text-gray-500 first-cap">Model Name</label>
               <input
                 className="w-full bg-aic-paper border border-aic-black/5 rounded-xl p-3 text-sm focus:border-aic-gold outline-none transition-all"
                 placeholder="e.g. CreditRisk-v4"
@@ -98,7 +98,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
               />
             </div>
             <div className="space-y-4">
-              <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">Bias Score (Lower is better)</label>
+              <label className="block text-[12px] font-bold text-gray-500 first-cap">Bias Score (Lower is better)</label>
               <input
                 type="number"
                 className="w-full bg-aic-paper border border-aic-black/5 rounded-xl p-3 text-sm focus:border-aic-gold outline-none transition-all"
@@ -108,7 +108,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
               />
             </div>
             <div className="md:col-span-2 space-y-4">
-              <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest">Training Data Demographics</label>
+              <label className="block text-[12px] font-bold text-gray-500 first-cap">Training Data Demographics</label>
               <textarea
                 className="w-full bg-aic-paper border border-aic-black/5 rounded-xl p-3 text-sm focus:border-aic-gold outline-none transition-all h-24"
                 placeholder="Describe dataset diversity and collection methodology..."
@@ -141,7 +141,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
                   a.click();
                 }
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-aic-black text-aic-paper rounded-xl text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-aic-gold transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-white text-[#0e1b2c] rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold transition-all"
             >
               <FileDown className="w-3 h-3" /> Export ISO Artifact
             </button>

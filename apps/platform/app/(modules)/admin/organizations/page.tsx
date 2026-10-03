@@ -28,27 +28,27 @@ export default function OrganisationsPage() {
 
   return (
     <AdminShell>
-      <h1 className="text-2xl font-semibold text-white">Organisations</h1>
-      <p className="mt-1 text-sm text-white/55">Client organisations and their people. Suspend access, rename, or delete an empty organisation.</p>
+      <h1 className="text-2xl font-semibold text-[#0e1b2c]">Organisations</h1>
+      <p className="mt-1 text-sm text-[#5e6b7b]">Client organisations and their people. Suspend access, rename, or delete an empty organisation.</p>
       <input className={`${field} mt-6 max-w-sm`} placeholder="Search organisations" value={q} onChange={(e) => setQ(e.target.value)} />
-      {error && <p className="mt-4 rounded-lg bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+      {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-white/[0.08]">
+      <div className="mt-4 overflow-x-auto rounded-xl border border-[#dde2e8]">
         <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-white/[0.03] text-xs text-white/45">
+          <thead className="bg-[#f5f7f9] text-xs text-[#8a95a3]">
             <tr><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">People</th><th className="px-4 py-3 font-medium">Certification</th><th className="px-4 py-3 font-medium">Registered</th><th /></tr>
           </thead>
           <tbody>
-            {orgs === null && <tr><td colSpan={5} className="px-4 py-10 text-center text-white/40">Loading…</td></tr>}
-            {orgs && shown.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-white/40">No organisations match.</td></tr>}
+            {orgs === null && <tr><td colSpan={5} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
+            {orgs && shown.length === 0 && <tr><td colSpan={5} className="px-4 py-10 text-center text-[#8a95a3]">No organisations match.</td></tr>}
             {shown.map((o) => {
               const suspended = (o.memberCount ?? 0) > 0 && (o.activeMembers ?? 0) === 0;
               return (
-                <tr key={o.id} className="border-t border-white/[0.06] hover:bg-white/[0.02]">
-                  <td className="px-4 py-3"><div className="font-medium text-white">{o.name}</div>{o.division ? <div className="text-xs text-white/45">Division {o.division}</div> : null}</td>
-                  <td className="px-4 py-3"><Link href={`/admin/users?org=${o.id}`} className="text-white/75 hover:text-white hover:underline">{o.activeMembers ?? 0} active{(o.memberCount ?? 0) !== (o.activeMembers ?? 0) ? ` of ${o.memberCount}` : ''}</Link></td>
+                <tr key={o.id} className="border-t border-[#dde2e8] hover:bg-[#eef1f5]">
+                  <td className="px-4 py-3"><div className="font-medium text-[#0e1b2c]">{o.name}</div>{o.division ? <div className="text-xs text-[#8a95a3]">Division {o.division}</div> : null}</td>
+                  <td className="px-4 py-3"><Link href={`/admin/users?org=${o.id}`} className="text-[#5e6b7b] hover:text-[#0e1b2c] hover:underline">{o.activeMembers ?? 0} active{(o.memberCount ?? 0) !== (o.activeMembers ?? 0) ? ` of ${o.memberCount}` : ''}</Link></td>
                   <td className="px-4 py-3">{suspended ? <Pill tone="bad">Access suspended</Pill> : <Pill>{(o.certificationStatus ?? 'Draft').replace(/_/g, ' ').toLowerCase()}</Pill>}</td>
-                  <td className="px-4 py-3 text-white/55">{ago(o.createdAt ?? o.created_at ?? null)}</td>
+                  <td className="px-4 py-3 text-[#5e6b7b]">{ago(o.createdAt ?? o.created_at ?? null)}</td>
                   <td className="px-4 py-3 text-right"><Button variant="ghost" onClick={() => setOpen(o)}>Manage</Button></td>
                 </tr>
               );
@@ -98,7 +98,7 @@ function ManageOrg({ org, onClose, onDone }: { org: Org; onClose: () => void; on
         <input className={field} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={`Type ${org.name} to confirm`} />
         <Button variant="danger" disabled={busy || confirm.trim() !== org.name} onClick={() => act({ confirmName: confirm }, 'DELETE')}>Delete organisation</Button>
       </Section>
-      {msg && <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{msg}</p>}
+      {msg && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{msg}</p>}
     </Panel>
   );
 }

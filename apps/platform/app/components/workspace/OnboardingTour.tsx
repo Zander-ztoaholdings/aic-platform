@@ -216,7 +216,7 @@ export function OnboardingTour({ orgName }: { orgName: string | null }) {
         tabIndex={-1}
         role="dialog"
         aria-label={step.title}
-        className={`pointer-events-auto outline-none rounded-2xl bg-white p-6 text-[#0e1b2c] shadow-[0_24px_60px_-20px_rgba(14,27,44,0.45)] ${pointing ? '' : 'fixed left-1/2 top-1/2 w-[min(440px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2'}`}
+        className={`pointer-events-auto outline-none rounded-2xl bg-white p-4 sm:p-6 text-[#0e1b2c] shadow-[0_24px_60px_-20px_rgba(14,27,44,0.45)] ${pointing ? '' : 'fixed left-1/2 top-1/2 w-[min(440px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2'}`}
         style={pointing ? cardStyle : undefined}
       >
         <div className="flex items-center justify-between gap-4">

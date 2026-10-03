@@ -85,53 +85,53 @@ export default function GovernancePage() {
 
   return (
       <div className="max-w-6xl space-y-12">
-        <div className="flex justify-between items-end border-b border-aic-paper/5 pb-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-8">
             <div>
-                <h1 className="text-4xl font-serif font-medium tracking-tight underline decoration-aic-gold underline-offset-8">Institutional Control</h1>
+                <h1 className="text-3xl md:text-4xl font-serif font-medium tracking-tight underline decoration-aic-gold underline-offset-8">Institutional Control</h1>
                 <p className="text-gray-500 font-serif mt-4 italic text-lg max-w-xl">Super-Admin Governance: Managing team access, roles, and functional permissions across the AIC ecosystem.</p>
             </div>
             <button 
                 onClick={handleProvision}
-                className="bg-aic-paper text-black px-8 py-3 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold transition-colors shadow-xl"
+                className="bg-[#0e1b2c] text-white px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-colors shadow-xl"
             >
                 + Provision New Account
             </button>
         </div>
 
-        <div className="bg-black/40 border border-aic-paper/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <table className="w-full text-left text-sm font-serif">
-                <thead className="bg-aic-paper/5 border-b border-aic-paper/5">
+        <div className="bg-white border border-[#dde2e8] rounded-[2.5rem] overflow-hidden shadow-2xl">
+            <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left text-sm font-serif">
+                <thead className="bg-[#f5f7f9] border-b border-[#dde2e8]">
                     <tr>
-                        <th className="p-6 font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">User Details</th>
-                        <th className="p-6 font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">Role</th>
-                        <th className="p-6 font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center">Advanced Permissions</th>
-                        <th className="p-6 text-right font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">Last Access</th>
+                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">User Details</th>
+                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">Role</th>
+                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap text-center">Advanced Permissions</th>
+                        <th className="p-4 sm:p-6 text-right text-[12px] font-bold text-gray-500 first-cap">Last Access</th>
                     </tr>
                 </thead>
-                <tbody className="divide-y divide-aic-paper/5">
+                <tbody className="divide-y divide-[#e6e9ee]">
                     {loading ? (
-                        <tr><td colSpan={4} className="p-12 text-center text-gray-500 font-serif italic">Accessing personnel database...</td></tr>
+                        <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 font-serif italic">Accessing personnel database...</td></tr>
                     ) : users.map((user, _i) => (
                         <motion.tr 
                             key={user.id}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="hover:bg-aic-paper/5 transition-colors group"
+                            className="hover:bg-[#eef1f5] transition-colors group"
                         >
-                            <td className="p-6">
-                                <p className="font-bold text-aic-paper text-lg leading-none mb-1">
-                                    {user.name} {user.is_super_admin && <span className="text-[8px] text-aic-gold border border-aic-gold/20 px-1 ml-2 font-mono">SUPER</span>}
+                            <td className="p-4 sm:p-6">
+                                <p className="font-bold text-[#0e1b2c] text-lg leading-none mb-1">
+                                    {user.name} {user.is_super_admin && <span className="text-[11px] text-[#8a6a1f] border border-aic-gold/20 px-1 ml-2 font-mono">SUPER</span>}
                                 </p>
-                                <p className="text-[10px] font-mono text-gray-500">{user.email}</p>
+                                <p className="text-[11.5px] font-mono text-gray-500">{user.email}</p>
                             </td>
-                            <td className="p-6">
-                                <span className={`text-[9px] font-mono uppercase px-2 py-0.5 rounded border ${
-                                    user.role === 'AIC_SUPER_ADMIN' ? 'border-aic-gold text-aic-gold bg-aic-gold/5' : 'border-aic-paper/10 text-gray-400'
+                            <td className="p-4 sm:p-6">
+                                <span className={`text-[12px] first-cap px-2 py-0.5 rounded border ${
+                                    user.role === 'AIC_SUPER_ADMIN' ? 'border-aic-gold text-[#8a6a1f] bg-aic-gold/5' : 'border-[#dde2e8] text-gray-500'
                                 }`}>
                                     {user.role}
                                 </span>
                             </td>
-                            <td className="p-6">
+                            <td className="p-4 sm:p-6">
                                 <div className="flex justify-center gap-3">
                                     {permissionKeys.map((p) => (
                                         <button
@@ -140,24 +140,24 @@ export default function GovernancePage() {
                                             className={`flex flex-col items-center gap-1 group/btn`}
                                         >
                                             <div className={`w-3 h-3 rounded-full border transition-all ${
-                                                user.permissions?.[p.id] ? 'bg-aic-gold border-aic-gold shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'bg-transparent border-aic-paper/20'
+                                                user.permissions?.[p.id] ? 'bg-aic-gold border-aic-gold shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'bg-transparent border-[#dde2e8]'
                                             }`} />
-                                            <span className={`text-[7px] font-mono uppercase transition-colors ${
-                                                user.permissions?.[p.id] ? 'text-aic-gold' : 'text-gray-600 group-hover/btn:text-gray-400'
+                                            <span className={`text-[12px] first-cap transition-colors ${
+                                                user.permissions?.[p.id] ? 'text-[#8a6a1f]' : 'text-gray-600 group-hover/btn:text-gray-400'
                                             }`}>{p.label}</span>
                                         </button>
                                     ))}
                                 </div>
                             </td>
-                            <td className="p-6 text-right">
-                                <span className="text-[9px] font-mono text-gray-500 uppercase">
+                            <td className="p-4 sm:p-6 text-right">
+                                <span className="text-[12px] text-gray-500 first-cap">
                                     {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
                                 </span>
                             </td>
                         </motion.tr>
                     ))}
                 </tbody>
-            </table>
+            </table></div>
         </div>
       </div>
   )

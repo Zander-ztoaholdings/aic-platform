@@ -70,7 +70,7 @@ function timeAgo(iso: string | null): string {
 function Stat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div>
-      <div className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em]">{label}</div>
+      <div className="text-[12px] font-bold text-gray-400 first-cap">{label}</div>
       <div className="mt-1 font-serif text-2xl font-bold text-aic-navy tabular-nums">{value}</div>
       {sub && <div className="mt-0.5 text-xs text-gray-500">{sub}</div>}
     </div>
@@ -178,7 +178,7 @@ export default function PulsePage() {
         </div>
 
         <SectionCard>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <Stat label="Recorded" value={loading ? '—' : stats.total} />
             <Stat label="Human overrides" value={loading ? '—' : stats.overrides} sub={loading ? undefined : stats.rate} />
             <Stat label="Last recorded" value={loading ? '—' : timeAgo(stats.last)} />
@@ -199,7 +199,7 @@ export default function PulsePage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="font-mono text-[10px] font-bold text-aic-navy uppercase tracking-[0.15em]">
+                  <div className="text-[12px] font-bold text-aic-navy first-cap">
                     Record a human override
                   </div>
                   <button
@@ -220,7 +220,7 @@ export default function PulsePage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="dec-system" className="block font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5">
+                    <label htmlFor="dec-system" className="block text-[12px] font-bold first-cap text-gray-400 mb-1.5">
                       System
                     </label>
                     <input
@@ -239,7 +239,7 @@ export default function PulsePage() {
                     </datalist>
                   </div>
                   <div>
-                    <label htmlFor="dec-original" className="block font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5">
+                    <label htmlFor="dec-original" className="block text-[12px] font-bold first-cap text-gray-400 mb-1.5">
                       What the system decided
                     </label>
                     <input
@@ -253,7 +253,7 @@ export default function PulsePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="dec-outcome" className="block font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5">
+                  <label htmlFor="dec-outcome" className="block text-[12px] font-bold first-cap text-gray-400 mb-1.5">
                     What you decided instead
                   </label>
                   <input
@@ -267,7 +267,7 @@ export default function PulsePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="dec-reason" className="block font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 mb-1.5">
+                  <label htmlFor="dec-reason" className="block text-[12px] font-bold first-cap text-gray-400 mb-1.5">
                     Why
                   </label>
                   <textarea
@@ -284,7 +284,7 @@ export default function PulsePage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-aic-navy text-white rounded-md px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider disabled:opacity-50"
+                  className="bg-aic-navy text-white rounded-md px-4 py-2 text-xs font-bold first-cap disabled:opacity-50"
                 >
                   {submitting ? 'Recording…' : 'Record override'}
                 </button>
@@ -312,7 +312,7 @@ export default function PulsePage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 border-b border-gray-100">
+                  <tr className="text-left text-[12px] first-cap text-gray-400 border-b border-gray-100">
                     <th className="px-5 py-3 font-bold">System</th>
                     <th className="px-5 py-3 font-bold">Outcome</th>
                     <th className="px-5 py-3 font-bold">Override</th>
@@ -330,7 +330,7 @@ export default function PulsePage() {
                       <td className="px-5 py-3">
                         {d.isHumanOverride ? (
                           <div>
-                            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.1em] text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                            <span className="text-[12px] font-bold first-cap text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
                               Overridden
                             </span>
                             {d.overrideReason && (

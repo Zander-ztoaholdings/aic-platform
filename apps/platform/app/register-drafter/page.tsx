@@ -50,7 +50,7 @@ export default function RegisterDrafterPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-3xl mx-auto pb-24 pt-8 px-4">
+      <div className="max-w-3xl mx-auto pb-24 md:pt-8">
         <Eyebrow>AI Overview · AI Estate</Eyebrow>
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
@@ -80,7 +80,7 @@ export default function RegisterDrafterPage() {
         </SectionCard>
 
         <div className="mb-3">
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#9ca3af]">
+          <span className="text-[12px] font-bold first-cap text-[#9ca3af]">
             How this will work
           </span>
         </div>
@@ -120,7 +120,7 @@ export default function RegisterDrafterPage() {
           </p>
           <Link
             href="/overview"
-            className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.1em] bg-[#0f1f3d] text-white rounded-full px-4 py-2 hover:bg-[#0A1728] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] font-bold first-cap bg-[#0f1f3d] text-white rounded-full px-4 py-2 hover:bg-[#0A1728] transition-colors"
           >
             Declare a System <ArrowRight className="w-3 h-3" />
           </Link>

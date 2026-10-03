@@ -19,7 +19,7 @@ const AIC_WEB = process.env.NEXT_PUBLIC_AIC_WEB_URL || 'https://aiccertified.clo
 
 function BrandMark() {
   return (
-    <svg viewBox="0 0 110 180" className="h-16 w-auto flex-shrink-0">
+    <svg viewBox="0 0 110 180" className="h-14 md:h-16 w-auto flex-shrink-0">
       <path d="M36,1 L1,1 L1,179 L36,179" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="square"/>
       <path d="M74,1 L109,1 L109,179 L74,179" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="square"/>
       <text x="55" y="20" fontSize="7" fill="#fff" textAnchor="middle" letterSpacing="2.5" fontFamily="Space Grotesk,sans-serif" fontWeight="700">METHODOLOGY</text>
@@ -218,67 +218,67 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#f0f4f8]">
       {/* LEFT PANEL - Dark Navy */}
-      <div className="w-full md:w-[45%] bg-[#0a1628] p-8 md:p-16 flex flex-col justify-center relative overflow-hidden">
+      <div className="w-full md:w-[45%] bg-[#0a1628] px-6 pt-7 pb-16 md:p-16 flex flex-col justify-center relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#c9920a]/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#c9920a]/5 rounded-full blur-3xl -ml-32 -mb-32"></div>
         
-        <div className="relative z-10 space-y-8">
+        <div className="relative z-10 flex items-center gap-5 md:block md:space-y-8">
           <BrandMark />
           
-          <div className="space-y-4">
-            <div className="font-mono text-[9px] tracking-[0.3em] text-[#c9920a] uppercase font-bold">
+          <div className="space-y-1 md:space-y-4">
+            <div className="text-[12px] text-[#c9920a] first-cap font-bold">
               AIC Pulse
             </div>
-            <h1 className="font-serif text-2xl md:text-3xl font-bold text-white leading-tight">
+            <h1 className="font-serif text-[22px] md:text-3xl font-bold text-white leading-tight">
               AI Accountability Platform
             </h1>
-            <p className="text-sm text-white/50 max-w-sm leading-relaxed">
+            <p className="hidden md:block text-sm text-white/50 max-w-sm leading-relaxed">
               Certifying that human empathy remains in the loop for every consequential automated decision.
             </p>
           </div>
 
-          <div className="space-y-4 pt-4">
+          <div className="hidden md:block space-y-4 pt-4">
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-[#c9920a]"></div>
-              <p className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Independent Algorithmic Auditing</p>
+              <p className="text-[12px] text-white/70 first-cap">Independent Algorithmic Auditing</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-[#c9920a]"></div>
-              <p className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Real-time Risk Monitoring</p>
+              <p className="text-[12px] text-white/70 first-cap">Real-time Risk Monitoring</p>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-[#c9920a]"></div>
-              <p className="text-[10px] font-mono text-white/70 uppercase tracking-wider">Stakeholder Transparency</p>
+              <p className="text-[12px] text-white/70 first-cap">Stakeholder Transparency</p>
             </div>
           </div>
         </div>
 
         <a
           href={AIC_WEB}
-          className="mt-16 md:absolute md:bottom-12 md:left-16 text-white/40 hover:text-white/80 transition-colors font-mono text-[10px] tracking-widest uppercase"
+          className="hidden md:block md:absolute md:bottom-12 md:left-16 text-white/40 hover:text-white/80 transition-colors text-[12px] first-cap"
         >
           &larr; aiccertified.cloud
         </a>
       </div>
 
       {/* RIGHT PANEL - White Form */}
-      <div className="w-full md:w-[55%] flex items-center justify-center p-6 md:p-12">
+      <div className="w-full md:w-[55%] flex items-start md:items-center justify-center px-4 pb-10 -mt-10 md:mt-0 md:p-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-[#e5e7eb] rounded-2xl p-8 shadow-sm max-w-sm w-full space-y-8"
+          className="bg-white border border-[#e5e7eb] rounded-2xl p-5 md:p-8 shadow-sm max-w-sm w-full space-y-8"
         >
           <div className="space-y-3">
             <a
               href={AIC_WEB}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-[#f8f9fb] px-3 py-1.5 font-mono text-[9px] font-bold text-[#6b7280] uppercase tracking-[0.2em] transition-colors hover:border-[#c9920a]/40 hover:bg-[#c9920a]/[0.06] hover:text-[#c9920a]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-[#f8f9fb] px-3 py-1.5 text-[12px] font-bold text-[#6b7280] first-cap transition-colors hover:border-[#c9920a]/40 hover:bg-[#c9920a]/[0.06] hover:text-[#c9920a]"
             >
               <span aria-hidden="true" className="text-xs leading-none">&larr;</span> Back to aiccertified.cloud
             </a>
             <div className="space-y-1">
               <h2 className="font-serif text-xl font-bold text-[#0f1f3d]">Welcome back</h2>
-              <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.2em]">
+              <p className="text-[12px] text-[#9ca3af] first-cap">
                 AIC Platform · Client Portal
               </p>
             </div>
@@ -311,7 +311,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => signIn('google', { callbackUrl: startUrl() })}
-                className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[10px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[11.5px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -326,7 +326,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => signIn('microsoft-entra-id', { callbackUrl: startUrl() })}
-                className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[10px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                className="flex items-center justify-center gap-2 border border-[#e5e7eb] rounded-xl py-2.5 text-[11.5px] font-mono font-bold text-[#6b7280] hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 23 23">
                   <path fill="currentColor" d="M0 0h11v11H0z" />
@@ -345,7 +345,7 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-[#e5e7eb]"></span>
               </div>
-              <div className="relative flex justify-center text-[8px] font-mono font-bold text-[#9ca3af] uppercase tracking-[0.2em]">
+              <div className="relative flex justify-center text-[12px] font-bold text-[#9ca3af] first-cap">
                 <span className="bg-white px-3">or continue with email</span>
               </div>
             </div>
@@ -353,7 +353,7 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <label htmlFor="email" className="block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+                <label htmlFor="email" className="block text-[12px] font-bold first-cap text-[#6b7280]">
                   Institutional Email
                 </label>
                 <input 
@@ -370,12 +370,12 @@ export default function LoginPage() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="password" className="block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+                  <label htmlFor="password" className="block text-[12px] font-bold first-cap text-[#6b7280]">
                     Access Key
                   </label>
                   <Link 
                     href="/forgot-password" 
-                    className="font-mono text-[9px] text-[#9ca3af] hover:text-[#c9920a] transition-colors"
+                    className="font-mono text-[11px] text-[#9ca3af] hover:text-[#c9920a] transition-colors"
                   >
                     FORGOT?
                   </Link>
@@ -398,7 +398,7 @@ export default function LoginPage() {
                     exit={{ opacity: 0, height: 0 }}
                     className="space-y-2 pt-2"
                   >
-                    <label htmlFor="mfaToken" className="block font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#c9920a]">
+                    <label htmlFor="mfaToken" className="block text-[12px] font-bold first-cap text-[#c9920a]">
                       MFA Verification
                     </label>
                     <input 
@@ -419,7 +419,7 @@ export default function LoginPage() {
               <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-[#c9920a] text-white rounded-full py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em] hover:bg-[#b07d08] transition-colors disabled:opacity-50 mt-4 shadow-sm"
+                className="w-full bg-[#c9920a] text-white rounded-full py-2.5 text-[12px] font-bold first-cap hover:bg-[#b07d08] transition-colors disabled:opacity-50 mt-4 shadow-sm"
               >
                 {isLoading ? 'Authorising…' : 'Access Portal'}
               </button>
@@ -427,7 +427,7 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
-            <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.15em]">
+            <p className="text-[12px] text-[#9ca3af] first-cap">
               New organisation?{' '}
               <Link href="/signup" className="font-bold text-[#6b7280] hover:text-[#c9920a] transition-colors">
                 Register it &rarr;
@@ -436,7 +436,7 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center">
-            <p className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-wider">
+            <p className="text-[12px] text-[#9ca3af] first-cap">
               Protected by AIC Secure Auth v2.1<br/>
               Continuous integrity monitoring
             </p>

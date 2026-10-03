@@ -32,20 +32,20 @@ export const SovereignButton = ({
 }: SovereignButtonProps) => {
   const isBusy = state === 'loading' || state === 'success' || state === 'error';
 
-  const baseStyles = "relative px-6 py-3 rounded-xl font-mono text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-3 border overflow-hidden group";
+  const baseStyles = "relative px-4 sm:px-6 py-3 rounded-xl text-[12px] font-bold first-cap transition-all duration-300 flex items-center justify-center gap-3 border overflow-hidden group";
   
   const variants = {
-    primary: "bg-aic-cyan/10 border-aic-cyan text-aic-cyan hover:bg-aic-cyan/20 hover:shadow-[0_0_20px_rgba(0,245,255,0.3)]",
-    secondary: "bg-aic-paper/5 border-aic-paper/10 text-gray-400 hover:text-aic-paper hover:border-aic-paper/30",
-    danger: "bg-red-500/10 border-red-500/50 text-red-500 hover:bg-red-500/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]",
-    ghost: "border-transparent text-gray-500 hover:text-aic-cyan hover:bg-aic-paper/5",
+    primary: "bg-aic-cyan/10 border-aic-cyan text-[#8a6a1f] hover:bg-aic-cyan/20 hover:shadow-[0_0_20px_rgba(0,245,255,0.3)]",
+    secondary: "bg-[#f5f7f9] border-[#dde2e8] text-gray-500 hover:text-[#0e1b2c] hover:border-[#dde2e8]",
+    danger: "bg-red-50 border-red-200 text-red-700 hover:bg-red-50 hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]",
+    ghost: "border-transparent text-gray-500 hover:text-[#8a6a1f] hover:bg-[#eef1f5]",
   };
 
   const stateStyles = {
     idle: "",
     loading: "cursor-wait opacity-80",
-    success: "border-green-500 text-green-500 bg-green-500/10",
-    error: "border-red-500 text-red-500 bg-red-500/10",
+    success: "border-green-200 text-green-700 bg-green-50",
+    error: "border-red-200 text-red-700 bg-red-50",
   };
 
   return (

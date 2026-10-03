@@ -57,7 +57,7 @@ function SectionCard({
 }) {
   return (
     <Card className={`rounded-2xl border-gray-100 shadow-sm ${className ?? ''}`}>
-      <CardHeader className="flex-row items-start justify-between gap-4 pb-4 border-b border-gray-50">
+      <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 pb-4 border-b border-gray-50">
         <div>
           <CardTitle className="font-serif text-lg font-bold text-aic-navy">{title}</CardTitle>
           {note && <CardDescription className="mt-1 text-xs leading-relaxed">{note}</CardDescription>}
@@ -72,7 +72,7 @@ function SectionCard({
 function StatTile({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="rounded-xl bg-gray-50/80 border border-gray-100 px-4 py-3.5">
-      <div className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-[0.14em]">
+      <div className="text-[12px] font-bold text-gray-400 first-cap">
         {label}
       </div>
       <div className="mt-1 font-serif text-2xl font-bold text-aic-navy tabular-nums">{value}</div>
@@ -90,7 +90,7 @@ function Tally({ rows }: { rows: Record<string, number> }) {
     <dl className="space-y-2.5">
       {entries.map(([k, n]) => (
         <div key={k} className="flex items-center justify-between">
-          <dt className="font-mono text-[11px] uppercase tracking-wider text-gray-500">
+          <dt className="text-[12.5px] first-cap text-gray-500">
             {k.replace(/_/g, ' ')}
           </dt>
           <dd>
@@ -130,7 +130,7 @@ function AvatarStack({ people }: { people: { name: string }[] }) {
         </Avatar>
       ))}
       {people.length > shown.length && (
-        <div className="-ml-2.5 size-9 rounded-full bg-gray-100 ring-2 ring-white flex items-center justify-center text-[10px] font-bold text-gray-500">
+        <div className="-ml-2.5 size-9 rounded-full bg-gray-100 ring-2 ring-white flex items-center justify-center text-[11.5px] font-bold text-gray-500">
           +{people.length - shown.length}
         </div>
       )}
@@ -169,10 +169,10 @@ export default async function OrgOverviewPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[1200px] mx-auto px-6 py-10 space-y-6">
+      <div className="max-w-[1200px] mx-auto md:py-4 space-y-6">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">
+            <div className="text-[12px] font-bold text-aic-gold first-cap">
               Organisation AI Overview
             </div>
             <h1 className="mt-2 font-serif text-3xl font-bold text-aic-navy tracking-tight">
@@ -197,7 +197,7 @@ export default async function OrgOverviewPage() {
             </div>
           </div>
           <div className="text-right">
-            <div className="font-mono text-[10px] text-gray-400 uppercase tracking-[0.15em]">
+            <div className="text-[12px] text-gray-400 first-cap">
               Assembled {new Date(overview.generatedAt).toLocaleString('en-ZA')}
             </div>
             {certificate && (
@@ -213,7 +213,7 @@ export default async function OrgOverviewPage() {
             because it is the answer to the question this whole screen invites
             ("so you're watching everything we do?") - no. */}
         <div className="rounded-2xl border border-aic-navy/10 bg-white px-5 py-4 shadow-sm">
-          <div className="font-mono text-[10px] font-bold text-aic-navy uppercase tracking-[0.15em]">
+          <div className="text-[12px] font-bold text-aic-navy first-cap">
             What AIC does not do
           </div>
           <p className="mt-1.5 text-sm text-gray-600 leading-relaxed max-w-3xl">
@@ -224,7 +224,7 @@ export default async function OrgOverviewPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 md:gap-6">
           {/* Gaps lead. The counts below are context for these; on their own
               they change nothing about what anyone does next. */}
           <SectionCard
@@ -240,7 +240,7 @@ export default async function OrgOverviewPage() {
               <ul className="space-y-3">
                 {gaps.map((gap) => (
                   <li key={gap.code} className="rounded-xl border border-gray-100 bg-gray-50/50 px-4 py-3.5">
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="flex flex-col-reverse items-start sm:flex-row sm:justify-between gap-2 sm:gap-4">
                       <div className="flex items-start gap-2.5">
                         <span className={`mt-1.5 size-2 rounded-full shrink-0 ${SEVERITY_DOT[gap.severity]}`} />
                         <h3 className="text-sm font-bold text-aic-navy">{gap.title}</h3>
@@ -251,7 +251,7 @@ export default async function OrgOverviewPage() {
                       </Badge>
                     </div>
                     <p className="mt-1.5 ml-4.5 text-xs leading-relaxed text-gray-500">{gap.detail}</p>
-                    <div className="mt-1.5 ml-4.5 font-mono text-[9px] uppercase tracking-[0.15em] text-gray-300">
+                    <div className="mt-1.5 ml-4.5 text-[12px] first-cap text-gray-300">
                       {gap.code}
                     </div>
                   </li>
@@ -296,7 +296,7 @@ export default async function OrgOverviewPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 border-b border-gray-100">
+                  <tr className="text-left text-[12px] first-cap text-gray-400 border-b border-gray-100">
                     <th className="pb-2 pr-4 font-bold">System</th>
                     <th className="pb-2 pr-4 font-bold">Purpose</th>
                     <th className="pb-2 pr-4 font-bold">Risk tier</th>
@@ -309,14 +309,14 @@ export default async function OrgOverviewPage() {
                     <tr key={s.id} className="align-top">
                       <td className="py-3 pr-4">
                         <div className="font-bold text-aic-navy">{s.name}</div>
-                        <div className="font-mono text-[10px] text-gray-400">v{s.version}</div>
+                        <div className="font-mono text-[11.5px] text-gray-400">v{s.version}</div>
                       </td>
                       <td className="py-3 pr-4 max-w-md text-gray-600">
                         {s.purpose?.trim() || <span className="text-red-500">Not stated</span>}
                       </td>
                       <td className="py-3 pr-4 font-mono tabular-nums text-gray-600">{s.riskTier}</td>
                       <td className="py-3 pr-4">
-                        <Badge variant="outline" className="rounded-full border-gray-200 font-mono text-[10px] uppercase tracking-wider text-gray-500">
+                        <Badge variant="outline" className="rounded-full border-gray-200 text-[12px] first-cap text-gray-500">
                           {s.lifecycleStage}
                         </Badge>
                       </td>
@@ -329,7 +329,7 @@ export default async function OrgOverviewPage() {
           )}
         </SectionCard>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <SectionCard
             title="Accountability"
             note="A named individual who has accepted a declaration. A job title alone is not an accountable person."
@@ -346,7 +346,7 @@ export default async function OrgOverviewPage() {
                     <li key={p.id} className="py-3">
                       <div className="font-bold text-aic-navy text-sm">{p.name}</div>
                       <div className="text-xs text-gray-500">{p.jobTitle ?? 'No title recorded'}</div>
-                      <div className="mt-1 font-mono text-[10px] text-gray-400 uppercase tracking-wider">
+                      <div className="mt-1 text-[12px] text-gray-400 first-cap">
                         Declaration {p.declarationVersion} accepted {date(p.declarationAcceptedAt)}
                       </div>
                     </li>
@@ -379,7 +379,7 @@ export default async function OrgOverviewPage() {
                 }
               />
             </div>
-            <div className="mt-6 pt-4 border-t border-gray-50 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400">
+            <div className="mt-6 pt-4 border-t border-gray-50 text-[12px] first-cap text-gray-400">
               Last record {date(decisions.lastRecordedAt)}
             </div>
           </SectionCard>
@@ -402,7 +402,7 @@ export default async function OrgOverviewPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="text-left font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 border-b border-gray-100">
+                      <tr className="text-left text-[12px] first-cap text-gray-400 border-b border-gray-100">
                         <th className="pb-2 pr-4 font-bold">Provider</th>
                         <th className="pb-2 pr-4 font-bold">Model</th>
                         <th className="pb-2 pr-4 font-bold text-right">Requests</th>
@@ -431,7 +431,7 @@ export default async function OrgOverviewPage() {
                 </div>
               </>
             )}
-            <div className="mt-5 pt-4 border-t border-gray-50 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400">
+            <div className="mt-5 pt-4 border-t border-gray-50 text-[12px] first-cap text-gray-400">
               Last reported {date(usage.lastIngestedAt)}
             </div>
           </SectionCard>
@@ -453,7 +453,7 @@ export default async function OrgOverviewPage() {
                   <li key={f.id} className="py-3 flex items-baseline justify-between gap-4">
                     <div>
                       <div className="text-sm text-aic-navy">{f.title}</div>
-                      <div className="font-mono text-[10px] uppercase tracking-wider text-gray-400">
+                      <div className="text-[12px] first-cap text-gray-400">
                         {f.severity} · raised {date(f.raisedAt)}
                       </div>
                     </div>

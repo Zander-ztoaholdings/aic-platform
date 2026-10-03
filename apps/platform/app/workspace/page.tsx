@@ -163,8 +163,8 @@ export default function GovernanceWorkspace() {
   };
 
   const getAccentColor = () => {
-    if (impactMagnitude <= 3) return 'text-aic-cyan';
-    if (impactMagnitude <= 7) return 'text-aic-gold';
+    if (impactMagnitude <= 3) return 'text-[#8a6a1f]';
+    if (impactMagnitude <= 7) return 'text-[#8a6a1f]';
     return 'text-aic-red';
   };
 
@@ -181,26 +181,26 @@ export default function GovernanceWorkspace() {
         <header className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2">
-              <LayoutPanelLeft className="w-5 h-5 text-aic-cyan" />
-              <span className="text-[10px] font-mono font-bold text-aic-slate uppercase tracking-[0.4em]">
+              <LayoutPanelLeft className="w-5 h-5 text-[#8a6a1f]" />
+              <span className="text-[12px] font-bold text-aic-slate first-cap">
                 ISO 42001 Governance Workspace
               </span>
             </div>
-            <h1 className="text-6xl font-serif font-bold text-aic-paper tracking-tighter leading-none">
+            <h1 className="text-4xl md:text-6xl font-serif font-bold text-[#0e1b2c] tracking-tighter leading-none">
               Algorithm Audit Trail<span className={getAccentColor()}>.</span>
             </h1>
             
             <div className="flex items-center gap-4">
               {/* System Selector */}
-              <div className="flex items-center gap-4 p-2 bg-aic-paper/5 backdrop-blur-sm rounded-xl border border-aic-paper/10 w-fit shadow-sm">
-                <Box className="w-4 h-4 text-aic-cyan ml-2" />
+              <div className="flex items-center gap-4 p-2 bg-[#f5f7f9] backdrop-blur-sm rounded-xl border border-[#dde2e8] w-fit shadow-sm">
+                <Box className="w-4 h-4 text-[#8a6a1f] ml-2" />
                 <select 
                   value={selectedSystemId || ''} 
                   onChange={(e) => setSelectedSystemId(e.target.value)}
-                  className="bg-transparent border-none text-[10px] font-mono font-bold uppercase tracking-widest outline-none py-2 pr-8 cursor-pointer text-aic-paper"
+                  className="bg-transparent border-none text-[12px] font-bold first-cap outline-none py-2 pr-8 cursor-pointer text-[#0e1b2c]"
                 >
                   {systems.map(s => (
-                    <option key={s.id} value={s.id} className="bg-aic-obsidian">{s.name}</option>
+                    <option key={s.id} value={s.id} className="bg-white">{s.name}</option>
                   ))}
                   {systems.length === 0 && <option disabled>No Systems Registered</option>}
                 </select>
@@ -209,10 +209,10 @@ export default function GovernanceWorkspace() {
               {/* Sandbox Indicator */}
               {selectedSystem && (
                 <div className={cn(
-                  "flex items-center gap-2 px-4 py-3 rounded-xl border font-mono text-[9px] font-bold uppercase tracking-widest",
+                  "flex items-center gap-2 px-4 py-3 rounded-xl border text-[12px] font-bold first-cap",
                   selectedSystem.isSandbox 
                     ? "bg-aic-slate/10 border-aic-slate/30 text-aic-slate" 
-                    : "bg-green-500/10 border-green-500/30 text-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
+                    : "bg-green-50 border-green-200 text-green-700 shadow-[0_0_15px_rgba(34,197,94,0.1)]"
                 )}>
                   {selectedSystem.isSandbox ? <ShieldAlert className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
                   {selectedSystem.isSandbox ? "Sandbox Mode" : "Formal Audit Active"}
@@ -255,16 +255,16 @@ export default function GovernanceWorkspace() {
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin text-aic-cyan" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#8a6a1f]" />
             <p className="font-serif italic text-aic-slate">Synchronizing sovereign ledger...</p>
           </div>
         ) : (
           <>
             {/* Empathy Controller */}
-            <section className="border-t border-aic-paper/5 py-10">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-aic-paper/[0.02] p-8 rounded-3xl border border-aic-paper/5">
+            <section className="border-t border-[#dde2e8] py-10">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-[#f5f7f9] p-5 md:p-8 rounded-3xl border border-[#dde2e8]">
                 <div className="max-w-sm text-center md:text-left">
-                  <h3 className="font-serif text-2xl font-bold mb-3 text-aic-paper">Human Impact Context</h3>
+                  <h3 className="font-serif text-2xl font-bold mb-3 text-[#0e1b2c]">Human Impact Context</h3>
                   <p className="text-sm text-aic-slate italic">
                     Increasing magnitude enforces stricter HITL (Human-in-the-loop) requirements for ISO 42001 certification.
                   </p>
@@ -291,13 +291,13 @@ export default function GovernanceWorkspace() {
               <div className="pt-12 flex items-center justify-center gap-6">
                 <button 
                   onClick={() => addBlock('text')}
-                  className="group flex items-center gap-3 px-6 py-3 border border-dashed border-aic-paper/10 rounded-2xl text-[10px] font-mono font-bold uppercase text-aic-slate hover:border-aic-cyan hover:text-aic-cyan transition-all"
+                  className="group flex items-center gap-3 px-4 sm:px-6 py-3 border border-dashed border-[#dde2e8] rounded-2xl text-[12px] font-bold first-cap text-aic-slate hover:border-aic-cyan hover:text-[#8a6a1f] transition-all"
                 >
                   <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Rationale
                 </button>
                 <button 
                   onClick={() => addBlock('model-card')}
-                  className="group flex items-center gap-3 px-6 py-3 border border-dashed border-aic-paper/10 rounded-2xl text-[10px] font-mono font-bold uppercase text-aic-slate hover:border-aic-cyan hover:text-aic-cyan transition-all"
+                  className="group flex items-center gap-3 px-4 sm:px-6 py-3 border border-dashed border-[#dde2e8] rounded-2xl text-[12px] font-bold first-cap text-aic-slate hover:border-aic-cyan hover:text-[#8a6a1f] transition-all"
                 >
                   <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" /> Model Artifact
                 </button>
@@ -309,7 +309,7 @@ export default function GovernanceWorkspace() {
               <motion.footer 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="p-10 bg-aic-red/10 border border-aic-red/30 text-aic-paper rounded-[3rem] shadow-2xl flex flex-col md:flex-row items-center gap-10 overflow-hidden relative group"
+                className="p-6 md:p-10 bg-aic-red/10 border border-aic-red/30 text-[#0e1b2c] rounded-[3rem] shadow-2xl flex flex-col md:flex-row items-center gap-10 overflow-hidden relative group"
               >
                 <div className="absolute inset-0 bg-aic-red/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="p-5 bg-aic-red/20 rounded-2xl relative z-10">
@@ -317,7 +317,7 @@ export default function GovernanceWorkspace() {
                 </div>
                 <div className="text-center md:text-left relative z-10">
                   <h4 className="font-serif text-3xl font-bold mb-2">Human-In-The-Loop Enforcement</h4>
-                  <p className="text-base text-aic-paper/70 italic font-serif max-w-2xl">
+                  <p className="text-base text-[#5e6b7b] italic font-serif max-w-2xl">
                     High magnitude detected. The sovereign ledger now requires verified qualitative rationale. Substantive review mode is active.
                   </p>
                 </div>

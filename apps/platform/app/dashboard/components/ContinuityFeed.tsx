@@ -58,7 +58,7 @@ export function ContinuityFeed({ events, now }: { events: ChainLink[]; now: numb
 
   return (
     <div>
-      <div className="px-6 pt-2 pb-3">
+      <div className="px-4 sm:px-6 pt-2 pb-3">
         <input
           type="text"
           value={q}
@@ -67,12 +67,12 @@ export function ContinuityFeed({ events, now }: { events: ChainLink[]; now: numb
           className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-aic-gold focus:ring-1 focus:ring-aic-gold/30"
         />
         {q.trim() !== '' && (
-          <p className="mt-1.5 font-mono text-[10px] text-gray-400 uppercase tracking-[0.15em]">
+          <p className="mt-1.5 text-[12px] text-gray-400 first-cap">
             {filtered.length} of {events.length} match{filtered.length === 1 ? '' : 'es'}
           </p>
         )}
       </div>
-      <div className="px-6 pb-2">
+      <div className="px-4 sm:px-6 pb-2">
         {filtered.length === 0 ? (
           <p className="py-10 text-sm text-gray-400 text-center">
             {events.length === 0 ? 'No entries yet.' : `No entries match “${q}”.`}
@@ -83,11 +83,11 @@ export function ContinuityFeed({ events, now }: { events: ChainLink[]; now: numb
               const emphatic = e.entityType === 'UNDECLARED_SYSTEM' || e.changeType === 'WITHDRAWN';
               return (
                 <li key={e.seq} className="py-3 flex items-start gap-4">
-                  <span className="font-mono text-[10px] text-gray-300 tabular-nums pt-0.5 w-12 shrink-0">
+                  <span className="font-mono text-[11.5px] text-gray-300 tabular-nums pt-0.5 w-12 shrink-0">
                     #{e.seq}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-gray-400">
+                    <span className="text-[12px] font-bold first-cap text-gray-400">
                       {ENTITY_LABEL[e.entityType] ?? e.entityType}
                     </span>
                     <p className={`mt-0.5 text-sm leading-snug ${emphatic ? 'text-red-700 font-semibold' : 'text-aic-navy'}`}>
@@ -95,8 +95,8 @@ export function ContinuityFeed({ events, now }: { events: ChainLink[]; now: numb
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="font-mono text-[10px] text-gray-400">{ago(e.observedAt, now)}</div>
-                    <div className="font-mono text-[9px] text-gray-300 truncate max-w-[10rem]">{e.actorLabel}</div>
+                    <div className="font-mono text-[11.5px] text-gray-400">{ago(e.observedAt, now)}</div>
+                    <div className="font-mono text-[11px] text-gray-300 truncate max-w-[10rem]">{e.actorLabel}</div>
                   </div>
                 </li>
               );

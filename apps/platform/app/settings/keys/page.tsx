@@ -111,13 +111,13 @@ export default function KeysPage() {
               </code>
               <button
                 onClick={() => { navigator.clipboard?.writeText(revealedKey).catch(() => {}); }}
-                className="font-mono text-[9px] font-bold text-amber-700 border border-amber-300 rounded-full px-3 py-1.5 hover:bg-amber-100 transition-colors whitespace-nowrap"
+                className="font-mono text-[11px] font-bold text-amber-700 border border-amber-300 rounded-full px-3 py-1.5 hover:bg-amber-100 transition-colors whitespace-nowrap"
               >
                 Copy Key
               </button>
               <button
                 onClick={() => setRevealedKey(null)}
-                className="font-mono text-[9px] text-amber-600 hover:text-amber-800 transition-colors"
+                className="font-mono text-[11px] text-amber-600 hover:text-amber-800 transition-colors"
               >
                 Dismiss
               </button>
@@ -129,13 +129,13 @@ export default function KeysPage() {
           <div className="space-y-4">
             {/* Keys table */}
             <SectionCard>
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-4">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
                 Active Keys
               </div>
               <div className="border border-[#e5e7eb] rounded-xl overflow-hidden">
-                <div className="grid grid-cols-[1fr_100px_100px_80px_44px] px-4 py-2.5 bg-[#f9fafb] border-b border-[#e5e7eb]">
-                  {['Key / Name', 'Created', 'Last Used', 'Status', ''].map((h, i) => (
-                    <span key={i} className="font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-[#9ca3af]">{h}</span>
+                <div className="grid grid-cols-[1fr_auto_44px] sm:grid-cols-[1fr_100px_100px_80px_44px] gap-x-3 px-4 py-2.5 bg-[#f9fafb] border-b border-[#e5e7eb]">
+                  {['Key', 'Created', 'Last used', 'Status', ''].map((h, i) => (
+                    <span key={i} className={`text-[12px] font-semibold text-[#6b7280] ${i === 1 || i === 2 ? 'hidden sm:block' : ''}`}>{h}</span>
                   ))}
                 </div>
                 {loading ? (
@@ -144,21 +144,22 @@ export default function KeysPage() {
                   <div className="px-4 py-6 text-center text-xs text-[#9ca3af]">No API keys yet. Generate your first key below.</div>
                 ) : (
                   keys.map((k) => (
-                    <div key={k.id} className="grid grid-cols-[1fr_100px_100px_80px_44px] px-4 py-3 border-b border-[#f3f4f6] last:border-0 items-center">
+                    <div key={k.id} className="grid grid-cols-[1fr_auto_44px] sm:grid-cols-[1fr_100px_100px_80px_44px] gap-x-3 px-4 py-3 border-b border-[#f3f4f6] last:border-0 items-center">
                       <div>
                         <div className="text-xs font-semibold text-[#0f1f3d] mb-0.5">{k.name}</div>
-                        <div className="font-mono text-[9px] text-[#9ca3af]">
+                        <div className="font-mono text-[11px] text-[#9ca3af]">
                           {k.keyPrefix}••••••••••••••••
                         </div>
                       </div>
-                      <span className="font-mono text-[9px] text-[#9ca3af]">{formatDate(k.createdAt)}</span>
-                      <span className="font-mono text-[9px] text-[#9ca3af]">{formatDate(k.lastUsedAt)}</span>
+                      <span className="hidden sm:block text-[12px] text-[#6b7280]">{formatDate(k.createdAt)}</span>
+                      <span className="hidden sm:block text-[12px] text-[#6b7280]">{formatDate(k.lastUsedAt)}</span>
                       <StatusChip status={k.isActive ? 'active' : 'expired'} />
                       <button
                         onClick={() => handleRevoke(k.id)}
                         disabled={revoking === k.id}
-                        className="p-1 text-[#9ca3af] hover:text-red-500 transition-colors disabled:opacity-50"
+                        className="w-10 h-10 flex items-center justify-center text-[#9ca3af] hover:text-red-500 transition-colors disabled:opacity-50"
                         title="Revoke key"
+                        aria-label={`Revoke ${k.name}`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -168,40 +169,40 @@ export default function KeysPage() {
               </div>
 
               {/* Generate new key */}
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={newKeyLabel}
                   onChange={e => setNewKeyLabel(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleGenerate()}
                   placeholder="Key label, e.g. Production SDK"
-                  className="flex-1 border border-[#e5e7eb] rounded-full px-4 py-2 text-xs focus:outline-none focus:border-[#c9920a] transition-colors"
+                  className="flex-1 min-w-0 border border-[#e5e7eb] rounded-full px-4 h-11 sm:h-auto sm:py-2 text-xs focus:outline-none focus:border-[#c9920a] transition-colors"
                 />
                 <button
                   onClick={handleGenerate}
                   disabled={generating || !newKeyLabel.trim()}
-                  className="inline-flex items-center gap-2 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2 text-[13px] font-semibold text-[#0e1b2c] border border-[#d5dbe2] rounded-full px-4 h-11 sm:h-auto sm:py-2 hover:border-[#a8772a] hover:text-[#c9920a] transition-colors disabled:opacity-50"
                 >
-                  <Plus className="w-3.5 h-3.5" /> {generating ? 'Generating…' : 'Generate Key'}
+                  <Plus className="w-3.5 h-3.5" /> {generating ? 'Generating…' : 'Generate key'}
                 </button>
               </div>
             </SectionCard>
 
             {/* SDK snippet */}
             <SectionCard>
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                 Pulse SDK — Minimum Viable Event
               </div>
               <div className="bg-[#0a1628] rounded-xl p-4 overflow-x-auto mb-3">
                 <pre className="font-mono text-xs text-white/80 leading-relaxed m-0">{SDK_SNIPPET}</pre>
               </div>
               <div className="flex gap-2.5">
-                <button className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
+                <button className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
                   <ExternalLink className="w-3 h-3" /> SDK Documentation
                 </button>
                 <button
                   onClick={handleCopySnippet}
-                  className="inline-flex items-center gap-1.5 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                  className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
                 >
                   {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
                   {copied ? 'Copied!' : 'Copy Schema'}
@@ -214,7 +215,7 @@ export default function KeysPage() {
           <div className="space-y-3">
             <SectionCard className="p-4">
               <Lock className="w-5 h-5 text-[#c9920a] mb-2.5" />
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                 Key Security
               </div>
               <div className="space-y-2">

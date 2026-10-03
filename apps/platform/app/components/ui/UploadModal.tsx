@@ -94,7 +94,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
     >
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-[fadeUp_0.2s_ease]">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-[#e5e7eb] flex items-start justify-between">
+        <div className="px-4 sm:px-6 py-5 border-b border-[#e5e7eb] flex items-start justify-between">
           <div>
             <Eyebrow>Submit Evidence</Eyebrow>
             <h2 className="font-serif text-lg font-bold text-[#0f1f3d] leading-snug">{label}</h2>
@@ -108,7 +108,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
         </div>
 
         {/* Body */}
-        <div className="px-6 py-6">
+        <div className="px-4 sm:px-6 py-6">
           {done ? (
             <div className="text-center py-8">
               <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-500 flex items-center justify-center mx-auto mb-4">
@@ -120,7 +120,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               </p>
               <button
                 onClick={onClose}
-                className="inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-5 py-2.5"
+                className="inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5"
               >
                 Close
               </button>
@@ -143,7 +143,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
                 <p className="text-sm font-semibold text-[#0f1f3d] mb-1">
                   Drop files or <span className="text-[#c9920a]">browse</span>
                 </p>
-                <p className="font-mono text-[9px] text-[#9ca3af] uppercase tracking-[0.15em]">
+                <p className="text-[12px] text-[#9ca3af] first-cap">
                   PDF · DOCX · XLSX · PNG — max 50MB
                 </p>
                 <input
@@ -165,7 +165,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
                     >
                       <FileText className="w-3.5 h-3.5 text-[#c9920a] flex-shrink-0" />
                       <span className="flex-1 text-xs font-medium text-[#0f1f3d] truncate">{file.name}</span>
-                      <span className="font-mono text-[9px] text-[#9ca3af]">
+                      <span className="font-mono text-[11px] text-[#9ca3af]">
                         {(file.size / 1024).toFixed(0)} KB
                       </span>
                       <button
@@ -199,14 +199,14 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               <div className="flex gap-2.5 mt-5">
                 <button
                   onClick={onClose}
-                  className="flex-none inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                  className="flex-none inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={files.length === 0 || busy}
-                  className="flex-1 inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#b07d08] transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#b07d08] transition-colors"
                 >
                   {busy ? (
                     <>

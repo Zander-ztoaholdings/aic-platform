@@ -36,7 +36,7 @@ export default function GlobalError({
               fontSize: '11px',
               fontWeight: 700,
               letterSpacing: '0.2em',
-              textTransform: 'uppercase',
+              textTransform: 'first-cap',
             }}
           >
             Retry

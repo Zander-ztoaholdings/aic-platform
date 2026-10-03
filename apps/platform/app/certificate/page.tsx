@@ -92,11 +92,11 @@ export default function CertificatePage() {
         <Eyebrow>My Certificate</Eyebrow>
 
         {!data ? (
-          <SectionCard className="p-8 text-center">
+          <SectionCard className="p-5 md:p-8 text-center">
             <p className="text-xs text-[#9ca3af]">Loading certificate data…</p>
           </SectionCard>
         ) : !cert ? (
-          <SectionCard className="p-8 text-center">
+          <SectionCard className="p-5 md:p-8 text-center">
             <p className="text-sm font-semibold text-[#0f1f3d] mb-2">Certificate Not Yet Issued</p>
             <p className="text-xs text-[#9ca3af]">
               Your certificate will appear here once the AIC audit process is complete.
@@ -107,10 +107,10 @@ export default function CertificatePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-start">
             {/* Certificate card */}
             <SectionCard className="p-0 overflow-hidden">
-              <div className="bg-[#0a1628] px-8 py-8 flex gap-6 items-center">
+              <div className="bg-[#0a1628] px-5 md:px-8 py-8 flex gap-6 items-center">
                 <BrandMark size={72} />
                 <div className="flex-1 min-w-0">
-                  <div className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-[#c9920a] mb-2">
+                  <div className="text-[12px] font-bold first-cap text-[#c9920a] mb-2">
                     Certificate of AI Accountability
                   </div>
                   <h2 className="font-serif text-xl font-bold text-white leading-snug mb-1">
@@ -121,12 +121,12 @@ export default function CertificatePage() {
                   <div className="font-mono text-3xl font-bold text-[#c9920a] leading-none">
                     {org?.integrityScore ?? 0}
                   </div>
-                  <div className="font-mono text-[9px] text-white/40 tracking-[0.15em] mt-1">INTEGRITY SCORE</div>
+                  <div className="font-mono text-[11px] text-white/40 tracking-[0.15em] mt-1">INTEGRITY SCORE</div>
                 </div>
               </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-3 border border-[#e5e7eb] rounded-xl overflow-hidden mb-5">
+              <div className="p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 border border-[#e5e7eb] rounded-xl overflow-hidden mb-5">
                   {certFields.map((r, i) => (
                     <div
                       key={r.k}
@@ -136,7 +136,7 @@ export default function CertificatePage() {
                         borderBottom: i < 3       ? '1px solid #e5e7eb' : undefined,
                       }}
                     >
-                      <div className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-[0.1em] mb-1">{r.k}</div>
+                      <div className="text-[12px] text-[#9ca3af] first-cap mb-1">{r.k}</div>
                       <div className="text-xs font-semibold text-[#0f1f3d]">{r.v}</div>
                     </div>
                   ))}
@@ -155,21 +155,21 @@ export default function CertificatePage() {
                   {cert.pdfUrl ? (
                     <a
                       href={cert.pdfUrl}
-                      className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors"
+                      className="inline-flex items-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors"
                     >
                       <Download className="w-3.5 h-3.5" /> Download PDF
                     </a>
                   ) : (
-                    <button disabled className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a]/40 text-white rounded-full px-5 py-2.5 cursor-not-allowed">
+                    <button disabled className="inline-flex items-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a]/40 text-white rounded-full px-5 py-2.5 cursor-not-allowed">
                       <Download className="w-3.5 h-3.5" /> PDF Pending
                     </button>
                   )}
-                  <button className="inline-flex items-center gap-2 font-mono text-[10px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
+                  <button className="inline-flex items-center gap-2 font-mono text-[11.5px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
                     <ExternalLink className="w-3.5 h-3.5" /> Public Registry
                   </button>
                   <button
                     onClick={handleCopy}
-                    className="inline-flex items-center gap-2 font-mono text-[10px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                    className="inline-flex items-center gap-2 font-mono text-[11.5px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? 'Copied!' : 'Copy Cert No.'}
@@ -181,7 +181,7 @@ export default function CertificatePage() {
             {/* Trust mark rail */}
             <div className="space-y-3">
               <SectionCard className="p-5 text-center">
-                <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+                <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                   AIC Trust Mark
                 </div>
                 <div className="bg-[#0a1628] rounded-xl p-5 inline-block mb-3">
@@ -191,13 +191,13 @@ export default function CertificatePage() {
                   Display on your website, RFP responses, and annual reports. Must include certificate number and
                   link to public registry.
                 </p>
-                <button className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
+                <button className="w-full inline-flex items-center justify-center gap-2 font-mono text-[11.5px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
                   <Download className="w-3.5 h-3.5" /> Download SVG
                 </button>
               </SectionCard>
 
               <SectionCard className="p-4">
-                <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+                <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                   Permitted Usage
                 </div>
                 <div className="space-y-2">

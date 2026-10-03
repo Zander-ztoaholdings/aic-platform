@@ -6,36 +6,36 @@
  */
 
 export const field =
-  'w-full rounded-lg border border-white/12 bg-white/[0.05] px-3 py-2 text-sm text-white placeholder:text-white/35 outline-none focus:border-[#d9a53a] focus:ring-2 focus:ring-[#d9a53a]/20';
+  'w-full rounded-lg border border-[#dde2e8] bg-white px-3 py-2 text-sm text-[#0e1b2c] placeholder:text-[#8a95a3] outline-none focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/20';
 
 export function Pill({ tone = 'neutral', children }: { tone?: 'neutral' | 'good' | 'warn' | 'bad' | 'gold'; children: React.ReactNode }) {
   const t = {
-    neutral: 'bg-white/[0.07] text-white/70',
-    good: 'bg-emerald-400/12 text-emerald-300',
-    warn: 'bg-amber-400/12 text-amber-300',
-    bad: 'bg-red-400/12 text-red-300',
-    gold: 'bg-[#d9a53a]/15 text-[#e8c071]',
+    neutral: 'bg-[#f5f7f9] text-[#5e6b7b]',
+    good: 'bg-emerald-50 text-emerald-700',
+    warn: 'bg-amber-50 text-amber-700',
+    bad: 'bg-red-50 text-red-700',
+    gold: 'bg-[#d9a53a]/15 text-[#8a6a1f]',
   }[tone];
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${t}`}>{children}</span>;
 }
 
 export function Button({ variant = 'default', className = '', ...p }: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'default' | 'primary' | 'danger' | 'ghost' }) {
   const v = {
-    default: 'border border-white/12 bg-white/[0.04] text-white hover:bg-white/[0.08]',
-    primary: 'bg-[#d9a53a] text-[#0b1626] hover:bg-[#e8b54a]',
-    danger: 'bg-red-500/90 text-white hover:bg-red-500',
-    ghost: 'text-white/60 hover:text-white hover:bg-white/[0.06]',
+    default: 'border border-[#dde2e8] bg-[#f5f7f9] text-[#0e1b2c] hover:bg-[#eef1f5]',
+    primary: 'bg-[#0e1b2c] text-white hover:bg-[#22344a]',
+    danger: 'bg-red-50 text-[#0e1b2c] hover:bg-red-500',
+    ghost: 'text-[#5e6b7b] hover:text-[#0e1b2c] hover:bg-[#eef1f5]',
   }[variant];
   return <button {...p} className={`inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition disabled:opacity-40 disabled:pointer-events-none ${v} ${className}`} />;
 }
 
 export function Panel({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/50" onClick={onClose}>
-      <aside onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-md overflow-y-auto border-l border-white/10 bg-[#0d1a2c] p-6 shadow-2xl" role="dialog" aria-label={title}>
+    <div className="fixed inset-0 z-50 flex justify-end bg-white" onClick={onClose}>
+      <aside onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-md overflow-y-auto border-l border-[#dde2e8] bg-white p-4 sm:p-6 shadow-2xl" role="dialog" aria-label={title}>
         <div className="mb-6 flex items-start justify-between gap-4">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
-          <button onClick={onClose} className="rounded-md px-2 text-white/50 hover:text-white" aria-label="Close">✕</button>
+          <h2 className="text-lg font-semibold text-[#0e1b2c]">{title}</h2>
+          <button onClick={onClose} className="rounded-md px-2 text-[#8a95a3] hover:text-[#0e1b2c]" aria-label="Close">✕</button>
         </div>
         {children}
       </aside>
@@ -45,9 +45,9 @@ export function Panel({ title, onClose, children }: { title: string; onClose: ()
 
 export function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="border-t border-white/[0.08] py-5 first:border-t-0 first:pt-0">
-      <h3 className="text-sm font-semibold text-white">{title}</h3>
-      {hint && <p className="mt-0.5 text-xs text-white/50">{hint}</p>}
+    <section className="border-t border-[#dde2e8] py-5 first:border-t-0 first:pt-0">
+      <h3 className="text-sm font-semibold text-[#0e1b2c]">{title}</h3>
+      {hint && <p className="mt-0.5 text-xs text-[#8a95a3]">{hint}</p>}
       <div className="mt-3 space-y-2.5">{children}</div>
     </section>
   );

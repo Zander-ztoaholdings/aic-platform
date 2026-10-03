@@ -198,3 +198,20 @@ body {
 .fade-up {
   animation: fadeUp 0.2s ease;
 }
+
+/* ─── Sentence-case labels ───────────────────────────────────────
+ * Labels used to be set in tracked all-caps monospace. They now keep the
+ * case they are written in; this only lifts a lowercase first letter (an
+ * enum value such as "verified") so it still reads as a label. */
+@utility first-cap {
+  &::first-letter { text-transform: uppercase; }
+}
+
+/* ─── Small screens ──────────────────────────────────────────────
+ * No accidental sideways scroll, no iOS font inflation on rotate, and
+ * form fields at 16px so Safari does not zoom the page when one is tapped. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { overflow-x: clip; }
+@media (max-width: 639px) {
+  input:not([type=checkbox]):not([type=radio]), select, textarea { font-size: 16px !important; }
+}

@@ -107,23 +107,29 @@ export default function EvidenceVault() {
                 {/* Accordion header */}
                 <button
                   onClick={() => toggle(r.id)}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[#f9fafb] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-4 sm:py-3.5 text-left hover:bg-[#f9fafb] transition-colors"
                 >
-                  <CopperTag>{r.tag}</CopperTag>
-                  <span className="font-serif text-sm font-bold text-[#0f1f3d]">{r.label}</span>
-                  {flagged > 0 && (
-                    <span className="font-mono text-[8px] font-bold bg-red-50 text-red-600 px-1.5 py-0.5 rounded">
-                      {flagged} FLAGGED
+                  <span className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                    <span className="flex items-center gap-2">
+                      <CopperTag>{r.tag.replace('RIGHT', 'Right')}</CopperTag>
+                      <span className="font-serif text-[16px] sm:text-sm font-bold text-[#0f1f3d]">{r.label}</span>
                     </span>
-                  )}
-                  <div className="ml-auto flex items-center gap-3">
-                    <span className="font-mono text-[9px] text-[#6b7280]">{verified}/{r.items.length} verified</span>
-                    <span className="font-mono text-sm font-bold" style={{ color: col }}>{r.score}</span>
+                    <span className="flex items-center gap-2 text-[12px] text-[#6b7280]">
+                      {verified}/{r.items.length} verified
+                      {flagged > 0 && (
+                        <span className="text-[12px] font-semibold bg-red-50 text-red-600 px-1.5 py-0.5 rounded">
+                          {flagged} flagged
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-3 shrink-0">
+                    <span className="text-[15px] font-bold tabular-nums" style={{ color: col }}>{r.score}</span>
                     <ChevronDown
                       className="w-4 h-4 text-[#9ca3af] transition-transform"
                       style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}
                     />
-                  </div>
+                  </span>
                 </button>
 
                 {/* Accordion body */}
@@ -136,40 +142,44 @@ export default function EvidenceVault() {
                         return (
                           <div
                             key={item.id}
-                            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg transition-colors border ${
+                            className={`flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 px-3 py-3 sm:py-2.5 rounded-lg transition-colors border ${
                               item.status === 'flagged'
                                 ? 'bg-red-50/50 border-red-200/60'
                                 : 'border-transparent hover:bg-[#f9fafb]'
                             }`}
                           >
-                            <span className="font-mono text-[8px] text-[#9ca3af] w-10 flex-shrink-0">{item.id}</span>
-                            <CopperTag>TIER {item.tier}</CopperTag>
-                            <span
-                              className={`flex-1 text-xs font-medium ${
-                                item.status === 'missing' ? 'text-[#9ca3af]' : 'text-[#0f1f3d]'
-                              }`}
-                            >
-                              {item.label}
-                            </span>
-                            {item.note && (
+                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                              <span className="hidden sm:inline text-[11px] text-[#9ca3af] w-10 flex-shrink-0 tabular-nums">{item.id}</span>
+                              <CopperTag>Tier {item.tier}</CopperTag>
                               <span
-                                className={`text-xs text-right max-w-[180px] ${
-                                  item.status === 'flagged' ? 'text-red-600' : 'text-[#9ca3af]'
+                                className={`flex-1 min-w-0 text-[14px] sm:text-xs font-medium leading-snug ${
+                                  item.status === 'missing' ? 'text-[#6b7280]' : 'text-[#0f1f3d]'
                                 }`}
                               >
-                                {item.note}
+                                {item.label}
                               </span>
-                            )}
-                            {canUpload ? (
-                              <button
-                                onClick={() => setUploadLabel(item.label)}
-                                className="flex items-center gap-1.5 text-xs font-mono font-semibold text-[#6b7280] border border-dashed border-[#e5e7eb] rounded-lg px-2.5 py-1 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors flex-shrink-0"
-                              >
-                                <Upload className="w-3 h-3" /> Upload
-                              </button>
-                            ) : (
-                              <StatusChip status={item.status} />
-                            )}
+                            </div>
+                            <div className="flex items-center justify-between sm:justify-end gap-3 pl-0 sm:pl-0">
+                              {item.note ? (
+                                <span
+                                  className={`text-[13px] sm:text-xs sm:text-right sm:max-w-[180px] leading-snug ${
+                                    item.status === 'flagged' ? 'text-red-600' : 'text-[#6b7280]'
+                                  }`}
+                                >
+                                  {item.note}
+                                </span>
+                              ) : <span />}
+                              {canUpload ? (
+                                <button
+                                  onClick={() => setUploadLabel(item.label)}
+                                  className="flex items-center gap-1.5 text-[13px] sm:text-xs font-semibold text-[#5e6b7b] border border-dashed border-[#d5dbe2] rounded-lg px-3 h-10 sm:h-auto sm:py-1 hover:border-[#a8772a] hover:text-[#a8772a] transition-colors flex-shrink-0"
+                                >
+                                  <Upload className="w-3.5 h-3.5" /> Upload
+                                </button>
+                              ) : (
+                                <span className="flex-shrink-0"><StatusChip status={item.status} /></span>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -192,15 +202,15 @@ export default function EvidenceVault() {
               ['D', 'Attestation only',           '0.4×'],
             ].map(([t, l, w]) => (
               <div key={t} className="flex items-center gap-2 mb-3">
-                <CopperTag>TIER {t}</CopperTag>
+                <CopperTag>Tier {t}</CopperTag>
                 <span className="flex-1 text-xs text-[#0f1f3d]">{l}</span>
-                <span className="font-mono text-[9px] text-[#c9920a] font-bold">{w}</span>
+                <span className="font-mono text-[11px] text-[#c9920a] font-bold">{w}</span>
               </div>
             ))}
           </SectionCard>
 
           <SectionCard className="p-4">
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-2">
+            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-2">
               Submission Deadline
             </div>
             <div className="font-serif text-xl font-bold text-red-600 mb-2">14 days</div>
@@ -209,7 +219,7 @@ export default function EvidenceVault() {
             </p>
             <button
               onClick={() => setUploadLabel('All Outstanding Evidence')}
-              className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-4 py-2.5 hover:bg-[#b07d08] transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-4 py-2.5 hover:bg-[#b07d08] transition-colors"
             >
               Submit All <ArrowRight className="w-3 h-3" />
             </button>

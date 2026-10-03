@@ -25,8 +25,8 @@ export default function StaffHome() {
   return (
     <AdminShell>
       <div className="mb-10">
-        <h1 className="font-serif text-3xl font-bold text-white mb-2">{first ? `Welcome back, ${first}` : 'Staff workspace'}</h1>
-        <p className="text-white/55 text-sm max-w-xl leading-relaxed">
+        <h1 className="font-serif text-3xl font-bold text-[#0e1b2c] mb-2">{first ? `Welcome back, ${first}` : 'Staff workspace'}</h1>
+        <p className="text-[#5e6b7b] text-sm max-w-xl leading-relaxed">
           Assessment work, the register and AIC&apos;s own administration. You see what your role can act on;
           everything else stays out of the way.
         </p>
@@ -35,14 +35,14 @@ export default function StaffHome() {
       <ViewAsPicker />
 
       {groups.length === 0 && session && (
-        <p className="text-white/60 text-sm">Your account has no staff capabilities yet. Ask a super admin to grant them.</p>
+        <p className="text-[#5e6b7b] text-sm">Your account has no staff capabilities yet. Ask a super admin to grant them.</p>
       )}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {groups.map((group) => (
-          <section key={group.key} className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-5">
-            <h2 className="text-[15px] font-semibold text-white">{group.label}</h2>
-            <p className="text-[12.5px] text-white/50 mt-1 mb-4">{group.summary}</p>
+          <section key={group.key} className="rounded-2xl border border-[#dde2e8] bg-[#f5f7f9] p-5">
+            <h2 className="text-[15px] font-semibold text-[#0e1b2c]">{group.label}</h2>
+            <p className="text-[12.5px] text-[#8a95a3] mt-1 mb-4">{group.summary}</p>
             <ul className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -50,14 +50,14 @@ export default function StaffHome() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="flex items-start gap-3 rounded-xl px-2.5 py-2 hover:bg-white/[0.05] transition-colors"
+                      className="flex items-start gap-3 rounded-xl px-2.5 py-2 hover:bg-[#eef1f5] transition-colors"
                     >
-                      <span className="mt-0.5 w-8 h-8 shrink-0 rounded-lg bg-white/[0.06] flex items-center justify-center text-white/80">
+                      <span className="mt-0.5 w-8 h-8 shrink-0 rounded-lg bg-[#f5f7f9] flex items-center justify-center text-[#5e6b7b]">
                         <Icon className="w-4 h-4" />
                       </span>
                       <span>
-                        <span className="block text-[13px] font-semibold text-white">{item.label}</span>
-                        <span className="block text-[12px] text-white/50 leading-snug">{item.description}</span>
+                        <span className="block text-[13px] font-semibold text-[#0e1b2c]">{item.label}</span>
+                        <span className="block text-[12px] text-[#8a95a3] leading-snug">{item.description}</span>
                       </span>
                     </Link>
                   </li>

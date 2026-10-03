@@ -75,10 +75,10 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
                     className="relative w-full max-w-lg bg-aic-paper rounded-3xl shadow-2xl overflow-hidden border border-aic-black/5"
                 >
-                    <div className="p-8">
+                    <div className="p-5 md:p-8">
                         <div className="flex justify-between items-start mb-8">
                             <div>
-                                <span className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.3em]">Submit Evidence</span>
+                                <span className="text-[12px] font-bold text-aic-gold first-cap">Submit Evidence</span>
                                 <h3 className="font-serif text-2xl font-medium text-aic-black mt-2">{requirement?.title}</h3>
                             </div>
                             <button onClick={onClose} className="text-gray-400 hover:text-aic-black transition-colors">
@@ -92,21 +92,21 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Upload Document</label>
+                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">Upload Document</label>
                                 <input 
                                     type="file" 
-                                    className="w-full bg-aic-paper/50 border border-dashed border-aic-black/10 rounded-xl p-4 font-mono text-[10px] focus:border-aic-gold outline-none transition-all"
+                                    className="w-full bg-aic-paper/50 border border-dashed border-aic-black/10 rounded-xl p-4 font-mono text-[11.5px] focus:border-aic-gold outline-none transition-all"
                                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                                 />
                             </div>
 
                             <div className="relative py-2">
                                 <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-aic-black/5" /></div>
-                                <div className="relative flex justify-center text-[8px] font-mono font-bold uppercase"><span className="bg-aic-paper px-2 text-gray-300">OR</span></div>
+                                <div className="relative flex justify-center text-[12px] font-bold first-cap"><span className="bg-aic-paper px-2 text-gray-300">OR</span></div>
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-2">Evidence URL</label>
+                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-2">Evidence URL</label>
                                 <input 
                                     type="url" 
                                     placeholder="https://drive.google.com/..." 
@@ -119,7 +119,7 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
                             <button 
                                 type="submit" 
                                 disabled={isUploading}
-                                className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-mono font-bold text-xs uppercase tracking-[0.2em] hover:bg-aic-gold transition-colors disabled:opacity-50"
+                                className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-bold text-xs first-cap hover:bg-aic-gold transition-colors disabled:opacity-50"
                             >
                                 {isUploading ? 'TRANSMITTING EVIDENCE...' : 'CONFIRM SUBMISSION'}
                             </button>

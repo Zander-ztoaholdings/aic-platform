@@ -123,21 +123,21 @@ export default function AuditsPage() {
     <AdminShell>
       <div className="space-y-8">
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-6">
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Scheduled</p>
-            <p className="text-3xl font-bold text-yellow-500">{upcoming.length}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Scheduled</p>
+            <p className="text-3xl font-bold text-amber-700">{upcoming.length}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">In Progress</p>
-            <p className="text-3xl font-bold text-blue-500">{inProgress.length}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">In Progress</p>
+            <p className="text-3xl font-bold text-blue-700">{inProgress.length}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Completed (YTD)</p>
-            <p className="text-3xl font-bold text-green-500">{completed.length}</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Completed (YTD)</p>
+            <p className="text-3xl font-bold text-green-700">{completed.length}</p>
           </div>
-          <div className="bg-[#1c1c1c] p-6 rounded-xl border border-gray-800">
-            <p className="text-gray-500 text-xs uppercase mb-2">Findings (YTD)</p>
+          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
+            <p className="text-gray-500 text-xs first-cap mb-2">Findings (YTD)</p>
             <p className="text-3xl font-bold">
               {completed.reduce((sum, a) => sum + (a.findings || 0), 0)}
             </p>
@@ -145,28 +145,28 @@ export default function AuditsPage() {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-3">
           <div className="flex gap-2">
             <button
               onClick={() => setView('list')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                view === 'list' ? 'bg-blue-600 text-aic-paper' : 'bg-gray-800 text-gray-400'
+                view === 'list' ? 'bg-[#0e1b2c] text-aic-paper' : 'bg-[#f5f7f9] text-gray-500'
               }`}
             >
-              List View
+              List
             </button>
             <button
               onClick={() => setView('calendar')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                view === 'calendar' ? 'bg-blue-600 text-aic-paper' : 'bg-gray-800 text-gray-400'
+                view === 'calendar' ? 'bg-[#0e1b2c] text-aic-paper' : 'bg-[#f5f7f9] text-gray-500'
               }`}
             >
-              Calendar View
+              Calendar
             </button>
           </div>
           <button 
             onClick={() => setIsScheduling(true)}
-            className="bg-blue-600 text-aic-paper px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-500"
+            className="bg-[#0e1b2c] text-aic-paper px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#22344a]"
           >
             + Schedule New Audit
           </button>
@@ -174,15 +174,15 @@ export default function AuditsPage() {
 
         {/* Schedule Modal */}
         {isScheduling && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-            <div className="bg-[#1c1c1c] border border-gray-800 rounded-2xl p-8 max-w-lg w-full shadow-2xl">
+          <div className="fixed inset-0 bg-white backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="bg-white border border-[#dde2e8] rounded-2xl p-5 md:p-8 max-w-lg w-full shadow-2xl">
               <h3 className="text-xl font-bold mb-6">Schedule Institutional Audit</h3>
               <form onSubmit={handleCreateAudit} className="space-y-6">
                 <div>
-                  <label className="block text-xs text-gray-500 uppercase font-mono mb-2">Target Organization</label>
+                  <label className="block text-xs text-gray-500 first-cap mb-2">Target Organization</label>
                   <select 
                     required
-                    className="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none"
+                    className="w-full bg-white border border-[#dde2e8] rounded-lg p-3 text-sm focus:border-blue-200 outline-none"
                     value={newAudit.org_id}
                     onChange={e => setNewAudit(prev => ({ ...prev, org_id: e.target.value }))}
                   >
@@ -193,9 +193,9 @@ export default function AuditsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 uppercase font-mono mb-2">Lead Auditor</label>
+                  <label className="block text-xs text-gray-500 first-cap mb-2">Lead Auditor</label>
                   <select 
-                    className="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none"
+                    className="w-full bg-white border border-[#dde2e8] rounded-lg p-3 text-sm focus:border-blue-200 outline-none"
                     value={newAudit.auditor_id}
                     onChange={e => setNewAudit(prev => ({ ...prev, auditor_id: e.target.value }))}
                   >
@@ -206,19 +206,19 @@ export default function AuditsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 uppercase font-mono mb-2">Scheduled Date</label>
+                  <label className="block text-xs text-gray-500 first-cap mb-2">Scheduled Date</label>
                   <input 
                     type="date"
                     required
-                    className="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none"
+                    className="w-full bg-white border border-[#dde2e8] rounded-lg p-3 text-sm focus:border-blue-200 outline-none"
                     value={newAudit.scheduled_at}
                     onChange={e => setNewAudit(prev => ({ ...prev, scheduled_at: e.target.value }))}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 uppercase font-mono mb-2">Administrative Notes</label>
+                  <label className="block text-xs text-gray-500 first-cap mb-2">Administrative Notes</label>
                   <textarea 
-                    className="w-full bg-black border border-gray-800 rounded-lg p-3 text-sm focus:border-blue-500 outline-none"
+                    className="w-full bg-white border border-[#dde2e8] rounded-lg p-3 text-sm focus:border-blue-200 outline-none"
                     rows={3}
                     placeholder="Audit scope and focal areas..."
                     value={newAudit.notes}
@@ -229,13 +229,13 @@ export default function AuditsPage() {
                   <button 
                     type="button"
                     onClick={() => setIsScheduling(false)}
-                    className="text-gray-400 hover:text-aic-paper px-4 py-2 text-sm"
+                    className="text-gray-500 hover:text-[#0e1b2c] px-4 py-2 text-sm"
                   >
                     Cancel
                   </button>
                   <button 
                     type="submit"
-                    className="bg-blue-600 text-aic-paper px-6 py-2 rounded-lg text-sm font-bold hover:bg-blue-500 transition-colors"
+                    className="bg-[#0e1b2c] text-aic-paper px-4 sm:px-6 py-2 rounded-lg text-sm font-bold hover:bg-[#22344a] transition-colors"
                   >
                     CONFIRM_SCHEDULE
                   </button>
@@ -254,27 +254,27 @@ export default function AuditsPage() {
           {/* In Progress */}
           {inProgress.length > 0 && (
             <div>
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-400">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-700">
+                <span className="w-2 h-2 rounded-full bg-[#0e1b2c] animate-pulse"></span>
                 Active Audits
               </h3>
               <div className="grid gap-4">
                 {inProgress.map((audit) => (
                   <div
                     key={audit.id}
-                    className="bg-[#1c1c1c] rounded-xl border border-blue-800/50 p-6"
+                    className="bg-white rounded-xl border border-blue-200 p-4 sm:p-6"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-mono text-[10px] text-gray-500">{audit.id}</p>
+                        <p className="font-mono text-[11.5px] text-gray-500">{audit.id}</p>
                         <h4 className="text-xl font-bold mt-1">{audit.org_name}</h4>
-                        <p className="text-sm text-gray-400 mt-1 italic">
+                        <p className="text-sm text-gray-500 mt-1 italic">
                           Assigned: {audit.auditor_name || 'UNASSIGNED'}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-500/20 text-blue-400`}>
-                          IN_PROGRESS
+                        <span className={`px-3 py-1 rounded-full text-[12px] font-bold first-cap bg-blue-50 text-blue-700`}>
+                          In progress
                         </span>
                       </div>
                     </div>
@@ -285,7 +285,7 @@ export default function AuditsPage() {
                       >
                         Complete Audit
                       </button>
-                      <button className="text-gray-400 px-4 py-2 text-sm hover:text-gray-300">
+                      <button className="text-gray-500 px-4 py-2 text-sm hover:text-gray-700">
                         View Evidence
                       </button>
                     </div>
@@ -297,10 +297,10 @@ export default function AuditsPage() {
 
           {/* Upcoming */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-yellow-500">Upcoming Schedule</h3>
-            <div className="bg-[#1c1c1c] rounded-xl border border-gray-800 overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-900/50 text-gray-500 text-[10px] font-mono uppercase tracking-widest">
+            <h3 className="text-lg font-bold mb-4 text-amber-700">Upcoming Schedule</h3>
+            <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden">
+              <div className="overflow-x-auto"><table className="min-w-[640px] w-full">
+                <thead className="bg-white text-gray-500 text-[12px] first-cap">
                   <tr>
                     <th className="text-left p-4">Organization</th>
                     <th className="text-left p-4">Auditor</th>
@@ -308,11 +308,11 @@ export default function AuditsPage() {
                     <th className="text-left p-4">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-[#e6e9ee]">
                   {upcoming.length === 0 ? (
-                    <tr><td colSpan={4} className="p-12 text-center text-gray-500 italic">No audits scheduled for this period.</td></tr>
+                    <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic">No audits scheduled for this period.</td></tr>
                   ) : upcoming.map((audit) => (
-                    <tr key={audit.id} className="hover:bg-gray-800/30">
+                    <tr key={audit.id} className="hover:bg-[#eef1f5]">
                       <td className="p-4 font-medium">{audit.org_name}</td>
                       <td className="p-4 text-sm">{audit.auditor_name || 'UNASSIGNED'}</td>
                       <td className="p-4 text-sm font-mono">{new Date(audit.scheduled_at).toLocaleDateString()}</td>
@@ -320,13 +320,13 @@ export default function AuditsPage() {
                         <div className="flex gap-4">
                           <button 
                             onClick={() => handleStatusChange(audit.id, 'IN_PROGRESS')}
-                            className="text-blue-400 hover:text-blue-300 text-[10px] font-bold font-mono"
+                            className="text-blue-700 hover:text-blue-700 text-[11.5px] font-bold font-mono"
                           >
                             START_NOW
                           </button>
                           <button 
                             onClick={() => handleStatusChange(audit.id, 'CANCELLED')}
-                            className="text-gray-500 hover:text-red-400 text-[10px] font-bold font-mono"
+                            className="text-gray-500 hover:text-red-700 text-[11.5px] font-bold font-mono"
                           >
                             CANCEL
                           </button>
@@ -335,16 +335,16 @@ export default function AuditsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
           {/* Completed */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-green-500">Audit History</h3>
-            <div className="bg-[#1c1c1c] rounded-xl border border-gray-800 overflow-hidden text-gray-400">
-              <table className="w-full">
-                <thead className="bg-gray-900/50 text-gray-500 text-[10px] font-mono uppercase tracking-widest">
+            <h3 className="text-lg font-bold mb-4 text-green-700">Audit History</h3>
+            <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden text-gray-500">
+              <div className="overflow-x-auto"><table className="min-w-[640px] w-full">
+                <thead className="bg-white text-gray-500 text-[12px] first-cap">
                   <tr>
                     <th className="text-left p-4">Organization</th>
                     <th className="text-left p-4">Auditor</th>
@@ -352,23 +352,23 @@ export default function AuditsPage() {
                     <th className="text-left p-4">Findings</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-800">
+                <tbody className="divide-y divide-[#e6e9ee]">
                   {completed.length === 0 ? (
-                    <tr><td colSpan={4} className="p-12 text-center text-gray-500 italic">No completed audits in historical registry.</td></tr>
+                    <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic">No completed audits in historical registry.</td></tr>
                   ) : completed.map((audit) => (
-                    <tr key={audit.id} className="hover:bg-gray-800/30">
-                      <td className="p-4 font-medium text-aic-paper">{audit.org_name}</td>
+                    <tr key={audit.id} className="hover:bg-[#eef1f5]">
+                      <td className="p-4 font-medium text-[#0e1b2c]">{audit.org_name}</td>
                       <td className="p-4 text-sm">{audit.auditor_name}</td>
                       <td className="p-4 text-sm font-mono">{new Date(audit.updated_at || audit.created_at).toLocaleDateString()}</td>
                       <td className="p-4">
-                        <span className="text-[10px] font-bold font-mono text-green-500 bg-green-500/10 px-2 py-1 rounded">
+                        <span className="text-[11.5px] font-bold font-mono text-green-700 bg-green-50 px-2 py-1 rounded">
                           CERTIFIED_COMPLIANT
                         </span>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
           </>

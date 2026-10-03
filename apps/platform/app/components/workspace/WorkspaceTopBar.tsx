@@ -102,11 +102,11 @@ export function WorkspaceTopBar({
 
   return (
     <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${t.bar}`}>
-      <div className="max-w-[1400px] mx-auto h-16 px-4 md:px-8 flex items-center gap-4 md:gap-8">
+      <div className="max-w-[1400px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-8">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className={`md:hidden -ml-1 p-2 rounded-lg ${t.trigger}`}
+          className={`md:hidden w-11 h-11 -ml-1 flex items-center justify-center rounded-xl ${t.trigger}`}
           aria-label="Open navigation"
         >
           <Menu className="w-5 h-5" />
@@ -166,7 +166,7 @@ export function WorkspaceTopBar({
                                   <span className="flex items-center gap-2 text-[13px] font-semibold leading-tight">
                                     {item.label}
                                     {item.badge && (
-                                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-md ${t.tile}`}>{item.badge}</span>
+                                      <span className={`text-[11.5px] font-medium px-1.5 py-0.5 rounded-md ${t.tile}`}>{item.badge}</span>
                                     )}
                                   </span>
                                   <span className={`block text-[12px] leading-snug mt-0.5 ${t.muted}`}>{item.description}</span>
@@ -194,7 +194,7 @@ export function WorkspaceTopBar({
               className={`flex items-center gap-2.5 rounded-xl pl-1.5 pr-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#c9920a]/40 ${t.trigger}`}
             >
               <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold ${t.avatar}`}>
-                {initialsOf(display)}
+                {user.name || user.email ? initialsOf(display) : ''}
               </span>
               <span className="hidden lg:flex flex-col items-start leading-tight">
                 <span className="text-[12.5px] font-semibold max-w-[160px] truncate">{display}</span>
@@ -254,18 +254,24 @@ export function WorkspaceTopBar({
         <div className="md:hidden fixed inset-0 z-50">
           <div className="absolute inset-0 bg-[#0A1728]/30 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
           <nav
-            className={`absolute inset-y-0 left-0 w-[86%] max-w-sm overflow-y-auto border-r p-4 ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'}`}
+            className={`absolute inset-y-0 left-0 w-[88%] max-w-sm overflow-y-auto overscroll-contain border-r px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'}`}
             aria-label="Workspace"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-2">
               <span className="font-serif text-[19px] font-bold">AIC<span className="text-[#c9920a]">.</span></span>
-              <button type="button" onClick={() => setMobileOpen(false)} className={`p-2 rounded-lg ${t.trigger}`} aria-label="Close navigation">
+              <button type="button" onClick={() => setMobileOpen(false)} className={`w-11 h-11 flex items-center justify-center rounded-xl ${t.trigger}`} aria-label="Close navigation">
                 <X className="w-5 h-5" />
               </button>
             </div>
+            {contextLabel && (
+              <div className="px-2 pb-5 mb-5 border-b border-current/10">
+                <p className="font-serif text-[20px] leading-snug font-semibold">{contextLabel}</p>
+                {contextDetail && <p className={`text-[13px] mt-0.5 ${t.muted}`}>{contextDetail}</p>}
+              </div>
+            )}
             {groups.map((group) => (
               <div key={group.key} className="mb-5">
-                <p className={`px-2 mb-1.5 text-[11px] font-semibold uppercase tracking-wide ${t.faint}`}>{group.label}</p>
+                <p className={`px-2 mb-1.5 text-[12.5px] font-semibold first-cap ${t.faint}`}>{group.label}</p>
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.href);
@@ -274,7 +280,7 @@ export function WorkspaceTopBar({
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 rounded-xl px-2 py-2 text-[14px] ${t.item} ${active ? t.itemActive : ''}`}
+                      className={`flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item} ${active ? t.itemActive : ''}`}
                     >
                       <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${active ? t.tileActive : t.tile}`}>
                         <Icon className="w-4 h-4" />
@@ -285,6 +291,30 @@ export function WorkspaceTopBar({
                 })}
               </div>
             ))}
+            <div className={`h-px my-4 ${t.divider}`} />
+            <p className={`px-2 mb-1.5 text-[12.5px] font-semibold ${t.faint}`}>{display}</p>
+            {accountItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
+                  <Icon className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
+                  {item.label}
+                </Link>
+              );
+            })}
+            {menuExtras.map((x) => (
+              <button key={x.label} type="button" onClick={() => { setMobileOpen(false); x.onSelect(); }}
+                className={`w-full text-left flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
+                <x.icon className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
+                {x.label}
+              </button>
+            ))}
+            <button type="button" onClick={() => signOut({ callbackUrl: '/login' })}
+              className={`w-full text-left flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
+              <LogOut className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
+              Sign out
+            </button>
           </nav>
         </div>
       )}

@@ -43,41 +43,41 @@ export default function EnterpriseCRMPage() {
 
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case 'ALPHA_ENROLLED': return 'bg-green-500/10 text-green-500 border-green-500/20';
-            case 'HIGH_INTENT': return 'bg-aic-gold/10 text-aic-gold border-aic-gold/20';
-            default: return 'bg-aic-paper/5 text-gray-500 border-aic-paper/10';
+            case 'ALPHA_ENROLLED': return 'bg-green-50 text-green-700 border-green-200';
+            case 'HIGH_INTENT': return 'bg-aic-gold/10 text-[#8a6a1f] border-aic-gold/20';
+            default: return 'bg-[#f5f7f9] text-gray-500 border-[#dde2e8]';
         }
     };
 
     return (
         <div className="space-y-12">
-            <div className="flex justify-between items-end">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end">
                 <div>
-                    <h1 className="text-4xl font-serif font-bold text-aic-paper tracking-tight mb-4 tracking-tighter">Enterprise CRM</h1>
+                    <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#0e1b2c] tracking-tight mb-4 tracking-tighter">Enterprise CRM</h1>
                     <p className="text-gray-500 font-serif italic text-lg leading-relaxed max-w-2xl">
                         Global pipeline management for AI accountability certification.
                     </p>
                 </div>
                 <div className="flex gap-4">
-                    <div className="bg-[#080808] border border-aic-paper/5 px-6 py-3 rounded-2xl text-right">
-                        <p className="text-[8px] text-gray-600 uppercase tracking-widest mb-1">Total Pipeline</p>
-                        <p className="text-xl font-serif font-bold">R 4.2M</p>
+                    <div className="bg-white border border-[#dde2e8] px-4 sm:px-6 py-3 rounded-2xl text-right">
+                        <p className="text-[12px] text-gray-600 first-cap mb-1">Total Pipeline</p>
+                        <p className="text-xl font-serif font-bold">—</p>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-[#080808] border border-aic-paper/5 rounded-[2.5rem] overflow-hidden">
-                <table className="w-full text-left">
-                    <thead className="bg-aic-paper/[0.02] border-b border-aic-paper/5 font-mono text-[9px] font-bold text-gray-500 uppercase tracking-[0.3em]">
+            <div className="bg-white border border-[#dde2e8] rounded-[2.5rem] overflow-hidden">
+                <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left">
+                    <thead className="bg-[#f5f7f9] border-b border-[#dde2e8] text-[12px] font-bold text-gray-500 first-cap">
                         <tr>
-                            <th className="p-8">Institutional Entity</th>
-                            <th className="p-8">Engagement Source</th>
-                            <th className="p-8">Intent Score</th>
-                            <th className="p-8">Account Status</th>
-                            <th className="p-8 text-right">Action</th>
+                            <th className="p-5 md:p-8">Institutional Entity</th>
+                            <th className="p-5 md:p-8">Engagement Source</th>
+                            <th className="p-5 md:p-8">Intent Score</th>
+                            <th className="p-5 md:p-8">Account Status</th>
+                            <th className="p-5 md:p-8 text-right">Action</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-aic-paper/5 font-serif">
+                    <tbody className="divide-y divide-[#e6e9ee] font-serif">
                         {loading ? (
                             <tr><td colSpan={5} className="p-20 text-center text-gray-600 italic">Syncing with growth registry...</td></tr>
                         ) : (
@@ -87,33 +87,33 @@ export default function EnterpriseCRMPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: i * 0.05 }}
-                                    className="hover:bg-aic-paper/[0.02] transition-colors group"
+                                    className="hover:bg-[#eef1f5] transition-colors group"
                                 >
-                                    <td className="p-8">
-                                        <p className="text-lg font-bold text-aic-paper tracking-tight">{lead.company || lead.email.split('@')[1]}</p>
-                                        <p className="text-[10px] font-mono text-gray-500 uppercase tracking-tighter mt-1">{lead.email}</p>
+                                    <td className="p-5 md:p-8">
+                                        <p className="text-lg font-bold text-[#0e1b2c] tracking-tight">{lead.company || lead.email.split('@')[1]}</p>
+                                        <p className="text-[12px] text-gray-500 first-cap tracking-tighter mt-1">{lead.email}</p>
                                     </td>
-                                    <td className="p-8">
-                                        <span className="font-mono text-[10px] text-gray-400">{lead.source}</span>
+                                    <td className="p-5 md:p-8">
+                                        <span className="font-mono text-[11.5px] text-gray-500">{lead.source}</span>
                                     </td>
-                                    <td className="p-8 text-aic-gold font-mono font-bold text-lg">
+                                    <td className="p-5 md:p-8 text-[#8a6a1f] font-mono font-bold text-lg">
                                         {lead.score || 0}%
                                     </td>
-                                    <td className="p-8">
+                                    <td className="p-5 md:p-8">
                                         <select 
                                             value={lead.status}
                                             onChange={(e) => handleStatusUpdate(lead.id, e.target.value)}
-                                            className={`bg-transparent border border-aic-paper/10 rounded-full px-3 py-1 font-mono text-[8px] font-bold uppercase tracking-widest outline-none focus:border-aic-gold transition-colors ${getStatusStyle(lead.status)}`}
+                                            className={`bg-transparent border border-[#dde2e8] rounded-full px-3 py-1 text-[12px] font-bold first-cap outline-none focus:border-aic-gold transition-colors ${getStatusStyle(lead.status)}`}
                                         >
                                             <option value="PROSPECT">PROSPECT</option>
-                                            <option value="HIGH_INTENT">HIGH_INTENT</option>
-                                            <option value="ALPHA_ENROLLED">ALPHA_ENROLLED</option>
+                                            <option value="HIGH_INTENT">High intent</option>
+                                            <option value="ALPHA_ENROLLED">Alpha enrolled</option>
                                             <option value="CERTIFIED">CERTIFIED</option>
                                             <option value="LOST">LOST</option>
                                         </select>
                                     </td>
-                                    <td className="p-8 text-right">
-                                        <button className="text-[10px] font-mono font-bold text-gray-500 group-hover:text-aic-paper transition-colors uppercase tracking-widest">
+                                    <td className="p-5 md:p-8 text-right">
+                                        <button className="text-[12px] font-bold text-gray-500 group-hover:text-[#0e1b2c] transition-colors first-cap">
                                             Manage Lead →
                                         </button>
                                     </td>
@@ -121,7 +121,7 @@ export default function EnterpriseCRMPage() {
                             ))
                         )}
                     </tbody>
-                </table>
+                </table></div>
             </div>
         </div>
     );

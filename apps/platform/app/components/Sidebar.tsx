@@ -37,7 +37,7 @@ export function Sidebar({ navItems }: SidebarProps) {
 
   return (
     <div className="w-64 bg-aic-navy h-screen flex flex-col fixed left-0 top-0 text-aic-white z-50 shadow-2xl">
-      <div className="p-6 border-b border-aic-paper/5">
+      <div className="p-4 sm:p-6 border-b border-aic-paper/5">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-8 h-8 bg-aic-navy-mid/10 rounded flex items-center justify-center">
             <Shield className="w-5 h-5 text-aic-gold" />
@@ -68,7 +68,7 @@ export function Sidebar({ navItems }: SidebarProps) {
                     <span className="text-sm font-semibold">{item.label}</span>
                   </div>
                   {item.badge && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-aic-paper/10 text-aic-paper/60 group-hover:text-aic-paper/80 transition-colors">
+                    <span className="text-[11.5px] px-1.5 py-0.5 rounded-full bg-aic-paper/10 text-aic-paper/60 group-hover:text-aic-paper/80 transition-colors">
                       {item.badge}
                     </span>
                   )}

@@ -59,13 +59,13 @@ export function PulseMonitor({
   }).join(' ');
 
   return (
-    <Card className="p-6 bg-white border-gray-200 shadow-sm col-span-1 lg:col-span-2">
+    <Card className="p-4 sm:p-6 bg-white border-gray-200 shadow-sm col-span-1 lg:col-span-2">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
           <div className="w-4 h-0.5 bg-aic-gold" />
-          <span className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">Pulse Telemetry</span>
+          <span className="text-[12px] font-bold text-aic-gold first-cap">Pulse Telemetry</span>
         </div>
-        <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+        <div className="text-[12px] font-bold text-gray-400 first-cap flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           Updated {time.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}
         </div>
@@ -74,15 +74,15 @@ export function PulseMonitor({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Decisions today */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-          <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3">Decisions Today</div>
+          <div className="text-[12px] font-bold text-gray-400 first-cap mb-3">Decisions Today</div>
           <div className="font-mono text-2xl font-bold text-aic-navy leading-none mb-1">{decisionsToday.toLocaleString()}</div>
-          <div className="text-[10px] text-gray-400">Total processed across all systems</div>
+          <div className="text-[11.5px] text-gray-400">Total processed across all systems</div>
         </div>
 
         {/* Override Rate */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
           <div className="flex justify-between items-start mb-3">
-            <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">Override Rate</div>
+            <div className="text-[12px] font-bold text-gray-400 first-cap">Override Rate</div>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -105,28 +105,28 @@ export function PulseMonitor({
                style={{ left: `calc(${orPct}% - 2px)` }}
              />
           </div>
-          <div className={`text-[9px] font-bold uppercase tracking-wide ${orCol}`}>{orStatus}</div>
+          <div className={`text-[12px] font-bold first-cap ${orCol}`}>{orStatus}</div>
         </div>
 
         {/* Open Findings */}
         <div className={`rounded-xl p-4 border ${findingsMaxSev === 'critical' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'}`}>
-          <div className={`font-mono text-[9px] font-bold uppercase tracking-widest mb-3 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>Open Findings</div>
+          <div className={`text-[12px] font-bold first-cap mb-3 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>Open Findings</div>
           <div className={`font-mono text-2xl font-bold leading-none mb-2 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>{openFindings}</div>
-          <Badge variant={findingsMaxSev === 'critical' ? 'destructive' : 'secondary'} className="h-4 text-[8px] uppercase font-bold tracking-widest px-1.5">
+          <Badge variant={findingsMaxSev === 'critical' ? 'destructive' : 'secondary'} className="h-4 text-[12px] first-cap font-bold px-1.5">
             {findingsMaxSev}
           </Badge>
         </div>
 
         {/* Days to Deadline */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-          <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-3">Days to Deadline</div>
+          <div className="text-[12px] font-bold text-gray-400 first-cap mb-3">Days to Deadline</div>
           <div className={`font-mono text-2xl font-bold leading-none mb-1 ${daysToMilestone <= 7 ? 'text-red-600' : 'text-aic-navy'}`}>{daysToMilestone}</div>
-          <div className="text-[10px] text-gray-400">{milestoneLabel}</div>
+          <div className="text-[11.5px] text-gray-400">{milestoneLabel}</div>
         </div>
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">7-Day Trend</div>
+        <div className="text-[12px] font-bold text-gray-400 first-cap">7-Day Trend</div>
         <svg width={svgW} height={svgH} className="flex-shrink-0">
           <polyline
             fill="none"
@@ -138,7 +138,7 @@ export function PulseMonitor({
           />
         </svg>
         <div className="flex-1 border-t border-dashed border-gray-200" />
-        <div className="font-mono text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+        <div className="text-[12px] font-bold text-gray-400 first-cap">
           {sparkline[sparkline.length - 1].toLocaleString()} decisions today
         </div>
       </div>

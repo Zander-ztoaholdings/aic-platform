@@ -92,7 +92,7 @@ export function DashboardHeader({
     : null;
 
   return (
-    <header className="bg-white border-b border-[#e5e7eb] px-7 py-3.5 flex items-center justify-between gap-4">
+    <header className="bg-white border-b border-[#e5e7eb] px-5 md:px-7 py-3.5 flex items-center justify-between gap-4">
       {/* Left: page eyebrow + org name */}
       <div className="flex items-center gap-3">
         <button
@@ -104,7 +104,7 @@ export function DashboardHeader({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-4 h-px bg-[#c9920a] inline-block flex-shrink-0" />
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#c9920a]">
+            <span className="text-[12px] font-bold first-cap text-[#c9920a]">
               {pageTitle}
             </span>
           </div>
@@ -120,7 +120,7 @@ export function DashboardHeader({
         {divisionName && (
           <Badge
             variant="outline"
-            className="hidden md:inline-flex items-center gap-1.5 rounded-full border-[#e5e7eb] px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[#6b7280]"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-full border-[#e5e7eb] px-3 py-1.5 text-[12px] font-bold first-cap text-[#6b7280]"
           >
             <span className="text-[#c9920a]">◆</span> Division {division} — {divisionName}
           </Badge>
@@ -130,7 +130,7 @@ export function DashboardHeader({
         {certificationStatus && (
           <div className={`hidden md:flex items-center gap-1.5 border rounded-full px-3 py-1.5 ${statusStyle}`}>
             <span className="w-1.5 h-1.5 rounded-full bg-current flex-shrink-0" />
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.12em]">
+            <span className="text-[12px] font-bold first-cap">
               {certificationStatus.replace(/_/g, ' ')}
             </span>
           </div>
@@ -159,11 +159,11 @@ export function DashboardHeader({
                   className="absolute right-0 top-12 w-80 bg-white border border-[#e5e7eb] rounded-2xl shadow-2xl overflow-hidden z-20"
                 >
                   <div className="px-5 py-3.5 border-b border-[#e5e7eb] flex justify-between items-center">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-[#6b7280]">
+                    <span className="text-[12px] font-bold first-cap text-[#6b7280]">
                       Registry Alerts
                     </span>
                     {unreadCount > 0 && (
-                      <span className="font-mono text-[9px] font-bold text-[#c9920a] bg-amber-50 px-2 py-0.5 rounded">
+                      <span className="font-mono text-[11px] font-bold text-[#c9920a] bg-amber-50 px-2 py-0.5 rounded">
                         {unreadCount} unread
                       </span>
                     )}
@@ -179,7 +179,7 @@ export function DashboardHeader({
                       >
                         <div className="flex justify-between items-start mb-1">
                           <p className="text-xs font-bold text-[#0f1f3d]">{n.title}</p>
-                          <p className="font-mono text-[9px] text-[#9ca3af]">
+                          <p className="font-mono text-[11px] text-[#9ca3af]">
                             {new Date(n.created_at).toLocaleTimeString()}
                           </p>
                         </div>
@@ -187,7 +187,7 @@ export function DashboardHeader({
                       </div>
                     ))}
                     {notifications.length === 0 && (
-                      <div className="p-8 text-center text-[#9ca3af] text-sm font-serif italic">
+                      <div className="p-5 md:p-8 text-center text-[#9ca3af] text-sm font-serif italic">
                         No alerts at this time.
                       </div>
                     )}
@@ -203,13 +203,13 @@ export function DashboardHeader({
           <div className="text-right hidden sm:block">
             <div className="text-xs font-semibold text-[#0f1f3d] leading-none">{displayName}</div>
             {roleLabel && (
-              <div className="font-mono text-[8px] text-[#c9920a] uppercase tracking-[0.12em] font-bold mt-0.5">
+              <div className="text-[12px] text-[#c9920a] first-cap font-bold mt-0.5">
                 {roleLabel}
               </div>
             )}
           </div>
           <Avatar className="w-9 h-9 rounded-lg">
-            <AvatarFallback className="rounded-lg bg-[#0f1f3d] font-mono text-[10px] font-bold text-[#c9920a]">
+            <AvatarFallback className="rounded-lg bg-[#0f1f3d] font-mono text-[11.5px] font-bold text-[#c9920a]">
               {initials}
             </AvatarFallback>
           </Avatar>

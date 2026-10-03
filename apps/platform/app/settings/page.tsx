@@ -147,9 +147,9 @@ export default function OrganizationalSettings() {
     return (
         <DashboardShell>
             <div className="max-w-4xl mx-auto space-y-12">
-                <div className="flex justify-between items-end border-b border-aic-black/5 pb-8">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-aic-black/5 pb-6 md:pb-8">
                     <div>
-                        <h1 className="text-4xl font-serif font-bold text-aic-black tracking-tight tracking-tighter">Organizational Standards</h1>
+                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-aic-black tracking-tight tracking-tighter">Organizational Standards</h1>
                         <p className="text-gray-500 font-serif mt-4 italic text-lg leading-relaxed">
                             Configure your institutional profile and security protocols.
                         </p>
@@ -159,13 +159,13 @@ export default function OrganizationalSettings() {
                 {loading ? (
                     <div className="text-center py-20 text-gray-400 italic font-serif">Loading organizational settings...</div>
                 ) : (
-                <div className="grid grid-cols-1 gap-12">
+                <div className="grid grid-cols-1 gap-4 md:gap-12">
                     {/* Institutional Profile */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Institutional Profile</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
+                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Institutional Profile</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                             <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Entity Name</label>
+                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Entity Name</label>
                                 <input
                                     className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={settings.name}
@@ -174,13 +174,13 @@ export default function OrganizationalSettings() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Compliance Tier</label>
-                                <div className="px-4 py-3 bg-aic-black text-aic-paper font-mono text-[10px] font-bold rounded-xl inline-block">
-                                    {settings.tier}
+                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Compliance Tier</label>
+                                <div className="px-4 py-3 bg-aic-black text-aic-paper font-mono text-[11.5px] font-bold rounded-xl inline-block">
+                                    {String(settings.tier ?? '').replace('TIER_', 'Tier ')}
                                 </div>
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Primary Compliance Email</label>
+                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Primary Compliance Email</label>
                                 <input
                                     className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
                                     value={settings.contactEmail}
@@ -191,8 +191,8 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Team Management */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Team Management</h3>
+                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
+                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Team Management</h3>
 
                         {!canManageTeam ? (
                             <p className="text-sm font-serif text-gray-500 italic">
@@ -201,20 +201,20 @@ export default function OrganizationalSettings() {
                         ) : (
                         <>
                         {generatedInvite && (
-                            <div className="mb-10 p-6 bg-aic-black text-aic-paper rounded-2xl border border-aic-paper/10">
-                                <p className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-widest mb-3">INVITATION LINK READY</p>
+                            <div className="mb-10 p-4 sm:p-6 bg-aic-black text-aic-paper rounded-2xl border border-aic-paper/10">
+                                <p className="text-[12px] font-bold text-aic-gold first-cap mb-3">INVITATION LINK READY</p>
                                 <div className="flex items-center gap-4">
                                     <code className="flex-1 bg-aic-paper/5 border border-aic-paper/10 p-4 rounded-xl font-mono text-xs break-all">
                                         {generatedInvite}
                                     </code>
                                     <button 
                                         onClick={() => setGeneratedInvite(null)}
-                                        className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest hover:text-aic-paper"
+                                        className="text-[12px] font-bold text-gray-400 first-cap hover:text-aic-paper"
                                     >
                                         Dismiss
                                     </button>
                                 </div>
-                                <p className="text-[10px] font-mono text-gray-500 mt-3 uppercase italic">The email could not be sent. Share this link with them directly — it works once and expires in seven days.</p>
+                                <p className="text-[12px] text-gray-500 mt-3 first-cap italic">The email could not be sent. Share this link with them directly — it works once and expires in seven days.</p>
                             </div>
                         )}
 
@@ -242,9 +242,9 @@ export default function OrganizationalSettings() {
                                 setSaving(false);
                             }
                         }} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Full Name</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Full Name</label>
                                     <input
                                         className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
                                         placeholder="Full name"
@@ -254,7 +254,7 @@ export default function OrganizationalSettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Institutional Email</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Institutional Email</label>
                                     <input
                                         className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
                                         placeholder="name@company.com"
@@ -265,7 +265,7 @@ export default function OrganizationalSettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest mb-3">Institutional Role</label>
+                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Institutional Role</label>
                                     <select
                                         className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all appearance-none"
                                         value={inviteRole}
@@ -280,9 +280,9 @@ export default function OrganizationalSettings() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="bg-aic-black text-aic-paper px-8 py-4 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-red transition-all disabled:opacity-50"
+                                    className="bg-aic-black text-aic-paper px-5 md:px-8 py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-red transition-all disabled:opacity-50"
                                 >
-                                    INVITE_TEAM_MEMBER
+                                    Invite team member
                                 </button>
                             </div>
                         </form>
@@ -291,22 +291,22 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Security Protocol */}
-                    <section className="bg-[#080808] text-aic-paper p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-10 opacity-5 font-serif italic text-6xl select-none uppercase">Security</div>
-                        <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10 relative z-10">Security Protocol</h3>
+                    <section className="bg-[#080808] text-aic-paper p-6 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-6 md:p-10 opacity-5 font-serif italic text-4xl md:text-6xl select-none first-cap">Security</div>
+                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10 relative z-10">Security Protocol</h3>
 
                         <div className="space-y-8 relative z-10">
-                            <div className="p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
-                                <div className="flex justify-between items-center mb-4">
+                            <div className="p-4 sm:p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                                     <div>
                                         <p className="text-sm font-serif font-bold text-aic-paper mb-1">Multi-Factor Authentication (MFA)</p>
-                                        <p className="text-[10px] font-mono text-gray-500 uppercase">Mandatory for {settings.tier} Organizations</p>
+                                        <p className="text-[12px] text-gray-500 first-cap">Required for {String(settings.tier ?? '').replace('TIER_', 'Tier ')} organisations</p>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        {settings.twoFactorEnabled && <span className="text-[8px] font-mono font-bold text-aic-gold bg-aic-gold/10 px-2 py-1 rounded">ACTIVE</span>}
+                                        {settings.twoFactorEnabled && <span className="text-[11px] font-mono font-bold text-aic-gold bg-aic-gold/10 px-2 py-1 rounded">Active</span>}
                                         <button 
                                             onClick={startMfaSetup}
-                                            className="bg-aic-paper/10 hover:bg-aic-paper/20 text-aic-paper px-4 py-2 rounded-lg font-mono text-[10px] font-bold uppercase transition-all"
+                                            className="bg-aic-paper/10 hover:bg-aic-paper/20 text-aic-paper px-4 py-2 rounded-lg text-[12px] font-bold first-cap transition-all"
                                         >
                                             {settings.twoFactorEnabled ? 'Reset MFA' : 'Configure MFA'}
                                         </button>
@@ -340,13 +340,13 @@ export default function OrganizationalSettings() {
                                                     <button 
                                                         onClick={completeMfaSetup}
                                                         disabled={isMfaEnabling || mfaToken.length !== 6}
-                                                        className="bg-aic-gold text-aic-black px-6 py-3 rounded-xl font-mono text-[10px] font-bold uppercase hover:bg-aic-paper transition-all disabled:opacity-50"
+                                                        className="bg-aic-gold text-aic-black px-4 sm:px-6 py-3 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-paper transition-all disabled:opacity-50"
                                                     >
                                                         {isMfaEnabling ? 'Verifying...' : 'Enable MFA'}
                                                     </button>
                                                     <button 
                                                         onClick={() => setMfaSetup(null)}
-                                                        className="text-[10px] font-mono font-bold text-gray-500 uppercase hover:text-aic-paper"
+                                                        className="text-[12px] font-bold text-gray-500 first-cap hover:text-aic-paper"
                                                     >
                                                         Cancel
                                                     </button>
@@ -357,24 +357,24 @@ export default function OrganizationalSettings() {
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
+                            <div className="flex justify-between items-center p-4 sm:p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
                                 <div>
                                     <p className="text-sm font-serif font-bold text-aic-paper mb-1">Audit Trail Cryptographic Signing</p>
-                                    <p className="text-[10px] font-mono text-gray-500 uppercase tracking-tighter italic">SHA-256 Chain Verification active</p>
+                                    <p className="text-[12px] text-gray-500 first-cap tracking-tighter italic">SHA-256 Chain Verification active</p>
                                 </div>
-                                <span className="text-[8px] font-mono font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded">SECURE</span>
+                                <span className="text-[11px] font-mono font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded">Secure</span>
                             </div>
                         </div>
                     </section>
 
                     {/* Data Residency */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Jurisdiction & Residency</h3>
-                        <div className="flex items-center gap-6 p-6 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
+                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
+                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Jurisdiction & Residency</h3>
+                        <div className="flex items-center gap-6 p-4 sm:p-6 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
                             <div className="w-12 h-12 rounded-xl bg-aic-paper border border-aic-black/5 flex items-center justify-center text-2xl font-serif font-bold">ZA</div>
                             <div>
                                 <p className="text-sm font-serif font-bold text-aic-black mb-1">Sovereign Data Storage</p>
-                                <p className="text-[10px] font-mono text-gray-500 uppercase leading-relaxed italic">
+                                <p className="text-[12px] text-gray-500 first-cap leading-relaxed italic">
                                     Your institutional data is pinned to South African regional nodes to satisfy POPIA cross-border transfer requirements.
                                 </p>
                             </div>
@@ -382,8 +382,8 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Developer API Access */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-[0.4em] mb-10">Developer API Access</h3>
+                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
+                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Developer API Access</h3>
 
                         {!canManageTeam ? (
                             <p className="text-sm font-serif text-gray-500 italic">
@@ -392,20 +392,20 @@ export default function OrganizationalSettings() {
                         ) : (
                         <>
                         {generatedKey && (
-                            <div className="mb-10 p-6 bg-green-50 border border-green-100 rounded-2xl">
-                                <p className="text-[10px] font-mono font-bold text-green-600 uppercase tracking-widest mb-3">NEW API KEY GENERATED</p>
+                            <div className="mb-10 p-4 sm:p-6 bg-green-50 border border-green-100 rounded-2xl">
+                                <p className="text-[12px] font-bold text-green-600 first-cap mb-3">NEW API KEY GENERATED</p>
                                 <div className="flex items-center gap-4">
                                     <code className="flex-1 bg-aic-paper border border-green-200 p-4 rounded-xl font-mono text-sm break-all">
                                         {generatedKey}
                                     </code>
                                     <button 
                                         onClick={() => setGeneratedKey(null)}
-                                        className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-widest hover:text-aic-black"
+                                        className="text-[12px] font-bold text-gray-400 first-cap hover:text-aic-black"
                                     >
                                         Dismiss
                                     </button>
                                 </div>
-                                <p className="text-[10px] font-mono text-green-600 mt-3 uppercase">Store this safely. It will never be shown again.</p>
+                                <p className="text-[12px] text-green-600 mt-3 first-cap">Store this safely. It will never be shown again.</p>
                             </div>
                         )}
 
@@ -422,13 +422,13 @@ export default function OrganizationalSettings() {
                                         <div key={key.id} className="flex items-center justify-between p-5 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
                                             <div>
                                                 <p className="text-sm font-serif font-bold text-aic-black">{key.label}</p>
-                                                <p className="text-[10px] font-mono text-gray-500 uppercase mt-1">
+                                                <p className="text-[12px] text-gray-500 first-cap mt-1">
                                                     Prefix: {key.key_prefix} • Created {new Date(key.created_at).toLocaleDateString()}
                                                 </p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[10px] font-mono text-gray-400 uppercase">Last Used</p>
-                                                <p className="text-[10px] font-mono font-bold text-aic-black mt-1">
+                                                <p className="text-[12px] text-gray-400 first-cap">Last Used</p>
+                                                <p className="text-[11.5px] font-mono font-bold text-aic-black mt-1">
                                                     {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'NEVER'}
                                                 </p>
                                             </div>
@@ -449,7 +449,7 @@ export default function OrganizationalSettings() {
                                     <button 
                                         type="submit"
                                         disabled={saving}
-                                        className="bg-aic-black text-aic-paper px-8 rounded-xl font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
+                                        className="bg-aic-black text-aic-paper px-5 md:px-8 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
                                     >
                                         Generate New Key
                                     </button>
@@ -467,7 +467,7 @@ export default function OrganizationalSettings() {
                     <button
                         onClick={handleSave}
                         disabled={saving || loading}
-                        className="bg-aic-black text-aic-paper px-12 py-4 font-mono text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-aic-gold hover:text-black transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                        className="bg-aic-black text-aic-paper px-6 md:px-12 py-4 text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all shadow-xl active:scale-95 disabled:opacity-50"
                     >
                         {saving ? 'SAVING...' : 'SAVE_PROTOCOL_CHANGES'}
                     </button>

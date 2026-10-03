@@ -14,13 +14,13 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 sm:p-6 text-center">
       <div className="max-w-md">
         <div className="mb-8">
-          <span className="text-6xl font-mono font-bold text-red-500/20">ERR</span>
+          <span className="text-4xl md:text-6xl font-mono font-bold text-red-500/20">ERR</span>
         </div>
 
-        <h2 className="text-3xl font-serif font-bold text-white mb-4 tracking-tight">
+        <h2 className="text-3xl font-serif font-bold text-[#0e1b2c] mb-4 tracking-tight">
           System Error.
         </h2>
 
@@ -31,13 +31,13 @@ export default function Error({
 
         <button
           onClick={reset}
-          className="inline-block px-10 py-4 bg-aic-gold text-black font-mono text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-white transition-all duration-500"
+          className="inline-block px-5 md:px-10 py-4 bg-aic-gold text-black text-[12px] font-bold first-cap hover:bg-white transition-all duration-500"
         >
           Retry
         </button>
       </div>
 
-      <p className="mt-12 text-[9px] font-mono text-gray-700 uppercase tracking-[0.2em]">
+      <p className="mt-12 text-[12px] text-gray-700 first-cap">
         AIC HQ &bull; Corporate Operating System
       </p>
     </div>

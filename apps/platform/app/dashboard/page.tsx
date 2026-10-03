@@ -58,12 +58,12 @@ export default async function ContinuityDashboard() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[1100px] mx-auto px-6 py-10 space-y-6">
-        <header className="flex flex-col md:flex-row md:items-center gap-8 pb-8 border-b border-[#dde2e8]" data-tour="standing">
+      <div className="max-w-[1100px] mx-auto md:py-4 space-y-6">
+        <header className="flex flex-col md:flex-row md:items-center gap-5 md:gap-8 pb-7 md:pb-8 border-b border-[#dde2e8]" data-tour="standing">
           <StandingSeal phase={phaseFromCertificationStatus(overview?.organisation.certificationStatus)} />
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-medium text-[#8a6a1f]">Continuity record</p>
-            <h1 className="mt-1 font-serif text-[40px] leading-[1.05] font-semibold text-[#0e1b2c] tracking-[-0.01em]">
+            <h1 className="mt-1 font-serif text-[32px] sm:text-[40px] leading-[1.08] font-semibold text-[#0e1b2c] tracking-[-0.01em]">
               {overview?.organisation.name ?? 'Your organisation'}
             </h1>
             <p className="mt-3 text-[15px] text-[#5e6b7b] max-w-xl leading-relaxed">
@@ -108,14 +108,14 @@ export default async function ContinuityDashboard() {
 
         {record.drift.length > 0 && (
           <section className="bg-white border border-gray-200 rounded-lg">
-            <header className="px-6 py-4 border-b border-gray-100">
+            <header className="px-4 sm:px-6 py-4 border-b border-gray-100">
               <h2 className="font-serif text-lg font-bold text-aic-navy">What has drifted</h2>
               <p className="mt-1 text-xs text-gray-500">
                 Conditions that have gone stale or that the record now contradicts. AIC reports
                 what it sees; deciding what to do about it is yours.
               </p>
             </header>
-            <ul className="p-6 space-y-3">
+            <ul className="p-4 sm:p-6 space-y-3">
               {record.drift.map((d, i) => (
                 <li
                   key={`${d.code}-${i}`}
@@ -136,7 +136,7 @@ export default async function ContinuityDashboard() {
         )}
 
         <section className="bg-white border border-gray-200 rounded-lg">
-          <header className="px-6 py-4 border-b border-gray-100 flex items-baseline justify-between gap-4">
+          <header className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 sm:gap-4">
             <div>
               <h2 className="font-serif text-lg font-bold text-aic-navy">The record</h2>
               <p className="mt-1 text-xs text-gray-500">
@@ -153,7 +153,7 @@ export default async function ContinuityDashboard() {
           </header>
           <ContinuityFeed events={record.events} now={now} />
           {record.total > record.events.length && (
-            <footer className="px-6 py-3 border-t border-gray-100 text-[12px] text-gray-400">
+            <footer className="px-4 sm:px-6 py-3 border-t border-gray-100 text-[12px] text-gray-400">
               Showing the most recent {record.events.length} of {record.total}
             </footer>
           )}

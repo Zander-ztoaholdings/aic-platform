@@ -89,38 +89,38 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-aic-navy text-aic-paper flex font-mono uppercase tracking-[0.15em] text-[9px]">
+    <div className="min-h-screen bg-white text-[#0e1b2c] flex first-cap text-[12px]">
       <AnimatePresence>
         {searchOpen && (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6"
+                className="fixed inset-0 z-[100] bg-white backdrop-blur-xl flex items-center justify-center p-4 sm:p-6"
             >
                 <motion.div
                     initial={{ scale: 0.95, y: 20 }}
                     animate={{ scale: 1, y: 0 }}
-                    className="w-full max-w-2xl bg-aic-navy-mid border border-aic-paper/10 rounded-[2.5rem] p-12 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
+                    className="w-full max-w-2xl bg-white border border-[#dde2e8] rounded-[2.5rem] p-6 md:p-12 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
                 >
                     <div className="flex items-center gap-6 mb-12">
-                        <svg className="w-6 h-6 text-aic-copper" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        <svg className="w-6 h-6 text-[#8a6a1f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <input
                             autoFocus
                             placeholder="QUERY REGISTRY..."
-                            className="bg-transparent border-none text-2xl font-serif text-aic-paper outline-none w-full tracking-tighter"
+                            className="bg-transparent border-none text-2xl font-serif text-[#0e1b2c] outline-none w-full tracking-tighter"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
-                        <button onClick={() => setSearchOpen(false)} className="text-gray-600 hover:text-aic-paper">ESC</button>
+                        <button onClick={() => setSearchOpen(false)} className="text-gray-600 hover:text-[#0e1b2c]">ESC</button>
                     </div>
 
                     <div className="space-y-8">
                         <div>
-                            <p className="text-[8px] text-gray-600 mb-4 tracking-[0.4em]">Suggested Commands</p>
+                            <p className="text-[11px] text-gray-600 mb-4 tracking-[0.4em]">Suggested Commands</p>
                             <div className="grid grid-cols-2 gap-4">
                                 {['/verify-id', '/audit-queue', '/revenue-report', '/training-log'].map(cmd => (
-                                    <div key={cmd} className="p-4 bg-aic-paper/5 border border-aic-paper/5 rounded-xl text-gray-400 font-mono text-[9px] hover:border-aic-copper/30 hover:text-aic-paper transition-all cursor-pointer">
+                                    <div key={cmd} className="p-4 bg-[#f5f7f9] border border-[#dde2e8] rounded-xl text-gray-500 font-mono text-[11px] hover:border-aic-copper/30 hover:text-[#0e1b2c] transition-all cursor-pointer">
                                         {cmd}
                                     </div>
                                 ))}
@@ -133,13 +133,13 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
 
       {/* Universal HQ Navigation */}
-      <aside className="w-20 bg-aic-navy border-r border-aic-paper/5 flex flex-col items-center py-8 gap-8 fixed h-full z-30">
-        <div className="h-10 w-10 rounded-xl bg-aic-copper/10 border border-aic-copper/30 flex items-center justify-center text-aic-copper font-serif font-bold text-xl mb-8">A</div>
+      <aside className="w-20 bg-white border-r border-[#dde2e8] flex flex-col items-center py-8 gap-8 fixed h-full z-30">
+        <div className="h-10 w-10 rounded-xl bg-aic-copper/10 border border-aic-copper/30 flex items-center justify-center text-[#8a6a1f] font-serif font-bold text-xl mb-8">A</div>
         {departments.map((dept) => (
             <Link
                 key={dept.id}
                 href={dept.routes[0].href}
-                className={`p-4 rounded-2xl transition-all duration-500 hover:bg-aic-paper/5 group relative ${pathname.startsWith('/' + dept.id) ? 'bg-aic-copper/10 text-aic-copper border border-aic-copper/20 shadow-none' : 'text-gray-600'}`}
+                className={`p-4 rounded-2xl transition-all duration-500 hover:bg-[#eef1f5] group relative ${pathname.startsWith('/' + dept.id) ? 'bg-aic-copper/10 text-aic-copper border border-aic-copper/20 shadow-none' : 'text-gray-600'}`}
             >
                 {dept.icon}
                 <span className="absolute left-full ml-4 px-3 py-1 bg-aic-copper text-black rounded font-bold opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
@@ -150,10 +150,10 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Department Sidebar */}
-      <aside className="w-64 ml-20 bg-aic-navy-mid border-r border-aic-paper/5 p-8 flex flex-col fixed h-full z-20 shadow-2xl">
+      <aside className="w-64 ml-20 bg-white border-r border-[#dde2e8] p-5 md:p-8 flex flex-col fixed h-full z-20 shadow-2xl">
         <div className="mb-12">
-            <p className="text-[7px] text-gray-600 uppercase tracking-[0.4em] mb-2">AIC_CORPORATE_OS</p>
-            <h2 className="text-xs font-bold text-aic-paper tracking-[0.3em]">
+            <p className="text-[12px] text-gray-600 first-cap mb-2">AIC_CORPORATE_OS</p>
+            <h2 className="text-xs font-bold text-[#0e1b2c] tracking-[0.3em]">
                 {departments.find(d => pathname.includes(d.id))?.label.toUpperCase() || 'COMMAND'}
             </h2>
         </div>
@@ -165,8 +165,8 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
                     href={route.href}
                     className={`block py-3 px-4 rounded-lg transition-all border ${
                         pathname === route.href
-                        ? 'bg-aic-paper/5 border-aic-paper/10 text-aic-paper shadow-xl'
-                        : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-aic-paper/[0.02]'
+                        ? 'bg-[#f5f7f9] border-[#dde2e8] text-[#0e1b2c] shadow-xl'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-[#eef1f5]'
                     }`}
                 >
                     {route.label}
@@ -174,27 +174,27 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
             ))}
         </nav>
 
-        <div className="mt-auto pt-8 border-t border-aic-paper/5 opacity-30">
-            <p className="text-[6px] tracking-[0.5em] text-gray-500">ENCRYPTED_SESSION_v4.0</p>
+        <div className="mt-auto pt-8 border-t border-[#dde2e8] opacity-30">
+            <p className="text-[11px] tracking-[0.5em] text-gray-500">ENCRYPTED_SESSION_v4.0</p>
         </div>
       </aside>
 
       {/* Content Engine */}
-      <main className="flex-1 ml-[20rem] min-h-screen bg-aic-navy">
-        <header className="sticky top-0 z-10 bg-aic-navy/80 backdrop-blur-xl border-b border-aic-paper/5 px-12 py-8 flex justify-between items-center">
+      <main className="flex-1 ml-[20rem] min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white backdrop-blur-xl border-b border-[#dde2e8] px-6 md:px-12 py-8 flex justify-between items-center">
             <div className="flex items-center gap-4">
                 <div className="h-1.5 w-1.5 rounded-full bg-aic-copper animate-pulse shadow-none"></div>
-                <h3 className="text-[10px] font-bold tracking-[0.4em] text-aic-paper">INTER_COMPANY_SYNC_ACTIVE</h3>
+                <h3 className="text-[11.5px] font-bold tracking-[0.4em] text-[#0e1b2c]">INTER_COMPANY_SYNC_ACTIVE</h3>
             </div>
             <div className="flex items-center gap-8">
                 <div className="text-right">
-                    <p className="text-[8px] text-gray-500">USER_TOKEN</p>
-                    <p className="text-[9px] text-aic-paper font-bold">Z. WILKEN_ADMIN</p>
+                    <p className="text-[11px] text-gray-500">USER_TOKEN</p>
+                    <p className="text-[11px] text-[#0e1b2c] font-bold">Z. WILKEN_ADMIN</p>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-zinc-900 border border-aic-paper/10"></div>
+                <div className="h-10 w-10 rounded-full bg-white border border-[#dde2e8]"></div>
             </div>
         </header>
-        <div className="p-12 max-w-7xl mx-auto">
+        <div className="p-6 md:p-12 max-w-7xl mx-auto">
             {children}
         </div>
       </main>

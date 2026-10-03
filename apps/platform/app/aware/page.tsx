@@ -48,7 +48,7 @@ const fmt = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numer
 
 const input =
   'w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-aic-navy outline-none transition focus:border-aic-gold focus:ring-4 focus:ring-amber-100';
-const label = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400';
+const label = 'mb-1.5 block text-[12.5px] font-semibold first-cap text-gray-400';
 
 export default function AwarePage() {
   const [state, setState] = useState<AwareState | null>(null);
@@ -198,7 +198,7 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
         <div className={`mt-6 space-y-10 ${hasPerson ? '' : 'pointer-events-none opacity-40'}`}>
           {grouped.map(({ category, questions }) => (
             <section key={category.key}>
-              <h3 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-aic-gold">{category.name}</h3>
+              <h3 className="text-[13px] font-semibold first-cap text-aic-gold">{category.name}</h3>
               {category.purpose && <p className="mt-1 text-sm text-gray-500">{category.purpose}</p>}
               <div className="mt-5 space-y-7">
                 {questions.map((q) => (
@@ -399,10 +399,10 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A1728] via-[#10233d] to-[#1b3350] p-8 text-white shadow-[0_20px_50px_rgba(10,23,40,0.25)]">
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A1728] via-[#10233d] to-[#1b3350] p-5 md:p-8 text-white shadow-[0_20px_50px_rgba(10,23,40,0.25)]">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-aic-gold-light">AIC Aware · self-declared</div>
+            <div className="text-[12.5px] font-semibold first-cap text-aic-gold-light">AIC Aware · self-declared</div>
             <div className="mt-2 text-2xl font-semibold tracking-tight">{badge.orgNameAtIssue}</div>
             <div className="mt-1 font-mono text-sm text-white/70">{badge.code}</div>
           </div>

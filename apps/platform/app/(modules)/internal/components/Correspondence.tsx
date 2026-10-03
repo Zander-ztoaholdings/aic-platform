@@ -62,7 +62,7 @@ export default function Correspondence() {
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+            <span className="text-[12px] font-bold first-cap text-[#6b7280]">
               Correspondence Thread
             </span>
             {unreadCount > 0 && <StatusChip status="partial" />}
@@ -76,7 +76,7 @@ export default function Correspondence() {
             <div className="divide-y divide-[#f3f4f6]">
               {messages.map((m) => (
                 <div key={m.id} className="flex gap-3 py-4">
-                  <div className="w-9 h-9 rounded-lg bg-[#f0f4f8] flex items-center justify-center font-mono text-[9px] font-bold text-[#c9920a] flex-shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-[#f0f4f8] flex items-center justify-center font-mono text-[11px] font-bold text-[#c9920a] flex-shrink-0">
                     {m.type === 'CORRESPONDENCE' ? 'YOU' : 'AIC'}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -86,11 +86,11 @@ export default function Correspondence() {
                       </span>
                       <div className="flex items-center gap-2">
                         {m.status === 'UNREAD' && (
-                          <span className="font-mono text-[8px] font-bold text-[#c9920a] bg-amber-50 px-1.5 py-0.5 rounded">
+                          <span className="font-mono text-[11px] font-bold text-[#c9920a] bg-amber-50 px-1.5 py-0.5 rounded">
                             UNREAD
                           </span>
                         )}
-                        <span className="font-mono text-[8px] text-[#9ca3af]">
+                        <span className="font-mono text-[11px] text-[#9ca3af]">
                           {new Date(m.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -113,7 +113,7 @@ export default function Correspondence() {
         </SectionCard>
 
         <SectionCard>
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+          <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
             Reply to Auditor
           </div>
           <textarea
@@ -126,7 +126,7 @@ export default function Correspondence() {
             <button
               onClick={handleSend}
               disabled={!message.trim() || sending}
-              className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Send className="w-3 h-3" /> {sending ? 'Sending…' : 'Send Message'}
             </button>
@@ -136,7 +136,7 @@ export default function Correspondence() {
 
       <div className="space-y-4">
         <SectionCard className="p-4">
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+          <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
             Your Auditor
           </div>
           <div className="flex items-center gap-3 mb-4">
@@ -145,7 +145,7 @@ export default function Correspondence() {
             </div>
             <div>
               <div className="text-xs font-semibold text-[#0f1f3d]">System Auditor</div>
-              <div className="font-mono text-[9px] text-[#c9920a]">AI Integrity Certification</div>
+              <div className="font-mono text-[11px] text-[#c9920a]">AI Integrity Certification</div>
             </div>
           </div>
           <p className="text-xs text-[#6b7280] leading-relaxed">
@@ -154,7 +154,7 @@ export default function Correspondence() {
         </SectionCard>
 
         <SectionCard className="p-4">
-          <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+          <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
             Communication Rules
           </div>
           <div className="space-y-3">

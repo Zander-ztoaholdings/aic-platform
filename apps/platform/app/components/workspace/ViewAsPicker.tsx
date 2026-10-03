@@ -40,12 +40,12 @@ export function ViewAsPicker() {
     window.location.href = d.home;
   }
 
-  const field = 'rounded-xl border border-white/15 bg-white/[0.06] px-3 py-2 text-sm text-white outline-none focus:border-amber-300';
+  const field = 'w-full sm:w-auto rounded-xl border border-[#dde2e8] bg-white px-3 h-11 text-sm text-[#0e1b2c] outline-none focus:border-[#a8772a]';
 
   return (
-    <section className="mb-8 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] p-5">
-      <div className="flex items-center gap-2 text-sm font-semibold text-amber-200"><Eye className="h-4 w-4" /> View as another role</div>
-      <p className="mt-1 text-xs text-white/55 max-w-2xl">
+    <section className="mb-8 rounded-2xl border border-[#e7d9b8] bg-[#fbf7ee] p-4 sm:p-5">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[#8a6a1f]"><Eye className="h-4 w-4" /> View as another role</div>
+      <p className="mt-1 text-[13px] text-[#5e6b7b] max-w-2xl">
         See the platform exactly as that role sees it: the same menus, pages and permission checks. Read-only; ends after two hours or when you exit.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -58,11 +58,11 @@ export function ViewAsPicker() {
             {opts.organisations.map((o) => <option key={o.id} value={o.id} className="text-black">{o.name}</option>)}
           </select>
         )}
-        <button onClick={start} disabled={busy || (needsOrg && !orgId)} className="rounded-full bg-amber-300 px-4 py-2 text-sm font-semibold text-[#1a1300] hover:bg-amber-200 disabled:opacity-40">
+        <button onClick={start} disabled={busy || (needsOrg && !orgId)} className="w-full sm:w-auto rounded-full bg-[#0e1b2c] px-5 h-11 text-sm font-semibold text-white hover:bg-[#22344a] disabled:opacity-40">
           {busy ? 'Starting…' : 'Start preview'}
         </button>
       </div>
-      {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+      {error && <p className="mt-2 text-xs text-red-700">{error}</p>}
     </section>
   );
 }

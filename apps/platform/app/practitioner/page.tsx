@@ -77,10 +77,10 @@ export default function PractitionerPage() {
         <Eyebrow>Practitioner Certification — CAAP</Eyebrow>
 
         {/* Hero banner */}
-        <div className="bg-[#0a1628] rounded-2xl px-8 py-8 flex gap-6 items-center">
-          <BrandMark size={60} />
+        <div className="bg-[#0a1628] rounded-2xl px-5 md:px-8 py-6 md:py-8 flex flex-col md:flex-row gap-5 md:gap-6 md:items-center">
+          <span className="hidden md:block"><BrandMark size={60} /></span>
           <div className="flex-1 min-w-0">
-            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[#c9920a] mb-2">
+            <div className="text-[12px] font-bold first-cap text-[#c9920a] mb-2">
               Certified AI Accountability Professional
             </div>
             <h2 className="font-serif text-xl font-bold text-white leading-snug mb-1.5">The CAAP Credential</h2>
@@ -89,8 +89,8 @@ export default function PractitionerPage() {
               an individual has the knowledge and commitment to manage AI governance responsibly.
             </p>
           </div>
-          <div className="ml-auto flex-shrink-0 text-right">
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-white/40 mb-1">Launching</div>
+          <div className="md:ml-auto flex-shrink-0 md:text-right flex md:block items-baseline gap-2 pt-4 md:pt-0 border-t border-white/10 md:border-0">
+            <div className="text-[12px] font-bold first-cap text-white/40 mb-1">Launching</div>
             <div className="font-serif text-xl font-bold text-[#c9920a]">Q3 2027</div>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function PractitionerPage() {
           <div className="space-y-4">
             {/* 5 Competency Domains */}
             <SectionCard>
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-4">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
                 5 Competency Domains
               </div>
               <div className="divide-y divide-[#f3f4f6]">
@@ -118,7 +118,7 @@ export default function PractitionerPage() {
 
             {/* Examination Structure */}
             <SectionCard>
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-4">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
                 Examination Structure
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -136,7 +136,7 @@ export default function PractitionerPage() {
           {/* Right rail */}
           <div className="space-y-3">
             <SectionCard className="p-4">
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
                 Fee Structure (ZAR)
               </div>
               <div className="divide-y divide-[#f3f4f6]">
@@ -150,7 +150,7 @@ export default function PractitionerPage() {
             </SectionCard>
 
             <SectionCard className="p-4">
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-2">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-2">
                 Register Interest
               </div>
               <p className="text-xs text-[#6b7280] leading-relaxed mb-4">
@@ -161,7 +161,7 @@ export default function PractitionerPage() {
                 type="button"
                 onClick={handleRegisterInterest}
                 disabled={submitting || registered}
-                className="w-full inline-flex items-center justify-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.15em] bg-[#c9920a] text-white rounded-full py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-60"
               >
                 {registered ? (
                   <>Registered <Check className="w-3 h-3" /></>

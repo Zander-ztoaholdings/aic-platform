@@ -120,8 +120,8 @@ export default function GovernanceWorkspace() {
 
   const getBorderColor = () => {
     if (impactMagnitude <= 3) return 'border-teal-500/20';
-    if (impactMagnitude <= 7) return 'border-amber-600/20';
-    return 'border-red-700/20';
+    if (impactMagnitude <= 7) return 'border-amber-200';
+    return 'border-red-200';
   };
 
   const WorkspaceContent = (
@@ -137,22 +137,22 @@ export default function GovernanceWorkspace() {
         <header className="flex flex-col md:flex-row md:items-start justify-between gap-8">
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2">
-              <LayoutPanelLeft className="w-5 h-5 text-aic-gold" />
-              <span className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-[0.4em]">
+              <LayoutPanelLeft className="w-5 h-5 text-[#8a6a1f]" />
+              <span className="text-[12px] font-bold text-gray-500 first-cap">
                 ISO 42001 Governance Workspace
               </span>
             </div>
-            <h1 className="text-5xl font-serif font-bold text-aic-black tracking-tighter leading-none">
+            <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] tracking-tighter leading-none">
               Algorithm Audit Trail.
             </h1>
             
             {/* System Selector */}
-            <div className="flex items-center gap-4 p-2 bg-aic-paper/50 backdrop-blur-sm rounded-2xl border border-aic-black/5 w-fit shadow-sm">
-              <Box className="w-4 h-4 text-aic-gold ml-2" />
+            <div className="flex items-center gap-4 p-2 bg-[#f5f7f9] backdrop-blur-sm rounded-2xl border border-aic-black/5 w-fit shadow-sm">
+              <Box className="w-4 h-4 text-[#8a6a1f] ml-2" />
               <select 
                 value={selectedSystemId || ''} 
                 onChange={(e) => setSelectedSystemId(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-mono font-bold uppercase tracking-widest outline-none py-2 pr-8 cursor-pointer"
+                className="bg-transparent border-none text-[12px] font-bold first-cap outline-none py-2 pr-8 cursor-pointer"
               >
                 {systems.map(s => (
                   <option key={s.id} value={s.id}>{s.name} ({s.lifecycleStage})</option>
@@ -165,7 +165,7 @@ export default function GovernanceWorkspace() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsFocusMode(!isFocusMode)}
-              className="flex items-center gap-2 px-4 py-2 bg-aic-paper border border-aic-black/5 rounded-2xl text-[10px] font-mono font-bold uppercase tracking-widest hover:border-aic-gold transition-all shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-aic-paper border border-aic-black/5 rounded-2xl text-[12px] font-bold first-cap hover:border-aic-gold transition-all shadow-sm"
             >
               {isFocusMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               {isFocusMode ? 'Exit Focus' : 'Focus Mode'}
@@ -173,7 +173,7 @@ export default function GovernanceWorkspace() {
             <button 
               onClick={saveWorkspace}
               disabled={isSaving || !selectedSystemId}
-              className="flex items-center gap-2 px-6 py-2 bg-aic-black text-aic-paper rounded-2xl text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-aic-gold transition-all disabled:opacity-50 shadow-lg"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 bg-white text-[#0e1b2c] rounded-2xl text-[12px] font-bold first-cap hover:bg-aic-gold transition-all disabled:opacity-50 shadow-lg"
             >
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {isSaving ? 'Securing...' : 'Commit Block'}
@@ -183,8 +183,8 @@ export default function GovernanceWorkspace() {
 
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <Loader2 className="w-8 h-8 animate-spin text-aic-gold" />
-            <p className="font-serif italic text-gray-400">Syncing governance blocks...</p>
+            <Loader2 className="w-8 h-8 animate-spin text-[#8a6a1f]" />
+            <p className="font-serif italic text-gray-500">Syncing governance blocks...</p>
           </div>
         ) : (
           <>
@@ -219,13 +219,13 @@ export default function GovernanceWorkspace() {
               <div className="pt-8 flex items-center justify-center gap-4">
                 <button 
                   onClick={() => addBlock('text')}
-                  className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[9px] font-mono font-bold uppercase text-gray-400 hover:border-aic-gold hover:text-aic-gold transition-all"
+                  className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[12px] font-bold first-cap text-gray-500 hover:border-aic-gold hover:text-[#8a6a1f] transition-all"
                 >
                   <Plus className="w-3 h-3" /> Add Text
                 </button>
                 <button 
                   onClick={() => addBlock('model-card')}
-                  className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[9px] font-mono font-bold uppercase text-gray-400 hover:border-aic-gold hover:text-aic-gold transition-all"
+                  className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[12px] font-bold first-cap text-gray-500 hover:border-aic-gold hover:text-[#8a6a1f] transition-all"
                 >
                   <FileText className="w-3 h-3" /> Model Card
                 </button>
@@ -237,14 +237,14 @@ export default function GovernanceWorkspace() {
               <motion.footer 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-8 bg-red-700 text-aic-paper rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center gap-8"
+                className="p-5 md:p-8 bg-red-700 text-aic-paper rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center gap-8"
               >
-                <div className="p-4 bg-aic-paper/10 rounded-2xl">
+                <div className="p-4 bg-[#f5f7f9] rounded-2xl">
                   <UserCheck className="w-8 h-8" />
                 </div>
                 <div className="text-center md:text-left">
                   <h4 className="font-serif text-2xl font-bold mb-1">Human-In-The-Loop Enforcement Active</h4>
-                  <p className="text-sm text-aic-paper/80 italic font-serif">
+                  <p className="text-sm text-[#5e6b7b] italic font-serif">
                     This audit session is now in "High Magnitude" mode. ISO 42001 certification requires verified human qualitative rationale before this trail can be finalized.
                   </p>
                 </div>

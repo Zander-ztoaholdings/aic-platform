@@ -24,9 +24,9 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-4 h-0.5 bg-aic-gold" />
-          <span className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-[0.2em]">Five Algorithmic Rights</span>
+          <span className="text-[12px] font-bold text-aic-gold first-cap">Five Algorithmic Rights</span>
         </div>
-        <button className="font-mono text-[10px] font-bold text-aic-gold uppercase tracking-widest hover:underline">
+        <button className="text-[12px] font-bold text-aic-gold first-cap hover:underline">
           View Details
         </button>
       </div>
@@ -44,7 +44,7 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
               className="p-4 bg-white hover:shadow-md transition-shadow cursor-pointer border-gray-100 flex flex-col"
             >
               <div className="flex justify-between items-start mb-4">
-                <span className="font-mono text-[9px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded uppercase tracking-widest">R{r.id}</span>
+                <span className="text-[12px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded first-cap">R{r.id}</span>
                 <span className={`font-mono text-xs font-bold ${trendCol[r.trendDir]}`}>{r.trendDir === 'up' ? '↑' : r.trendDir === 'down' ? '↓' : '→'}</span>
               </div>
               
@@ -52,7 +52,7 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
               
               <div className="flex items-baseline gap-1 mb-3">
                 <span className={`font-mono text-xl font-bold ${col}`}>{r.score}</span>
-                <span className="font-mono text-[9px] text-gray-400">/100</span>
+                <span className="font-mono text-[11px] text-gray-400">/100</span>
               </div>
               
               <div className="h-0.5 w-full bg-gray-100 rounded-full mb-4 overflow-hidden mt-auto">
@@ -62,11 +62,11 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
                 />
               </div>
               
-              <div className="text-[9px] text-gray-500 leading-tight mb-3 line-clamp-2 h-6">
+              <div className="text-[11px] text-gray-500 leading-tight mb-3 line-clamp-2 h-6">
                 {r.metric}
               </div>
               
-              <div className={`mt-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${statusBg} ${statusCol}`}>
+              <div className={`mt-auto inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[12px] font-bold first-cap ${statusBg} ${statusCol}`}>
                 <div className={`w-1 h-1 rounded-full ${bgCol}`} />
                 {r.status === 'healthy' ? 'Healthy' : r.status === 'attention' ? 'Attention' : 'Action'}
               </div>

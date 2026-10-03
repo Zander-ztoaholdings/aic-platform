@@ -105,7 +105,7 @@ export default function OrganisationProfile() {
     return (
       <div className="space-y-5">
         <Eyebrow>Organisation Profile</Eyebrow>
-        <SectionCard className="p-8 text-center">
+        <SectionCard className="p-5 md:p-8 text-center">
           <p className="text-xs text-[#9ca3af]">Loading organisation profile…</p>
         </SectionCard>
       </div>
@@ -116,7 +116,7 @@ export default function OrganisationProfile() {
     return (
       <div className="space-y-5">
         <Eyebrow>Organisation Profile</Eyebrow>
-        <SectionCard className="p-8 text-center">
+        <SectionCard className="p-5 md:p-8 text-center">
           <p className="text-xs text-[#9ca3af]">Could not load the organisation profile. Try refreshing.</p>
         </SectionCard>
       </div>
@@ -154,13 +154,13 @@ export default function OrganisationProfile() {
         <div className="space-y-4">
           {/* Organisation Details */}
           <SectionCard>
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-4">
+            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
               Organisation Details
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {ORG_FIELDS.map((r) => (
                 <div key={r.k} className="bg-[#f9fafb] rounded-lg px-3 py-2.5">
-                  <div className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-[0.1em] mb-1">{r.k}</div>
+                  <div className="text-[12px] text-[#9ca3af] first-cap mb-1">{r.k}</div>
                   <div className="text-xs font-semibold text-[#0f1f3d]">{r.v}</div>
                 </div>
               ))}
@@ -169,7 +169,7 @@ export default function OrganisationProfile() {
 
           {/* Certificate */}
           <SectionCard>
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-4">
+            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
               Certificate
             </div>
             {certificate ? (
@@ -191,12 +191,12 @@ export default function OrganisationProfile() {
           {/* Evidence verification */}
           <SectionCard>
             <div className="flex items-center justify-between mb-4">
-              <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280]">
+              <div className="text-[12px] font-bold first-cap text-[#6b7280]">
                 Evidence Verification
               </div>
               <Link
                 href="/evidence"
-                className="font-mono text-[9px] font-bold text-[#c9920a] hover:text-[#0f1f3d] transition-colors"
+                className="font-mono text-[11px] font-bold text-[#c9920a] hover:text-[#0f1f3d] transition-colors"
               >
                 Open the vault →
               </Link>
@@ -212,7 +212,7 @@ export default function OrganisationProfile() {
                 ))}
               </div>
             )}
-            <p className="font-mono text-[9px] text-[#9ca3af]">
+            <p className="font-mono text-[11px] text-[#9ca3af]">
               Last verified: {date(evidence.lastVerifiedAt)}
             </p>
           </SectionCard>
@@ -222,7 +222,7 @@ export default function OrganisationProfile() {
         <div className="space-y-3">
           {/* Accountable Person */}
           <SectionCard className="p-4">
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
               Accountable Person
             </div>
             {person ? (
@@ -233,20 +233,20 @@ export default function OrganisationProfile() {
                   </div>
                   <div>
                     <div className="text-sm font-bold text-[#0f1f3d]">{person.name}</div>
-                    <div className="font-mono text-[9px] text-[#c9920a]">
+                    <div className="font-mono text-[11px] text-[#c9920a]">
                       {person.jobTitle ?? 'No title recorded'}
                     </div>
                   </div>
                 </div>
                 <div className="divide-y divide-[#f3f4f6]">
                   <div className="py-2">
-                    <div className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-[0.1em] mb-0.5">
+                    <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">
                       Email
                     </div>
                     <div className="text-xs font-medium text-[#0f1f3d]">{person.email}</div>
                   </div>
                   <div className="py-2">
-                    <div className="font-mono text-[8px] text-[#9ca3af] uppercase tracking-[0.1em] mb-0.5">
+                    <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">
                       Declaration Accepted
                     </div>
                     <div className="text-xs font-medium text-[#0f1f3d]">
@@ -260,7 +260,7 @@ export default function OrganisationProfile() {
             )}
             <Link
               href="/overview"
-              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[9px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
             >
               {person ? 'Change Accountable Person' : 'Declare Accountable Person'} →
             </Link>
@@ -268,7 +268,7 @@ export default function OrganisationProfile() {
 
           {/* AI Systems in Scope */}
           <SectionCard className="p-4">
-            <div className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#6b7280] mb-3">
+            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
               AI Systems in Scope
             </div>
             {inventory.systems.length === 0 ? (
@@ -279,7 +279,7 @@ export default function OrganisationProfile() {
                   <div key={s.id} className="flex items-center gap-2.5 py-2">
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-[#0f1f3d] truncate">{s.name}</div>
-                      <div className="font-mono text-[8px] text-[#9ca3af]">Tier {s.riskTier ?? '—'}</div>
+                      <div className="font-mono text-[11px] text-[#9ca3af]">Tier {s.riskTier ?? '—'}</div>
                     </div>
                     <StatusChip status={systemChip(s)} />
                   </div>
@@ -288,7 +288,7 @@ export default function OrganisationProfile() {
             )}
             <Link
               href="/overview"
-              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[9px] font-bold text-[#9ca3af] border border-dashed border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[11px] font-bold text-[#9ca3af] border border-dashed border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
             >
               Declare New AI System →
             </Link>

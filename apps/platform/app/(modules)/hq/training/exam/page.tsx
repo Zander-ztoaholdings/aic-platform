@@ -77,15 +77,15 @@ export default function BoardExamPage() {
             <div className="max-w-3xl mx-auto text-center py-24">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                     <div className="w-24 h-24 bg-aic-gold/10 border border-aic-gold/30 rounded-3xl flex items-center justify-center mx-auto mb-12">
-                        <svg className="w-10 h-10 text-aic-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        <svg className="w-10 h-10 text-[#8a6a1f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <h1 className="text-5xl font-serif font-bold text-aic-paper mb-6 tracking-tighter">Lead Auditor Board Exam</h1>
+                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] mb-6 tracking-tighter">Lead Auditor Board Exam</h1>
                     <p className="text-gray-500 font-serif italic text-lg mb-12 leading-relaxed">
                         You are about to enter the high-stakes certification environment. Passing this exam authorizes you to represent AIC in institutional audits.
                     </p>
-                    <div className="bg-aic-paper/5 border border-aic-paper/10 p-8 rounded-2xl mb-12 text-left">
-                        <h4 className="text-[10px] font-mono font-bold text-aic-gold uppercase tracking-widest mb-4">Exam Protocols</h4>
-                        <ul className="space-y-3 text-sm text-gray-400 font-serif italic">
+                    <div className="bg-[#f5f7f9] border border-[#dde2e8] p-5 md:p-8 rounded-2xl mb-12 text-left">
+                        <h4 className="text-[12px] font-bold text-[#8a6a1f] first-cap mb-4">Exam Protocols</h4>
+                        <ul className="space-y-3 text-sm text-gray-500 font-serif italic">
                             <li>• Minimum pass rate: 80%</li>
                             <li>• Closed-book institutional standard</li>
                             <li>• Results are cryptographically recorded in the People Registry</li>
@@ -93,7 +93,7 @@ export default function BoardExamPage() {
                     </div>
                     <button 
                         onClick={() => setStarted(true)}
-                        className="bg-aic-paper text-black px-12 py-5 font-mono text-xs font-bold uppercase tracking-[0.3em] hover:bg-aic-gold transition-all shadow-2xl"
+                        className="bg-[#0e1b2c] text-white px-6 md:px-12 py-5 text-xs font-bold first-cap hover:bg-[#22344a] transition-all shadow-2xl"
                     >
                         INITIALIZE_EXAM_SESSION
                     </button>
@@ -112,7 +112,7 @@ export default function BoardExamPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-12 overflow-y-auto"
+                            className="fixed inset-0 z-50 bg-white flex items-center justify-center p-6 md:p-12 overflow-y-auto"
                         >
                             <div className="w-full max-w-5xl">
                                 <LeadAuditorCertificate 
@@ -122,7 +122,7 @@ export default function BoardExamPage() {
                                 />
                                 <button 
                                     onClick={() => setShowCert(false)}
-                                    className="mt-12 text-aic-paper font-mono text-[10px] font-bold uppercase tracking-[0.4em] hover:text-aic-gold transition-colors"
+                                    className="mt-12 text-[#0e1b2c] text-[12px] font-bold first-cap hover:text-[#8a6a1f] transition-colors"
                                 >
                                     CLOSE_PREVIEW
                                 </button>
@@ -132,39 +132,39 @@ export default function BoardExamPage() {
                 </AnimatePresence>
 
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-                    <div className={`text-6xl mb-8 ${pass ? 'text-green-500' : 'text-aic-red'}`}>
+                    <div className={`text-4xl md:text-6xl mb-8 ${pass ? 'text-green-500' : 'text-aic-red'}`}>
                         {pass ? '🏆' : '⚠️'}
                     </div>
-                    <h2 className="text-4xl font-serif font-bold text-aic-paper mb-4 tracking-tight">
+                    <h2 className="text-3xl md:text-4xl font-serif font-bold text-[#0e1b2c] mb-4 tracking-tight">
                         {pass ? 'Certification Authorized' : 'Certification Denied'}
                     </h2>
                     <p className="text-gray-500 font-serif italic text-lg mb-12 leading-relaxed">
-                        Your final evaluation score: <span className="text-aic-paper font-bold">{Math.round((score / questions.length) * 100)}%</span>
+                        Your final evaluation score: <span className="text-[#0e1b2c] font-bold">{Math.round((score / questions.length) * 100)}%</span>
                     </p>
                     
                     {pass ? (
-                        <div className="bg-green-500/5 border border-green-500/20 p-10 rounded-[3rem] mb-12">
-                            <p className="text-green-500 font-mono text-[10px] font-bold uppercase tracking-widest mb-4">Registry Entry Created</p>
-                            <p className="text-sm text-gray-400 font-serif leading-relaxed italic mb-8 max-w-md mx-auto">
+                        <div className="bg-green-50 border border-green-200 p-6 md:p-10 rounded-[3rem] mb-12">
+                            <p className="text-green-700 text-[12px] font-bold first-cap mb-4">Registry Entry Created</p>
+                            <p className="text-sm text-gray-500 font-serif leading-relaxed italic mb-8 max-w-md mx-auto">
                                 "We hereby recognize your competence as a Lead Auditor. Your digital credentials have been issued."
                             </p>
                             <button 
                                 onClick={() => setShowCert(true)}
-                                className="bg-aic-gold text-black px-8 py-3 rounded-lg font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-paper transition-all shadow-xl"
+                                className="bg-aic-gold text-black px-5 md:px-8 py-3 rounded-lg text-[12px] font-bold first-cap hover:bg-aic-paper transition-all shadow-xl"
                             >
                                 View Institutional Certificate
                             </button>
                         </div>
                     ) : (
-                        <div className="bg-aic-red/5 border border-aic-red/20 p-8 rounded-[2rem] mb-12">
-                            <p className="text-aic-red font-mono text-[10px] font-bold uppercase tracking-widest mb-4">Remediation Required</p>
-                            <p className="text-sm text-gray-400 font-serif leading-relaxed italic">
+                        <div className="bg-aic-red/5 border border-aic-red/20 p-5 md:p-8 rounded-[2rem] mb-12">
+                            <p className="text-aic-red text-[12px] font-bold first-cap mb-4">Remediation Required</p>
+                            <p className="text-sm text-gray-500 font-serif leading-relaxed italic">
                                 Please review the Technical Bias Audit domain and attempt the examination again in 24 hours.
                             </p>
                         </div>
                     )}
 
-                    <Link href="/training" className="inline-block bg-aic-paper/5 border border-aic-paper/10 text-aic-paper px-10 py-4 font-mono text-[10px] font-bold uppercase tracking-widest hover:bg-aic-paper hover:text-black transition-all">
+                    <Link href="/training" className="inline-block bg-[#f5f7f9] border border-[#dde2e8] text-[#0e1b2c] px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-aic-paper hover:text-black transition-all">
                         RETURN_TO_ACADEMY
                     </Link>
                 </motion.div>
@@ -174,9 +174,9 @@ export default function BoardExamPage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-16">
-                <span className="text-[10px] font-mono font-bold text-gray-600 uppercase tracking-[0.4em]">Question 0{currentQuestion + 1} / 0{questions.length}</span>
-                <div className="h-1 w-64 bg-aic-paper/5 rounded-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:items-center mb-16">
+                <span className="text-[12px] font-bold text-gray-600 first-cap">Question 0{currentQuestion + 1} / 0{questions.length}</span>
+                <div className="h-1 w-64 bg-[#f5f7f9] rounded-full overflow-hidden">
                     <motion.div 
                         className="h-full bg-aic-gold"
                         initial={{ width: 0 }}
@@ -186,7 +186,7 @@ export default function BoardExamPage() {
             </div>
 
             <div className="space-y-12">
-                <h3 className="text-4xl font-serif font-medium text-aic-paper tracking-tight leading-tight">
+                <h3 className="text-3xl md:text-4xl font-serif font-medium text-[#0e1b2c] tracking-tight leading-tight">
                     {questions[currentQuestion].q}
                 </h3>
 
@@ -195,10 +195,10 @@ export default function BoardExamPage() {
                         <button 
                             key={i}
                             onClick={() => handleAnswer(i)}
-                            className="text-left p-8 rounded-2xl bg-[#080808] border border-aic-paper/5 hover:border-aic-gold/50 hover:bg-aic-paper/[0.02] transition-all group flex items-center gap-6"
+                            className="text-left p-5 md:p-8 rounded-2xl bg-white border border-[#dde2e8] hover:border-aic-gold/50 hover:bg-[#eef1f5] transition-all group flex items-center gap-6"
                         >
-                            <span className="w-8 h-8 rounded-lg bg-zinc-900 border border-aic-paper/10 flex items-center justify-center font-mono text-[10px] text-gray-500 group-hover:text-aic-gold transition-colors">0{i+1}</span>
-                            <span className="text-lg text-gray-400 group-hover:text-aic-paper transition-colors font-serif italic leading-relaxed">{option}</span>
+                            <span className="w-8 h-8 rounded-lg bg-white border border-[#dde2e8] flex items-center justify-center font-mono text-[11.5px] text-gray-500 group-hover:text-[#8a6a1f] transition-colors">0{i+1}</span>
+                            <span className="text-lg text-gray-500 group-hover:text-[#0e1b2c] transition-colors font-serif italic leading-relaxed">{option}</span>
                         </button>
                     ))}
                 </div>
