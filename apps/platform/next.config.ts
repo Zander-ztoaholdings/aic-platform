@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  // The build runs on the same VPS as the live apps and the database, and was
+  // being killed for lack of memory at "Collecting build traces". Trades a
+  // little build time for a lower memory peak.
+  experimental: {
+    webpackMemoryOptimizations: true,
+  },
   serverExternalPackages: [
     'minio',
     '@aws-sdk/client-s3',
