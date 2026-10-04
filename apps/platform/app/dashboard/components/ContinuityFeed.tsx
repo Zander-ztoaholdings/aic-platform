@@ -12,6 +12,7 @@ const ENTITY_LABEL: Record<string, string> = {
   FINDING: 'Finding',
   CERTIFICATE: 'Certificate',
   UNDECLARED_SYSTEM: 'Undeclared system',
+  AUTOMATED_CHECK: 'Automated check',
 };
 
 function ago(iso: string, now: number) {

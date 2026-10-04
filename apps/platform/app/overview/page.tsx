@@ -27,9 +27,14 @@ export const dynamic = 'force-dynamic';
  * needs no new provider-side integration to be true by Friday and nothing
  * here has built (a) or (c) yet. Zander: change this string (and only this
  * string) if that is not the mechanism you want to stand behind in the room.
+ *
+ * DECIDED (Zander, Oct 2026): offer both. The exporter stays the default and
+ * AIC never sees a provider key that way; an organisation may instead opt in
+ * to giving AIC a read-only admin key, stored encrypted. See
+ * lib/integrations/providers.ts and the integrations table.
  */
 const READ_ONLY_MECHANISM =
-  'Today, that means an export your own tooling already produces — a nightly file or webhook AIC ingests. AIC does not request or hold an API key for this.';
+  'For AI providers you choose how: run AIC’s exporter on your side, so AIC never sees your key, or give AIC a read-only admin key, which it stores encrypted and deletes when you disconnect. GitHub is read through an app you install on the repositories you pick.';
 
 /**
  * Visual pass (Sep 2026): rebuilt on the shadcn primitives that were already
@@ -217,10 +222,10 @@ export default async function OrgOverviewPage() {
             What AIC does not do
           </div>
           <p className="mt-1.5 text-sm text-gray-600 leading-relaxed max-w-3xl">
-            AIC never holds your AI providers&apos; credentials — not even read-only,
-            not even to itself — and never sits in the path that runs, blocks or
-            approves anything your systems do. It records what you declare and
-            compares it against what it can observe. {READ_ONLY_MECHANISM}
+            AIC never sits in the path that runs, blocks or approves anything your
+            systems do, and it cannot change your code or call your models. It
+            records what you declare and compares it against what it can observe
+            in the systems you connect. {READ_ONLY_MECHANISM}
           </p>
         </div>
 

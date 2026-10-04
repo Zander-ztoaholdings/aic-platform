@@ -1,5 +1,6 @@
 import { createHash } from 'crypto';
 import type { OrgOverview } from './org-overview';
+import { CHECK_BY_KEY } from './integrations/catalog';
 
 /**
  * The continuity record.
@@ -66,6 +67,10 @@ export type EstateState = {
   decidingNames: string[];
   certificate: { number: string; status: string | null; expires: string | null } | null;
   evidenceLastVerifiedAt: string | null;
+  /** Automated check → status. Optional: snapshots taken before connected
+   *  systems existed do not have it, and that must not read as every check
+   *  appearing at once. */
+  checks?: Record<string, string>;
 };
 
 export type EstateChange = {
@@ -74,7 +79,8 @@ export type EstateChange = {
     | 'ACCOUNTABLE_PERSON'
     | 'FINDING'
     | 'CERTIFICATE'
-    | 'UNDECLARED_SYSTEM';
+    | 'UNDECLARED_SYSTEM'
+    | 'AUTOMATED_CHECK';
   entityKey: string;
   entityLabel: string;
   changeType: 'DECLARED' | 'CHANGED' | 'WITHDRAWN' | 'OBSERVED';
@@ -148,6 +154,11 @@ export function snapshotEstate(o: OrgOverview): EstateState {
         }
       : null,
     evidenceLastVerifiedAt: iso(o.evidence.lastVerifiedAt),
+    checks: Object.fromEntries(
+      (o.checks ?? [])
+        .filter((c) => c.status === 'pass' || c.status === 'fail')
+        .map((c) => [`${c.checkKey}|${c.subject}`, c.status])
+    ),
   };
 }
 
@@ -362,6 +373,29 @@ export function diffEstate(prev: EstateState | null, next: EstateState): EstateC
     });
   }
 
+
+  // Automated checks. Only a change of verdict is recorded: a check that
+  // starts failing, or passes again. A check seen for the first time is
+  // recorded only if it is failing — a new repository passing its checks is
+  // not an event anyone needs to read.
+  const prevChecks = p?.checks ?? {};
+  for (const [key, status] of Object.entries(next.checks ?? {})) {
+    const before = prevChecks[key];
+    if (before === status) continue;
+    if (before === undefined && status !== 'fail') continue;
+    const [checkKey, subject] = key.split('|');
+    const title = CHECK_BY_KEY[checkKey]?.title ?? checkKey;
+    changes.push({
+      entityType: 'AUTOMATED_CHECK',
+      entityKey: key,
+      entityLabel: `${title} (${subject})`,
+      changeType: 'OBSERVED',
+      field: 'status',
+      previousValue: before ?? null,
+      newValue: status,
+    });
+  }
+
   return changes;
 }
 
@@ -530,6 +564,11 @@ export function narrateEvent(e: {
     return prev
       ? `${name}, still undeclared, logged decisions ${prev} → ${next}.`
       : `${name} logged ${next} decision${next === '1' ? '' : 's'} without being on the declared inventory.`;
+  }
+
+  if (entityType === 'AUTOMATED_CHECK' && changeType === 'OBSERVED') {
+    if (next === 'fail') return prev ? `Check started failing: ${name}.` : `AIC observed a failing check: ${name}.`;
+    if (next === 'pass') return `Check passes again: ${name}.`;
   }
 
   // Unrecognised combination - still honest, never blank.

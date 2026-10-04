@@ -1050,3 +1050,71 @@ export const llmUsageRecords = pgTable('llm_usage_records', {
   orgPeriod: index('llm_usage_org_period_idx').on(table.orgId, table.periodStart),
   dedupe: unique('llm_usage_dedupe').on(table.orgId, table.provider, table.model, table.periodStart, table.periodEnd),
 }));
+
+/**
+ * Connected systems — the Vanta-style half of the platform.
+ *
+ * One row per organisation per source. A source is either GitHub (a read-only
+ * GitHub App the organisation installs on the repositories it chooses) or an
+ * AI provider (OpenAI, Anthropic), connected in one of two ways the
+ * organisation picks:
+ *
+ *   exporter  the organisation runs AIC's exporter on its own side with its
+ *             own admin key and pushes usage to /api/usage. AIC never sees the
+ *             provider key. This is the default.
+ *   api_key   the organisation pastes a read-only admin key; AIC stores it
+ *             encrypted (secret_ciphertext) and pulls usage itself. Opt-in.
+ *
+ * For GitHub, external_id is the installation id. AIC holds no GitHub secret
+ * belonging to the organisation: it mints a one-hour installation token from
+ * its own App key each time it reads, and the organisation can uninstall the
+ * App from GitHub at any time, which AIC notices on the next sync.
+ */
+export const integrations = pgTable('integrations', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  provider: varchar('provider', { length: 30 }).notNull(), // 'github' | 'openai' | 'anthropic'
+  mode: varchar('mode', { length: 20 }).notNull(), // 'github_app' | 'exporter' | 'api_key'
+  status: varchar('status', { length: 20 }).notNull().default('pending'), // 'pending' | 'active' | 'error' | 'disconnected'
+  externalId: varchar('external_id', { length: 100 }),
+  accountLabel: varchar('account_label', { length: 255 }),
+  secretCiphertext: text('secret_ciphertext'),
+  secretHint: varchar('secret_hint', { length: 20 }),
+  settings: jsonb('settings').notNull().default({}),
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
+  lastError: text('last_error'),
+  connectedBy: uuid('connected_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgProvider: unique('integrations_org_provider').on(table.orgId, table.provider),
+}));
+
+/**
+ * The latest result of each automated check, per subject.
+ *
+ * A subject is what the check looked at: a repository ("acme/lending-api"),
+ * a provider ("openai"), or the organisation itself ("org"). One row per
+ * (org, check, subject), overwritten on every sync — the history of a check
+ * going from pass to fail lives in the continuity record (estate_events),
+ * which is hash-chained; this table is only the current state.
+ *
+ * status: 'pass' | 'fail' | 'warn' | 'unknown'. Unknown means AIC could not
+ * look (a permission the organisation did not grant, an API error) and is
+ * never shown as a pass.
+ */
+export const integrationChecks = pgTable('integration_checks', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  integrationId: uuid('integration_id').notNull().references(() => integrations.id, { onDelete: 'cascade' }),
+  checkKey: varchar('check_key', { length: 80 }).notNull(),
+  subject: varchar('subject', { length: 255 }).notNull(),
+  status: varchar('status', { length: 10 }).notNull(),
+  summary: text('summary').notNull(),
+  detail: jsonb('detail').notNull().default({}),
+  failingSince: timestamp('failing_since', { withTimezone: true }),
+  observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgCheckSubject: unique('integration_checks_org_check_subject').on(table.orgId, table.checkKey, table.subject),
+  orgStatus: index('integration_checks_org_status_idx').on(table.orgId, table.status),
+}));

@@ -72,6 +72,12 @@ const PUBLIC_PATHS = [
   // scores or personal data; the badge image and verify page on aiccertified.cloud
   // read from here. Only this prefix — the rest of /api/public stays gated.
   "/api/public/aware",
+  // The nightly connected-systems sync. No session by nature; the route
+  // refuses anything without CRON_SECRET, and refuses everything if it is unset.
+  "/api/cron/",
+  // AIC's usage exporter script, which organisations download to run on their
+  // own side. Contains no secrets; it is the same file for everyone.
+  "/exporter/",
 ];
 
 // Staging must never be indexed, even if its password protection is switched
@@ -113,6 +119,14 @@ export function middleware(req: NextRequest) {
 
   const hasSession = SESSION_COOKIES.some((name) => req.cookies.has(name));
   if (hasSession) return finish(NextResponse.next());
+
+  // A system calling the API with an AIC key (the usage exporter, a decision
+  // logger) has no session cookie. Let it reach the route, which verifies the
+  // key itself; without this every key-authenticated call was redirected to
+  // the sign-in page.
+  if (pathname.startsWith("/api/") && (req.headers.get("authorization") ?? "").startsWith("Bearer aic_live_")) {
+    return finish(NextResponse.next());
+  }
 
   const url = req.nextUrl.clone();
   url.pathname = "/login";

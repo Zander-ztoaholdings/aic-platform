@@ -10,6 +10,7 @@ import {
   decisionRecords,
   correctionRequests,
   llmUsageRecords,
+  integrationChecks,
   eq,
   and,
   desc,
@@ -386,6 +387,13 @@ export async function buildOrgOverview(orgId: string) {
       overrides,
     });
 
+    // Automated checks from connected systems (GitHub, AI providers). Only
+    // the current status; the history is in the continuity record.
+    const automatedChecks = await tx
+      .select({ checkKey: integrationChecks.checkKey, subject: integrationChecks.subject, status: integrationChecks.status })
+      .from(integrationChecks)
+      .where(eq(integrationChecks.orgId, orgId));
+
     return {
       generatedAt: new Date().toISOString(),
       organisation: {
@@ -427,6 +435,7 @@ export async function buildOrgOverview(orgId: string) {
         byVerificationOutcome: evidenceTally,
         lastVerifiedAt: verified?.last ?? null,
       },
+      checks: automatedChecks,
       findings: {
         open: openFindings.map((f) => ({
           id: f.id,

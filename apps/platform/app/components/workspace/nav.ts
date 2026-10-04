@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard, Boxes, Activity, Sparkles,
-  ShieldCheck, AlertTriangle, Siren, FileCheck,
+  ShieldCheck, AlertTriangle, Siren, FileCheck, Plug,
   Award, MessageSquare,
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
@@ -64,6 +64,8 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'Compliance Tracking',
     summary: 'The requirements that apply to you, and the evidence against each.',
     items: [
+      { label: 'Automated checks', href: '/checks', icon: ListChecks, description: 'What AIC found in your connected systems, and how to fix it.' },
+      { label: 'Connected systems', href: '/integrations', icon: Plug, description: 'GitHub and AI providers AIC reads, and how.' },
       { label: 'Evidence Vault', href: '/evidence', icon: ShieldCheck, description: 'Requirements for your Division and the evidence you have filed.' },
       { label: 'Assessor Findings', href: '/findings', icon: AlertTriangle, description: 'What the assessor raised, and your corrective actions.' },
       { label: 'Incidents', href: '/incidents', icon: Siren, description: 'AI incidents reported, and how each was resolved.' },
