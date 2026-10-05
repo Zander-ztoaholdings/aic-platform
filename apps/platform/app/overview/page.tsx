@@ -86,6 +86,13 @@ function StatTile({ label, value, sub }: { label: string; value: string | number
   );
 }
 
+const TALLY_LABEL: Record<string, string> = {
+  ACCEPTED: 'Accepted', WAITING_FOR_REVIEW: 'Waiting for review', SENT_BACK: 'Sent back for more', NOTHING_FILED: 'Nothing filed yet',
+  INSUFFICIENT: 'Sent back for more', REJECTED: 'Not accepted', UNSPECIFIED: 'Waiting for review',
+  SUBMITTED: 'Submitted', UNDER_REVIEW: 'Being reviewed', RESOLVED: 'Resolved', UPHELD: 'Upheld', DISMISSED: 'Dismissed',
+};
+const humanise = (k: string) => TALLY_LABEL[k] ?? (k.charAt(0) + k.slice(1).toLowerCase()).replace(/_/g, ' ');
+
 function Tally({ rows }: { rows: Record<string, number> }) {
   const entries = Object.entries(rows);
   if (entries.length === 0) {
@@ -95,11 +102,9 @@ function Tally({ rows }: { rows: Record<string, number> }) {
     <dl className="space-y-2.5">
       {entries.map(([k, n]) => (
         <div key={k} className="flex items-center justify-between">
-          <dt className="text-[12.5px] first-cap text-gray-500">
-            {k.replace(/_/g, ' ')}
-          </dt>
+          <dt className="text-[13px] text-[#5e6b7b]">{humanise(k)}</dt>
           <dd>
-            <Badge variant="secondary" className="rounded-full font-mono tabular-nums px-2.5">
+            <Badge variant="secondary" className="rounded-full tabular-nums px-2.5">
               {n}
             </Badge>
           </dd>
@@ -229,7 +234,7 @@ export default async function OrgOverviewPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 md:gap-6">
+        <div className={`grid grid-cols-1 gap-4 md:gap-6 ${new Set(gaps.map((g) => g.severity)).size > 1 ? 'lg:grid-cols-[1.4fr_1fr]' : ''}`}>
           {/* Gaps lead. The counts below are context for these; on their own
               they change nothing about what anyone does next. */}
           <SectionCard
@@ -252,22 +257,22 @@ export default async function OrgOverviewPage() {
                       </div>
                       <Badge className={`rounded-full shrink-0 border ${SEVERITY_BADGE[gap.severity]}`}>
                         {SEVERITY_LABEL[gap.severity]}
-                        {gap.count !== undefined ? ` · ${gap.count}` : ''}
+                        {gap.count !== undefined ? `: ${gap.count}` : ''}
                       </Badge>
                     </div>
                     <p className="mt-1.5 ml-4.5 text-xs leading-relaxed text-gray-500">{gap.detail}</p>
-                    <div className="mt-1.5 ml-4.5 text-[12px] first-cap text-gray-300">
-                      {gap.code}
-                    </div>
                   </li>
                 ))}
               </ul>
             )}
           </SectionCard>
 
-          <SectionCard title="Gap mix" note="Blocking gaps prevent certification; the rest are context.">
-            <GapMixChart gaps={gaps} />
-          </SectionCard>
+          {/* A mix of one kind is a circle, not a chart. */}
+          {new Set(gaps.map((g) => g.severity)).size > 1 && (
+            <SectionCard title="Gap mix" note="Blocking gaps prevent certification; the rest are context.">
+              <GapMixChart gaps={gaps} />
+            </SectionCard>
+          )}
         </div>
 
         <SectionCard
@@ -459,7 +464,7 @@ export default async function OrgOverviewPage() {
                     <div>
                       <div className="text-sm text-aic-navy">{f.title}</div>
                       <div className="text-[12px] first-cap text-gray-400">
-                        {f.severity} · raised {date(f.raisedAt)}
+                        {f.severity.charAt(0) + f.severity.slice(1).toLowerCase().replace(/_/g, ' ')}, raised {date(f.raisedAt)}
                       </div>
                     </div>
                     {f.overdue && (

@@ -25,7 +25,7 @@ import {
   getSystemDb, eq, inArray,
   organizations, users, accountablePersons, aiSystems, orgPolicies, policyVersions, policyAcceptances,
   integrations, integrationChecks, llmUsageRecords, decisionRecords, auditRequirements, auditDocuments,
-  awareAssessments, awareBadges, trustPages, orgFrameworks, auditLogs, auditLedger, inviteCodes, EncryptionService,
+  awareAssessments, awareBadges, trustPages, orgFrameworks, auditFindings, correctiveActions, auditLogs, auditLedger, inviteCodes, EncryptionService,
 } from '@aic/db';
 import { StorageService, storageConfig } from '@aic/db/storage';
 import { MFAService } from '@aic/auth';
@@ -88,6 +88,8 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
   const db = getSystemDb();
   const now = new Date();
   const ago = (days: number, hours = 0) => new Date(now.getTime() - days * DAY - hours * 3_600_000);
+  /** A working-hours moment, `days` ago, at hh:mm in Johannesburg (UTC+2), so the history reads like people did it. */
+  const at = (days: number, hh: number, mm: number) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days, hh - 2, mm));
   const rand = rng(20261005);
 
   // ── 1. Clear the old demo, keeping its people ──────────────────────────────
@@ -127,15 +129,36 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     isActive: false, emailVerified: true,
   } as typeof users.$inferInsert).onConflictDoUpdate({ target: users.email, set: { isActive: false } }).returning({ id: users.id });
 
-  // ── 4. Accountable person and AI systems ───────────────────────────────────
+  // ── 4. AI systems and the accountable person, declared over two months ────
+  // Each stage is observed at the date it happened, so the continuity record
+  // reads as a history rather than ten entries stamped the minute this ran.
+  const observe = async (at: Date, who: string) => {
+    try { await observeEstate(DEMO_ORG_ID, who, null, at); } catch (e) { console.error('[DEMO] observation failed:', (e as Error).message); }
+  };
+  const declare = (s: (typeof SYSTEMS)[number], at: Date, overrides: Partial<{ riskTier: number; stage: string }> = {}) =>
+    db.insert(aiSystems).values({
+      id: s.id, orgId: DEMO_ORG_ID, name: s.name, purpose: s.purpose, riskTier: overrides.riskTier ?? s.riskTier, division: 2,
+      lifecycleStage: overrides.stage ?? s.stage, status: 'active', isActive: true, isSandbox: false, createdAt: at, updatedAt: at,
+    });
+  await declare(SYSTEMS[0], ago(58));
+  await declare(SYSTEMS[1], ago(58), { stage: 'pilot' });
+  await observe(at(58, 9, 42), 'Naledi Khumalo');
+
   const [ap] = await db.insert(accountablePersons).values({
     orgId: DEMO_ORG_ID, nominatedBy: ids.naledi, name: 'Naledi Khumalo', jobTitle: 'Chief Operating Officer', email: `naledi@${DEMO_DOMAIN}`,
     declarationVersion: ACCOUNTABLE_PERSON_DECLARATION.version, declarationAcceptedAt: ago(55),
   }).returning({ id: accountablePersons.id });
-  await db.insert(aiSystems).values(SYSTEMS.map((s) => ({
-    id: s.id, orgId: DEMO_ORG_ID, name: s.name, purpose: s.purpose, riskTier: s.riskTier, division: 2,
-    lifecycleStage: s.stage, status: 'active', isActive: true, isSandbox: false, createdAt: ago(58), updatedAt: ago(20),
-  })));
+  await observe(at(55, 14, 7), 'Naledi Khumalo');
+
+  await declare(SYSTEMS[2], ago(41), { riskTier: 2 });
+  await db.update(aiSystems).set({ lifecycleStage: 'production', updatedAt: ago(40) }).where(eq(aiSystems.id, SYSTEMS[1].id));
+  await observe(at(40, 11, 18), 'Sipho Dlamini');
+
+  await db.update(aiSystems).set({ riskTier: 3, updatedAt: ago(27) }).where(eq(aiSystems.id, SYSTEMS[2].id));
+  await observe(at(27, 16, 31), 'Naledi Khumalo');
+
+  await declare(SYSTEMS[3], ago(20));
+  await observe(at(20, 10, 3), 'Pieter van Wyk');
 
   // ── 5. Policies, written by the policy builder from Highveld's answers ─────
   const ctx: BuilderContext = {
@@ -213,6 +236,7 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     check(an, 'ai.usage_fresh', 'anthropic', 'pass', 'Anthropic usage reached AIC within the last day.'),
     check(an, 'ai.models_declared', 'anthropic', 'pass', 'Every model in use is linked to a declared system.'),
   ]);
+  await observe(at(9, 2, 15), 'AIC connector sync');
 
   // ── 7. AI usage: 45 days, three models, one with no owner ──────────────────
   const usage: (typeof llmUsageRecords.$inferInsert)[] = [];
@@ -308,15 +332,40 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
       aiTriageNotes: opts.triage ? JSON.stringify(opts.triage) : null, createdAt: ago(opts.days),
     } as typeof auditDocuments.$inferInsert);
   };
-  const ordered = [...reqRows].sort((a, b) => (a.code ?? '').localeCompare(b.code ?? '', undefined, { numeric: true }));
-  let n = 0;
-  for (const r of ordered) {
-    if (n < 14) await doc({ requirementId: r.id, slot: 'REQUIREMENT', title: `${r.code} evidence pack.pdf`, outcome: 'ACCEPTED', days: 40 - n });
-    else if (n < 17) await doc({ requirementId: r.id, slot: 'REQUIREMENT', title: `${r.code} evidence.pdf`, outcome: null, days: 3 - (n - 14) * 0.5 + 0.5 });
-    else if (n === 17) await doc({ requirementId: r.id, slot: 'REQUIREMENT', title: `${r.code} screenshot.png`, outcome: 'INSUFFICIENT', days: 12, notes: 'This shows the setting but not that it is in use. File a sample of real cases from the last quarter, with personal details removed.' });
-    else break;
-    n++;
-  }
+  // A believable spread: the accountability and correction basics in, the
+  // harder explanation and bias work still to come.
+  const ACCEPTED = ['HU-1', 'HU-2', 'HU-3', 'HU-4', 'HU-6', 'CO-1', 'CO-2', 'CO-5', 'CO-9', 'TR-1', 'TR-2', 'EX-1', 'EX-7', 'EM-6'];
+  const WAITING = ['HU-5', 'EX-3', 'TR-7'];
+  const SENT_BACK = 'EM-7';
+  const byCode = new Map(reqRows.map((r) => [r.code ?? '', r]));
+  let k = 0;
+  for (const code of ACCEPTED) { const r = byCode.get(code); if (r) await doc({ requirementId: r.id, slot: 'REQUIREMENT', title: `${code} evidence pack.pdf`, outcome: 'ACCEPTED', days: 44 - k++ * 2 }); }
+  k = 0;
+  for (const code of WAITING) { const r = byCode.get(code); if (r) await doc({ requirementId: r.id, slot: 'REQUIREMENT', title: `${code} evidence.pdf`, outcome: null, days: 3 - k++ }); }
+  const sentBack = byCode.get(SENT_BACK);
+  if (sentBack) await doc({ requirementId: sentBack.id, slot: 'REQUIREMENT', title: `${SENT_BACK} bias test summary.pdf`, outcome: 'INSUFFICIENT', days: 12, notes: 'This reports the overall approval rate but not the ratio between groups. File the disparate impact ratio for each protected characteristic you tested, with the period and sample size.' });
+
+  // Two findings: one open and due soon, one closed with the response accepted.
+  await db.insert(auditFindings).values({
+    orgId: DEMO_ORG_ID, requirementId: sentBack?.id ?? null, raisedBy: assessor.id, severity: 'MINOR',
+    title: 'Bias testing does not show the ratio between groups',
+    description: 'The bias test summary filed for EM-7 reports overall approval rates only. The standard asks for the disparate impact ratio across each tested characteristic, and evidence that a ratio below 0.8 is investigated.',
+    status: 'OPEN', raisedAt: ago(11), dueAt: new Date(now.getTime() + 10 * DAY), createdAt: ago(11), updatedAt: ago(11),
+  });
+  const hu4 = byCode.get('HU-4');
+  const [closed] = await db.insert(auditFindings).values({
+    orgId: DEMO_ORG_ID, requirementId: hu4?.id ?? null, raisedBy: assessor.id, severity: 'OBSERVATION',
+    title: 'Override procedure did not name who may override',
+    description: 'The written override procedure describes how to override a decision but not which roles may do so. Name the roles, so a reviewer can show they were entitled to make the change.',
+    status: 'CLOSED', raisedAt: ago(38), dueAt: ago(24), closedAt: ago(26), closedBy: assessor.id,
+    closureNotes: 'Version 2 of the procedure names the credit team leads and the Head of Credit. Closed.', createdAt: ago(38), updatedAt: ago(26),
+  }).returning({ id: auditFindings.id });
+  await db.insert(correctiveActions).values({
+    findingId: closed.id, orgId: DEMO_ORG_ID, rootCause: 'The procedure was written before the credit team was split into two shifts.',
+    actionTaken: 'Updated the override procedure to name the roles allowed to override (credit team leads and the Head of Credit) and filed version 2.',
+    submittedBy: ids.pieter, submittedAt: ago(30), reviewedBy: assessor.id, reviewedAt: ago(26), outcome: 'ACCEPTED',
+    reviewNotes: 'Roles are now named and match the people recorded as overriding in the decision log.',
+  });
   await doc({ slot: controlSlot('ops.backup'), title: 'Backup schedule and restore test, August 2026.pdf', outcome: 'ACCEPTED', days: 30 });
   await doc({ slot: controlSlot('ops.encryption'), title: 'Database encryption settings.pdf', outcome: null, days: 1, triage: {
     verdict: 'partly', summary: 'Screenshots of encryption-at-rest settings for the production database.', missing: ['Nothing on encryption in transit', 'No date or owner on the document'],
@@ -346,8 +395,8 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     await db.insert(orgFrameworks).values(['aic', 'popia', 'iso42001', 'eu_ai_act', 'iso27001'].map((k) => ({ orgId: DEMO_ORG_ID, frameworkKey: k, addedBy: ids.naledi })));
   } catch { /* migration 015 not applied: Controls shows the same defaults */ }
 
-  // ── 12. The continuity record's first snapshot ─────────────────────────────
-  try { await observeEstate(DEMO_ORG_ID, 'Demo company built'); } catch (e) { console.error('[DEMO] first observation failed:', (e as Error).message); }
+  // ── 12. Today's observation: anything the decisions and usage changed ──────
+  await observe(ago(0, 1), 'AIC connector sync');
 
   return {
     credentials: { emails, password, totpSecret, otpauth: MFAService.getOTPAuthURI(totpSecret, 'Highveld Credit (Demo)', 'AIC Platform') },

@@ -6,11 +6,13 @@ import type { NextConfig } from "next";
 // through; everything else is locked to this origin. Sentry's ingest is the
 // only outside host the browser talks to.
 const isHttps = (process.env.NEXTAUTH_URL || process.env.AUTH_URL || '').startsWith('https://');
+// The AIC Aware page previews the badge image served by the public website.
+const webOrigin = (() => { try { return new URL(process.env.NEXT_PUBLIC_WEB_URL || process.env.WEB_URL || 'https://aiccertified.cloud').origin; } catch { return 'https://aiccertified.cloud'; } })();
 const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com${process.env.NODE_ENV === 'production' ? '' : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com",
+  `img-src 'self' data: blob: ${webOrigin} https://aiccertified.cloud https://www.google-analytics.com https://www.googletagmanager.com`,
   "font-src 'self' data:",
   "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com https://www.google.com",
   "frame-ancestors 'none'",

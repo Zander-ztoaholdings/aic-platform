@@ -41,7 +41,7 @@ export default function PracticePage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-4xl">
+      <div className="">
         <PageHeader
           eyebrow="Compliance tracking"
           title="Policy versus practice"

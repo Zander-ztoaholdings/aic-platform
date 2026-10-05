@@ -39,8 +39,8 @@ function CoverageLine({ c }: { c: Coverage }) {
   return (
     <p className="text-[12.5px] text-[#5e6b7b]">
       <span className="font-medium text-[#0e1b2c]">{c.evidenced}</span> of {mappedOf(c)} evidenced
-      {c.gap > 0 && <span className="text-[#b23a35]"> · {c.gap} gap{c.gap === 1 ? '' : 's'}</span>}
-      {c.notMapped > 0 && <span> · {c.notMapped} not mapped</span>}
+      {c.gap > 0 && <span className="text-[#b23a35]">, {c.gap} with a gap</span>}
+      {c.notMapped > 0 && <span>, {c.notMapped} not mapped</span>}
     </p>
   );
 }
@@ -52,7 +52,7 @@ function FrameworkCard({ f, on, canManage, busy, onToggle }: { f: Meta; on: bool
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[15px] font-semibold text-[#0e1b2c]">{f.name}</p>
-          <p className="mt-0.5 text-[12.5px] text-[#8a95a3]">{f.region} · {f.requirementCount} requirements</p>
+          <p className="mt-0.5 text-[12.5px] text-[#8a95a3]">{f.requirementCount} requirements, {f.region}</p>
         </div>
         {canManage ? (
           <button type="button" onClick={onToggle} disabled={busy} aria-pressed={on}
@@ -235,7 +235,7 @@ export default function FrameworksPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-5xl">
+      <div className="">
         <PageHeader
           eyebrow="Compliance tracking"
           title="Frameworks"
@@ -253,7 +253,7 @@ export default function FrameworksPage() {
             {msg && <p className="text-[13px] text-[#b23a35]">{msg}</p>}
 
             <section>
-              <h2 className="mb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#8a95a3]">You track {tracked.length + d.custom.length + 1}</h2>
+              <h2 className="mb-3 text-[18px] font-semibold text-[#0e1b2c]">You track {tracked.length + d.custom.length + 1}</h2>
               <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <li>
                   <Link href="/controls" className="block h-full rounded-xl border border-[#0e1b2c]/15 bg-[#0e1b2c] p-4 text-white">
@@ -297,7 +297,7 @@ export default function FrameworksPage() {
                     <li key={c.id} className="flex flex-wrap items-center gap-3 p-4">
                       <div className="min-w-0 flex-1">
                         <p className="text-[15px] font-medium text-[#0e1b2c]">{c.name}</p>
-                        <p className="text-[12.5px] text-[#5e6b7b]">{c.requirements.length} requirements{c.description ? ` · ${c.description}` : ''}</p>
+                        <p className="text-[12.5px] text-[#5e6b7b]">{c.requirements.length} requirements{c.description ? `. ${c.description}` : ''}</p>
                       </div>
                       {d.canManage && (
                         <div className="flex gap-1">

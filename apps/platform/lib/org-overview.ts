@@ -259,11 +259,26 @@ export async function buildOrgOverview(orgId: string) {
       .where(and(eq(accountablePersons.orgId, orgId), isNull(accountablePersons.supersededAt)))
       .orderBy(desc(accountablePersons.declarationAcceptedAt));
 
-    const requirementsByStatus = await tx
-      .select({ status: auditRequirements.status, n: count() })
-      .from(auditRequirements)
-      .where(eq(auditRequirements.orgId, orgId))
-      .groupBy(auditRequirements.status);
+    // Where each requirement stands, from the evidence filed against it. The
+    // requirement's own status column is not kept up to date by the review
+    // flow, so counting it said "nothing submitted" for requirements whose
+    // evidence had already been accepted.
+    const reqIds = await tx.select({ id: auditRequirements.id }).from(auditRequirements).where(eq(auditRequirements.orgId, orgId));
+    const reqDocs = await tx
+      .select({ requirementId: auditDocuments.requirementId, outcome: auditDocuments.verificationOutcome, supersededBy: auditDocuments.supersededBy, createdAt: auditDocuments.createdAt })
+      .from(auditDocuments)
+      .where(eq(auditDocuments.orgId, orgId));
+    const stateOf = (rid: string) => {
+      const live = reqDocs.filter((d) => d.requirementId === rid && !d.supersededBy);
+      if (live.length === 0) return 'NOTHING_FILED';
+      if (live.some((d) => d.outcome === 'ACCEPTED')) return 'ACCEPTED';
+      const newest = [...live].sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))[0];
+      return newest.outcome === 'REJECTED' || newest.outcome === 'INSUFFICIENT' ? 'SENT_BACK' : 'WAITING_FOR_REVIEW';
+    };
+    const stateCounts = new Map<string, number>();
+    for (const r of reqIds) { const st = stateOf(r.id); stateCounts.set(st, (stateCounts.get(st) ?? 0) + 1); }
+    const requirementsByStatus = ['ACCEPTED', 'WAITING_FOR_REVIEW', 'SENT_BACK', 'NOTHING_FILED']
+      .filter((st) => stateCounts.has(st)).map((st) => ({ status: st, n: stateCounts.get(st)! }));
 
     const evidenceByOutcome = await tx
       .select({ outcome: auditDocuments.verificationOutcome, n: count() })
@@ -364,7 +379,7 @@ export async function buildOrgOverview(orgId: string) {
 
     const requirementTally = tally(requirementsByStatus);
     const requirementsTotal = Object.values(requirementTally).reduce((a, b) => a + b, 0);
-    const requirementsNotStarted = requirementTally['PENDING'] ?? 0;
+    const requirementsNotStarted = requirementTally['NOTHING_FILED'] ?? 0;
 
     const evidenceTally = tally(evidenceByOutcome.map((r) => ({ status: r.outcome, n: r.n })));
     const evidenceRejected = evidenceTally['REJECTED'] ?? 0;

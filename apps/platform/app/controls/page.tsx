@@ -124,6 +124,17 @@ function ControlsInner() {
   const shown = useMemo(() => (data?.controls ?? []).filter((c) => c.framework === fw), [data, fw]);
   const sorted = useMemo(() => (fw === 'aic' ? shown : [...shown].sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status))), [shown, fw]);
   const framework = data?.frameworks.find((f) => f.key === fw);
+  const tabs = useMemo(() => {
+    if (!data) return [];
+    const pct = (items: { status: ControlStatus }[]) => {
+      const mapped = items.filter((c) => c.status !== 'not_mapped');
+      return mapped.length ? Math.round((mapped.filter((c) => c.status === 'evidenced').length / mapped.length) * 100) : null;
+    };
+    return [
+      ...data.frameworks.map((f) => ({ key: f.key, name: f.name, pct: pct(data.controls.filter((c) => c.framework === f.key)) })),
+      { key: COMMON, name: 'Common controls', pct: pct(data.common) },
+    ];
+  }, [data]);
 
   /** How many tracked requirements lean on each common control. */
   const usage = useMemo(() => {
@@ -148,7 +159,7 @@ function ControlsInner() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[920px] space-y-6">
+      <div className="space-y-6">
         <PageHeader
           eyebrow="Compliance tracking"
           title="Controls"
@@ -159,8 +170,31 @@ function ControlsInner() {
         {!data && !error && <p className="text-[14px] text-[#5e6b7b]">Loading…</p>}
         {data && (
           <>
-            <div className="flex gap-2 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0 pb-1">
-              {[...data.frameworks.map((f) => ({ key: f.key, name: f.name })), { key: COMMON, name: 'Common controls' }].map((f) => (
+            <div className="xl:grid xl:grid-cols-[264px_minmax(0,1fr)] xl:gap-8">
+            {/* Wide screens: frameworks as a list with each one's coverage. Narrow: a row of tabs. */}
+            <nav aria-label="Frameworks" className="hidden xl:block">
+              <div className="sticky top-24 space-y-1">
+                {tabs.map((f) => {
+                  const on = fw === f.key;
+                  return (
+                    <button key={f.key} onClick={() => pick(f.key)} aria-current={on ? 'page' : undefined}
+                      className={`w-full rounded-xl px-3.5 py-2.5 text-left transition-colors ${on ? 'bg-white shadow-[0_1px_0_rgba(10,23,40,0.04)] ring-1 ring-[#dde2e8]' : 'hover:bg-white/70'}`}>
+                      <span className={`block text-[14px] ${on ? 'font-semibold text-[#0e1b2c]' : 'font-medium text-[#33404f]'}`}>{f.name}</span>
+                      {f.pct !== null && (
+                        <span className="mt-1.5 flex items-center gap-2">
+                          <span className="h-1 flex-1 overflow-hidden rounded-full bg-[#e6e9ee]"><span className="block h-full rounded-full bg-[#a8772a]" style={{ width: `${f.pct}%` }} /></span>
+                          <span className="w-9 text-right text-[12px] tabular-nums text-[#8a95a3]">{f.pct}%</span>
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+                <Link href="/frameworks" className="mt-2 block px-3.5 py-2 text-[13px] font-medium text-[#8a6a1f] hover:underline underline-offset-2">Choose frameworks</Link>
+              </div>
+            </nav>
+            <div className="min-w-0 space-y-6">
+            <div className="flex gap-2 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0 pb-1 xl:hidden">
+              {tabs.map((f) => (
                 <button key={f.key} onClick={() => pick(f.key)} className={`h-10 sm:h-9 px-4 rounded-full text-[14px] font-medium whitespace-nowrap border ${fw === f.key ? 'bg-[#0e1b2c] text-white border-[#0e1b2c]' : 'bg-white text-[#5e6b7b] border-[#dde2e8]'}`}>
                   {f.name}
                 </button>
@@ -177,7 +211,7 @@ function ControlsInner() {
                 </div>
                 {byArea.map(([area, list]) => (
                   <section key={area}>
-                    <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#8a95a3]">{AREA_LABEL[area]}</h2>
+                    <h2 className="mb-2 text-[15px] font-semibold text-[#0e1b2c]">{AREA_LABEL[area]}</h2>
                     <div className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee] overflow-hidden">
                       {list.map((c) => {
                         const k = `cc:${c.key}`;
@@ -189,7 +223,7 @@ function ControlsInner() {
                               <span className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ${STATUS[c.status].dot}`} aria-hidden />
                               <span className="flex-1 min-w-0">
                                 <span className="block text-[14.5px] font-medium text-[#0e1b2c]">{c.title}</span>
-                                <span className="block text-[13px] text-[#5e6b7b] mt-0.5">{STATUS[c.status].label}{n > 0 ? ` · ${n} requirement${n === 1 ? '' : 's'} in your frameworks` : ''}</span>
+                                <span className="block text-[13px] text-[#5e6b7b] mt-0.5">{STATUS[c.status].label}{n > 0 ? `, used by ${n} requirement${n === 1 ? '' : 's'} in your frameworks` : ''}</span>
                               </span>
                               <ChevronDown className={`w-4 h-4 mt-1 text-[#8a95a3] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                             </button>
@@ -255,6 +289,8 @@ function ControlsInner() {
                 )}
               </>
             )}
+            </div>
+            </div>
           </>
         )}
       </div>

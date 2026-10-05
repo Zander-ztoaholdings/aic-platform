@@ -41,7 +41,7 @@ export default function PoliciesPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[920px] space-y-7">
+      <div className="space-y-7">
         <header>
           <Eyebrow>Compliance tracking</Eyebrow>
           <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Policies</h1>

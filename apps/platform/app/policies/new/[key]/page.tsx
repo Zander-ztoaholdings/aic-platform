@@ -140,7 +140,7 @@ export default function PolicyBuilderPage() {
               <aside className={`${showPreview ? 'fixed inset-0 z-50 overflow-y-auto bg-[#fbfcfd] p-5' : 'hidden'} lg:static lg:block lg:p-0`}>
                 <div className="lg:sticky lg:top-24 rounded-xl border border-[#dde2e8] bg-white p-5 sm:p-6 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#8a95a3]">Live preview</p>
+                    <p className="text-[13px] font-medium text-[#8a95a3]">How it will read</p>
                     <button type="button" onClick={() => setShowPreview(false)} className="text-[13px] font-medium text-[#8a6a1f] lg:hidden">Close</button>
                   </div>
                   <PolicyText text={preview} />

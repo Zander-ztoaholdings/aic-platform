@@ -1,4 +1,5 @@
 'use client';
+import { PathToCertificate } from './PathToCertificate';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
@@ -97,13 +98,7 @@ export default function CertificatePage() {
             <p className="text-xs text-[#9ca3af]">Loading certificate data…</p>
           </SectionCard>
         ) : !cert ? (
-          <SectionCard className="p-5 md:p-8 text-center">
-            <p className="text-sm font-semibold text-[#0f1f3d] mb-2">Certificate Not Yet Issued</p>
-            <p className="text-xs text-[#9ca3af]">
-              Your certificate will appear here once the AIC audit process is complete.
-              Continue submitting evidence to progress toward certification.
-            </p>
-          </SectionCard>
+          <PathToCertificate status={org?.certificationStatus} />
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-start">
             {/* Certificate card */}

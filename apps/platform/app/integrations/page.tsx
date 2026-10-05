@@ -101,7 +101,7 @@ function IntegrationsPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[920px] space-y-8">
+      <div className="space-y-8">
         <header>
           <Eyebrow>Compliance tracking</Eyebrow>
           <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Connected systems</h1>

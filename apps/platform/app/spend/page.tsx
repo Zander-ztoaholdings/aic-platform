@@ -103,7 +103,7 @@ export default function SpendPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-5xl">
+      <div className="">
         <PageHeader
           eyebrow="AI overview"
           title="AI spend"

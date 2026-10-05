@@ -49,7 +49,7 @@ export default async function ContinuityDashboard() {
   if (!orgId) redirect('/login');
 
   const [record, overview] = await Promise.all([
-    readContinuity(orgId, 40),
+    readContinuity(orgId, 200),
     buildOrgOverview(orgId),
   ]);
 
@@ -80,26 +80,26 @@ export default async function ContinuityDashboard() {
 
         {!firstRun && (
           <div
-            className={`rounded-lg border px-5 py-4 ${
-              chainOk ? 'border-emerald-200 bg-emerald-50' : 'border-red-300 bg-red-50'
+            className={`rounded-2xl border px-5 py-4 ${
+              chainOk ? 'border-[#2e7a57]/20 bg-[#2e7a57]/[0.05]' : 'border-[#b23a35]/30 bg-[#b23a35]/[0.06]'
             }`}
           >
             <div className="flex items-baseline justify-between gap-4 flex-wrap">
               <span
                 className={`text-[13px] font-semibold ${
-                  chainOk ? 'text-emerald-800' : 'text-red-700'
+                  chainOk ? 'text-[#2e7a57]' : 'text-[#b23a35]'
                 }`}
               >
                 {chainOk ? 'Chain intact' : `Chain broken at #${record.chain.brokenAtSeq}`}
               </span>
-              <span className="text-[12px] text-gray-500">
+              <span className="text-[12.5px] text-[#5e6b7b]">
                 {record.total} links verified
                 {record.lastObservedAt
                   ? `, last observed ${ago(record.lastObservedAt, now)}`
                   : ''}
               </span>
             </div>
-            <p className="mt-1 text-xs text-gray-600 leading-relaxed max-w-3xl">
+            <p className="mt-1 text-[13px] text-[#5e6b7b] leading-relaxed max-w-3xl">
               {chainOk
                 ? 'Every entry has been recomputed from its own contents and matches the link before it. The record is append-only at the database level, so an entry cannot be edited or removed — a correction is an additional entry and both stay visible.'
                 : `${record.chain.reason}. This record can no longer be relied on from that point forward and AIC should be told.`}
@@ -110,10 +110,10 @@ export default async function ContinuityDashboard() {
         <DashboardInsights />
 
         {record.drift.length > 0 && (
-          <section className="bg-white border border-gray-200 rounded-lg">
-            <header className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <h2 className="font-serif text-lg font-bold text-aic-navy">What has drifted</h2>
-              <p className="mt-1 text-xs text-gray-500">
+          <section className="bg-white border border-[#dde2e8] rounded-2xl">
+            <header className="px-4 sm:px-6 py-4 border-b border-[#eef1f5]">
+              <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">What has drifted</h2>
+              <p className="mt-1 text-[13px] text-[#5e6b7b]">
                 Conditions that have gone stale or that the record now contradicts. AIC reports
                 what it sees; deciding what to do about it is yours.
               </p>
@@ -131,39 +131,34 @@ export default async function ContinuityDashboard() {
                     </span>
                   </div>
                   <p className="mt-1 text-xs leading-relaxed opacity-90">{d.detail}</p>
-                  <div className="mt-1 text-[11px] opacity-50">{d.code}</div>
                 </li>
               ))}
             </ul>
           </section>
         )}
 
-        <section className="bg-white border border-gray-200 rounded-lg">
-          <header className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 sm:gap-4">
+        <section className="bg-white border border-[#dde2e8] rounded-2xl" id="record">
+          <header className="px-4 sm:px-6 pt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4">
             <div>
-              <h2 className="font-serif text-lg font-bold text-aic-navy">The record</h2>
-              <p className="mt-1 text-xs text-gray-500">
-                Newest first. Each entry names what changed, what it changed from, and who changed
-                it.
+              <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">The record</h2>
+              <p className="mt-1 text-[13px] text-[#5e6b7b]">
+                Every change to your AI estate, newest first. Open an entry to see what moved, who moved it, and the link that ties it to the one before.
               </p>
             </div>
-            <Link
-              href="/overview"
-              className="text-[13px] font-medium text-[#8a6a1f] hover:underline shrink-0"
-            >
+            <Link href="/overview" className="text-[13px] font-medium text-[#8a6a1f] hover:underline underline-offset-2 shrink-0">
               See the current estate
             </Link>
           </header>
-          <ContinuityFeed events={record.events} now={now} />
+          <ContinuityFeed events={record.events} now={now} chainOk={chainOk} />
           {record.total > record.events.length && (
-            <footer className="px-4 sm:px-6 py-3 border-t border-gray-100 text-[12px] text-gray-400">
-              Showing the most recent {record.events.length} of {record.total}
+            <footer className="px-4 sm:px-6 py-3 border-t border-[#eef1f5] text-[12.5px] text-[#8a95a3]">
+              Showing the most recent {record.events.length} of {record.total} entries.
             </footer>
           )}
         </section>
 
-        <footer className="pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 leading-relaxed max-w-3xl">
+        <footer className="pt-6 border-t border-[#dde2e8]">
+          <p className="text-[12.5px] text-[#8a95a3] leading-relaxed max-w-3xl">
             This record covers what has been declared to AIC and what AIC has observed in the
             decision log. It is not a determination of legal compliance in any jurisdiction, and
             the completeness of the AI inventory remains a declaration by the organisation.

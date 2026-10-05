@@ -37,7 +37,7 @@ export default function QuestionnairesPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-5xl">
+      <div className="">
         <PageHeader
           eyebrow="AIC Certification"
           title="Questionnaires"
