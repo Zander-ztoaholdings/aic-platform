@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, getSystemDb, llmUsageRecords, organizations, eq, and, sql } from '@aic/db';
 import { policyCaller } from '@/lib/policies';
 import { summariseSpend, type UsageRow } from '@/lib/spend';
+import { adviseModels, totalSaving, type ModelUsage } from '@/lib/spend-switch';
+import { PRICES_AS_OF, PRICE_SOURCES } from '@/lib/ai-prices';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +21,27 @@ export async function GET() {
   );
   const [org] = await getSystemDb().select({ budget: organizations.aiMonthlyBudgetUsd }).from(organizations).where(eq(organizations.id, c.orgId)).limit(1);
   const budget = org?.budget ? Number(org.budget) : null;
-  return NextResponse.json({ ...summariseSpend(rows as UsageRow[], new Date(), budget), canManage: c.canManage });
+  const now = new Date();
+  const summary = summariseSpend(rows as UsageRow[], now, budget);
+
+  // Switch advice works on the last 30 days of tokens, per model.
+  const byModel = new Map<string, ModelUsage>();
+  for (const r of rows) {
+    if (!r.model || new Date(r.periodStart).getTime() < now.getTime() - 30 * 86_400_000) continue;
+    const u = byModel.get(r.model) ?? { model: r.model, provider: r.provider, cost: 0, requests: 0, inputTokens: 0, outputTokens: 0 };
+    u.cost += Number(r.costUsd ?? 0) || 0; u.requests += Number(r.requests ?? 0) || 0;
+    u.inputTokens += Number(r.inputTokens ?? 0) || 0; u.outputTokens += Number(r.outputTokens ?? 0) || 0;
+    byModel.set(r.model, u);
+  }
+  const advice = adviseModels([...byModel.values()], now);
+  const advised = new Set(advice.filter((a) => a.options.length).map((a) => a.model));
+  return NextResponse.json({
+    ...summary,
+    // The switch advice below says the same thing with figures, so the older generic flag is dropped for those models.
+    flags: summary.flags.filter((f) => !(f.kind === 'premium_short' && [...advised].some((m) => f.title.startsWith(m + ' ')))),
+    switches: { advice, total: totalSaving(advice), asOf: PRICES_AS_OF, sources: PRICE_SOURCES },
+    canManage: c.canManage,
+  });
 }
 
 /** Set or clear the monthly AI budget (organisation admins). Body: { budgetUsd: number | null } */

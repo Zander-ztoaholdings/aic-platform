@@ -51,6 +51,8 @@ export type EvidenceInput = {
   requirements: Record<string, { id: string; state: string; text: string; right: string | null }>;
   /** common control key → state of the documents filed against it (evidenceState) and how many */
   documents?: Record<string, { state: string; count: number }>;
+  /** register facts (lib/registers/facts): suppliers, risks, training, access_review, leavers */
+  facts?: Record<string, { status: SourceStatus; label: string; href: string }>;
 };
 
 export type EvaluatedSource = { label: string; status: SourceStatus; href: string };
@@ -70,6 +72,10 @@ export function sourceStatus(s: CommonSource, e: EvidenceInput): EvaluatedSource
     const p = e.policies[s.key];
     const status: SourceStatus = !p ? 'none' : !p.published ? 'none' : p.acceptedAll ? 'pass' : 'pending';
     return { label: s.key, status, href: p ? `/policies/${p.id}` : '/policies' };
+  }
+  if (s.kind === 'fact') {
+    const f = e.facts?.[s.key];
+    return f ? { label: f.label, status: f.status, href: f.href } : { label: s.key, status: 'none', href: '/controls' };
   }
   const r = e.requirements[s.code];
   return { label: s.code, status: vaultStatus(r?.state), href: '/evidence' };
@@ -95,6 +101,7 @@ export function rollUp(statuses: SourceStatus[]): ControlStatus {
 function applies(s: CommonSource, e: EvidenceInput): boolean {
   if (s.kind === 'check') return (e.checks[s.key] ?? []).length > 0;
   if (s.kind === 'requirement') return s.code in e.requirements;
+  if (s.kind === 'fact') return !!e.facts?.[s.key];
   return true;
 }
 
@@ -103,7 +110,7 @@ export function evaluateCommon(e: EvidenceInput, checkTitle: (k: string) => stri
     const live = c.sources.filter((s) => applies(s, e));
     const sources: EvaluatedSource[] = live.map((s) => ({
       ...sourceStatus(s, e),
-      label: s.kind === 'check' ? checkTitle(s.key) : s.kind === 'policy' ? policyTitle(s.key) : `${s.code} evidence`,
+      label: s.kind === 'check' ? checkTitle(s.key) : s.kind === 'policy' ? policyTitle(s.key) : s.kind === 'fact' ? sourceStatus(s, e).label : `${s.code} evidence`,
     }));
     const doc = e.documents?.[c.key];
     const docSource: EvaluatedSource = {

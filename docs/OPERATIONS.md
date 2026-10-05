@@ -14,6 +14,8 @@ Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platfo
 
 **015 (frameworks)** adds the tables for choosing frameworks and writing custom ones. Nothing existing reads them, so it can go in before or after the push; until it is in, the Frameworks page says the choice cannot be saved and Controls shows the default frameworks. Paste `db/manual/run-015-in-platform-terminal.txt` the same way; it ends with `✓ 015 verified`.
 
+**016 (risk and people)** adds the supplier register, risk register, training records, access reviews and the people list. Nothing existing depends on them: until it is in, those five pages say the migration is needed and the matching controls show no evidence. Paste `db/manual/run-016-in-platform-terminal.txt` the same way; it ends with `✓ 016 verified`. Rebuild the demo company afterwards (Admin, Demo company) so it has the registers filled in.
+
 **Check:** `/api/health` shows `schema: ok, up to date with 015`.
 
 ## 2. Tenant isolation (row-level security)

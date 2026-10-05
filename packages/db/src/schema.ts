@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, smallint, bigint, numeric, boolean, timestamp, jsonb, text, pgEnum, index, unique, primaryKey, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, smallint, date, bigint, numeric, boolean, timestamp, jsonb, text, pgEnum, index, unique, primaryKey, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Enums
@@ -1255,4 +1255,121 @@ export const customFrameworkRequirements = pgTable('custom_framework_requirement
   ref: varchar('ref', { length: 40 }).notNull(),
   title: text('title').notNull(),
   controls: text('controls').array().notNull().default(sql`'{}'::text[]`),
+});
+
+// ── Registers and people (db/manual/016_registers_people.sql) ────────────────
+export const suppliers = pgTable('suppliers', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 200 }).notNull(),
+  website: varchar('website', { length: 300 }),
+  category: varchar('category', { length: 40 }).notNull().default('software'),
+  purpose: text('purpose'),
+  dataShared: text('data_shared').array().notNull().default(sql`'{}'::text[]`),
+  outsideSa: boolean('outside_sa').notNull().default(false),
+  country: varchar('country', { length: 80 }),
+  criticality: varchar('criticality', { length: 10 }).notNull().default('medium'),
+  hasDpa: boolean('has_dpa').notNull().default(false),
+  ownerName: varchar('owner_name', { length: 200 }),
+  status: varchar('status', { length: 20 }).notNull().default('active'),
+  source: varchar('source', { length: 60 }).notNull().default('manual'),
+  nextReviewAt: timestamp('next_review_at', { withTimezone: true }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const supplierReviews = pgTable('supplier_reviews', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  supplierId: uuid('supplier_id').notNull().references(() => suppliers.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  outcome: varchar('outcome', { length: 30 }).notNull(),
+  notes: text('notes'),
+  documentId: uuid('document_id').references(() => auditDocuments.id, { onDelete: 'set null' }),
+  reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }).notNull().defaultNow(),
+  nextReviewAt: timestamp('next_review_at', { withTimezone: true }),
+});
+
+export const risks = pgTable('risks', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description'),
+  category: varchar('category', { length: 30 }).notNull().default('security'),
+  likelihood: smallint('likelihood').notNull(),
+  impact: smallint('impact').notNull(),
+  residualLikelihood: smallint('residual_likelihood'),
+  residualImpact: smallint('residual_impact'),
+  treatment: varchar('treatment', { length: 20 }).notNull().default('mitigate'),
+  treatmentPlan: text('treatment_plan'),
+  controls: text('controls').array().notNull().default(sql`'{}'::text[]`),
+  ownerName: varchar('owner_name', { length: 200 }),
+  status: varchar('status', { length: 20 }).notNull().default('open'),
+  reviewAt: timestamp('review_at', { withTimezone: true }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const orgTraining = pgTable('org_training', {
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  moduleKey: varchar('module_key', { length: 60 }).notNull(),
+  required: boolean('required').notNull().default(true),
+  everyMonths: smallint('every_months').notNull().default(12),
+  updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.orgId, t.moduleKey] })]);
+
+export const trainingCompletions = pgTable('training_completions', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  moduleKey: varchar('module_key', { length: 60 }).notNull(),
+  moduleVersion: varchar('module_version', { length: 20 }).notNull(),
+  score: smallint('score').notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const accessReviews = pgTable('access_reviews', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 200 }).notNull(),
+  status: varchar('status', { length: 20 }).notNull().default('open'),
+  dueAt: timestamp('due_at', { withTimezone: true }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  completedBy: uuid('completed_by').references(() => users.id, { onDelete: 'set null' }),
+});
+
+export const accessReviewItems = pgTable('access_review_items', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  reviewId: uuid('review_id').notNull().references(() => accessReviews.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  system: varchar('system', { length: 80 }).notNull(),
+  account: varchar('account', { length: 255 }).notNull(),
+  displayName: varchar('display_name', { length: 255 }),
+  privilege: varchar('privilege', { length: 120 }),
+  lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
+  decision: varchar('decision', { length: 20 }),
+  note: text('note'),
+  decidedBy: uuid('decided_by').references(() => users.id, { onDelete: 'set null' }),
+  decidedAt: timestamp('decided_at', { withTimezone: true }),
+  removedAt: timestamp('removed_at', { withTimezone: true }),
+});
+
+export const orgPeople = pgTable('org_people', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 200 }).notNull(),
+  email: varchar('email', { length: 255 }),
+  jobTitle: varchar('job_title', { length: 200 }),
+  department: varchar('department', { length: 120 }),
+  startDate: date('start_date'),
+  endDate: date('end_date'),
+  source: varchar('source', { length: 60 }).notNull().default('manual'),
+  externalId: varchar('external_id', { length: 120 }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

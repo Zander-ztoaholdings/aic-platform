@@ -15,7 +15,9 @@
 export type CommonSource =
   | { kind: 'check'; key: string }
   | { kind: 'policy'; key: string }
-  | { kind: 'requirement'; code: string };
+  | { kind: 'requirement'; code: string }
+  /** A register AIC keeps: suppliers, risks, training, access_review, leavers (lib/registers/facts). */
+  | { kind: 'fact'; key: string };
 
 export type CommonArea = 'governance' | 'identity' | 'development' | 'operations' | 'ai' | 'privacy';
 
@@ -31,6 +33,7 @@ export type CommonControl = {
 const check = (key: string): CommonSource => ({ kind: 'check', key });
 const policy = (key: string): CommonSource => ({ kind: 'policy', key });
 const req = (code: string): CommonSource => ({ kind: 'requirement', code });
+const fact = (key: string): CommonSource => ({ kind: 'fact', key });
 
 export const AREA_LABEL: Record<CommonArea, string> = {
   governance: 'Governance',
@@ -46,12 +49,12 @@ export const COMMON_CONTROLS: CommonControl[] = [
   { key: 'gov.ai_policy', area: 'governance', title: 'AI use policy', evidence: 'The policy on how the organisation uses AI, and its disclosure policy.', sources: [policy('ai-acceptable-use'), req('TR-1')] },
   { key: 'gov.policy_acceptance', area: 'governance', title: 'Staff accept the policies', evidence: 'A record of who accepted which version, and when.', sources: [policy('information-security'), policy('ai-acceptable-use'), policy('human-oversight'), policy('incident-response')] },
   { key: 'gov.accountability', area: 'governance', title: 'Named accountable people', evidence: 'Who is accountable for security, privacy and each AI system, in writing, with their signed acknowledgement.', sources: [req('HU-1'), req('HU-2'), req('CO-9')] },
-  { key: 'gov.risk_assessment', area: 'governance', title: 'Risk assessment', evidence: 'The latest risk register or assessment, with treatments and owners.', sources: [] },
+  { key: 'gov.risk_assessment', area: 'governance', title: 'Risk assessment', evidence: 'The latest risk register or assessment, with treatments and owners.', sources: [fact('risks')] },
 
   { key: 'iam.mfa', area: 'identity', title: 'Multi-factor sign-in', evidence: 'A setting or report showing a second factor is required for everyone.', sources: [check('m365.mfa_enforced'), check('m365.mfa_registered'), check('github.org_2fa_required')] },
   { key: 'iam.privileged', area: 'identity', title: 'Administrator access kept small', evidence: 'The list of administrators and why each needs it.', sources: [check('m365.global_admins')] },
-  { key: 'iam.leavers', area: 'identity', title: 'Access removed when people leave', evidence: 'The leaver checklist and a recent example of it being followed.', sources: [check('m365.stale_accounts')] },
-  { key: 'iam.access_review', area: 'identity', title: 'Access reviewed regularly', evidence: 'The latest access review: who reviewed which system, and what changed.', sources: [] },
+  { key: 'iam.leavers', area: 'identity', title: 'Access removed when people leave', evidence: 'The leaver checklist and a recent example of it being followed.', sources: [check('m365.stale_accounts'), fact('leavers')] },
+  { key: 'iam.access_review', area: 'identity', title: 'Access reviewed regularly', evidence: 'The latest access review: who reviewed which system, and what changed.', sources: [fact('access_review')] },
 
   { key: 'dev.change_review', area: 'development', title: 'Changes reviewed before release', evidence: 'Branch protection settings and an example of a reviewed change.', sources: [check('github.branch_protected'), check('github.review_required'), check('github.merged_with_review')] },
   { key: 'dev.ai_code_review', area: 'development', title: 'AI-written code reviewed by a person', evidence: 'How AI-assisted changes are marked and reviewed.', sources: [check('github.ai_changes_reviewed')] },
@@ -63,8 +66,8 @@ export const COMMON_CONTROLS: CommonControl[] = [
   { key: 'ops.logging_monitoring', area: 'operations', title: 'Logging and monitoring', evidence: 'What is logged, where, for how long, and who looks at it.', sources: [] },
   { key: 'ops.backup', area: 'operations', title: 'Backups and recovery', evidence: 'The backup schedule and the result of the latest restore test.', sources: [] },
   { key: 'ops.encryption', area: 'operations', title: 'Encryption', evidence: 'How data is encrypted in storage and in transit.', sources: [] },
-  { key: 'ops.supplier_mgmt', area: 'operations', title: 'Supplier risk', evidence: 'The list of suppliers who handle data, with the review of each.', sources: [] },
-  { key: 'ops.awareness_training', area: 'operations', title: 'Security and AI awareness training', evidence: 'Training records: who completed what, and when.', sources: [] },
+  { key: 'ops.supplier_mgmt', area: 'operations', title: 'Supplier risk', evidence: 'The list of suppliers who handle data, with the review of each.', sources: [fact('suppliers')] },
+  { key: 'ops.awareness_training', area: 'operations', title: 'Security and AI awareness training', evidence: 'Training records: who completed what, and when.', sources: [fact('training')] },
   { key: 'ops.asset_inventory', area: 'operations', title: 'Asset inventory', evidence: 'The list of systems and data the organisation holds, with owners.', sources: [] },
   { key: 'ops.endpoint', area: 'operations', title: 'Device security', evidence: 'Device management settings: encryption, updates, malware protection.', sources: [] },
 

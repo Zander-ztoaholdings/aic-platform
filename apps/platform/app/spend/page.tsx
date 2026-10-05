@@ -13,7 +13,73 @@ type Data = {
   last30: number; monthToDate: number; lastMonth: number; projected: number | null; budget: number | null;
   daily: { day: string; cost: number }[]; byProvider: Slice[]; byModel: Slice[]; bySystem: Slice[];
   flags: Flag[]; hasData: boolean; canManage: boolean;
+  switches?: { advice: Advice[]; total: number; asOf: string; sources: { provider: string; url: string }[] };
 };
+type SwitchOption = { to: string; provider: string; tier: string; estimate: number; saving: number; savingShare: number; reason: string; kind: 'replacement' | 'same_provider' | 'other_provider'; promoUntil: string | null };
+type Advice = {
+  model: string; provider: string; matched: string | null; tier: string | null; cost: number; listEstimate: number | null; avgOutputTokens: number | null;
+  ending: { on: string | null; status: 'deprecated' | 'retired'; daysLeft: number | null } | null; options: SwitchOption[];
+};
+const PROVIDER: Record<string, string> = { openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google', mistral: 'Mistral' };
+const KIND: Record<SwitchOption['kind'], string> = { replacement: 'The provider’s replacement', same_provider: 'Same provider', other_provider: 'Another provider' };
+const longDate = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+function Switches({ s }: { s: NonNullable<Data['switches']> }) {
+  const shown = s.advice.filter((a) => a.ending || a.options.length);
+  const unknown = s.advice.filter((a) => !a.matched);
+  return (
+    <SectionCard>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-[15px] font-semibold text-[#0e1b2c]">Cheaper ways to run the same work</h2>
+        {s.total >= 1 && <p className="text-[14px] text-[#0e1b2c]">Up to <span className="font-semibold text-[#2e7a57]">{usd(s.total)} a month</span> with the same provider</p>}
+      </div>
+      <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-[#5e6b7b]">Each figure is your last 30 days of tokens priced on another model. AIC never sees your prompts or answers, so it cannot tell whether a cheaper model is good enough: run a sample of real requests through it and compare before you switch.</p>
+      {shown.length === 0 ? (
+        <p className="mt-4 text-[14px] text-[#0e1b2c]">Nothing to suggest: each model you use is current, and nothing comparable is clearly cheaper for your mix of requests.</p>
+      ) : (
+        <ul className="mt-4 space-y-3">
+          {shown.map((a) => (
+            <li key={a.model} className="rounded-xl border border-[#eef1f5] p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-[14.5px] font-semibold text-[#0e1b2c]">{a.model} <span className="font-normal text-[#5e6b7b]">from {PROVIDER[a.provider] ?? a.provider}</span></p>
+                <p className="text-[13px] text-[#5e6b7b]">{usd(a.cost)} in the last 30 days</p>
+              </div>
+              {a.ending && (
+                <p className="mt-2 flex gap-2 rounded-lg bg-[#b23a35]/[0.06] px-3 py-2 text-[13px] text-[#8f2d29]">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{a.ending.status === 'retired' ? `Retired${a.ending.on ? ` on ${longDate(a.ending.on)}` : ''}: requests to it may already be failing.` : `Stops working on ${a.ending.on ? longDate(a.ending.on) : 'a date the provider has announced'}${a.ending.daysLeft !== null && a.ending.daysLeft >= 0 ? `, ${a.ending.daysLeft} days from now` : ''}. Move before then.`}</span>
+                </p>
+              )}
+              {a.options.length > 0 && (
+                <ul className="mt-3 divide-y divide-[#eef1f5]">
+                  {a.options.map((o) => (
+                    <li key={o.to} className="grid gap-x-4 gap-y-1 py-2.5 md:grid-cols-[minmax(0,1fr)_auto]">
+                      <div className="min-w-0">
+                        <p className="text-[14px] text-[#0e1b2c]"><span className="font-medium">{o.to}</span> <span className="text-[12.5px] text-[#8a95a3]">{KIND[o.kind]}{o.kind === 'other_provider' ? `, ${PROVIDER[o.provider] ?? o.provider}` : ''}</span></p>
+                        <p className="mt-0.5 text-[13px] leading-relaxed text-[#5e6b7b]">{o.reason}{o.promoUntil ? ` The price is promotional until ${longDate(o.promoUntil)} and rises after that.` : ''}</p>
+                      </div>
+                      <div className="text-[13px] md:text-right">
+                        <p className="text-[#0e1b2c]">About {usd(o.estimate)} a month</p>
+                        <p className={o.saving > 0 ? 'font-medium text-[#2e7a57]' : 'text-[#b45309]'}>{o.saving > 0 ? `${usd(o.saving)} less (${Math.round(o.savingShare * 100)}%)` : `${usd(-o.saving)} more`}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {unknown.length > 0 && <p className="mt-3 text-[12.5px] text-[#8a95a3]">Not in AIC’s price list yet, so not compared: {unknown.map((u) => u.model).join(', ')}.</p>}
+      <p className="mt-3 text-[12.5px] text-[#8a95a3]">
+        List prices from {[...new Set(s.sources.map((x) => x.provider))].map((p, i, arr) => {
+          const src = s.sources.find((x) => x.provider === p)!;
+          return <span key={p}>{i > 0 ? (i === arr.length - 1 ? ' and ' : ', ') : ''}<a href={src.url} target="_blank" rel="noreferrer" className="underline decoration-[#c9ced6] underline-offset-2 hover:text-[#0e1b2c]">{PROVIDER[p] ?? p}</a></span>;
+        })}, checked {longDate(s.asOf)}. Batch, caching and negotiated discounts are not included.
+      </p>
+    </SectionCard>
+  );
+}
 
 const usd = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const dayLabel = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', timeZone: 'UTC' });
@@ -64,7 +130,7 @@ function Breakdown({ title, rows }: { title: string; rows: Slice[] }) {
             <li key={r.key}>
               <div className="flex items-baseline justify-between gap-3 text-[13px]">
                 <span className={`truncate ${r.key ? 'text-[#0e1b2c]' : 'text-[#b45309]'}`}>{r.label}</span>
-                <span className="shrink-0 text-[#0e1b2c]">{usd(r.cost)} <span className="text-[#8a95a3]">· {Math.round(r.share * 100)}%</span></span>
+                <span className="shrink-0 text-[#0e1b2c]">{usd(r.cost)} <span className="text-[#8a95a3]">({Math.round(r.share * 100)}%)</span></span>
               </div>
               <div className="mt-1 h-1.5 rounded-full bg-[#eef1f5]"><div className="h-1.5 rounded-full bg-[#a8772a]" style={{ width: `${(r.cost / max) * 100}%` }} /></div>
             </li>
@@ -103,7 +169,7 @@ export default function SpendPage() {
 
   return (
     <DashboardShell>
-      <div className="">
+      <div>
         <PageHeader
           eyebrow="AI overview"
           title="AI spend"
@@ -150,6 +216,8 @@ export default function SpendPage() {
                 ))}
               </ul>
             )}
+
+            {d.switches && <Switches s={d.switches} />}
 
             <SectionCard>
               <h2 className="text-[14px] font-semibold text-[#0e1b2c]">Daily spend, last 30 days</h2>

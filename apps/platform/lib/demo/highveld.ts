@@ -26,6 +26,7 @@ import {
   organizations, users, accountablePersons, aiSystems, orgPolicies, policyVersions, policyAcceptances,
   integrations, integrationChecks, llmUsageRecords, decisionRecords, auditRequirements, auditDocuments,
   awareAssessments, awareBadges, trustPages, orgFrameworks, auditFindings, correctiveActions, auditLogs, auditLedger, inviteCodes, EncryptionService,
+  suppliers, supplierReviews, risks, trainingCompletions, accessReviews, accessReviewItems, orgPeople,
 } from '@aic/db';
 import { StorageService, storageConfig } from '@aic/db/storage';
 import { MFAService } from '@aic/auth';
@@ -38,6 +39,8 @@ import { generateBadgeCode, badgeExpiry } from '../aware/badge';
 import { ACCOUNTABLE_PERSON_DECLARATION } from '../aware/declarations';
 import { controlSlot } from '../common-controls';
 import { observeEstate } from '../continuity-store';
+import { MODULE_BY_KEY } from '../training/modules';
+import { nextReview } from '../registers/suppliers';
 
 export const DEMO_ORG_ID = 'de300000-0000-4000-8000-0000000000a1';
 export const DEMO_DOMAIN = 'demo.aiccertified.cloud';
@@ -64,6 +67,29 @@ const SYSTEMS = [
   { id: 'de300000-0000-4000-8000-0000000000b3', name: 'Customer help assistant', purpose: 'Answers customer questions in chat, built on a hosted language model', riskTier: 3, stage: 'production' },
   { id: 'de300000-0000-4000-8000-0000000000b4', name: 'Payslip fraud check', purpose: 'Flags edited payslips for a person to look at', riskTier: 2, stage: 'pilot' },
 ];
+
+/**
+ * Everyone on the staff list, beyond the four who sign in. Two have left:
+ * Lindiwe's accounts were switched off, Johan's were not, which is what the
+ * People page and the leavers control are there to catch. Bongani starts soon.
+ * `left` and `starts` are days from today.
+ */
+const STAFF = [
+  { key: 'naledi', name: 'Naledi Khumalo', jobTitle: 'Chief Operating Officer', department: 'Executive' },
+  { key: 'pieter', name: 'Pieter van Wyk', jobTitle: 'Head of Credit', department: 'Credit' },
+  { key: 'sipho', name: 'Sipho Dlamini', jobTitle: 'Head of IT', department: 'Technology' },
+  { key: 'ayesha', name: 'Ayesha Patel', jobTitle: 'Compliance Officer', department: 'Risk and compliance' },
+  { key: 'thandi', name: 'Thandi Mthembu', jobTitle: 'Credit analyst', department: 'Credit' },
+  { key: 'zanele', name: 'Zanele Ndlovu', jobTitle: 'Credit analyst', department: 'Credit' },
+  { key: 'lerato', name: 'Lerato Molefe', jobTitle: 'Collections lead', department: 'Collections' },
+  { key: 'kagiso', name: 'Kagiso Sithole', jobTitle: 'Software developer', department: 'Technology' },
+  { key: 'ruan', name: 'Ruan Pretorius', jobTitle: 'Software developer', department: 'Technology' },
+  { key: 'megan', name: 'Megan Fourie', jobTitle: 'Customer support lead', department: 'Customer service' },
+  { key: 'fatima', name: 'Fatima Ebrahim', jobTitle: 'Finance manager', department: 'Finance' },
+  { key: 'johan', name: 'Johan Botha', jobTitle: 'Data engineer', department: 'Technology', left: -38 },
+  { key: 'lindiwe', name: 'Lindiwe Mokoena', jobTitle: 'Marketing coordinator', department: 'Marketing', left: -75 },
+  { key: 'bongani', name: 'Bongani Zulu', jobTitle: 'Data scientist', department: 'Technology', starts: 12 },
+] as { key: string; name: string; jobTitle: string; department: string; left?: number; starts?: number }[];
 
 const DAY = 86_400_000;
 /** Deterministic pseudo-random numbers, so every reset looks the same. */
@@ -204,8 +230,27 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     }).returning({ id: integrations.id });
     return r.id;
   };
-  const gh = await conn('github', 'highveld-credit', 'demo', { accountType: 'Organization', repositories: ['highveld-credit/credit-engine', 'highveld-credit/website'], repositoriesTotal: 2, repositorySelection: 'selected', links: { 'highveld-credit/credit-engine': SYSTEMS[0].id, 'highveld-credit/website': 'none' } });
-  const ms = await conn('microsoft', 'Microsoft 365', 'demo-tenant', { tenantName: 'Highveld Credit (Demo)', users: 45 });
+  // The accounts each system holds, for access reviews and the leavers check (lib/registers/accounts reads these in demo mode).
+  const iso = (days: number) => ago(days).toISOString();
+  const msAccounts = [
+    ...STAFF.filter((p) => !p.starts).map((p, i) => ({
+      system: 'Microsoft 365', account: `${p.key}@${DEMO_DOMAIN}`, displayName: p.name,
+      privilege: p.key === 'sipho' ? 'Global administrator' : 'Member',
+      lastActiveAt: p.key === 'lindiwe' ? iso(76) : p.key === 'johan' ? iso(39) : iso(i % 3), enabled: p.key !== 'lindiwe',
+    })),
+    { system: 'Microsoft 365', account: `it-admin@${DEMO_DOMAIN}`, displayName: 'IT admin (break glass)', privilege: 'Global administrator', lastActiveAt: iso(204), enabled: true },
+    { system: 'Microsoft 365', account: `reception@${DEMO_DOMAIN}`, displayName: 'Reception', privilege: 'Member', lastActiveAt: iso(141), enabled: true },
+    { system: 'Microsoft 365', account: `scanner@${DEMO_DOMAIN}`, displayName: 'Office scanner', privilege: 'Member', lastActiveAt: iso(1), enabled: true },
+  ];
+  const ghAccounts = [
+    { system: 'GitHub', account: 'sipho', displayName: null, privilege: 'Owner', lastActiveAt: null, enabled: true },
+    { system: 'GitHub', account: 'kagiso', displayName: null, privilege: 'Member', lastActiveAt: null, enabled: true },
+    { system: 'GitHub', account: 'ruan', displayName: null, privilege: 'Member', lastActiveAt: null, enabled: true },
+    { system: 'GitHub', account: 'johan', displayName: null, privilege: 'Owner', lastActiveAt: null, enabled: true },
+    { system: 'GitHub', account: 'hc-deploy-bot', displayName: null, privilege: 'Member', lastActiveAt: null, enabled: true },
+  ];
+  const gh = await conn('github', 'highveld-credit', 'demo', { accountType: 'Organization', repositories: ['highveld-credit/credit-engine', 'highveld-credit/website'], repositoriesTotal: 2, repositorySelection: 'selected', links: { 'highveld-credit/credit-engine': SYSTEMS[0].id, 'highveld-credit/website': 'none' }, accounts: ghAccounts });
+  const ms = await conn('microsoft', 'Microsoft 365', 'demo-tenant', { tenantName: 'Highveld Credit (Demo)', users: msAccounts.length, accounts: msAccounts });
   const oa = await conn('openai', 'OpenAI', null, { links: { 'gpt-4o': SYSTEMS[2].id } });
   const an = await conn('anthropic', 'Anthropic', null, { links: { 'claude-sonnet-4-5': SYSTEMS[3].id } });
   const failSince = ago(9);
@@ -395,12 +440,21 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     await db.insert(orgFrameworks).values(['aic', 'popia', 'iso42001', 'eu_ai_act', 'iso27001'].map((k) => ({ orgId: DEMO_ORG_ID, frameworkKey: k, addedBy: ids.naledi })));
   } catch { /* migration 015 not applied: Controls shows the same defaults */ }
 
-  // ── 12. Today's observation: anything the decisions and usage changed ──────
+  // ── 12. Risk and people: registers, training, people and access reviews ───
+  let registers = 0;
+  try {
+    registers = await seedRegisters({ ids, ago, at, msAccounts, ghAccounts });
+  } catch (e) {
+    const code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code;
+    if (code !== '42P01') throw e; // migration 016 not applied: the demo simply has no registers yet
+  }
+
+  // ── 13. Today's observation: anything the decisions and usage changed ──────
   await observe(ago(0, 1), 'AIC connector sync');
 
   return {
     credentials: { emails, password, totpSecret, otpauth: MFAService.getOTPAuthURI(totpSecret, 'Highveld Credit (Demo)', 'AIC Platform') },
-    summary: { people: PEOPLE.length, systems: SYSTEMS.length, decisions: decisions.length, heldDecisions: 3, requirements: reqRows.length, usageRows: usage.length, filesStored: stored },
+    summary: { people: PEOPLE.length, systems: SYSTEMS.length, decisions: decisions.length, heldDecisions: 3, requirements: reqRows.length, usageRows: usage.length, filesStored: stored, registerRows: registers },
   };
 }
 
@@ -410,4 +464,101 @@ export async function removeHighveld(): Promise<void> {
   const emails = PEOPLE.map((p) => `${p.key}@${DEMO_DOMAIN}`);
   await db.update(users).set({ orgId: null, isActive: false }).where(inArray(users.email, emails));
   await deleteDemoOrg();
+}
+
+type DemoAccount = { system: string; account: string; displayName: string | null; privilege: string; lastActiveAt: string | null; enabled: boolean };
+
+/** The five registers, filled so each tells a story worth showing: some in order, some with a gap to fix. */
+async function seedRegisters({ ids, ago, at, msAccounts, ghAccounts }: {
+  ids: Record<string, string>; ago: (d: number, h?: number) => Date; at: (d: number, hh: number, mm: number) => Date;
+  msAccounts: DemoAccount[]; ghAccounts: DemoAccount[];
+}): Promise<number> {
+  const db = getSystemDb();
+  const ahead = (days: number) => ago(-days);
+  const day = (offset: number) => ago(-offset).toISOString().slice(0, 10);
+  let n = 0;
+
+  // People
+  await db.insert(orgPeople).values(STAFF.map((p) => ({
+    orgId: DEMO_ORG_ID, name: p.name, email: `${p.key}@${DEMO_DOMAIN}`, jobTitle: p.jobTitle, department: p.department,
+    startDate: p.starts ? day(p.starts) : day(-400 - (p.name.length * 37) % 900), endDate: p.left ? day(p.left) : null,
+    source: 'import', createdAt: ago(30), updatedAt: ago(30),
+  })));
+  n += STAFF.length;
+
+  // Suppliers. GitHub is left off on purpose, so the page suggests it.
+  const sup = [
+    { name: 'OpenAI', website: 'https://openai.com', category: 'ai_provider', purpose: 'Language model behind the customer help assistant', dataShared: ['personal'], outsideSa: true, country: 'United States', criticality: 'high', hasDpa: true, ownerName: 'Sipho Dlamini',
+      review: { days: 150, outcome: 'approved_with_conditions', notes: 'Security report and data processing terms reviewed. Condition: confirm zero data retention is switched on for the help assistant.' } },
+    { name: 'Anthropic', website: 'https://www.anthropic.com', category: 'ai_provider', purpose: 'Language model behind the payslip fraud check pilot', dataShared: ['personal'], outsideSa: true, country: 'United States', criticality: 'medium', hasDpa: false, ownerName: 'Sipho Dlamini', review: null },
+    { name: 'Microsoft 365', website: 'https://www.microsoft.com', category: 'cloud', purpose: 'Email, documents and staff sign-in', dataShared: ['personal', 'credentials'], outsideSa: false, country: 'South Africa', criticality: 'high', hasDpa: true, ownerName: 'Sipho Dlamini',
+      review: { days: 380, outcome: 'approved', notes: 'Data residency confirmed for South Africa. Contract terms include the data processing addendum.' } },
+  ];
+  for (const s of sup) {
+    const { review, ...v } = s;
+    const reviewedAt = review ? at(review.days, 10, 15) : null;
+    const next = reviewedAt ? nextReview(v.criticality, reviewedAt) : null;
+    const [row] = await db.insert(suppliers).values({ orgId: DEMO_ORG_ID, ...v, source: 'manual', nextReviewAt: next, createdBy: ids.sipho, createdAt: ago(60), updatedAt: ago(20) }).returning({ id: suppliers.id });
+    if (review) await db.insert(supplierReviews).values({ supplierId: row.id, orgId: DEMO_ORG_ID, outcome: review.outcome, notes: review.notes, reviewedBy: ids.ayesha, reviewedAt: reviewedAt!, nextReviewAt: next });
+    n++;
+  }
+
+  // Risks
+  const R = (title: string, category: string, likelihood: number, impact: number, treatment: string, status: string, ownerName: string | null, reviewIn: number, controls: string[], treatmentPlan: string | null, residual?: [number, number]) => ({
+    orgId: DEMO_ORG_ID, title, category, likelihood, impact, treatment, status, ownerName, reviewAt: ahead(reviewIn), controls, treatmentPlan,
+    residualLikelihood: residual?.[0] ?? null, residualImpact: residual?.[1] ?? null, createdBy: ids.ayesha, createdAt: ago(55), updatedAt: ago(10),
+  });
+  const riskRows = [
+    R('Pre-screening model declines a protected group more often', 'ai', 3, 5, 'mitigate', 'treating', 'Pieter van Wyk', 30, ['ai.impact_bias', 'ai.human_oversight'], 'Quarterly bias test across age and gender. The referral band stays wide while the open finding on bias testing is resolved.', [2, 5]),
+    R('Customer information goes to a model provider without a signed agreement', 'privacy', 3, 4, 'mitigate', 'open', 'Ayesha Patel', -5, ['ops.supplier_mgmt', 'priv.lawful_basis'], 'Sign the data processing terms with Anthropic before the payslip pilot goes live.'),
+    R('Former staff keep access to company systems', 'security', 4, 4, 'mitigate', 'treating', 'Sipho Dlamini', 20, ['iam.leavers', 'iam.access_review'], 'HR tells IT on the leaving date; quarterly access review catches anything missed.', [2, 4]),
+    R('Phishing leads to a taken-over mailbox', 'security', 4, 3, 'mitigate', 'treating', 'Sipho Dlamini', 45, ['iam.mfa', 'ops.awareness_training'], 'Second factor for everyone; security training every year.', [2, 3]),
+    R('Help assistant tells a customer something wrong about their account', 'ai', 3, 3, 'mitigate', 'open', 'Megan Fourie', 60, ['ai.monitoring', 'ai.transparency'], 'Assistant answers general questions only; account questions go to a person.'),
+    R('Collections prioritiser puts vulnerable customers under pressure', 'ai', 2, 4, 'mitigate', 'open', null, 40, ['ai.impact_bias'], null),
+    R('Main model provider has a long outage', 'supplier', 2, 3, 'accept', 'accepted', 'Naledi Khumalo', 150, [], 'The help assistant falls back to a contact form. Pre-screening does not depend on it.'),
+    R('Model API keys kept in the code repository', 'security', 3, 4, 'mitigate', 'closed', 'Sipho Dlamini', 90, ['dev.secrets'], 'Keys moved to the secrets manager and rotated; secret scanning switched on.', [1, 4]),
+  ];
+  await db.insert(risks).values(riskRows);
+  n += riskRows.length;
+
+  // Training: the three general modules by default; Pieter's is out of date.
+  const done = (who: string, key: string, days: number, score: number) => ({ orgId: DEMO_ORG_ID, userId: ids[who], moduleKey: key, moduleVersion: MODULE_BY_KEY[key].version, score, completedAt: at(days, 9 + (days % 7), (days * 7) % 60) });
+  const completions = [
+    done('naledi', 'security-basics', 58, 100), done('naledi', 'popia-essentials', 57, 75), done('naledi', 'ai-at-work', 50, 100),
+    done('sipho', 'security-basics', 61, 100), done('sipho', 'popia-essentials', 44, 100), done('sipho', 'ai-at-work', 44, 75),
+    done('ayesha', 'security-basics', 52, 100), done('ayesha', 'popia-essentials', 52, 100), done('ayesha', 'ai-at-work', 33, 100), done('ayesha', 'reviewing-decisions', 33, 100),
+    done('pieter', 'security-basics', 410, 75), done('pieter', 'reviewing-decisions', 41, 100),
+  ];
+  await db.insert(trainingCompletions).values(completions);
+  n += completions.length;
+
+  // Access reviews: one completed four months ago, one in progress now.
+  const monthName = (d: Date) => d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'Africa/Johannesburg' });
+  const past = ago(122);
+  const [r1] = await db.insert(accessReviews).values({ orgId: DEMO_ORG_ID, name: `Access review, ${monthName(past)}`, status: 'completed', dueAt: ago(108), createdBy: ids.sipho, createdAt: past, completedAt: at(115, 15, 40), completedBy: ids.sipho }).returning({ id: accessReviews.id });
+  const pastItems = msAccounts.filter((a) => a.account.split('@')[0] !== 'reception').map((a) => {
+    const lindiwe = a.account.startsWith('lindiwe@');
+    return {
+      reviewId: r1.id, orgId: DEMO_ORG_ID, system: a.system, account: a.account, displayName: a.displayName, privilege: a.privilege,
+      lastActiveAt: lindiwe ? ago(118) : ago(123), decision: lindiwe ? 'reduce' : 'keep', note: lindiwe ? 'Moved to read-only while her role changed.' : null,
+      decidedBy: ids.sipho, decidedAt: at(117, 11, 5), removedAt: lindiwe ? at(115, 14, 20) : null,
+    };
+  });
+  await db.insert(accessReviewItems).values(pastItems);
+
+  const [r2] = await db.insert(accessReviews).values({ orgId: DEMO_ORG_ID, name: `Access review, ${monthName(ago(0))}`, status: 'open', dueAt: ahead(12), createdBy: ids.sipho, createdAt: at(2, 9, 30) }).returning({ id: accessReviews.id });
+  // Routine accounts already decided; the ones worth a closer look are left for the demo.
+  const routine = new Set(['naledi', 'pieter', 'ayesha', 'thandi', 'zanele', 'lerato', 'megan', 'fatima', 'kagiso', 'ruan', 'scanner']);
+  const nowItems = [...msAccounts, ...ghAccounts].map((a) => {
+    const who = a.account.split('@')[0];
+    const decided = routine.has(who) && !(a.system === 'GitHub' && who === 'ruan');
+    return {
+      reviewId: r2.id, orgId: DEMO_ORG_ID, system: a.system, account: a.account, displayName: a.displayName, privilege: a.privilege,
+      lastActiveAt: a.lastActiveAt ? new Date(a.lastActiveAt) : null,
+      decision: decided ? 'keep' : null, decidedBy: decided ? ids.sipho : null, decidedAt: decided ? at(1, 14, 10) : null,
+    };
+  });
+  await db.insert(accessReviewItems).values(nowItems);
+  n += 2;
+  return n;
 }

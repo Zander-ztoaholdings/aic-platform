@@ -12,6 +12,7 @@ import { evidenceState } from '@/lib/evidence-vault';
 import { CHECK_BY_KEY } from '@/lib/integrations/catalog';
 import { TEMPLATE_BY_KEY } from '@/lib/policy-templates';
 import { orgMembers } from '@/lib/policies';
+import { registerFacts } from '@/lib/registers/facts';
 
 export type CustomFramework = {
   id: string; key: string; name: string; description: string | null;
@@ -50,9 +51,9 @@ export async function gatherEvidence(orgId: string): Promise<EvidenceInput> {
     reqs: await tx.select().from(auditRequirements).where(eq(auditRequirements.orgId, orgId)),
     docs: await tx.select().from(auditDocuments).where(eq(auditDocuments.orgId, orgId)),
   }));
-  const members = await orgMembers(orgId);
+  const [members, facts] = await Promise.all([orgMembers(orgId), registerFacts(orgId)]);
 
-  const input: EvidenceInput = { checks: {}, policies: {}, requirements: {}, documents: {} };
+  const input: EvidenceInput = { checks: {}, policies: {}, requirements: {}, documents: {}, facts };
   for (const c of checks) (input.checks[c.key] ??= []).push(c.status);
   for (const p of policies) {
     if (!p.templateKey) continue;

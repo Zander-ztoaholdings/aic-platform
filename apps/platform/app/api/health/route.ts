@@ -91,7 +91,7 @@ export async function GET() {
       ['decision_records', 'review_status'],     // 014
       ['organizations', 'ai_monthly_budget_usd'],// 014
     ];
-    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items', 'org_frameworks', 'custom_frameworks', 'custom_framework_requirements']; // 002, 011, 013, 014, 015
+    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items', 'org_frameworks', 'custom_frameworks', 'custom_framework_requirements', 'suppliers', 'risks', 'training_completions', 'access_review_items', 'org_people']; // 002, 011, 013, 014, 015, 016
 
     const found = await db.execute(sql`
       SELECT table_name, column_name FROM information_schema.columns
@@ -114,9 +114,9 @@ export async function GET() {
       ? {
           status: 'error',
           latency_ms: Date.now() - schemaStart,
-          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 015)`,
+          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 016)`,
         }
-      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 015' };
+      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 016' };
   } catch (err: unknown) {
     console.error('[HEALTH] schema check failed:', err);
     checks.schema = { status: 'error', latency_ms: Date.now() - schemaStart, detail: 'Could not read' };

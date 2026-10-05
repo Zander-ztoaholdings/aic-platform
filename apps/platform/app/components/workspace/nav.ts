@@ -6,6 +6,7 @@ import {
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
   FileBarChart, UserCog, Lock, Target, LineChart, Library,
+  ShieldAlert, Truck, Contact, UserCheck,
 } from 'lucide-react';
 import { canManageTeamAndKeys } from '@/lib/roles';
 import { staffCan, canUseHq, type WorkspaceUser } from '@/lib/workspace';
@@ -75,6 +76,18 @@ export const CLIENT_NAV: NavGroup[] = [
       { label: 'Assessor Findings', href: '/findings', icon: AlertTriangle, description: 'What the assessor raised, and your corrective actions.' },
       { label: 'Incidents', href: '/incidents', icon: Siren, description: 'AI incidents reported, and how each was resolved.' },
       { label: 'Reports', href: '/reports', icon: FileCheck, description: 'Reports generated from your record.' },
+    ],
+  },
+  {
+    key: 'people',
+    label: 'Risk and people',
+    summary: 'Risks, suppliers, who has access, and who is trained.',
+    items: [
+      { label: 'Risk register', href: '/risks', icon: ShieldAlert, description: 'What could go wrong, how bad it would be, and who owns it.' },
+      { label: 'Suppliers', href: '/suppliers', icon: Truck, description: 'Who holds your data or runs part of your service, and when you last checked them.' },
+      { label: 'People', href: '/people', icon: Contact, description: 'Joiners and leavers, matched to their accounts.' },
+      { label: 'Access reviews', href: '/access-reviews', icon: UserCheck, description: 'Confirm who still needs each account.' },
+      { label: 'Training', href: '/training', icon: GraduationCap, description: 'Security, POPIA and AI modules, and who has completed them.' },
     ],
   },
   {
