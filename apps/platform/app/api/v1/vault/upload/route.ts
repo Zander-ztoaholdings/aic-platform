@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
 import { getSystemDb, auditDocuments, auditRequirements, and, eq } from '@aic/db';
-import { StorageService } from '@aic/db/storage';
+import { StorageService, storageConfig } from '@aic/db/storage';
 import { canManageCompliance } from '@/lib/roles';
 
 export async function POST(req: NextRequest) {
@@ -45,14 +45,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 1. Persist to real Storage Backend (Minio/S3)
+    // 1. Persist to the evidence bucket (MinIO or any S3-compatible store)
+    if (!storageConfig()) {
+      console.error('[VAULT_UPLOAD] evidence storage is not configured (MINIO_* variables)');
+      return NextResponse.json(
+        { error: 'File storage is not switched on for this AIC server yet, so the file was not saved. AIC has been alerted.' },
+        { status: 503 }
+      );
+    }
     const buffer = Buffer.from(await file.arrayBuffer());
-    const { evidenceId, hash } = await StorageService.saveEvidence(
-      session.user.orgId,
-      file.name,
-      buffer,
-      file.type
-    );
+    let evidenceId: string, hash: string;
+    try {
+      ({ evidenceId, hash } = await StorageService.saveEvidence(session.user.orgId, file.name, buffer, file.type));
+    } catch (e) {
+      console.error('[VAULT_UPLOAD] storage write failed:', e);
+      return NextResponse.json({ error: 'The file could not be stored. Nothing was saved; please try again.' }, { status: 502 });
+    }
 
     // 2. Register in Database
     const db = getSystemDb();

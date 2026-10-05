@@ -10,6 +10,7 @@ import { StandingSeal } from '../components/workspace/StandingSeal';
 import { phaseFromCertificationStatus } from '@/lib/phases';
 import { ObserveButton } from './components/ObserveButton';
 import { ContinuityFeed } from './components/ContinuityFeed';
+import { DashboardInsights } from './components/DashboardInsights';
 
 export const metadata = { title: 'Continuity Record | AIC' };
 export const dynamic = 'force-dynamic';
@@ -105,6 +106,8 @@ export default async function ContinuityDashboard() {
             </p>
           </div>
         )}
+
+        <DashboardInsights />
 
         {record.drift.length > 0 && (
           <section className="bg-white border border-gray-200 rounded-lg">

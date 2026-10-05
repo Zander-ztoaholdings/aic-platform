@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { signOut } from 'next-auth/react';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { ChevronDown, LogOut, Menu, X } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
 import type { NavGroup, NavItem } from './nav';
+import { MobileNav } from './MobileNav';
 
 /**
  * The top bar both workspaces share.
@@ -74,6 +74,8 @@ export interface WorkspaceTopBarProps {
   actions?: React.ReactNode;
   /** Extra entries at the foot of the person menu, e.g. "Take the tour". */
   menuExtras?: { label: string; onSelect: () => void; icon: React.ComponentType<{ className?: string }> }[];
+  /** Phone tab bar: the four places people go most. The rest are under Menu. */
+  tabs?: NavItem[];
 }
 
 function initialsOf(nameOrEmail: string): string {
@@ -95,22 +97,15 @@ export function WorkspaceTopBar({
   user,
   actions,
   menuExtras = [],
+  tabs = [],
 }: WorkspaceTopBarProps) {
   const t = TONE[tone];
-  const [mobileOpen, setMobileOpen] = useState(false);
   const display = user.name ?? user.email ?? 'Signed in';
 
   return (
+    <>
     <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${t.bar}`}>
       <div className="max-w-[1200px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-8">
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className={`md:hidden w-11 h-11 -ml-1 flex items-center justify-center rounded-xl ${t.trigger}`}
-          aria-label="Open navigation"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
 
         {/* Brand and context — whose record this is. */}
         <Link href={homeHref} className="flex items-center gap-3 min-w-0 shrink-0">
@@ -249,75 +244,17 @@ export function WorkspaceTopBar({
         </div>
       </div>
 
-      {/* Small screens: the same groups as one list. */}
-      {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-[#0A1728]/30 backdrop-blur-sm scrim-in" onClick={() => setMobileOpen(false)} />
-          <nav
-            className={`sheet-in absolute inset-y-0 left-0 w-[88%] max-w-sm overflow-y-auto overscroll-contain border-r px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'}`}
-            aria-label="Workspace"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-serif text-[19px] font-bold">AIC<span className="text-[#c9920a]">.</span></span>
-              <button type="button" onClick={() => setMobileOpen(false)} className={`w-11 h-11 flex items-center justify-center rounded-xl ${t.trigger}`} aria-label="Close navigation">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            {contextLabel && (
-              <div className="px-2 pb-5 mb-5 border-b border-current/10">
-                <p className="font-serif text-[20px] leading-snug font-semibold">{contextLabel}</p>
-                {contextDetail && <p className={`text-[13px] mt-0.5 ${t.muted}`}>{contextDetail}</p>}
-              </div>
-            )}
-            {groups.map((group) => (
-              <div key={group.key} className="mb-5">
-                <p className={`px-2 mb-1.5 text-[12.5px] font-semibold first-cap ${t.faint}`}>{group.label}</p>
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      className={`flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item} ${active ? t.itemActive : ''}`}
-                    >
-                      <span className={`w-8 h-8 rounded-lg flex items-center justify-center ${active ? t.tileActive : t.tile}`}>
-                        <Icon className="w-4 h-4" />
-                      </span>
-                      {item.label}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-            <div className={`h-px my-4 ${t.divider}`} />
-            <p className={`px-2 mb-1.5 text-[12.5px] font-semibold ${t.faint}`}>{display}</p>
-            {accountItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
-                  <Icon className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
-                  {item.label}
-                </Link>
-              );
-            })}
-            {menuExtras.map((x) => (
-              <button key={x.label} type="button" onClick={() => { setMobileOpen(false); x.onSelect(); }}
-                className={`w-full text-left flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
-                <x.icon className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
-                {x.label}
-              </button>
-            ))}
-            <button type="button" onClick={() => signOut({ callbackUrl: '/login' })}
-              className={`w-full text-left flex items-center gap-3 rounded-xl px-2 py-2.5 min-h-[48px] text-[15px] ${t.item}`}>
-              <LogOut className={`w-4 h-4 ml-2 mr-2 ${t.muted}`} />
-              Sign out
-            </button>
-          </nav>
-        </div>
-      )}
     </header>
+    <MobileNav
+      tabs={tabs}
+      groups={groups}
+      accountItems={accountItems}
+      isActive={isActive}
+      contextLabel={contextLabel}
+      contextDetail={contextDetail}
+      userLabel={display}
+      menuExtras={menuExtras}
+    />
+    </>
   );
 }

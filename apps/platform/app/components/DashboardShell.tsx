@@ -12,7 +12,7 @@ import { phaseFromCertificationStatus } from './ui/PhaseTracker';
 import { WorkspaceTopBar } from './workspace/WorkspaceTopBar';
 import { WorkspaceStatusStrip } from './workspace/WorkspaceStatusStrip';
 import { NotificationBell } from './workspace/NotificationBell';
-import { CLIENT_NAV, CLIENT_ACCOUNT, visibleGroups, visibleItems } from './workspace/nav';
+import { CLIENT_NAV, CLIENT_ACCOUNT, CLIENT_TAB_HREFS, visibleGroups, visibleItems, tabsFor } from './workspace/nav';
 import { canUseClientWorkspace, homeFor, type WorkspaceUser } from '@/lib/workspace';
 import { ROLE_LABEL, type OrgRole } from '@/lib/roles';
 
@@ -68,6 +68,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         contextLabel={org?.name ?? null}
         contextDetail={contextDetail}
         groups={visibleGroups(CLIENT_NAV, user)}
+        tabs={tabsFor(CLIENT_TAB_HREFS, visibleGroups(CLIENT_NAV, user))}
         accountItems={visibleItems(CLIENT_ACCOUNT, user)}
         isActive={isActive}
         user={{
@@ -94,7 +95,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         openCorrections={orgSummary?.corrections.open ?? null}
       /></div>
       <OnboardingTour orgName={org?.name ?? null} />
-      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-20 md:pt-12 md:pb-24"><PageTransition>{children}</PageTransition></main>
+      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24"><PageTransition>{children}</PageTransition></main>
     </div>
   );
 }

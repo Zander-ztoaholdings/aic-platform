@@ -1,0 +1,99 @@
+-- 014_trust_spend_review.sql
+--
+-- The October 2026 build week:
+--   1. A monthly AI budget per organisation (AI spend page).
+--   2. Trust pages: an organisation's public page, opt-in, section by section.
+--   3. Questionnaires: a buyer's security questionnaire, answered from the
+--      organisation's own record, each answer approved by a named person.
+--   4. Decision review: a decision can be held until a named person approves
+--      or overrides it (the human approval gate).
+--
+-- Additive and safe to run more than once.
+
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS ai_monthly_budget_usd numeric(12, 2);
+
+-- ── Trust pages ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS trust_pages (
+  org_id uuid PRIMARY KEY REFERENCES organizations(id) ON DELETE CASCADE,
+  slug varchar(80) NOT NULL UNIQUE,
+  enabled boolean NOT NULL DEFAULT false,
+  intro text,
+  contact_email varchar(255),
+  sections jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT trust_pages_slug_format CHECK (slug ~ '^[a-z0-9]([a-z0-9-]{1,78}[a-z0-9])?$')
+);
+
+-- ── Questionnaires ───────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS questionnaires (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  title varchar(255) NOT NULL,
+  requester varchar(255),
+  status varchar(20) NOT NULL DEFAULT 'open',
+  created_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS questionnaires_org_idx ON questionnaires (org_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS questionnaire_items (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  questionnaire_id uuid NOT NULL REFERENCES questionnaires(id) ON DELETE CASCADE,
+  org_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  position integer NOT NULL,
+  question text NOT NULL,
+  draft text,
+  answer text,
+  topic varchar(60),
+  sources jsonb NOT NULL DEFAULT '[]'::jsonb,
+  status varchar(20) NOT NULL DEFAULT 'draft',
+  approved_by uuid REFERENCES users(id) ON DELETE SET NULL,
+  approved_at timestamptz,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT questionnaire_items_status CHECK (status IN ('draft', 'needs_input', 'approved')),
+  CONSTRAINT questionnaire_items_approval CHECK (status <> 'approved' OR (approved_by IS NOT NULL AND approved_at IS NOT NULL AND answer IS NOT NULL))
+);
+CREATE INDEX IF NOT EXISTS questionnaire_items_q_idx ON questionnaire_items (questionnaire_id, position);
+
+-- ── Decision review (the approval gate) ──────────────────────────────────────
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS review_status varchar(20) NOT NULL DEFAULT 'not_required';
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS review_due_at timestamptz;
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES users(id);
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS review_note text;
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS final_outcome jsonb;
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS callback_url text;
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS callback_status varchar(40);
+ALTER TABLE decision_records ADD COLUMN IF NOT EXISTS external_ref varchar(255);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'decision_records_review_status') THEN
+    ALTER TABLE decision_records ADD CONSTRAINT decision_records_review_status
+      CHECK (review_status IN ('not_required', 'pending', 'approved', 'overridden', 'expired'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'decision_records_review_attributed') THEN
+    ALTER TABLE decision_records ADD CONSTRAINT decision_records_review_attributed
+      CHECK (review_status NOT IN ('approved', 'overridden') OR (reviewed_by IS NOT NULL AND reviewed_at IS NOT NULL));
+  END IF;
+END $$;
+CREATE INDEX IF NOT EXISTS decision_records_pending_idx ON decision_records (org_id, created_at) WHERE review_status = 'pending';
+
+-- ── Row-level security and grants for the new tables ─────────────────────────
+DO $outer$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['trust_pages', 'questionnaires', 'questionnaire_items'] LOOP
+    EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+    IF NOT EXISTS (SELECT 1 FROM pg_policy WHERE polname = t || '_isolation_policy') THEN
+      EXECUTE format('CREATE POLICY %I ON %I '
+        'USING (org_id = NULLIF(current_setting(''app.current_org_id'', TRUE), '''')::uuid) '
+        'WITH CHECK (org_id = NULLIF(current_setting(''app.current_org_id'', TRUE), '''')::uuid)',
+        t || '_isolation_policy', t);
+    END IF;
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'aic_tenant') THEN
+      EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON %I TO aic_tenant', t);
+    END IF;
+  END LOOP;
+END $outer$;

@@ -81,7 +81,7 @@ describe('controls', () => {
 
   it('a check with any failing subject fails the source', () => {
     const r = evaluateControls({ checks: { 'github.branch_protected': ['pass', 'fail'] }, policies: {}, requirements: {} }, (k) => k, (k) => k);
-    expect(r.find((c) => c.id === 'A.8.4')!.status).toBe('gap');
+    expect(r.find((c) => c.framework === 'iso27001' && c.id === 'A.8.4')!.status).toBe('gap');
   });
 
   it('lists one AIC control per requirement', () => {

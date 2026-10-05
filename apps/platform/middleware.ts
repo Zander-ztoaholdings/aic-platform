@@ -72,6 +72,9 @@ const PUBLIC_PATHS = [
   // scores or personal data; the badge image and verify page on aiccertified.cloud
   // read from here. Only this prefix — the rest of /api/public stays gated.
   "/api/public/aware",
+  // Trust pages: public by design, and only for organisations that switched
+  // theirs on. "/trust/" with the slash, so the settings page "/trust-page" stays gated.
+  "/trust/",
   // The nightly connected-systems sync. No session by nature; the route
   // refuses anything without CRON_SECRET, and refuses everything if it is unset.
   "/api/cron/",

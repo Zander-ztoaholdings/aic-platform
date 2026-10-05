@@ -192,4 +192,4 @@ export * from './schema';
 export { schema }; 
 export type { PgTransaction, PgQueryResultHKT };
 export { pool }; // Note: This will be null until first DB access
-export { sql, eq, and, or, desc, asc, like, gte, lt, avg, count, sum, min, max, isNull, isNotNull } from 'drizzle-orm';
+export { sql, eq, and, or, desc, asc, like, gte, lt, avg, count, sum, min, max, isNull, isNotNull, ne, inArray, lte, gt } from 'drizzle-orm';

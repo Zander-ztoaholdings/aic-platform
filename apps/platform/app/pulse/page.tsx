@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Activity, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardShell from '../components/DashboardShell';
+import { ReviewQueue } from './ReviewQueue';
 import { SectionCard } from '../components/ui/Eyebrow';
 import { canRecordDecisions } from '../../lib/roles';
 
@@ -177,6 +178,8 @@ export default function PulsePage() {
         <div>
           <PageHeader eyebrow="AI overview" title="Decision log" lede="Decisions your systems have recorded, the human overrides, and who made them." />
         </div>
+
+        <ReviewQueue />
 
         <SectionCard>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">

@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import DashboardShell from '../../components/DashboardShell';
 import { Eyebrow } from '../../components/ui/Eyebrow';
 import { PolicyText } from '../../components/ui/PolicyText';
+import { PracticeForPolicy } from '../../components/PracticeForPolicy';
 
 type Data = {
   canManage: boolean;
@@ -122,6 +123,7 @@ function PolicyDetail() {
       </article>
 
       <aside className="space-y-4">
+        {d.policy.publishedVersion > 0 && <PracticeForPolicy policyId={d.policy.id} />}
         {d.policy.publishedVersion > 0 && (
           <div className="bg-white border border-[#dde2e8] rounded-xl p-5">
             <h2 className="text-[14px] font-semibold text-[#0e1b2c]">Accepted by {accepted} of {d.members.length}</h2>

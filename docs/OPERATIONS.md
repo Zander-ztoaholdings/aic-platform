@@ -4,21 +4,15 @@ What has to be switched on, by hand, for the October 2026 professional-standards
 
 Related: `docs/STAGING.md` (staging and releases), `docs/INTEGRATIONS.md` (GitHub, Microsoft 365 and AI providers), `docs/INCIDENT-RESPONSE.md` (when something goes wrong), `docs/legal/DATA-PROCESSING-AGREEMENT-DRAFT.md` (for the lawyer).
 
-## 1. Database migrations 011 to 013
+## 1. Database migrations
 
-Run each in the aic-platform container terminal, in order. All three are additive and safe to run twice.
+011 to 013 were applied on 5 October 2026.
 
-```
-psql "$DATABASE_URL" -f db/manual/011_integrations.sql
-psql "$DATABASE_URL" -f db/manual/012_api_key_lookup.sql
-psql "$DATABASE_URL" -f db/manual/013_policies.sql
-```
+**014 (trust pages, questionnaires, AI budget, decision review) must be applied before the code that uses it is deployed.** Drizzle names every column of a table in its queries, so the new platform build fails on the decision log, organisations and every client page until 014 is in. 014 is additive, so the old build keeps working once it is applied. Order: run 014, then push.
 
-- 011: connected systems and their checks.
-- 012: an indexed lookup column for API keys, so a request no longer compares against every key in the database. Existing keys fill it in the first time each is used.
-- 013: policies, published versions and acceptances. A trigger refuses any change to a published version, so the record of what people accepted cannot be edited afterwards.
+Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platform → Terminal**. It ends with `✓ 014 verified`. Safe to run twice.
 
-**Check:** `https://app.aiccertified.cloud/api/health` shows `schema: ok, up to date with 013`.
+**Check:** `/api/health` shows `schema: ok, up to date with 014`.
 
 ## 2. Tenant isolation (row-level security)
 
@@ -85,7 +79,17 @@ scripts/backup/restore-test.sh
 
 It restores the newest dump into a throwaway database and checks that the core tables hold rows. For a Coolify backup instead, download the newest file from the bucket and run `pg_restore --list` on it, then restore it into a throwaway database the same way. Write the date and result in the operations log. A backup nobody has restored is a hope.
 
-**Evidence storage.** Uploaded evidence goes to MinIO (`MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_USE_SSL`). The 5 October inventory listed no MinIO resource in Coolify. If those variables are not set on aic-platform, uploads are failing in production and must be fixed before any client relies on the Evidence Vault: add MinIO as a Coolify resource (or point the variables at an S3-compatible bucket), set the variables, and test one upload.
+**Evidence storage.** Uploaded evidence goes to any S3-compatible bucket. Production had none on 5 October, so every upload failed. The simplest set-up is a second private bucket at the same provider as the backups (Backblaze B2 or Cloudflare R2), with its own key limited to that bucket. On aic-platform set:
+
+| Variable | Value |
+|---|---|
+| `MINIO_ENDPOINT` | the provider's S3 URL, e.g. `https://s3.eu-central-003.backblazeb2.com` or `https://<account>.r2.cloudflarestorage.com` |
+| `MINIO_ACCESS_KEY` | the key ID |
+| `MINIO_SECRET_KEY` | the key secret |
+| `MINIO_BUCKET` | the bucket name, e.g. `aic-evidence` (create it first; a scoped key cannot) |
+| `MINIO_REGION` | only if the provider needs it (R2 uses `auto`, set automatically) |
+
+**Check:** `/api/health` shows `evidence_storage: ok`, then upload one file in the Evidence Vault and open it again. Without these variables an upload now says plainly that storage is not switched on, rather than failing with a server error.
 
 ## 6. Error and uptime monitoring
 
@@ -118,9 +122,15 @@ See `docs/STAGING.md`. Branch protection on `main` (above) is what makes staging
 
 ## 10. Audit engine and network aliases
 
+As of 5 October 2026 aic-engine had **never been deployed** in Coolify (no deployments, no container), which is why health shows it unreachable. Open aic-engine in Coolify and press **Deploy** first; check its logs come up on port 8000.
+
 `/api/health` shows the engine as unreachable until the platform can reach it by name. In Coolify, on the engine service, add the network alias `aic-engine` (Advanced → Network aliases, or `--network-alias aic-engine` in custom Docker options), then set `ENGINE_URL=http://aic-engine:8000` on aic-platform. Use aliases for Postgres (`aic-db`), Redis and MinIO as well, rather than the generated container names, which change when a service is recreated.
 
 **Check:** HQ → Audit engine shows every row as working.
+
+## 10a. Decision review callbacks
+
+Systems that hold a decision for a person (`require_review: true`) can be called back. Callbacks are signed with a per-organisation secret derived from `INTEGRATIONS_STATE_SECRET`, so that variable must be set (`openssl rand -hex 32`) before clients use callbacks. Changing it later changes every organisation's signing secret, so set it once and keep it in the password manager.
 
 ## 11. The security mailbox
 

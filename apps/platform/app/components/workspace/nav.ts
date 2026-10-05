@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard, Boxes, Activity, Sparkles,
-  ShieldCheck, AlertTriangle, Siren, FileCheck, Plug, ScrollText, Layers,
+  ShieldCheck, AlertTriangle, Siren, FileCheck, Plug, ScrollText, Scale, Wallet, Globe, ClipboardList, Layers,
   Award, MessageSquare,
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
@@ -56,6 +56,7 @@ export const CLIENT_NAV: NavGroup[] = [
       { label: 'Continuity Record', href: '/dashboard', icon: LayoutDashboard, description: 'The standing record of your AI estate and every change to it.' },
       { label: 'AI Estate', href: '/overview', icon: Boxes, description: 'Each system, its purpose, and the person accountable for it.' },
       { label: 'Decision Log', href: '/pulse', icon: Activity, description: 'Decisions recorded, the overrides, and who made them.' },
+      { label: 'AI spend', href: '/spend', icon: Wallet, description: 'What you spend on AI models, by provider, model and system.' },
       { label: 'Register Drafter', href: '/register-drafter', icon: Sparkles, badge: 'Soon', description: 'A draft AI register built from what you have declared.' },
     ],
   },
@@ -69,6 +70,7 @@ export const CLIENT_NAV: NavGroup[] = [
       { label: 'Connected systems', href: '/integrations', icon: Plug, description: 'GitHub and AI providers AIC reads, and how.' },
       { label: 'Evidence Vault', href: '/evidence', icon: ShieldCheck, description: 'Requirements for your Division and the evidence you have filed.' },
       { label: 'Policies', href: '/policies', icon: ScrollText, description: 'Your policies, the version in force, and who has accepted it.' },
+      { label: 'Policy vs practice', href: '/practice', icon: Scale, description: 'Where what your policies promise and what your systems show disagree.' },
       { label: 'Assessor Findings', href: '/findings', icon: AlertTriangle, description: 'What the assessor raised, and your corrective actions.' },
       { label: 'Incidents', href: '/incidents', icon: Siren, description: 'AI incidents reported, and how each was resolved.' },
       { label: 'Reports', href: '/reports', icon: FileCheck, description: 'Reports generated from your record.' },
@@ -81,6 +83,8 @@ export const CLIENT_NAV: NavGroup[] = [
     items: [
       { label: 'AIC Aware', href: '/aware', icon: BadgeCheck, description: 'Declare your AI awareness and hold a verifiable badge.' },
       { label: 'My Certificate', href: '/certificate', icon: Award, description: 'Your current status, and what stands between you and the next.' },
+      { label: 'Trust page', href: '/trust-page', icon: Globe, description: 'A public page for your customers, live from your record.' },
+      { label: 'Questionnaires', href: '/questionnaires', icon: ClipboardList, description: 'Answer a buyer’s security questionnaire from your record.' },
       { label: 'Correspondence', href: '/correspondence', icon: MessageSquare, description: 'Messages with your assessor, on the record.' },
     ],
   },
@@ -147,4 +151,23 @@ export function visibleGroups(groups: NavGroup[], user: WorkspaceUser): NavGroup
   return groups
     .map((g) => ({ ...g, items: visibleItems(g.items, user) }))
     .filter((g) => g.items.length > 0);
+}
+
+/**
+ * The phone tab bar: short labels for the places people go most. A tab only
+ * shows if the same page is in the person's visible menu, so a role never
+ * gets a tab for a page it cannot open.
+ */
+const TAB_LABEL: Record<string, string> = {
+  '/dashboard': 'Record', '/evidence': 'Evidence', '/checks': 'Checks', '/pulse': 'Decisions',
+  '/admin/queue': 'Queue', '/admin/verification': 'Evidence', '/admin/organizations': 'Clients', '/admin/certifications': 'Certificates',
+};
+export const CLIENT_TAB_HREFS = ['/dashboard', '/evidence', '/checks', '/pulse'];
+export const STAFF_TAB_HREFS = ['/admin/queue', '/admin/verification', '/admin/organizations'];
+export const STAFF_HOME_TAB: NavItem = { label: 'Home', href: '/admin', icon: LayoutDashboard, description: 'Staff workspace.' };
+
+export function tabsFor(hrefs: string[], groups: NavGroup[], lead?: NavItem): NavItem[] {
+  const all = groups.flatMap((g) => g.items);
+  const picked = hrefs.map((h) => all.find((i) => i.href === h)).filter((i): i is NavItem => !!i).map((i) => ({ ...i, label: TAB_LABEL[i.href] ?? i.label }));
+  return (lead ? [lead, ...picked] : picked).slice(0, 4);
 }

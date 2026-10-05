@@ -16,7 +16,7 @@ export const POLICY_TEMPLATES: PolicyTemplate[] = [
     key: 'ai-acceptable-use',
     title: 'AI acceptable use policy',
     summary: 'Which AI tools staff may use, for what, and with which information.',
-    controls: ['ISO 27001 A.5.10', 'AIC HU-3', 'POPIA s19'],
+    controls: ['ISO 42001 A.2.2', 'ISO 42001 A.9.2', 'EU AI Act Art. 4', 'ISO 27001 A.5.10', 'AIC HU-3', 'POPIA s19'],
     body: `# AI acceptable use policy
 
 ## Purpose
@@ -53,7 +53,7 @@ Report misuse, or a mistake such as pasting personal information into an unappro
     key: 'human-oversight',
     title: 'Human oversight of automated decisions',
     summary: 'Who is accountable for each AI system, and how a person can review and override a decision.',
-    controls: ['POPIA s71', 'AIC HU-1', 'AIC HU-2', 'AIC HU-4', 'AIC CO-1'],
+    controls: ['POPIA s71', 'EU AI Act Art. 14', 'ISO 42001 A.2.2', 'AIC HU-1', 'AIC HU-2', 'AIC HU-4', 'AIC CO-1'],
     body: `# Human oversight of automated decisions
 
 ## Purpose
@@ -118,7 +118,7 @@ Suppliers who handle personal information on our behalf sign a written agreement
     key: 'incident-response',
     title: 'Security incident response policy',
     summary: 'What happens when something goes wrong, including POPIA notification.',
-    controls: ['POPIA s22', 'ISO 27001 A.5.24', 'ISO 27001 A.5.26'],
+    controls: ['POPIA s22', 'ISO 27001 A.5.24', 'ISO 27001 A.5.26', 'ISO 42001 A.8.4', 'EU AI Act Art. 73'],
     body: `# Security incident response policy
 
 ## What counts as an incident

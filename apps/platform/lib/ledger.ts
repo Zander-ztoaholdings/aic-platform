@@ -38,7 +38,13 @@ export async function recordDecisionWithLedger(data: any) {
       integrityHash: currentHash,
       isHumanOverride: data.isHumanOverride || false,
       overrideReason: data.overrideReason,
-      overriddenBy: data.overriddenBy
+      overriddenBy: data.overriddenBy,
+      ...(data.reviewStatus ? {
+        reviewStatus: data.reviewStatus,
+        reviewDueAt: data.reviewDueAt ?? null,
+        callbackUrl: data.callbackUrl ?? null,
+        externalRef: data.externalRef ?? null,
+      } : {}),
     }).returning();
 
     // [SECURITY] HITL Trigger Enforcement (Strategic Framework)

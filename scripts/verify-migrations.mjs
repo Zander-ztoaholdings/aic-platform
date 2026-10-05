@@ -87,6 +87,7 @@ check(await hasTable('aware_badges') && await hasColumn('aware_assessments', 'at
 check(await hasTable('integrations') && await hasTable('integration_checks'), '011 integrations', '011 integrations MISSING  <-- Connected systems and Automated checks fail without this');
 check(await hasColumn('api_keys', 'key_lookup'), '012 api key lookup', '012 api key lookup MISSING  <-- creating an API key fails without this');
 check(await hasTable('org_policies') && await hasTable('policy_acceptances'), '013 policies', '013 policies MISSING  <-- the Policies pages fail without this');
+check(await hasTable('trust_pages') && await hasTable('questionnaire_items') && await hasColumn('decision_records', 'review_status'), '014 trust, spend, review', '014 trust, spend, review MISSING  <-- recording any decision fails without this');
 
 console.log('\nRow-level security');
 const rls = await one(`

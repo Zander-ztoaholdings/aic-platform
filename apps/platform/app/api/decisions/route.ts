@@ -3,6 +3,8 @@ import { getTenantDb, decisionRecords, eq, desc } from '@aic/db';
 import { auth } from '@aic/auth';
 import { resolveApiKey } from '@/lib/api-key-auth';
 import { recordDecisionWithLedger } from '@/lib/ledger';
+import { validateCallbackUrl, reviewDeadline, isExpired } from '@/lib/decision-review';
+import { and, sql } from '@aic/db';
 
 /**
  * The decision log — the integration point for anything that decides.
@@ -53,14 +55,20 @@ export async function GET(request: NextRequest) {
     const db = getTenantDb(caller.orgId);
 
     return await db.query(async (tx) => {
+      const pendingOnly = request.nextUrl.searchParams.get('review') === 'pending';
+      // Lazily close reviews whose deadline passed, so nobody approves a stale decision.
+      await tx.update(decisionRecords).set({ reviewStatus: 'expired' })
+        .where(and(eq(decisionRecords.orgId, caller.orgId), eq(decisionRecords.reviewStatus, 'pending'), sql`${decisionRecords.reviewDueAt} < now()`));
       const result = await tx
         .select()
         .from(decisionRecords)
-        .where(eq(decisionRecords.orgId, caller.orgId))
-        .orderBy(desc(decisionRecords.createdAt))
-        .limit(50);
+        .where(pendingOnly
+          ? and(eq(decisionRecords.orgId, caller.orgId), eq(decisionRecords.reviewStatus, 'pending'))
+          : eq(decisionRecords.orgId, caller.orgId))
+        .orderBy(pendingOnly ? decisionRecords.createdAt : desc(decisionRecords.createdAt))
+        .limit(pendingOnly ? 200 : 50);
 
-      return NextResponse.json({ decisions: result });
+      return NextResponse.json({ decisions: result.map((d) => ({ ...d, reviewStatus: isExpired(d.reviewStatus, d.reviewDueAt) ? 'expired' : d.reviewStatus })) });
     });
   } catch (error) {
     console.error('[DECISIONS] GET error:', (error as Error).message);
@@ -86,7 +94,23 @@ export async function POST(request: NextRequest) {
       isHumanOverride,
       overrideReason,
       originalOutcome,
+      require_review,
+      callback_url,
+      review_within_hours,
+      external_ref,
     } = body as Record<string, unknown>;
+
+    const hold = require_review === true;
+    let callbackUrl: string | null = null;
+    if (callback_url !== undefined && callback_url !== null) {
+      if (!hold) return NextResponse.json({ error: 'callback_url only applies when require_review is true' }, { status: 400 });
+      const v = validateCallbackUrl(callback_url);
+      if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
+      callbackUrl = v.url;
+    }
+    if (external_ref !== undefined && (typeof external_ref !== 'string' || external_ref.length > 255)) {
+      return NextResponse.json({ error: 'external_ref must be a string of at most 255 characters' }, { status: 400 });
+    }
 
     if (!system_name || !input_params || !outcome) {
       return NextResponse.json(
@@ -100,6 +124,9 @@ export async function POST(request: NextRequest) {
     }
 
     const override = isHumanOverride === true;
+    if (hold && override) {
+      return NextResponse.json({ error: 'A decision held for review cannot also be recorded as already overridden.' }, { status: 400 });
+    }
 
     if (override && caller.via === 'api_key') {
       return NextResponse.json(
@@ -138,8 +165,22 @@ export async function POST(request: NextRequest) {
       // here to satisfy a column would put a false name on an accountability
       // record.
       overriddenBy: override ? caller.userId : null,
+      ...(hold ? {
+        reviewStatus: 'pending',
+        reviewDueAt: reviewDeadline(review_within_hours),
+        callbackUrl,
+        externalRef: typeof external_ref === 'string' ? external_ref : null,
+      } : {}),
     });
 
+    if (hold) {
+      return NextResponse.json({
+        success: true, recorded_via: caller.via,
+        id: decision.id, review_status: 'pending', review_due_at: decision.reviewDueAt,
+        poll_url: `/api/decisions/${decision.id}`,
+        note: 'Held for a named person to approve or override. Do not act on the outcome until review_status is approved or overridden.',
+      }, { status: 202 });
+    }
     return NextResponse.json({ success: true, recorded_via: caller.via, decision }, { status: 201 });
   } catch (error) {
     console.error('[DECISIONS] POST error:', (error as Error).message);

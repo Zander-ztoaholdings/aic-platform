@@ -2,9 +2,12 @@
 import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
-import { Plus, Copy, Check, ExternalLink, Lock, Trash2 } from 'lucide-react';
+import { Plus, Check, Lock, Trash2 } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { canManageTeamAndKeys } from '@/lib/roles';
 import DashboardShell from '../../components/DashboardShell';
 import { SectionCard } from '../../components/ui/Eyebrow';
+import { DeveloperGuide } from './DeveloperGuide';
 import { StatusChip } from '../../components/ui/StatusChip';
 
 type ApiKey = {
@@ -16,20 +19,6 @@ type ApiKey = {
   isActive: boolean;
 };
 
-const SDK_SNIPPET = `{
-  "decision_id":           "unique-id",
-  "system_name":           "credit-scoring-v2",
-  "decision_type":         "loan-approval",
-  "outcome":               "declined",
-  "affected_person_ref":   "anonymised-hash",
-  "timestamp":             "2026-04-19T10:00:00Z",
-  "human_review_required":  true,
-  "human_review_completed": false,
-  "human_reviewer_id":     null,
-  "override_applied":      false,
-  "correction_requested":  false
-}`;
-
 const SECURITY_RULES = [
   'Keys are scoped to your organisation only',
   'Rotate keys immediately if compromised',
@@ -38,9 +27,10 @@ const SECURITY_RULES = [
 ];
 
 export default function KeysPage() {
+  const { data: session } = useSession();
+  const canManageKeys = canManageTeamAndKeys((session?.user as { role?: string } | undefined)?.role);
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
   const [newKeyLabel, setNewKeyLabel] = useState('');
   const [generating, setGenerating] = useState(false);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
@@ -55,11 +45,6 @@ export default function KeysPage() {
 
   useEffect(() => { fetchKeys(); }, []);
 
-  const handleCopySnippet = () => {
-    navigator.clipboard?.writeText(SDK_SNIPPET).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleGenerate = async () => {
     if (!newKeyLabel.trim()) return;
@@ -189,27 +174,7 @@ export default function KeysPage() {
               </div>
             </SectionCard>
 
-            {/* SDK snippet */}
-            <SectionCard>
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
-                Pulse SDK — Minimum Viable Event
-              </div>
-              <div className="bg-[#0a1628] rounded-xl p-4 overflow-x-auto mb-3">
-                <pre className="font-mono text-xs text-white/80 leading-relaxed m-0">{SDK_SNIPPET}</pre>
-              </div>
-              <div className="flex gap-2.5">
-                <button className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors">
-                  <ExternalLink className="w-3 h-3" /> SDK Documentation
-                </button>
-                <button
-                  onClick={handleCopySnippet}
-                  className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full px-4 py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
-                >
-                  {copied ? <Check className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
-                  {copied ? 'Copied!' : 'Copy Schema'}
-                </button>
-              </div>
-            </SectionCard>
+            <DeveloperGuide canManage={canManageKeys} />
           </div>
 
           {/* Right rail */}

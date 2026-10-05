@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSystemDb, probeTenantIsolation, sql } from '@aic/db';
+import { storageHealth } from '@aic/db/storage';
 import { standardHealth } from '@/lib/standard';
 
 /**
@@ -86,8 +87,10 @@ export async function GET() {
       ['audit_documents', 'verified_by'],        // 002
       ['issued_certifications', 'suspended_at'], // 002
       ['api_keys', 'key_lookup'],                // 012
+      ['decision_records', 'review_status'],     // 014
+      ['organizations', 'ai_monthly_budget_usd'],// 014
     ];
-    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies']; // 002, 011, 013
+    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items']; // 002, 011, 013, 014
 
     const found = await db.execute(sql`
       SELECT table_name, column_name FROM information_schema.columns
@@ -110,9 +113,9 @@ export async function GET() {
       ? {
           status: 'error',
           latency_ms: Date.now() - schemaStart,
-          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 013)`,
+          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 014)`,
         }
-      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 013' };
+      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 014' };
   } catch (err: unknown) {
     console.error('[HEALTH] schema check failed:', err);
     checks.schema = { status: 'error', latency_ms: Date.now() - schemaStart, detail: 'Could not read' };
@@ -125,6 +128,11 @@ export async function GET() {
   checks.tenant_isolation = { status: iso.enforced ? 'ok' : 'error', latency_ms: Date.now() - isoStart, detail: iso.detail };
   if (!iso.enforced) console.error('[HEALTH] tenant isolation:', iso.detail);
 
+  // Evidence storage. Uploads fail without it, so it is reported, not assumed.
+  const stoStart = Date.now();
+  const sto = await storageHealth();
+  checks.evidence_storage = { status: sto.ok ? 'ok' : 'error', latency_ms: Date.now() - stoStart, detail: sto.detail };
+
   // 4. The published standard. Registration cannot generate a roadmap without
   //    it, so a signup failing for this reason should be visible here first
   //    rather than discovered by whoever is trying to register.
@@ -136,10 +144,15 @@ export async function GET() {
   if (!std.ok) console.error('[HEALTH] standard check failed:', std.detail);
 
   const allOk = Object.values(checks).every(c => c.status === 'ok');
+  // 503 only when the platform cannot serve anyone (no database, or tenant
+  // pages failing to sign in). A stopped engine or an unreachable website is
+  // "degraded" with 200, so an uptime monitor pages for outages, not for
+  // every amber line; the body still lists each failing check.
+  const down = checks.database?.status !== 'ok' || (process.env.TENANT_DATABASE_URL && checks.tenant_isolation?.status !== 'ok');
 
   return NextResponse.json({
-    status: allOk ? 'healthy' : 'degraded',
+    status: down ? 'down' : allOk ? 'healthy' : 'degraded',
     checks,
     timestamp: new Date().toISOString(),
-  }, { status: allOk ? 200 : 503 });
+  }, { status: down ? 503 : 200 });
 }

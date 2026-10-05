@@ -73,6 +73,7 @@ export const organizations = pgTable('organizations', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   name: varchar('name', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 100 }).unique(), // for public directory URL
+  aiMonthlyBudgetUsd: numeric('ai_monthly_budget_usd', { precision: 12, scale: 2 }), // 014
   logoUrl: text('logo_url'),
   tier: tierEnum('tier').default('TIER_3'),
 
@@ -488,6 +489,16 @@ export const decisionRecords = pgTable('decision_records', {
   overriddenBy: uuid('overridden_by').references(() => users.id),
   syncStatus: varchar('sync_status', { length: 20 }).default('SYNCED'), // 'LOCAL_ONLY', 'SYNCED'
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  // 014: the human approval gate. 'pending' decisions wait for a named person.
+  reviewStatus: varchar('review_status', { length: 20 }).notNull().default('not_required'), // not_required | pending | approved | overridden | expired
+  reviewDueAt: timestamp('review_due_at', { withTimezone: true }),
+  reviewedBy: uuid('reviewed_by').references(() => users.id),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  reviewNote: text('review_note'),
+  finalOutcome: jsonb('final_outcome'),
+  callbackUrl: text('callback_url'),
+  callbackStatus: varchar('callback_status', { length: 40 }),
+  externalRef: varchar('external_ref', { length: 255 }),
 });
 
 // Correction Requests (Update to include decision reference)
@@ -1171,3 +1182,43 @@ export const policyAcceptances = pgTable('policy_acceptances', {
 }, (table) => ({
   once: unique('policy_acceptances_once').on(table.policyId, table.version, table.userId),
 }));
+
+
+// ── 014: Trust pages, questionnaires ──────────────────────────────────────────
+export const trustPages = pgTable('trust_pages', {
+  orgId: uuid('org_id').primaryKey().references(() => organizations.id, { onDelete: 'cascade' }),
+  slug: varchar('slug', { length: 80 }).notNull().unique(),
+  enabled: boolean('enabled').notNull().default(false),
+  intro: text('intro'),
+  contactEmail: varchar('contact_email', { length: 255 }),
+  sections: jsonb('sections').notNull().default(sql`'{}'::jsonb`),
+  updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const questionnaires = pgTable('questionnaires', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 255 }).notNull(),
+  requester: varchar('requester', { length: 255 }),
+  status: varchar('status', { length: 20 }).notNull().default('open'),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const questionnaireItems = pgTable('questionnaire_items', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  questionnaireId: uuid('questionnaire_id').notNull().references(() => questionnaires.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  position: integer('position').notNull(),
+  question: text('question').notNull(),
+  draft: text('draft'),
+  answer: text('answer'),
+  topic: varchar('topic', { length: 60 }),
+  sources: jsonb('sources').notNull().default(sql`'[]'::jsonb`),
+  status: varchar('status', { length: 20 }).notNull().default('draft'), // draft | needs_input | approved
+  approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});

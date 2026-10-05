@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { ViewAsBanner } from '@/app/components/workspace/ViewAsBanner';
 import { ReactNode } from 'react';
 import { WorkspaceTopBar } from '@/app/components/workspace/WorkspaceTopBar';
-import { STAFF_NAV, visibleGroups } from '@/app/components/workspace/nav';
+import { STAFF_NAV, STAFF_TAB_HREFS, STAFF_HOME_TAB, visibleGroups, tabsFor } from '@/app/components/workspace/nav';
 import type { WorkspaceUser } from '@/lib/workspace';
 
 /**
@@ -44,11 +44,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         contextLabel="AIC Staff"
         contextDetail={user.isSuperAdmin ? 'Super admin' : user.role === 'AIC_AUDITOR' ? 'Auditor' : null}
         groups={visibleGroups(STAFF_NAV, user)}
+        tabs={tabsFor(STAFF_TAB_HREFS, visibleGroups(STAFF_NAV, user), STAFF_HOME_TAB)}
         accountItems={[]}
         isActive={isActive}
         user={{ name: user.name ?? null, email: user.email ?? null, roleLabel: null }}
       />
-      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-20 md:pt-12 md:pb-24 text-[#0e1b2c]"><PageTransition>{children}</PageTransition></main>
+      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24 text-[#0e1b2c]"><PageTransition>{children}</PageTransition></main>
     </div>
   );
 }
