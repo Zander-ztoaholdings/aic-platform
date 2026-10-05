@@ -1,0 +1,179 @@
+{
+  "key": "nist_csf",
+  "name": "NIST CSF 2.0",
+  "fullName": "NIST Cybersecurity Framework 2.0",
+  "publisher": "National Institute of Standards and Technology (NIST)",
+  "version": "2.0 (NIST CSWP 29, February 2024)",
+  "region": "US",
+  "appliesTo": "Any organisation of any size or sector managing cybersecurity risk (voluntary framework).",
+  "note": "Mapped at the 22 CSF 2.0 Category level; each category's subcategory outcomes and the organisation's chosen profile and tiers determine what full alignment requires.",
+  "sources": [
+    "https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.29.pdf"
+  ],
+  "requirements": [
+    {
+      "id": "GV.OC",
+      "title": "Organizational Context",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "GV.RM",
+      "title": "Risk Management Strategy",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "GV.RR",
+      "title": "Roles, Responsibilities, and Authorities",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "GV.PO",
+      "title": "Policy",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "GV.OV",
+      "title": "Oversight",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "GV.SC",
+      "title": "Cybersecurity Supply Chain Risk Management",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "ID.AM",
+      "title": "Asset Management",
+      "controls": [
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "ID.RA",
+      "title": "Risk Assessment",
+      "controls": [
+        "gov.risk_assessment",
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "ID.IM",
+      "title": "Improvement",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "PR.AA",
+      "title": "Identity Management, Authentication, and Access Control",
+      "controls": [
+        "iam.mfa",
+        "iam.privileged",
+        "iam.access_review"
+      ]
+    },
+    {
+      "id": "PR.AT",
+      "title": "Awareness and Training",
+      "controls": [
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "PR.DS",
+      "title": "Data Security",
+      "controls": [
+        "ops.encryption",
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "PR.PS",
+      "title": "Platform Security",
+      "controls": [
+        "ops.endpoint",
+        "dev.vulnerabilities",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "PR.IR",
+      "title": "Technology Infrastructure Resilience",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "DE.CM",
+      "title": "Continuous Monitoring",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "DE.AE",
+      "title": "Adverse Event Analysis",
+      "controls": [
+        "ops.logging_monitoring",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RS.MA",
+      "title": "Incident Management",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RS.AN",
+      "title": "Incident Analysis",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RS.CO",
+      "title": "Incident Response Reporting and Communication",
+      "controls": [
+        "ops.breach_notification",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RS.MI",
+      "title": "Incident Mitigation",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RC.RP",
+      "title": "Incident Recovery Plan Execution",
+      "controls": [
+        "ops.backup",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "RC.CO",
+      "title": "Incident Recovery Communication",
+      "controls": [
+        "ops.incident_response"
+      ]
+    }
+  ]
+}

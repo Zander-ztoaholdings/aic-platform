@@ -1,0 +1,196 @@
+{
+ "key": "popia",
+ "name": "POPIA",
+ "fullName": "Protection of Personal Information Act 4 of 2013",
+ "publisher": "Republic of South Africa; enforced by the Information Regulator",
+ "version": "Act 4 of 2013 (in force 1 July 2020)",
+ "region": "South Africa",
+ "appliesTo": "Any responsible party processing personal information in South Africa, or using means in South Africa to process it.",
+ "note": "Section headings of the Act. The mapping shows which common controls usually support a section, not that the section is complied with; the Information Regulator and the courts decide that.",
+ "sources": [
+  "https://www.gov.za/documents/protection-personal-information-act",
+  "https://inforegulator.org.za/"
+ ],
+ "requirements": [
+  {
+   "id": "s8",
+   "title": "Accountability: the responsible party ensures the conditions for lawful processing are met",
+   "controls": [
+    "gov.accountability",
+    "priv.dpo"
+   ]
+  },
+  {
+   "id": "s9",
+   "title": "Lawfulness of processing",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s10",
+   "title": "Minimality",
+   "controls": [
+    "priv.retention"
+   ]
+  },
+  {
+   "id": "s11",
+   "title": "Consent, justification and objection",
+   "controls": [
+    "priv.lawful_basis",
+    "priv.subject_rights"
+   ]
+  },
+  {
+   "id": "s12",
+   "title": "Collection directly from the data subject",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s13",
+   "title": "Collection for a specific purpose",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s14",
+   "title": "Retention and restriction of records",
+   "controls": [
+    "priv.retention"
+   ]
+  },
+  {
+   "id": "s15",
+   "title": "Further processing to be compatible with the purpose of collection",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s16",
+   "title": "Quality of information",
+   "controls": [
+    "priv.subject_rights"
+   ]
+  },
+  {
+   "id": "s17",
+   "title": "Documentation of processing operations",
+   "controls": [
+    "ops.asset_inventory",
+    "ai.inventory"
+   ]
+  },
+  {
+   "id": "s18",
+   "title": "Notification to the data subject when collecting personal information",
+   "controls": [
+    "priv.notice",
+    "ai.transparency"
+   ]
+  },
+  {
+   "id": "s19",
+   "title": "Security measures on integrity and confidentiality of personal information",
+   "controls": [
+    "gov.infosec_policy",
+    "gov.risk_assessment",
+    "ops.encryption"
+   ]
+  },
+  {
+   "id": "s20",
+   "title": "Information processed by an operator or person acting under authority",
+   "controls": [
+    "ops.supplier_mgmt"
+   ]
+  },
+  {
+   "id": "s21",
+   "title": "Security measures regarding information processed by an operator",
+   "controls": [
+    "ops.supplier_mgmt"
+   ]
+  },
+  {
+   "id": "s22",
+   "title": "Notification of security compromises",
+   "controls": [
+    "ops.breach_notification",
+    "ops.incident_response"
+   ]
+  },
+  {
+   "id": "s23",
+   "title": "Access to personal information",
+   "controls": [
+    "priv.subject_rights"
+   ]
+  },
+  {
+   "id": "s24",
+   "title": "Correction of personal information",
+   "controls": [
+    "priv.subject_rights",
+    "ai.contestability"
+   ]
+  },
+  {
+   "id": "s26",
+   "title": "Processing of special personal information",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s34",
+   "title": "Processing of personal information of children",
+   "controls": [
+    "priv.lawful_basis"
+   ]
+  },
+  {
+   "id": "s55",
+   "title": "Duties and responsibilities of the Information Officer",
+   "controls": [
+    "priv.dpo"
+   ]
+  },
+  {
+   "id": "s57",
+   "title": "Processing subject to prior authorisation",
+   "controls": [
+    "gov.risk_assessment"
+   ]
+  },
+  {
+   "id": "s69",
+   "title": "Direct marketing by means of unsolicited electronic communications",
+   "controls": [
+    "priv.lawful_basis",
+    "priv.subject_rights"
+   ]
+  },
+  {
+   "id": "s71",
+   "title": "Automated decision making",
+   "controls": [
+    "ai.human_oversight",
+    "ai.explanation",
+    "ai.contestability"
+   ]
+  },
+  {
+   "id": "s72",
+   "title": "Transfers of personal information outside the Republic",
+   "controls": [
+    "ops.supplier_mgmt",
+    "priv.lawful_basis"
+   ]
+  }
+ ]
+}

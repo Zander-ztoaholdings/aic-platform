@@ -1,0 +1,54 @@
+{
+  "key": "cyber_essentials",
+  "name": "Cyber Essentials",
+  "fullName": "Cyber Essentials: Requirements for IT Infrastructure",
+  "publisher": "UK National Cyber Security Centre (NCSC), delivered by IASME",
+  "version": "v3.3 (April 2026; 'Danzell' question set, applies to assessment accounts created from 26 April 2026)",
+  "region": "UK",
+  "appliesTo": "UK organisations of any size seeking Cyber Essentials or Cyber Essentials Plus certification, required for many UK government contracts.",
+  "note": "Mapping is per technical control theme and shows topical overlap only; certification requires meeting every detailed requirement within each theme across the full in-scope estate.",
+  "sources": [
+    "https://www.ncsc.gov.uk/files/cyber-essentials-requirements-for-it-infrastructure-v3-3.pdf",
+    "https://www.ncsc.gov.uk/cyberessentials/overview",
+    "https://iasme.co.uk/articles/important-update-changes-to-cyber-essentials-for-april-2026/"
+  ],
+  "requirements": [
+    {
+      "id": "CE-1",
+      "title": "Firewalls",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "CE-2",
+      "title": "Secure configuration",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "CE-3",
+      "title": "Security update management",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "CE-4",
+      "title": "User access control",
+      "controls": [
+        "iam.privileged",
+        "iam.mfa",
+        "iam.leavers"
+      ]
+    },
+    {
+      "id": "CE-5",
+      "title": "Malware protection",
+      "controls": [
+        "ops.endpoint"
+      ]
+    }
+  ]
+}

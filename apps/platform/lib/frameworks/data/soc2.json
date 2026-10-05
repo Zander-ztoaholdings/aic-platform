@@ -1,0 +1,465 @@
+{
+  "key": "soc2",
+  "name": "SOC 2",
+  "fullName": "2017 Trust Services Criteria for Security, Availability, Processing Integrity, Confidentiality, and Privacy (With Revised Points of Focus — 2022) (TSP Section 100)",
+  "publisher": "AICPA (American Institute of Certified Public Accountants)",
+  "version": "2017 TSC, revised points of focus 2022",
+  "region": "US",
+  "appliesTo": "Service organisations that undergo a SOC 2 examination by a CPA firm, typically at the request of customers relying on their systems.",
+  "note": "Titles are brief paraphrases of AICPA criteria (not criteria text); mapping indicates common controls that commonly support a criterion, not that they satisfy it — the auditor tests the organisation's own control description and points of focus.",
+  "sources": [
+    "https://gccertification.com/wp-content/uploads/2024/06/AICPA-TSP-Section-100-Trust-Services-Criteria-2022.pdf",
+    "https://dart.deloitte.com/USDART/home/auditing/aicpa/trust-services-principles-criteria-illustrations/aicpa-trust-services-principles-criteria/trust-services-criteria",
+    "https://www.aicpa-cima.com/search/5+trust+services+criteria"
+  ],
+  "requirements": [
+    {
+      "id": "CC1.1",
+      "title": "Commitment to integrity and ethical values",
+      "controls": [
+        "gov.accountability",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "CC1.2",
+      "title": "Board independence and oversight of internal control",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "CC1.3",
+      "title": "Management sets structures, reporting lines and authorities",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "CC1.4",
+      "title": "Attract, develop and retain competent personnel",
+      "controls": [
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "CC1.5",
+      "title": "Hold individuals accountable for control responsibilities",
+      "controls": [
+        "gov.accountability",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "CC2.1",
+      "title": "Obtain and use relevant, quality information",
+      "controls": [
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "CC2.2",
+      "title": "Communicate control information internally",
+      "controls": [
+        "gov.infosec_policy",
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "CC2.3",
+      "title": "Communicate control matters with external parties",
+      "controls": [
+        "priv.notice"
+      ]
+    },
+    {
+      "id": "CC3.1",
+      "title": "Specify objectives to enable risk identification",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "CC3.2",
+      "title": "Identify and analyse risks to objectives",
+      "controls": [
+        "gov.risk_assessment",
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "CC3.3",
+      "title": "Consider potential for fraud in risk assessment",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "CC3.4",
+      "title": "Identify and assess changes affecting internal control",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "CC4.1",
+      "title": "Perform ongoing and/or separate control evaluations",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CC4.2",
+      "title": "Evaluate and communicate control deficiencies",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "CC5.1",
+      "title": "Select and develop risk-mitigating control activities",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "CC5.2",
+      "title": "Select and develop general controls over technology",
+      "controls": [
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "CC5.3",
+      "title": "Deploy controls through policies and procedures",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "CC6.1",
+      "title": "Logical access security over protected information assets",
+      "controls": [
+        "iam.mfa",
+        "iam.privileged",
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "CC6.2",
+      "title": "Register and authorise users before issuing credentials",
+      "controls": [
+        "iam.leavers",
+        "iam.access_review"
+      ]
+    },
+    {
+      "id": "CC6.3",
+      "title": "Authorise, modify and remove access by least privilege",
+      "controls": [
+        "iam.privileged",
+        "iam.leavers",
+        "iam.access_review"
+      ]
+    },
+    {
+      "id": "CC6.4",
+      "title": "Restrict physical access to facilities and assets",
+      "controls": []
+    },
+    {
+      "id": "CC6.5",
+      "title": "Securely discontinue protections when disposing of assets",
+      "controls": [
+        "ops.asset_inventory",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "CC6.6",
+      "title": "Protect against threats from outside system boundaries",
+      "controls": [
+        "iam.mfa",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "CC6.7",
+      "title": "Restrict and protect transmission and movement of data",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "CC6.8",
+      "title": "Prevent or detect unauthorised or malicious software",
+      "controls": [
+        "ops.endpoint",
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "CC7.1",
+      "title": "Detect configuration changes and new vulnerabilities",
+      "controls": [
+        "dev.vulnerabilities",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CC7.2",
+      "title": "Monitor system components for anomalies",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CC7.3",
+      "title": "Evaluate security events to determine incidents",
+      "controls": [
+        "ops.incident_response",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CC7.4",
+      "title": "Respond to identified security incidents",
+      "controls": [
+        "ops.incident_response",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "CC7.5",
+      "title": "Recover from identified security incidents",
+      "controls": [
+        "ops.incident_response",
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "CC8.1",
+      "title": "Authorise, test and approve changes before implementation",
+      "controls": [
+        "dev.change_review",
+        "dev.ai_code_review"
+      ]
+    },
+    {
+      "id": "CC9.1",
+      "title": "Mitigate risks from business disruption",
+      "controls": [
+        "ops.backup",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "CC9.2",
+      "title": "Assess and manage vendor and business partner risk",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "A1.1",
+      "title": "Manage capacity to meet availability objectives",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "A1.2",
+      "title": "Environmental protections, backups and recovery infrastructure",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "A1.3",
+      "title": "Test recovery plan procedures",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "C1.1",
+      "title": "Identify and maintain confidential information",
+      "controls": [
+        "ops.asset_inventory",
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "C1.2",
+      "title": "Dispose of confidential information",
+      "controls": [
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "PI1.1",
+      "title": "Information on processing objectives and specifications",
+      "controls": [
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "PI1.2",
+      "title": "Controls over completeness and accuracy of inputs",
+      "controls": []
+    },
+    {
+      "id": "PI1.3",
+      "title": "Controls over system processing",
+      "controls": [
+        "ai.monitoring"
+      ]
+    },
+    {
+      "id": "PI1.4",
+      "title": "Controls over complete, accurate, timely outputs",
+      "controls": [
+        "ai.monitoring"
+      ]
+    },
+    {
+      "id": "PI1.5",
+      "title": "Controls over storage of inputs, items in processing and outputs",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "P1.1",
+      "title": "Provide notice about privacy practices",
+      "controls": [
+        "priv.notice"
+      ]
+    },
+    {
+      "id": "P2.1",
+      "title": "Communicate choices and obtain consent",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.notice"
+      ]
+    },
+    {
+      "id": "P3.1",
+      "title": "Collect personal information consistent with objectives",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "P3.2",
+      "title": "Obtain explicit consent where required for collection",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "P4.1",
+      "title": "Limit use of personal information to stated objectives",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "P4.2",
+      "title": "Retain personal information only as needed",
+      "controls": [
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "P4.3",
+      "title": "Securely dispose of personal information",
+      "controls": [
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "P5.1",
+      "title": "Grant data subjects access to their personal information",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "P5.2",
+      "title": "Correct, amend or append personal information on request",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "P6.1",
+      "title": "Disclose personal information to third parties with consent",
+      "controls": [
+        "ops.supplier_mgmt",
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "P6.2",
+      "title": "Record authorised disclosures of personal information",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "P6.3",
+      "title": "Record detected or reported unauthorised disclosures",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "P6.4",
+      "title": "Obtain privacy commitments from vendors and third parties",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "P6.5",
+      "title": "Third parties report unauthorised disclosures to the entity",
+      "controls": [
+        "ops.supplier_mgmt",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "P6.6",
+      "title": "Notify affected data subjects of breaches and incidents",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "P6.7",
+      "title": "Provide an accounting of disclosures on request",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "P7.1",
+      "title": "Keep personal information accurate, complete and relevant",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "P8.1",
+      "title": "Handle privacy inquiries, complaints and disputes",
+      "controls": [
+        "priv.subject_rights",
+        "priv.dpo"
+      ]
+    }
+  ]
+}

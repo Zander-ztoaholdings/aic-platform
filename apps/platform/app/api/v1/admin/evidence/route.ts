@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       verificationNotes: auditDocuments.verificationNotes,
       verifiedAt: auditDocuments.verifiedAt,
       supersededBy: auditDocuments.supersededBy,
+      slotType: auditDocuments.slotType,
       requirementCode: auditRequirements.code,
       requirementText: auditRequirements.title,
       evidenceGuidance: auditRequirements.evidenceGuidance,

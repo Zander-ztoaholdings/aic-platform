@@ -1,0 +1,169 @@
+{
+  "key": "dora",
+  "name": "DORA",
+  "fullName": "Regulation (EU) 2022/2554 on digital operational resilience for the financial sector (Digital Operational Resilience Act)",
+  "publisher": "European Parliament and Council of the European Union",
+  "version": "Regulation (EU) 2022/2554 of 14 December 2022 (applies from 17 January 2025)",
+  "region": "EU",
+  "appliesTo": "EU financial entities (banks, insurers, investment firms, payment institutions and others) and, indirectly, their ICT third-party service providers.",
+  "note": "Article-level mapping only; DORA's regulatory and implementing technical standards (RTS/ITS) carry detailed requirements not reflected here.",
+  "sources": [
+    "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022R2554",
+    "https://www.digital-operational-resilience-act.com/DORA_Articles.html"
+  ],
+  "requirements": [
+    {
+      "id": "Art. 5",
+      "title": "Governance and organisation",
+      "controls": [
+        "gov.accountability",
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "Art. 6",
+      "title": "ICT risk management framework",
+      "controls": [
+        "gov.risk_assessment",
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "Art. 7",
+      "title": "ICT systems, protocols and tools",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "Art. 8",
+      "title": "Identification",
+      "controls": [
+        "ops.asset_inventory",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 9",
+      "title": "Protection and prevention",
+      "controls": [
+        "ops.encryption",
+        "iam.privileged",
+        "dev.change_review"
+      ]
+    },
+    {
+      "id": "Art. 10",
+      "title": "Detection",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "Art. 11",
+      "title": "Response and recovery",
+      "controls": [
+        "ops.incident_response",
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "Art. 12",
+      "title": "Backup policies and procedures, restoration and recovery procedures and methods",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "Art. 13",
+      "title": "Learning and evolving",
+      "controls": [
+        "ops.awareness_training",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 14",
+      "title": "Communication",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 15",
+      "title": "Further harmonisation of ICT risk management tools, methods, processes and policies",
+      "controls": []
+    },
+    {
+      "id": "Art. 16",
+      "title": "Simplified ICT risk management framework",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 17",
+      "title": "ICT-related incident management process",
+      "controls": [
+        "ops.incident_response",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "Art. 18",
+      "title": "Classification of ICT-related incidents and cyber threats",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 19",
+      "title": "Reporting of major ICT-related incidents and voluntary notification of significant cyber threats",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 24",
+      "title": "General requirements for the performance of digital operational resilience testing",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Art. 25",
+      "title": "Testing of ICT tools and systems",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Art. 26",
+      "title": "Advanced testing of ICT tools, systems and processes based on TLPT",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Art. 28",
+      "title": "General principles (ICT third-party risk)",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 29",
+      "title": "Preliminary assessment of ICT concentration risk at entity level",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 30",
+      "title": "Key contractual provisions",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "key": "cps234",
+  "name": "CPS 234",
+  "fullName": "Prudential Standard CPS 234 Information Security",
+  "publisher": "Australian Prudential Regulation Authority (APRA)",
+  "version": "Effective 1 July 2019",
+  "region": "AU",
+  "appliesTo": "APRA-regulated entities in Australia (ADIs, insurers, superannuation RSE licensees and related entities).",
+  "note": "Paragraph-level mapping of the standard's requirements; APRA's guidance in CPG 234 is not mapped and the controls shown are indicative, not evidence of compliance.",
+  "sources": [
+    "https://www.apra.gov.au/standards/cps-234"
+  ],
+  "requirements": [
+    {
+      "id": "Para 13",
+      "title": "Board ultimately responsible for information security",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Para 14",
+      "title": "Define information security roles and responsibilities",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Para 15",
+      "title": "Maintain information security capability commensurate with threats",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Para 16",
+      "title": "Assess security capability of related and third parties",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Para 17",
+      "title": "Actively maintain capability as vulnerabilities and threats change",
+      "controls": [
+        "dev.vulnerabilities",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Para 18",
+      "title": "Maintain information security policy framework commensurate with exposures",
+      "controls": [
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "Para 19",
+      "title": "Policy framework directs responsibilities of all parties",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Para 20",
+      "title": "Classify information assets by criticality and sensitivity",
+      "controls": [
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "Para 21",
+      "title": "Implement controls proportionate to threats and asset criticality",
+      "controls": [
+        "gov.risk_assessment",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "Para 22",
+      "title": "Evaluate design of controls over third-party managed assets",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Para 23",
+      "title": "Robust mechanisms to detect and respond to incidents",
+      "controls": [
+        "ops.logging_monitoring",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Para 24",
+      "title": "Maintain plans to respond to plausible incidents",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Para 25",
+      "title": "Response plans cover incident stages and escalation",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Para 26",
+      "title": "Annually review and test incident response plans",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Para 27",
+      "title": "Systematic testing program for control effectiveness",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Para 28",
+      "title": "Assess third-party control testing where relied upon",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Para 29",
+      "title": "Escalate untimely-remediated control deficiencies to Board",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Para 30",
+      "title": "Testing by skilled, functionally independent specialists",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Para 31",
+      "title": "Review sufficiency of testing program annually or on change",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Para 32",
+      "title": "Internal audit reviews design and effectiveness of controls",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Para 33",
+      "title": "Internal audit staff have information security assurance skills",
+      "controls": []
+    },
+    {
+      "id": "Para 34",
+      "title": "Internal audit assesses third-party control assurance",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Para 35",
+      "title": "Notify APRA of material incidents within 72 hours",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Para 36",
+      "title": "Notify APRA of material control weaknesses within 10 business days",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    }
+  ]
+}

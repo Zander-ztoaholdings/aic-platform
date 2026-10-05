@@ -1,0 +1,209 @@
+{
+  "key": "hipaa",
+  "name": "HIPAA",
+  "fullName": "HIPAA Security Rule (45 CFR Part 164 Subpart C) and Breach Notification Rule (45 CFR Part 164 Subpart D)",
+  "publisher": "U.S. Department of Health and Human Services (HHS)",
+  "version": "45 CFR Part 164 as currently codified (eCFR)",
+  "region": "US",
+  "appliesTo": "HIPAA covered entities (health plans, clearinghouses, providers transmitting electronic transactions) and their business associates handling electronic protected health information.",
+  "note": "Standard-level items only; required and addressable implementation specifications sit beneath each standard and mapping shows supporting controls, not full compliance.",
+  "sources": [
+    "https://www.law.cornell.edu/cfr/text/45/164.308",
+    "https://www.law.cornell.edu/cfr/text/45/164.310",
+    "https://www.law.cornell.edu/cfr/text/45/164.312",
+    "https://www.law.cornell.edu/cfr/text/45/164.314",
+    "https://www.law.cornell.edu/cfr/text/45/164.316",
+    "https://www.law.cornell.edu/cfr/text/45/part-164/subpart-D"
+  ],
+  "requirements": [
+    {
+      "id": "164.308(a)(1)",
+      "title": "Security management process",
+      "controls": [
+        "gov.risk_assessment",
+        "ops.logging_monitoring",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "164.308(a)(2)",
+      "title": "Assigned security responsibility",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "164.308(a)(3)",
+      "title": "Workforce security",
+      "controls": [
+        "iam.leavers",
+        "iam.privileged"
+      ]
+    },
+    {
+      "id": "164.308(a)(4)",
+      "title": "Information access management",
+      "controls": [
+        "iam.access_review",
+        "iam.privileged"
+      ]
+    },
+    {
+      "id": "164.308(a)(5)",
+      "title": "Security awareness and training",
+      "controls": [
+        "ops.awareness_training",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "164.308(a)(6)",
+      "title": "Security incident procedures",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "164.308(a)(7)",
+      "title": "Contingency plan",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "164.308(a)(8)",
+      "title": "Evaluation",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "164.308(b)(1)",
+      "title": "Business associate contracts and other arrangements",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "164.310(a)(1)",
+      "title": "Facility access controls",
+      "controls": []
+    },
+    {
+      "id": "164.310(b)",
+      "title": "Workstation use",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "164.310(c)",
+      "title": "Workstation security",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "164.310(d)(1)",
+      "title": "Device and media controls",
+      "controls": [
+        "ops.asset_inventory",
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "164.312(a)(1)",
+      "title": "Access control",
+      "controls": [
+        "iam.privileged",
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "164.312(b)",
+      "title": "Audit controls",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "164.312(c)(1)",
+      "title": "Integrity",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "164.312(d)",
+      "title": "Person or entity authentication",
+      "controls": [
+        "iam.mfa"
+      ]
+    },
+    {
+      "id": "164.312(e)(1)",
+      "title": "Transmission security",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "164.314(a)(1)",
+      "title": "Business associate contracts or other arrangements",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "164.314(b)(1)",
+      "title": "Requirements for group health plans",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "164.316(a)",
+      "title": "Policies and procedures",
+      "controls": [
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "164.316(b)(1)",
+      "title": "Documentation",
+      "controls": [
+        "gov.infosec_policy",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "164.404",
+      "title": "Notification to individuals",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "164.406",
+      "title": "Notification to the media",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "164.408",
+      "title": "Notification to the Secretary",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "164.410",
+      "title": "Notification by a business associate",
+      "controls": [
+        "ops.breach_notification",
+        "ops.supplier_mgmt"
+      ]
+    }
+  ]
+}

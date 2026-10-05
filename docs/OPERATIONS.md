@@ -12,7 +12,9 @@ Related: `docs/STAGING.md` (staging and releases), `docs/INTEGRATIONS.md` (GitHu
 
 Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platform → Terminal**. It ends with `✓ 014 verified`. Safe to run twice.
 
-**Check:** `/api/health` shows `schema: ok, up to date with 014`.
+**015 (frameworks)** adds the tables for choosing frameworks and writing custom ones. Nothing existing reads them, so it can go in before or after the push; until it is in, the Frameworks page says the choice cannot be saved and Controls shows the default frameworks. Paste `db/manual/run-015-in-platform-terminal.txt` the same way; it ends with `✓ 015 verified`.
+
+**Check:** `/api/health` shows `schema: ok, up to date with 015`.
 
 ## 2. Tenant isolation (row-level security)
 

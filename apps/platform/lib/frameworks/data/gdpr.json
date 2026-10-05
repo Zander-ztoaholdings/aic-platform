@@ -1,0 +1,291 @@
+{
+  "key": "gdpr",
+  "name": "GDPR",
+  "fullName": "Regulation (EU) 2016/679 of the European Parliament and of the Council (General Data Protection Regulation)",
+  "publisher": "European Parliament and Council of the European Union",
+  "version": "2016/679 (applicable from 25 May 2018)",
+  "region": "EU",
+  "appliesTo": "Controllers and processors that process personal data in the context of an EU/EEA establishment, or that offer goods/services to or monitor people in the EU.",
+  "note": "Covers the obligation-bearing articles an organisation typically evidences; definitions, supervisory-authority and remedies chapters are omitted, and a mapped control supports but does not by itself demonstrate compliance with an article.",
+  "sources": [
+    "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679"
+  ],
+  "requirements": [
+    {
+      "id": "Art. 5",
+      "title": "Principles relating to processing of personal data",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.retention",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 6",
+      "title": "Lawfulness of processing",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "Art. 7",
+      "title": "Conditions for consent",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "Art. 8",
+      "title": "Conditions applicable to child's consent in relation to information society services",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "Art. 9",
+      "title": "Processing of special categories of personal data",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "Art. 10",
+      "title": "Processing of personal data relating to criminal convictions and offences",
+      "controls": [
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "Art. 12",
+      "title": "Transparent information, communication and modalities for the exercise of the rights of the data subject",
+      "controls": [
+        "priv.notice",
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 13",
+      "title": "Information to be provided where personal data are collected from the data subject",
+      "controls": [
+        "priv.notice",
+        "ai.transparency"
+      ]
+    },
+    {
+      "id": "Art. 14",
+      "title": "Information to be provided where personal data have not been obtained from the data subject",
+      "controls": [
+        "priv.notice",
+        "ai.transparency"
+      ]
+    },
+    {
+      "id": "Art. 15",
+      "title": "Right of access by the data subject",
+      "controls": [
+        "priv.subject_rights",
+        "ai.explanation"
+      ]
+    },
+    {
+      "id": "Art. 16",
+      "title": "Right to rectification",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 17",
+      "title": "Right to erasure ('right to be forgotten')",
+      "controls": [
+        "priv.subject_rights",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "Art. 18",
+      "title": "Right to restriction of processing",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 19",
+      "title": "Notification obligation regarding rectification or erasure of personal data or restriction of processing",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 20",
+      "title": "Right to data portability",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 21",
+      "title": "Right to object",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "Art. 22",
+      "title": "Automated individual decision-making, including profiling",
+      "controls": [
+        "ai.human_oversight",
+        "ai.contestability",
+        "ai.explanation"
+      ]
+    },
+    {
+      "id": "Art. 24",
+      "title": "Responsibility of the controller",
+      "controls": [
+        "gov.accountability",
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "Art. 25",
+      "title": "Data protection by design and by default",
+      "controls": [
+        "priv.retention",
+        "dev.change_review"
+      ]
+    },
+    {
+      "id": "Art. 26",
+      "title": "Joint controllers",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 27",
+      "title": "Representatives of controllers or processors not established in the Union",
+      "controls": [
+        "priv.dpo"
+      ]
+    },
+    {
+      "id": "Art. 28",
+      "title": "Processor",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 29",
+      "title": "Processing under the authority of the controller or processor",
+      "controls": [
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "Art. 30",
+      "title": "Records of processing activities",
+      "controls": [
+        "ops.asset_inventory",
+        "ai.inventory"
+      ]
+    },
+    {
+      "id": "Art. 31",
+      "title": "Cooperation with the supervisory authority",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 32",
+      "title": "Security of processing",
+      "controls": [
+        "ops.encryption",
+        "ops.backup",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 33",
+      "title": "Notification of a personal data breach to the supervisory authority",
+      "controls": [
+        "ops.breach_notification",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 34",
+      "title": "Communication of a personal data breach to the data subject",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 35",
+      "title": "Data protection impact assessment",
+      "controls": [
+        "gov.risk_assessment",
+        "ai.impact_bias"
+      ]
+    },
+    {
+      "id": "Art. 36",
+      "title": "Prior consultation",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 37",
+      "title": "Designation of the data protection officer",
+      "controls": [
+        "priv.dpo"
+      ]
+    },
+    {
+      "id": "Art. 38",
+      "title": "Position of the data protection officer",
+      "controls": [
+        "priv.dpo"
+      ]
+    },
+    {
+      "id": "Art. 39",
+      "title": "Tasks of the data protection officer",
+      "controls": [
+        "priv.dpo"
+      ]
+    },
+    {
+      "id": "Art. 44",
+      "title": "General principle for transfers",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 45",
+      "title": "Transfers on the basis of an adequacy decision",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 46",
+      "title": "Transfers subject to appropriate safeguards",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 49",
+      "title": "Derogations for specific situations",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    }
+  ]
+}

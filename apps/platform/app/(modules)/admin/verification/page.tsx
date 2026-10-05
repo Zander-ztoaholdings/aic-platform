@@ -1,5 +1,6 @@
 'use client';
 
+import { controlFromSlot, COMMON_BY_KEY } from '@/lib/common-controls';
 import { Eyebrow } from '@/app/components/ui/Eyebrow';
 import { useCallback, useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
@@ -20,7 +21,7 @@ type Org = { orgId: string; name: string; division: number | null; total: number
 type Doc = {
   id: string; title: string; fileSize: string | null; createdAt: string | null;
   verificationOutcome: string | null; verificationNotes: string | null; verifiedAt: string | null;
-  requirementCode: string | null; requirementText: string | null; evidenceGuidance: string | null; uploadedBy: string | null;
+  slotType?: string | null; requirementCode: string | null; requirementText: string | null; evidenceGuidance: string | null; uploadedBy: string | null;
 };
 
 const OUTCOME_PILL: Record<string, { tone: 'good' | 'warn' | 'bad'; label: string }> = {
@@ -154,7 +155,7 @@ function ReviewCard({ d, onDone }: { d: Doc; onDone: () => void }) {
             {d.requirementCode && <span className="text-sm font-semibold text-[#0e1b2c]">{d.requirementCode}</span>}
             {outcome ? <Pill tone={outcome.tone}>{outcome.label}</Pill> : <Pill tone="gold">Waiting</Pill>}
           </div>
-          <p className="mt-1 text-sm text-[#0e1b2c]">{d.requirementText ?? 'Filed without a requirement'}</p>
+          <p className="mt-1 text-sm text-[#0e1b2c]">{d.requirementText ?? (controlFromSlot(d.slotType) ? `Control: ${COMMON_BY_KEY[controlFromSlot(d.slotType)!].title}. ${COMMON_BY_KEY[controlFromSlot(d.slotType)!].evidence}` : 'Filed without a requirement')}</p>
           {d.evidenceGuidance && <p className="mt-0.5 text-[13px] text-[#5e6b7b]">Expects: {d.evidenceGuidance}</p>}
         </div>
       </div>

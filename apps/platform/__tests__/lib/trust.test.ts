@@ -19,14 +19,14 @@ const facts: OrgFacts = {
 
 describe('trust pages', () => {
   it('shows only the sections switched on', () => {
-    const v = buildTrustView(facts, DEFAULT_SECTIONS, [], { intro: null, contactEmail: null, updatedAt: '' });
+    const v = buildTrustView(facts, DEFAULT_SECTIONS, { frameworks: [], controls: [] }, { intro: null, contactEmail: null, updatedAt: '' });
     expect(v.name).toBe('Karoo Lending (Pty) Ltd');
     expect(v.badge?.code).toBe('AWR-ABCD-EFGH');
     expect(v.systems).toBeUndefined();
     expect(v.monitoring).toBeUndefined();
   });
   it('monitoring reports counts by area, never which repository failed', () => {
-    const v = buildTrustView(facts, { ...DEFAULT_SECTIONS, monitoring: true }, [], { intro: null, contactEmail: null, updatedAt: '' });
+    const v = buildTrustView(facts, { ...DEFAULT_SECTIONS, monitoring: true }, { frameworks: [], controls: [] }, { intro: null, contactEmail: null, updatedAt: '' });
     expect(v.monitoring?.areas).toEqual([{ area: 'Code and change control', passing: 1, total: 2 }]);
     expect(JSON.stringify(v.monitoring)).not.toContain('a/c');
   });

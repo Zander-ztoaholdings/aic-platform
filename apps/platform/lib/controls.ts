@@ -1,82 +1,46 @@
 /**
- * Frameworks and their controls, and what evidence on the platform speaks to
- * each one: automated checks, adopted policies, and accepted evidence against
- * the AIC standard's requirements.
+ * Frameworks, their requirements, and what evidence on the platform speaks to
+ * each one.
  *
- * A control's status here is a summary of evidence, not a conformity
- * decision. "Evidenced" means every source AIC can see is positive; only an
- * assessment says whether the control is actually met.
+ * Evidence is gathered once, against the common controls
+ * (lib/common-controls.ts): automated checks, adopted policies, evidence AIC
+ * has accepted against the AIC standard, and documents filed against the
+ * control. Each framework requirement then takes the status of the common
+ * controls it maps to (lib/frameworks). The AIC standard itself is listed
+ * requirement by requirement, straight from the evidence vault.
  *
- * Control titles are as published (ISO/IEC 27001:2022 Annex A; POPIA section
- * headings). Only controls the platform has evidence for are listed — a list
- * of 93 controls with nothing behind 80 of them would be decoration.
+ * A status here is a summary of evidence, not a conformity decision.
+ * "Evidenced" means every source AIC can see is positive; only an assessment
+ * says whether a requirement is actually met.
  */
+import { COMMON_CONTROLS, type CommonArea, type CommonSource } from './common-controls';
+import { CATALOGUE, type CatalogueRequirement } from './frameworks/catalog';
 
-export type Framework = 'aic' | 'iso42001' | 'euaiact' | 'iso27001' | 'popia';
-export const FRAMEWORKS: { key: Framework; name: string; note: string }[] = [
-  { key: 'aic', name: 'AIC standard', note: 'The requirements that apply to your Division.' },
-  { key: 'iso42001', name: 'ISO/IEC 42001:2023', note: 'Annex A controls for an AI management system that the platform has evidence for. Certification to ISO/IEC 42001 is granted by an accredited certification body, not by this view.' },
-  { key: 'euaiact', name: 'EU AI Act', note: 'Articles of Regulation (EU) 2024/1689 the platform has evidence for. They apply where you place AI systems on the EU market or their output is used in the EU.' },
-  { key: 'iso27001', name: 'ISO/IEC 27001:2022', note: 'Annex A controls the platform has evidence for.' },
-  { key: 'popia', name: 'POPIA', note: 'Sections of the Protection of Personal Information Act the platform has evidence for.' },
-];
+/** 'aic', a catalogue key such as 'soc2', or 'custom:<uuid>'. */
+export type Framework = string;
 
-type Source = { kind: 'check'; key: string } | { kind: 'policy'; key: string } | { kind: 'requirement'; code: string };
+export type FrameworkMeta = {
+  key: Framework;
+  name: string;
+  note: string;
+  fullName?: string;
+  publisher?: string;
+  version?: string;
+  region?: string;
+  appliesTo?: string;
+  group?: string;
+  sources?: string[];
+  custom?: boolean;
+};
 
-export type ControlDef = { framework: Framework; id: string; title: string; sources: Source[] };
-
-const check = (key: string): Source => ({ kind: 'check', key });
-const policy = (key: string): Source => ({ kind: 'policy', key });
-const req = (code: string): Source => ({ kind: 'requirement', code });
-
-export const CONTROLS: ControlDef[] = [
-  // ISO/IEC 42001:2023 Annex A (reference control objectives and controls)
-  { framework: 'iso42001', id: 'A.2.2', title: 'AI policy', sources: [policy('ai-acceptable-use'), policy('human-oversight')] },
-  { framework: 'iso42001', id: 'A.3.2', title: 'AI roles and responsibilities', sources: [req('HU-1'), req('HU-2')] },
-  { framework: 'iso42001', id: 'A.3.3', title: 'Reporting of concerns', sources: [policy('incident-response')] },
-  { framework: 'iso42001', id: 'A.4.4', title: 'Tooling resources', sources: [check('ai.models_declared'), check('github.ai_usage_declared')] },
-  { framework: 'iso42001', id: 'A.5.4', title: 'Assessing AI system impact on individuals or groups of individuals', sources: [req('EM-6'), req('EM-7')] },
-  { framework: 'iso42001', id: 'A.6.1.3', title: 'Processes for responsible AI system design and development', sources: [check('github.ai_changes_reviewed'), check('github.merged_with_review')] },
-  { framework: 'iso42001', id: 'A.6.2.6', title: 'AI system operation and monitoring', sources: [check('ai.usage_fresh'), req('HU-8')] },
-  { framework: 'iso42001', id: 'A.6.2.7', title: 'AI system technical documentation', sources: [req('EX-7')] },
-  { framework: 'iso42001', id: 'A.6.2.8', title: 'AI system recording of event logs', sources: [req('HU-7'), req('CO-5')] },
-  { framework: 'iso42001', id: 'A.8.2', title: 'System documentation and information for users', sources: [req('TR-1'), req('TR-4')] },
-  { framework: 'iso42001', id: 'A.8.4', title: 'Communication of incidents', sources: [policy('incident-response')] },
-  { framework: 'iso42001', id: 'A.9.2', title: 'Processes for responsible use of AI systems', sources: [policy('ai-acceptable-use'), check('github.ai_changes_reviewed')] },
-  { framework: 'iso42001', id: 'A.9.4', title: 'Intended use of the AI system', sources: [req('HU-3'), check('ai.models_declared')] },
-  { framework: 'iso42001', id: 'A.10.3', title: 'Suppliers', sources: [policy('information-security')] },
-
-  // EU AI Act, Regulation (EU) 2024/1689
-  { framework: 'euaiact', id: 'Art. 4', title: 'AI literacy', sources: [policy('ai-acceptable-use')] },
-  { framework: 'euaiact', id: 'Art. 9', title: 'Risk management system', sources: [req('EM-6'), req('EM-7')] },
-  { framework: 'euaiact', id: 'Art. 12', title: 'Record-keeping', sources: [req('HU-7'), req('CO-5')] },
-  { framework: 'euaiact', id: 'Art. 13', title: 'Transparency and provision of information to deployers', sources: [req('EX-7'), req('TR-1')] },
-  { framework: 'euaiact', id: 'Art. 14', title: 'Human oversight', sources: [policy('human-oversight'), req('HU-4'), req('HU-5')] },
-  { framework: 'euaiact', id: 'Art. 26', title: 'Obligations of deployers of high-risk AI systems', sources: [req('HU-1'), req('HU-3'), check('ai.usage_fresh')] },
-  { framework: 'euaiact', id: 'Art. 50', title: 'Transparency obligations for providers and deployers of certain AI systems', sources: [req('TR-1'), req('TR-2')] },
-  { framework: 'euaiact', id: 'Art. 73', title: 'Reporting of serious incidents', sources: [policy('incident-response')] },
-  { framework: 'euaiact', id: 'Art. 86', title: 'Right to explanation of individual decision-making', sources: [req('EX-1'), req('EX-4')] },
-
-  { framework: 'iso27001', id: 'A.5.1', title: 'Policies for information security', sources: [policy('information-security')] },
-  { framework: 'iso27001', id: 'A.5.10', title: 'Acceptable use of information and other associated assets', sources: [policy('ai-acceptable-use')] },
-  { framework: 'iso27001', id: 'A.5.15', title: 'Access control', sources: [check('m365.global_admins')] },
-  { framework: 'iso27001', id: 'A.5.17', title: 'Authentication information', sources: [check('github.no_exposed_secrets'), check('m365.mfa_registered')] },
-  { framework: 'iso27001', id: 'A.5.18', title: 'Access rights', sources: [check('m365.stale_accounts')] },
-  { framework: 'iso27001', id: 'A.5.24', title: 'Information security incident management planning and preparation', sources: [policy('incident-response')] },
-  { framework: 'iso27001', id: 'A.8.2', title: 'Privileged access rights', sources: [check('m365.global_admins')] },
-  { framework: 'iso27001', id: 'A.8.4', title: 'Access to source code', sources: [check('github.branch_protected'), check('github.no_exposed_secrets')] },
-  { framework: 'iso27001', id: 'A.8.5', title: 'Secure authentication', sources: [check('github.org_2fa_required'), check('m365.mfa_enforced')] },
-  { framework: 'iso27001', id: 'A.8.8', title: 'Management of technical vulnerabilities', sources: [check('github.no_critical_vulnerabilities')] },
-  { framework: 'iso27001', id: 'A.8.25', title: 'Secure development life cycle', sources: [check('github.review_required')] },
-  { framework: 'iso27001', id: 'A.8.32', title: 'Change management', sources: [check('github.branch_protected'), check('github.review_required'), check('github.merged_with_review'), check('github.ai_changes_reviewed')] },
-
-  { framework: 'popia', id: 's19', title: 'Security measures on integrity and confidentiality of personal information', sources: [policy('information-security'), check('github.no_critical_vulnerabilities'), check('github.no_exposed_secrets'), check('m365.mfa_enforced')] },
-  { framework: 'popia', id: 's22', title: 'Notification of security compromises', sources: [policy('incident-response')] },
-  { framework: 'popia', id: 's71', title: 'Automated decision making', sources: [policy('human-oversight'), req('HU-1'), req('HU-2'), check('github.ai_usage_declared'), check('ai.models_declared')] },
-];
+export const AIC_FRAMEWORK: FrameworkMeta = {
+  key: 'aic',
+  name: 'AIC standard',
+  note: 'The requirements of the AIC standard that apply to your Division, each evidenced by what you have filed in the Evidence Vault.',
+};
 
 export type SourceStatus = 'pass' | 'fail' | 'pending' | 'none';
-export type ControlStatus = 'evidenced' | 'partial' | 'gap' | 'no_evidence';
+export type ControlStatus = 'evidenced' | 'partial' | 'gap' | 'no_evidence' | 'not_mapped';
 
 export type EvidenceInput = {
   /** check key → statuses across subjects */
@@ -85,12 +49,18 @@ export type EvidenceInput = {
   policies: Record<string, { id: string; published: boolean; acceptedAll: boolean }>;
   /** requirement code → vault state */
   requirements: Record<string, { id: string; state: string; text: string; right: string | null }>;
+  /** common control key → state of the documents filed against it (evidenceState) and how many */
+  documents?: Record<string, { state: string; count: number }>;
 };
 
 export type EvaluatedSource = { label: string; status: SourceStatus; href: string };
-export type EvaluatedControl = { framework: Framework; id: string; title: string; status: ControlStatus; sources: EvaluatedSource[] };
+export type EvaluatedControl = { framework: Framework; id: string; title: string; status: ControlStatus; sources: EvaluatedSource[]; controls?: string[] };
+export type EvaluatedCommonControl = {
+  key: string; area: CommonArea; title: string; evidence: string; status: ControlStatus;
+  sources: EvaluatedSource[]; documents: number;
+};
 
-export function sourceStatus(s: Source, e: EvidenceInput): EvaluatedSource {
+export function sourceStatus(s: CommonSource, e: EvidenceInput): EvaluatedSource {
   if (s.kind === 'check') {
     const st = e.checks[s.key] ?? [];
     const status: SourceStatus = st.length === 0 ? 'none' : st.includes('fail') ? 'fail' : st.every((x) => x === 'pass') ? 'pass' : 'pending';
@@ -102,9 +72,11 @@ export function sourceStatus(s: Source, e: EvidenceInput): EvaluatedSource {
     return { label: s.key, status, href: p ? `/policies/${p.id}` : '/policies' };
   }
   const r = e.requirements[s.code];
-  const status: SourceStatus = !r ? 'none' : r.state === 'accepted' ? 'pass' : r.state === 'needs_more' ? 'fail' : r.state === 'submitted' ? 'pending' : 'none';
-  return { label: s.code, status, href: '/evidence' };
+  return { label: s.code, status: vaultStatus(r?.state), href: '/evidence' };
 }
+
+const vaultStatus = (state: string | undefined): SourceStatus =>
+  state === 'accepted' ? 'pass' : state === 'needs_more' ? 'fail' : state === 'submitted' ? 'pending' : 'none';
 
 export function rollUp(statuses: SourceStatus[]): ControlStatus {
   if (statuses.includes('fail')) return 'gap';
@@ -113,24 +85,82 @@ export function rollUp(statuses: SourceStatus[]): ControlStatus {
   return 'no_evidence';
 }
 
-export function evaluateControls(e: EvidenceInput, checkTitle: (k: string) => string, policyTitle: (k: string) => string): EvaluatedControl[] {
-  const fixed = CONTROLS.map((c) => {
-    const sources = c.sources.map((s) => {
-      const ev = sourceStatus(s, e);
-      const label = s.kind === 'check' ? checkTitle(s.key) : s.kind === 'policy' ? policyTitle(s.key) : `${s.code} evidence`;
-      return { ...ev, label };
-    });
-    return { framework: c.framework, id: c.id, title: c.title, status: rollUp(sources.map((s) => s.status)), sources };
-  });
+/**
+ * A source only counts where it applies to the organisation: a check from a
+ * system it has not connected, or an AIC requirement outside its Division, is
+ * left out rather than counted against it. Policies always count, because
+ * adopting one is always open to the organisation. Documents count once any
+ * are filed, and are the only source for controls nothing else can see.
+ */
+function applies(s: CommonSource, e: EvidenceInput): boolean {
+  if (s.kind === 'check') return (e.checks[s.key] ?? []).length > 0;
+  if (s.kind === 'requirement') return s.code in e.requirements;
+  return true;
+}
 
-  // The AIC standard: one control per requirement that applies to the
-  // organisation, evidenced by the vault and by any check or policy that
-  // names the requirement code.
-  const aic = Object.entries(e.requirements)
+export function evaluateCommon(e: EvidenceInput, checkTitle: (k: string) => string, policyTitle: (k: string) => string): EvaluatedCommonControl[] {
+  return COMMON_CONTROLS.map((c) => {
+    const live = c.sources.filter((s) => applies(s, e));
+    const sources: EvaluatedSource[] = live.map((s) => ({
+      ...sourceStatus(s, e),
+      label: s.kind === 'check' ? checkTitle(s.key) : s.kind === 'policy' ? policyTitle(s.key) : `${s.code} evidence`,
+    }));
+    const doc = e.documents?.[c.key];
+    const docSource: EvaluatedSource = {
+      label: doc?.count ? `${doc.count} document${doc.count === 1 ? '' : 's'} filed against this control` : 'Documents filed against this control',
+      status: vaultStatus(doc?.state),
+      href: `/controls?view=common#${c.key}`,
+    };
+    const counted = doc?.count ? [...sources, docSource] : sources;
+    return {
+      key: c.key, area: c.area, title: c.title, evidence: c.evidence,
+      status: rollUp(counted.map((s) => s.status)),
+      sources: [...sources, docSource],
+      documents: doc?.count ?? 0,
+    };
+  });
+}
+
+const AS_SOURCE: Record<ControlStatus, SourceStatus> = { evidenced: 'pass', gap: 'fail', partial: 'pending', no_evidence: 'none', not_mapped: 'none' };
+
+/** A framework's requirements, each taking the status of the common controls it maps to. */
+export function evaluateFramework(key: Framework, requirements: CatalogueRequirement[], common: EvaluatedCommonControl[]): EvaluatedControl[] {
+  const byKey = new Map(common.map((c) => [c.key, c]));
+  return requirements.map((r) => {
+    const ccs = r.controls.map((k) => byKey.get(k)).filter((c): c is EvaluatedCommonControl => !!c);
+    if (ccs.length === 0) return { framework: key, id: r.id, title: r.title, status: 'not_mapped' as const, sources: [], controls: [] };
+    const sources = ccs.map((c) => ({ label: c.title, status: AS_SOURCE[c.status], href: `/controls?view=common#${c.key}` }));
+    return { framework: key, id: r.id, title: r.title, status: rollUp(sources.map((s) => s.status)), sources, controls: ccs.map((c) => c.key) };
+  });
+}
+
+/** The AIC standard: one entry per requirement that applies to the organisation, evidenced by the vault. */
+export function evaluateAic(e: EvidenceInput): EvaluatedControl[] {
+  return Object.entries(e.requirements)
     .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
     .map(([code, r]) => {
-      const sources: EvaluatedSource[] = [{ ...sourceStatus(req(code), e), label: 'Evidence filed in the vault' }];
-      return { framework: 'aic' as const, id: code, title: r.text, status: rollUp(sources.map((s) => s.status)), sources };
+      const sources: EvaluatedSource[] = [{ label: 'Evidence filed in the vault', status: vaultStatus(r.state), href: '/evidence' }];
+      return { framework: 'aic', id: code, title: r.text, status: rollUp(sources.map((s) => s.status)), sources };
     });
-  return [...aic, ...fixed];
+}
+
+/**
+ * Every requirement of the AIC standard and of the given frameworks (all of
+ * the catalogue by default), evaluated against the organisation's evidence.
+ */
+export function evaluateControls(
+  e: EvidenceInput,
+  checkTitle: (k: string) => string,
+  policyTitle: (k: string) => string,
+  frameworks: { key: Framework; requirements: CatalogueRequirement[] }[] = CATALOGUE,
+): EvaluatedControl[] {
+  const common = evaluateCommon(e, checkTitle, policyTitle);
+  return [...evaluateAic(e), ...frameworks.flatMap((f) => evaluateFramework(f.key, f.requirements, common))];
+}
+
+export type Coverage = { total: number; evidenced: number; partial: number; gap: number; noEvidence: number; notMapped: number };
+
+export function coverage(controls: EvaluatedControl[]): Coverage {
+  const n = (s: ControlStatus) => controls.filter((c) => c.status === s).length;
+  return { total: controls.length, evidenced: n('evidenced'), partial: n('partial'), gap: n('gap'), noEvidence: n('no_evidence'), notMapped: n('not_mapped') };
 }

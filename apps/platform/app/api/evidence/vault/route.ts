@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { controlFromSlot } from '@/lib/common-controls';
 import { getTenantDb, auditRequirements, auditDocuments, organizations, eq, asc, desc } from '@aic/db';
 import { auth } from '@aic/auth';
 import { fetchPublishedStandard, type PublishedStandard } from '@/lib/standard';
@@ -56,7 +57,7 @@ export async function GET() {
     };
   });
 
-  const unlinked = docs.filter((d) => !d.requirementId).map((d) => ({
+  const unlinked = docs.filter((d) => !d.requirementId && !controlFromSlot(d.slotType)).map((d) => ({
     id: d.id, title: d.title, createdAt: d.createdAt, slotType: d.slotType,
   }));
 

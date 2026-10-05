@@ -12,8 +12,7 @@
  */
 
 import type { OrgFacts } from './org-facts';
-import type { EvaluatedControl } from './controls';
-import { FRAMEWORKS } from './controls';
+import type { EvaluatedControl, FrameworkMeta } from './controls';
 import { CHECK_BY_KEY } from './integrations/catalog';
 
 export const SECTION_KEYS = ['badge', 'certificate', 'accountable_person', 'policies', 'frameworks', 'monitoring', 'systems'] as const;
@@ -25,7 +24,7 @@ export const SECTION_LABELS: Record<SectionKey, { title: string; help: string }>
   certificate: { title: 'AIC certificate', help: 'Your certificate, if one has been issued. Suspension or revocation shows here at once.' },
   accountable_person: { title: 'Accountable person', help: 'The name and job title of the person who signed the accountability declaration.' },
   policies: { title: 'Published policies', help: 'Titles, version numbers and how many of your people have accepted each. Not the text.' },
-  frameworks: { title: 'Framework coverage', help: 'How many controls in each framework have evidence, without detail of the gaps.' },
+  frameworks: { title: 'Framework coverage', help: 'For each framework you track, how many requirements have evidence, without detail of the gaps. Your own custom frameworks are never shown.' },
   monitoring: { title: 'Continuous monitoring', help: 'Which systems AIC reads, and how many automated checks pass, by area.' },
   systems: { title: 'AI systems', help: 'The names and purposes of the AI systems you have declared.' },
 };
@@ -70,15 +69,18 @@ export interface TrustView {
 
 const AREA: Record<string, string> = { github: 'Code and change control', microsoft: 'Identity and sign-in', ai_provider: 'AI model usage' };
 
-export function buildTrustView(facts: OrgFacts, sections: Sections, controls: EvaluatedControl[], page: { intro: string | null; contactEmail: string | null; updatedAt: string }): TrustView {
+export function buildTrustView(facts: OrgFacts, sections: Sections, tracked: { frameworks: FrameworkMeta[]; controls: EvaluatedControl[] }, page: { intro: string | null; contactEmail: string | null; updatedAt: string }): TrustView {
   const v: TrustView = { name: facts.org.legalName || facts.org.name, intro: page.intro, contactEmail: page.contactEmail, updatedAt: page.updatedAt };
   if (sections.badge && facts.badge) v.badge = facts.badge;
   if (sections.certificate && facts.certificate) v.certificate = facts.certificate;
   if (sections.accountable_person && facts.accountablePerson) v.accountablePerson = facts.accountablePerson;
   if (sections.policies && facts.policies.length) v.policies = facts.policies;
-  if (sections.frameworks && controls.length) {
-    v.frameworks = FRAMEWORKS.map((f) => {
-      const cs = controls.filter((c) => c.framework === f.key);
+  if (sections.frameworks && tracked.controls.length) {
+    // An organisation's own frameworks stay private: one may be a customer's
+    // security schedule. Requirements AIC does not map are left out of the
+    // count rather than shown as gaps.
+    v.frameworks = tracked.frameworks.filter((f) => !f.custom).map((f) => {
+      const cs = tracked.controls.filter((c) => c.framework === f.key && c.status !== 'not_mapped');
       return { key: f.key, name: f.name, evidenced: cs.filter((c) => c.status === 'evidenced').length, total: cs.length };
     }).filter((f) => f.total > 0);
   }

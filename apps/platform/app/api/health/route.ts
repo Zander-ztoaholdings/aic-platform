@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSystemDb, probeTenantIsolation, sql } from '@aic/db';
+import { getSystemDb, probeTenantIsolation, sql, EncryptionService } from '@aic/db';
 import { storageHealth } from '@aic/db/storage';
 import { standardHealth } from '@/lib/standard';
 
@@ -90,7 +90,7 @@ export async function GET() {
       ['decision_records', 'review_status'],     // 014
       ['organizations', 'ai_monthly_budget_usd'],// 014
     ];
-    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items']; // 002, 011, 013, 014
+    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items', 'org_frameworks', 'custom_frameworks', 'custom_framework_requirements']; // 002, 011, 013, 014, 015
 
     const found = await db.execute(sql`
       SELECT table_name, column_name FROM information_schema.columns
@@ -113,9 +113,9 @@ export async function GET() {
       ? {
           status: 'error',
           latency_ms: Date.now() - schemaStart,
-          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 014)`,
+          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 015)`,
         }
-      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 014' };
+      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 015' };
   } catch (err: unknown) {
     console.error('[HEALTH] schema check failed:', err);
     checks.schema = { status: 'error', latency_ms: Date.now() - schemaStart, detail: 'Could not read' };
@@ -127,6 +127,11 @@ export async function GET() {
   const iso = await probeTenantIsolation();
   checks.tenant_isolation = { status: iso.enforced ? 'ok' : 'error', latency_ms: Date.now() - isoStart, detail: iso.detail };
   if (!iso.enforced) console.error('[HEALTH] tenant isolation:', iso.detail);
+
+  // Encryption key: provider keys and MFA secrets cannot be stored without it.
+  checks.encryption = EncryptionService.isConfigured()
+    ? { status: 'ok', latency_ms: 0, detail: 'key configured' }
+    : { status: 'error', latency_ms: 0, detail: 'not configured: set ENCRYPTION_KEY' };
 
   // Evidence storage. Uploads fail without it, so it is reported, not assumed.
   const stoStart = Date.now();

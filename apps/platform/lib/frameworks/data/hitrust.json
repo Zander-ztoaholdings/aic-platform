@@ -1,0 +1,159 @@
+{
+  "key": "hitrust",
+  "name": "HITRUST CSF",
+  "fullName": "HITRUST Common Security Framework",
+  "publisher": "HITRUST Alliance",
+  "version": "v11.x (19 assessment domains)",
+  "region": "US / Global",
+  "appliesTo": "Organisations, especially in healthcare and their service providers, seeking assurance over protection of sensitive and regulated information.",
+  "note": "The CSF's requirement statements are licensed, so only the 19 publicly listed assessment domains are mapped; HITRUST certification (e1/i1/r2) requires validation by an authorised External Assessor and HITRUST QA.",
+  "sources": [
+    "https://linfordco.com/blog/hitrust-csf-framework/",
+    "https://www.a-lign.com/articles/everything-you-need-to-know-about-hitrust-certification",
+    "https://hitrustalliance.net/hubfs/CSF-Assurance-Program-Requirements.pdf",
+    "https://hitrustalliance.net/hubfs/23257256/Example-HITRUST-Implemented-1-year-i1-Certification-Report.pdf"
+  ],
+  "requirements": [
+    {
+      "id": "01",
+      "title": "Information Protection Program",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "02",
+      "title": "Endpoint Protection",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "03",
+      "title": "Portable Media Security",
+      "controls": [
+        "ops.encryption",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "04",
+      "title": "Mobile Device Security",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "05",
+      "title": "Wireless Security",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "06",
+      "title": "Configuration Management",
+      "controls": [
+        "dev.change_review",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "07",
+      "title": "Vulnerability Management",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "08",
+      "title": "Network Protection",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "09",
+      "title": "Transmission Protection",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "10",
+      "title": "Password Management",
+      "controls": [
+        "dev.secrets",
+        "iam.mfa"
+      ]
+    },
+    {
+      "id": "11",
+      "title": "Access Control",
+      "controls": [
+        "iam.privileged",
+        "iam.access_review",
+        "iam.leavers"
+      ]
+    },
+    {
+      "id": "12",
+      "title": "Audit Logging & Monitoring",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "13",
+      "title": "Education, Training, and Awareness",
+      "controls": [
+        "ops.awareness_training",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "14",
+      "title": "Third-Party Assurance",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "15",
+      "title": "Incident Management",
+      "controls": [
+        "ops.incident_response",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "16",
+      "title": "Business Continuity & Disaster Recovery",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "17",
+      "title": "Risk Management",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "18",
+      "title": "Physical & Environmental Security",
+      "controls": []
+    },
+    {
+      "id": "19",
+      "title": "Data Protection & Privacy",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.retention",
+        "ops.encryption"
+      ]
+    }
+  ]
+}

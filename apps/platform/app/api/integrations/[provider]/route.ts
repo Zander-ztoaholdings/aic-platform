@@ -37,6 +37,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const key = (body.key ?? '').trim();
     const problem = keyShapeProblem(provider as Provider, key);
     if (problem) return NextResponse.json({ error: problem }, { status: 400 });
+    if (!EncryptionService.isConfigured()) {
+      console.error('[INTEGRATIONS] refusing to store a provider key: ENCRYPTION_KEY is not set');
+      return NextResponse.json(
+        { error: `Storing ${label} keys is not switched on for this AIC server yet, so the key was not saved. Use the exporter for now, or try again once AIC has finished setting it up.` },
+        { status: 503 }
+      );
+    }
     try {
       await pullUsage(provider as Provider, key, 1);
     } catch (e) {

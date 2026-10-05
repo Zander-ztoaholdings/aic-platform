@@ -1,0 +1,171 @@
+{
+  "key": "cjis",
+  "name": "CJIS Security Policy",
+  "fullName": "FBI Criminal Justice Information Services (CJIS) Security Policy",
+  "publisher": "US Federal Bureau of Investigation (FBI), CJIS Division",
+  "version": "v6.1 (25 June 2026); many state CSAs still audit against v5.9.5 during transition",
+  "region": "US",
+  "appliesTo": "Criminal justice and noncriminal justice agencies, and their contractors and cloud/IT vendors, that access, process, store or transmit Criminal Justice Information (CJI).",
+  "note": "Since v6.0 the policy is organised as Policy Area 1 (Information Exchange Agreements), NIST SP 800-53 control families, and Policy Area 20 (Mobile Devices); requirements are mapped at family level, so mappings indicate overlap only and each family contains many detailed, phased controls.",
+  "sources": [
+    "https://le.fbi.gov/cjis-division/cjis-security-policy-resource-center",
+    "https://le.fbi.gov/file-repository/cjis_security_policy_v6-1_20260625-1.pdf",
+    "https://www.dps.texas.gov/section/crime-records/cjis-documents",
+    "https://www.saltycloud.com/blog/cjis-security-policy/"
+  ],
+  "requirements": [
+    {
+      "id": "CJIS-5.1",
+      "title": "Information Exchange Agreements",
+      "controls": [
+        "ops.supplier_mgmt",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "CJIS-AC",
+      "title": "Access Control (AC)",
+      "controls": [
+        "iam.privileged",
+        "iam.access_review",
+        "iam.leavers"
+      ]
+    },
+    {
+      "id": "CJIS-AT",
+      "title": "Awareness and Training (AT)",
+      "controls": [
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "CJIS-AU",
+      "title": "Audit and Accountability (AU)",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CJIS-CA",
+      "title": "Assessment, Authorization, and Monitoring (CA)",
+      "controls": [
+        "gov.risk_assessment",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CJIS-CM",
+      "title": "Configuration Management (CM)",
+      "controls": [
+        "dev.change_review",
+        "ops.asset_inventory",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "CJIS-CP",
+      "title": "Contingency Planning (CP)",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "CJIS-IA",
+      "title": "Identification and Authentication (IA)",
+      "controls": [
+        "iam.mfa",
+        "dev.secrets"
+      ]
+    },
+    {
+      "id": "CJIS-IR",
+      "title": "Incident Response (IR)",
+      "controls": [
+        "ops.incident_response",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "CJIS-MA",
+      "title": "Maintenance (MA)",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "CJIS-MP",
+      "title": "Media Protection (MP)",
+      "controls": [
+        "ops.encryption",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "CJIS-PE",
+      "title": "Physical and Environmental Protection (PE)",
+      "controls": []
+    },
+    {
+      "id": "CJIS-PL",
+      "title": "Planning (PL)",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "CJIS-PS",
+      "title": "Personnel Security (PS)",
+      "controls": [
+        "iam.leavers",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "CJIS-RA",
+      "title": "Risk Assessment (RA)",
+      "controls": [
+        "gov.risk_assessment",
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "CJIS-SA",
+      "title": "System and Services Acquisition (SA)",
+      "controls": [
+        "ops.supplier_mgmt",
+        "dev.change_review"
+      ]
+    },
+    {
+      "id": "CJIS-SC",
+      "title": "System and Communications Protection (SC)",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "CJIS-SI",
+      "title": "System and Information Integrity (SI)",
+      "controls": [
+        "dev.vulnerabilities",
+        "ops.endpoint",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CJIS-SR",
+      "title": "Supply Chain Risk Management (SR)",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "CJIS-5.20",
+      "title": "Mobile Devices",
+      "controls": [
+        "ops.endpoint"
+      ]
+    }
+  ]
+}

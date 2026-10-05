@@ -1,0 +1,174 @@
+{
+  "key": "eu_ai_act",
+  "name": "EU AI Act",
+  "fullName": "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act)",
+  "publisher": "European Parliament and Council of the EU",
+  "version": "2024/1689",
+  "region": "European Union",
+  "appliesTo": "Providers, deployers, importers and distributors of AI systems placed on the market, put into service or used in the EU, with most obligations here applying to high-risk AI systems.",
+  "note": "Mapping shows which AIC common controls provide evidence relevant to selected articles; it is not a legal compliance determination, and high-risk conformity assessment follows the Act's own procedures (including notified bodies where required).",
+  "sources": [
+    "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+    "https://artificialintelligenceact.eu/ai-act-explorer/"
+  ],
+  "requirements": [
+    {
+      "id": "Art. 4",
+      "title": "AI literacy",
+      "controls": [
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "Art. 5",
+      "title": "Prohibited AI practices",
+      "controls": [
+        "ai.inventory",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 9",
+      "title": "Risk management system",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 10",
+      "title": "Data and data governance",
+      "controls": [
+        "ai.impact_bias",
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "Art. 11",
+      "title": "Technical documentation",
+      "controls": [
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "Art. 12",
+      "title": "Record-keeping",
+      "controls": [
+        "ai.decision_logging"
+      ]
+    },
+    {
+      "id": "Art. 13",
+      "title": "Transparency and provision of information to deployers",
+      "controls": [
+        "ai.documentation",
+        "ai.transparency"
+      ]
+    },
+    {
+      "id": "Art. 14",
+      "title": "Human oversight",
+      "controls": [
+        "ai.human_oversight"
+      ]
+    },
+    {
+      "id": "Art. 15",
+      "title": "Accuracy, robustness and cybersecurity",
+      "controls": [
+        "ai.monitoring",
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "Art. 16",
+      "title": "Obligations of providers of high-risk AI systems",
+      "controls": [
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 17",
+      "title": "Quality management system",
+      "controls": [
+        "gov.ai_policy",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 18",
+      "title": "Documentation keeping",
+      "controls": [
+        "ai.documentation",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "Art. 19",
+      "title": "Automatically generated logs",
+      "controls": [
+        "ai.decision_logging"
+      ]
+    },
+    {
+      "id": "Art. 20",
+      "title": "Corrective actions and duty of information",
+      "controls": [
+        "ops.incident_response",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 26",
+      "title": "Obligations of deployers of high-risk AI systems",
+      "controls": [
+        "ai.human_oversight",
+        "ai.monitoring",
+        "ai.decision_logging"
+      ]
+    },
+    {
+      "id": "Art. 27",
+      "title": "Fundamental rights impact assessment for high-risk AI systems",
+      "controls": [
+        "ai.impact_bias"
+      ]
+    },
+    {
+      "id": "Art. 49",
+      "title": "Registration",
+      "controls": [
+        "ai.inventory"
+      ]
+    },
+    {
+      "id": "Art. 50",
+      "title": "Transparency obligations for providers and deployers of certain AI systems",
+      "controls": [
+        "ai.transparency"
+      ]
+    },
+    {
+      "id": "Art. 72",
+      "title": "Post-market monitoring by providers and post-market monitoring plan for high-risk AI systems",
+      "controls": [
+        "ai.monitoring"
+      ]
+    },
+    {
+      "id": "Art. 73",
+      "title": "Reporting of serious incidents",
+      "controls": [
+        "ops.breach_notification",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 86",
+      "title": "Right to explanation of individual decision-making",
+      "controls": [
+        "ai.explanation",
+        "ai.contestability"
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, integer, smallint, bigint, numeric, boolean, timestamp, jsonb, text, pgEnum, index, unique, type AnyPgColumn } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, integer, smallint, bigint, numeric, boolean, timestamp, jsonb, text, pgEnum, index, unique, primaryKey, type AnyPgColumn } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 // Enums
@@ -1221,4 +1221,38 @@ export const questionnaireItems = pgTable('questionnaire_items', {
   approvedBy: uuid('approved_by').references(() => users.id, { onDelete: 'set null' }),
   approvedAt: timestamp('approved_at', { withTimezone: true }),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ── Frameworks (db/manual/015_frameworks.sql) ────────────────────────────────
+// Which frameworks an organisation tracks. No rows means it has not chosen
+// yet and sees the defaults; once it saves a choice, 'aic' is always stored
+// with it, so the table is never empty for an organisation that has chosen.
+export const orgFrameworks = pgTable('org_frameworks', {
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  frameworkKey: varchar('framework_key', { length: 80 }).notNull(),
+  addedBy: uuid('added_by').references(() => users.id, { onDelete: 'set null' }),
+  addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.orgId, t.frameworkKey] })]);
+
+// An organisation's own framework: a customer's security schedule, an
+// internal standard, a regulator's letter. Each requirement maps to common
+// controls the same way the published frameworks do.
+export const customFrameworks = pgTable('custom_frameworks', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 120 }).notNull(),
+  description: text('description'),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const customFrameworkRequirements = pgTable('custom_framework_requirements', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  frameworkId: uuid('framework_id').notNull().references(() => customFrameworks.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  position: integer('position').notNull(),
+  ref: varchar('ref', { length: 40 }).notNull(),
+  title: text('title').notNull(),
+  controls: text('controls').array().notNull().default(sql`'{}'::text[]`),
 });

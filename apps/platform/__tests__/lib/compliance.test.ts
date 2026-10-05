@@ -3,7 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { createHmac } from 'crypto';
 import { evaluateTenant } from '@/lib/integrations/microsoft-checks';
 import type { TenantFacts } from '@/lib/integrations/microsoft';
-import { rollUp, sourceStatus, evaluateControls, CONTROLS, type EvidenceInput } from '@/lib/controls';
+import { rollUp, sourceStatus, evaluateControls, evaluateCommon, type EvidenceInput } from '@/lib/controls';
+import { COMMON_CONTROLS } from '@/lib/common-controls';
 import { validGitHubSignature } from '@/lib/integrations/webhook';
 import { POLICY_TEMPLATES } from '@/lib/policy-templates';
 import { CHECK_BY_KEY } from '@/lib/integrations/catalog';
@@ -59,7 +60,7 @@ describe('Microsoft 365 checks', () => {
 describe('controls', () => {
   it('every check and policy a control names exists', () => {
     const policies = new Set(POLICY_TEMPLATES.map((p) => p.key));
-    for (const c of CONTROLS) for (const s of c.sources) {
+    for (const c of COMMON_CONTROLS) for (const s of c.sources) {
       if (s.kind === 'check') expect(CHECK_BY_KEY[s.key], s.key).toBeDefined();
       if (s.kind === 'policy') expect(policies.has(s.key), s.key).toBe(true);
     }
@@ -82,6 +83,22 @@ describe('controls', () => {
   it('a check with any failing subject fails the source', () => {
     const r = evaluateControls({ checks: { 'github.branch_protected': ['pass', 'fail'] }, policies: {}, requirements: {} }, (k) => k, (k) => k);
     expect(r.find((c) => c.framework === 'iso27001' && c.id === 'A.8.4')!.status).toBe('gap');
+  });
+
+  it('a source that does not apply is left out; a document filed counts', () => {
+    const none = evaluateCommon({ checks: {}, policies: {}, requirements: {} }, (k) => k, (k) => k);
+    expect(none.find((c) => c.key === 'iam.mfa')!.status).toBe('no_evidence');
+    const gh = evaluateCommon({ checks: { 'github.org_2fa_required': ['pass'] }, policies: {}, requirements: {} }, (k) => k, (k) => k);
+    expect(gh.find((c) => c.key === 'iam.mfa')!.status).toBe('evidenced');
+    const doc = evaluateCommon({ checks: {}, policies: {}, requirements: {}, documents: { 'ops.backup': { state: 'submitted', count: 1 } } }, (k) => k, (k) => k);
+    expect(doc.find((c) => c.key === 'ops.backup')!.status).toBe('partial');
+  });
+
+  it('one check counts across frameworks; unmapped requirements say so', () => {
+    const r = evaluateControls({ checks: { 'm365.mfa_enforced': ['pass'], 'm365.mfa_registered': ['pass'] }, policies: {}, requirements: {} }, (k) => k, (k) => k);
+    expect(r.find((c) => c.framework === 'iso27001' && c.id === 'A.8.5')!.status).toBe('evidenced');
+    expect(r.filter((c) => c.framework === 'soc2' && c.controls?.includes('iam.mfa')).every((c) => c.status !== 'no_evidence')).toBe(true);
+    expect(r.some((c) => c.framework === 'iso27001' && c.status === 'not_mapped')).toBe(true);
   });
 
   it('lists one AIC control per requirement', () => {

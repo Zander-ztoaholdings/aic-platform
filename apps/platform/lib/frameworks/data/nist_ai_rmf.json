@@ -1,0 +1,160 @@
+{
+  "key": "nist_ai_rmf",
+  "name": "NIST AI RMF",
+  "fullName": "Artificial Intelligence Risk Management Framework (AI RMF 1.0), NIST AI 100-1",
+  "publisher": "National Institute of Standards and Technology (NIST)",
+  "version": "1.0 (January 2023)",
+  "region": "US",
+  "appliesTo": "Voluntary framework for any organization designing, developing, deploying or using AI systems.",
+  "note": "Mapped at category level only; each category has subcategories whose full intent is broader than the common controls shown.",
+  "sources": [
+    "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf"
+  ],
+  "requirements": [
+    {
+      "id": "GOVERN 1",
+      "title": "AI risk policies, processes and practices in place and effective",
+      "controls": [
+        "gov.ai_policy",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "GOVERN 2",
+      "title": "Accountability structures empower and train teams on AI risk",
+      "controls": [
+        "gov.accountability",
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "GOVERN 3",
+      "title": "Workforce diversity, equity, inclusion and accessibility prioritized in AI risk",
+      "controls": []
+    },
+    {
+      "id": "GOVERN 4",
+      "title": "Organizational culture considers and communicates AI risk",
+      "controls": [
+        "ops.awareness_training",
+        "gov.ai_policy"
+      ]
+    },
+    {
+      "id": "GOVERN 5",
+      "title": "Processes for robust engagement with relevant AI actors",
+      "controls": [
+        "ai.contestability",
+        "ai.transparency"
+      ]
+    },
+    {
+      "id": "GOVERN 6",
+      "title": "Policies address third-party software, data and supply chain AI risks",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "MAP 1",
+      "title": "Context is established and understood",
+      "controls": [
+        "ai.inventory",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "MAP 2",
+      "title": "Categorization of the AI system is performed",
+      "controls": [
+        "ai.inventory",
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "MAP 3",
+      "title": "AI capabilities, usage, goals, benefits and costs understood",
+      "controls": [
+        "ai.inventory",
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "MAP 4",
+      "title": "Risks and benefits mapped for all components incl. third parties",
+      "controls": [
+        "gov.risk_assessment",
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "MAP 5",
+      "title": "Impacts to individuals, groups, communities and society characterized",
+      "controls": [
+        "ai.impact_bias"
+      ]
+    },
+    {
+      "id": "MEASURE 1",
+      "title": "Appropriate methods and metrics identified and applied",
+      "controls": [
+        "ai.monitoring",
+        "ai.impact_bias"
+      ]
+    },
+    {
+      "id": "MEASURE 2",
+      "title": "AI systems evaluated for trustworthy characteristics",
+      "controls": [
+        "ai.impact_bias",
+        "ai.monitoring",
+        "ai.documentation"
+      ]
+    },
+    {
+      "id": "MEASURE 3",
+      "title": "Mechanisms track identified AI risks over time",
+      "controls": [
+        "ai.monitoring",
+        "ai.decision_logging"
+      ]
+    },
+    {
+      "id": "MEASURE 4",
+      "title": "Feedback about measurement efficacy gathered and assessed",
+      "controls": [
+        "ai.monitoring"
+      ]
+    },
+    {
+      "id": "MANAGE 1",
+      "title": "AI risks prioritized, responded to and managed",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "MANAGE 2",
+      "title": "Strategies maximize AI benefits and minimize negative impacts",
+      "controls": [
+        "ai.human_oversight",
+        "ai.monitoring"
+      ]
+    },
+    {
+      "id": "MANAGE 3",
+      "title": "AI risks and benefits from third-party entities managed",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "MANAGE 4",
+      "title": "Risk treatments, response, recovery and communication plans monitored",
+      "controls": [
+        "ops.incident_response",
+        "ai.monitoring"
+      ]
+    }
+  ]
+}

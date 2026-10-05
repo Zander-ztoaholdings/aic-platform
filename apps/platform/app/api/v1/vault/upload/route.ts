@@ -3,6 +3,7 @@ import { auth } from '@aic/auth';
 import { getSystemDb, auditDocuments, auditRequirements, and, eq } from '@aic/db';
 import { StorageService, storageConfig } from '@aic/db/storage';
 import { canManageCompliance } from '@/lib/roles';
+import { CONTROL_SLOT_PREFIX, controlFromSlot } from '@/lib/common-controls';
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -21,6 +22,11 @@ export async function POST(req: NextRequest) {
 
     if (!file || !slotType) {
       return NextResponse.json({ error: 'Missing file or slot type' }, { status: 400 });
+    }
+    // Evidence for a common control (Controls page) names the control in its
+    // slot type. It must be one AIC knows, or it would count for nothing.
+    if (slotType.startsWith(CONTROL_SLOT_PREFIX) && !controlFromSlot(slotType)) {
+      return NextResponse.json({ error: 'Unknown control' }, { status: 400 });
     }
 
     // If the submission names a requirement, it must be one of this

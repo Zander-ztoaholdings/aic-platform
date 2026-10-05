@@ -1,0 +1,146 @@
+{
+  "key": "nis2",
+  "name": "NIS2",
+  "fullName": "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)",
+  "publisher": "European Parliament and Council of the European Union",
+  "version": "Directive (EU) 2022/2555 of 14 December 2022 (transposition deadline 17 October 2024)",
+  "region": "EU",
+  "appliesTo": "Essential and important entities in sectors listed in Annexes I and II operating in the EU, as transposed into national law.",
+  "note": "Covers only the entity-level obligations in Articles 20, 21(2) and 23; national transposing laws and implementing acts may add detail not reflected in the mapping.",
+  "sources": [
+    "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32022L2555",
+    "https://www.nis-2-directive.com/NIS_2_Directive_Article_20.html",
+    "https://www.nis-2-directive.com/NIS_2_Directive_Article_21.html",
+    "https://www.nis-2-directive.com/NIS_2_Directive_Article_23.html"
+  ],
+  "requirements": [
+    {
+      "id": "Art. 20(1)",
+      "title": "Management bodies approve and oversee cybersecurity risk-management measures",
+      "controls": [
+        "gov.accountability",
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "Art. 20(2)",
+      "title": "Management body members follow cybersecurity training",
+      "controls": [
+        "ops.awareness_training",
+        "gov.accountability"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(a)",
+      "title": "Policies on risk analysis and information system security",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(b)",
+      "title": "Incident handling",
+      "controls": [
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(c)",
+      "title": "Business continuity, backup management, disaster recovery, crisis management",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(d)",
+      "title": "Supply chain security, including direct suppliers and service providers",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(e)",
+      "title": "Secure acquisition, development, maintenance; vulnerability handling and disclosure",
+      "controls": [
+        "dev.vulnerabilities",
+        "dev.change_review"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(f)",
+      "title": "Assess effectiveness of cybersecurity risk-management measures",
+      "controls": [
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(g)",
+      "title": "Basic cyber hygiene practices and cybersecurity training",
+      "controls": [
+        "ops.awareness_training",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(h)",
+      "title": "Cryptography and, where appropriate, encryption",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(i)",
+      "title": "Human resources security, access control and asset management",
+      "controls": [
+        "iam.leavers",
+        "iam.access_review",
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "Art. 21(2)(j)",
+      "title": "Multi-factor authentication and secured communications",
+      "controls": [
+        "iam.mfa"
+      ]
+    },
+    {
+      "id": "Art. 23(1)",
+      "title": "Notify CSIRT/authority and recipients of significant incidents",
+      "controls": [
+        "ops.breach_notification",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "Art. 23(4)(a)",
+      "title": "Early warning within 24 hours of awareness",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 23(4)(b)",
+      "title": "Incident notification within 72 hours of awareness",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 23(4)(c)",
+      "title": "Intermediate report on request of CSIRT or authority",
+      "controls": [
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "Art. 23(4)(d)",
+      "title": "Final report within one month of incident notification",
+      "controls": [
+        "ops.breach_notification",
+        "ops.incident_response"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "key": "fedramp",
+  "name": "FedRAMP",
+  "fullName": "Federal Risk and Authorization Management Program (control baselines from NIST SP 800-53 Rev. 5)",
+  "publisher": "U.S. General Services Administration (FedRAMP PMO); controls by NIST",
+  "version": "NIST SP 800-53 Rev. 5 (Release 5.1.1) / FedRAMP Rev. 5 baselines",
+  "region": "US",
+  "appliesTo": "Cloud service providers offering cloud services to U.S. federal agencies.",
+  "note": "Mapped at the 20 NIST SP 800-53 Rev. 5 control-family level only; FedRAMP authorisation requires implementing the full Low/Moderate/High baseline and an independent 3PAO assessment, so family-level coverage does not indicate authorisation readiness.",
+  "sources": [
+    "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final",
+    "https://www.fedramp.gov/"
+  ],
+  "requirements": [
+    {
+      "id": "AC",
+      "title": "Access Control",
+      "controls": [
+        "iam.privileged",
+        "iam.access_review",
+        "iam.mfa"
+      ]
+    },
+    {
+      "id": "AT",
+      "title": "Awareness and Training",
+      "controls": [
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "AU",
+      "title": "Audit and Accountability",
+      "controls": [
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CA",
+      "title": "Assessment, Authorization, and Monitoring",
+      "controls": [
+        "gov.accountability",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "CM",
+      "title": "Configuration Management",
+      "controls": [
+        "dev.change_review",
+        "ops.endpoint",
+        "ops.asset_inventory"
+      ]
+    },
+    {
+      "id": "CP",
+      "title": "Contingency Planning",
+      "controls": [
+        "ops.backup"
+      ]
+    },
+    {
+      "id": "IA",
+      "title": "Identification and Authentication",
+      "controls": [
+        "iam.mfa",
+        "dev.secrets"
+      ]
+    },
+    {
+      "id": "IR",
+      "title": "Incident Response",
+      "controls": [
+        "ops.incident_response",
+        "ops.breach_notification"
+      ]
+    },
+    {
+      "id": "MA",
+      "title": "Maintenance",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "MP",
+      "title": "Media Protection",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "PE",
+      "title": "Physical and Environmental Protection",
+      "controls": []
+    },
+    {
+      "id": "PL",
+      "title": "Planning",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "PM",
+      "title": "Program Management",
+      "controls": [
+        "gov.infosec_policy",
+        "gov.accountability",
+        "gov.risk_assessment"
+      ]
+    },
+    {
+      "id": "PS",
+      "title": "Personnel Security",
+      "controls": [
+        "iam.leavers",
+        "gov.policy_acceptance"
+      ]
+    },
+    {
+      "id": "PT",
+      "title": "PII Processing and Transparency",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.notice",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "RA",
+      "title": "Risk Assessment",
+      "controls": [
+        "gov.risk_assessment",
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "SA",
+      "title": "System and Services Acquisition",
+      "controls": [
+        "dev.change_review",
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "SC",
+      "title": "System and Communications Protection",
+      "controls": [
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "SI",
+      "title": "System and Information Integrity",
+      "controls": [
+        "dev.vulnerabilities",
+        "ops.endpoint",
+        "ops.logging_monitoring"
+      ]
+    },
+    {
+      "id": "SR",
+      "title": "Supply Chain Risk Management",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    }
+  ]
+}

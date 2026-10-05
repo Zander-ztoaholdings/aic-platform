@@ -1,0 +1,74 @@
+{
+  "key": "essential_eight",
+  "name": "Essential Eight",
+  "fullName": "ASD Essential Eight Maturity Model",
+  "publisher": "Australian Signals Directorate (ASD) / Australian Cyber Security Centre (ACSC)",
+  "version": "Maturity Model, November 2023 update",
+  "region": "AU",
+  "appliesTo": "Australian government entities (mandatory for non-corporate Commonwealth entities under the PSPF) and any organisation using it as a baseline for Microsoft Windows-based networks.",
+  "note": "Mapping is per mitigation strategy and indicates topical overlap only; it does not reflect maturity levels (ML1–ML3), which each define specific, more detailed requirements.",
+  "sources": [
+    "https://www.cyber.gov.au/business-government/asds-cyber-security-frameworks/essential-eight/essential-eight-maturity-model-faq",
+    "https://learn.microsoft.com/compliance/anz/e8-overview"
+  ],
+  "requirements": [
+    {
+      "id": "E8-1",
+      "title": "Patch applications",
+      "controls": [
+        "dev.vulnerabilities"
+      ]
+    },
+    {
+      "id": "E8-2",
+      "title": "Patch operating systems",
+      "controls": [
+        "dev.vulnerabilities",
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "E8-3",
+      "title": "Multi-factor authentication",
+      "controls": [
+        "iam.mfa"
+      ]
+    },
+    {
+      "id": "E8-4",
+      "title": "Restrict administrative privileges",
+      "controls": [
+        "iam.privileged",
+        "iam.access_review"
+      ]
+    },
+    {
+      "id": "E8-5",
+      "title": "Application control",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "E8-6",
+      "title": "Restrict Microsoft Office macros",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "E8-7",
+      "title": "User application hardening",
+      "controls": [
+        "ops.endpoint"
+      ]
+    },
+    {
+      "id": "E8-8",
+      "title": "Regular backups",
+      "controls": [
+        "ops.backup"
+      ]
+    }
+  ]
+}

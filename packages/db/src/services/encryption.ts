@@ -72,6 +72,11 @@ export class EncryptionService {
   static readonly UNREADABLE = UNREADABLE;
 
   /** Encrypt with the current key. Throws if no key is configured. */
+  /** True when a key is configured, so a secret can be stored. */
+  static isConfigured(): boolean {
+    return keys().length > 0;
+  }
+
   static encrypt(text: string): string {
     const [current] = keys();
     if (!current) throw new Error('[SECURITY] No ENCRYPTION_KEY or ENCRYPTION_KEYS configured; refusing to store a secret.');

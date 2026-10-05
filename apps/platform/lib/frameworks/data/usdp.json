@@ -1,0 +1,151 @@
+{
+  "key": "usdp",
+  "name": "US Data Privacy",
+  "fullName": "California Consumer Privacy Act of 2018 as amended by the California Privacy Rights Act (Cal. Civ. Code §1798.100 et seq.) and CCPA Regulations (Cal. Code Regs. tit. 11, §7000 et seq.)",
+  "publisher": "State of California; California Privacy Protection Agency (CPPA)",
+  "version": "CCPA as amended by CPRA (operative 1 Jan 2023); CPPA regulations on cybersecurity audits, risk assessments and ADMT approved 22 Sep 2025, effective 1 Jan 2026 with phased compliance dates",
+  "region": "US",
+  "appliesTo": "For-profit businesses doing business in California that meet CCPA thresholds, used here as the anchor for obligations common to US state comprehensive privacy laws.",
+  "note": "Anchored on California; other state laws (e.g. Virginia, Colorado, Connecticut, Texas) share these themes but differ in thresholds, rights and deadlines, and ADMT/risk-assessment/cyber-audit obligations phase in from 2026–2028.",
+  "sources": [
+    "https://cppa.ca.gov/regulations/pdf/ccpa_statute.pdf",
+    "https://cppa.ca.gov/regulations/pdf/ccpa_statute_eff_20260101.pdf",
+    "https://oag.ca.gov/privacy/ccpa",
+    "https://cppa.ca.gov/regulations/ccpa_updates.html",
+    "https://www.mofo.com/resources/insights/251007-ccpa-regulations-on-cybersecurity-risk-assessments"
+  ],
+  "requirements": [
+    {
+      "id": "1798.100(a)",
+      "title": "Notice at collection of categories, purposes and retention",
+      "controls": [
+        "priv.notice",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "1798.100(c)",
+      "title": "Collection and use reasonably necessary and proportionate",
+      "controls": [
+        "priv.lawful_basis",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "1798.100(d)",
+      "title": "Contracts with third parties, service providers, contractors",
+      "controls": [
+        "ops.supplier_mgmt"
+      ]
+    },
+    {
+      "id": "1798.100(e)",
+      "title": "Reasonable security procedures and practices",
+      "controls": [
+        "gov.infosec_policy",
+        "ops.encryption"
+      ]
+    },
+    {
+      "id": "1798.105",
+      "title": "Consumers' Right to Delete Personal Information",
+      "controls": [
+        "priv.subject_rights",
+        "priv.retention"
+      ]
+    },
+    {
+      "id": "1798.106",
+      "title": "Consumers' Right to Correct Inaccurate Personal Information",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "1798.110",
+      "title": "Consumers' Right to Know What Personal Information is Being Collected; Right to Access",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "1798.115",
+      "title": "Consumers' Right to Know What Personal Information is Sold or Shared and to Whom",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "1798.120",
+      "title": "Consumers' Right to Opt Out of Sale or Sharing of Personal Information",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "1798.121",
+      "title": "Consumers' Right to Limit Use and Disclosure of Sensitive Personal Information",
+      "controls": [
+        "priv.subject_rights",
+        "priv.lawful_basis"
+      ]
+    },
+    {
+      "id": "1798.125",
+      "title": "Consumers' Right of No Retaliation Following Opt Out or Exercise of Other Rights",
+      "controls": [
+        "priv.subject_rights"
+      ]
+    },
+    {
+      "id": "1798.130",
+      "title": "Notice, Disclosure, Correction, and Deletion Requirements",
+      "controls": [
+        "priv.subject_rights",
+        "priv.notice",
+        "ops.awareness_training"
+      ]
+    },
+    {
+      "id": "1798.135",
+      "title": "Methods of Limiting Sale, Sharing, and Use of Personal Information and Use of Sensitive Personal Information",
+      "controls": [
+        "priv.subject_rights",
+        "priv.notice"
+      ]
+    },
+    {
+      "id": "1798.150",
+      "title": "Personal Information Security Breaches",
+      "controls": [
+        "ops.encryption",
+        "ops.incident_response"
+      ]
+    },
+    {
+      "id": "11 CCR 7120",
+      "title": "Requirement to complete a cybersecurity audit (regulation)",
+      "controls": [
+        "gov.risk_assessment",
+        "gov.infosec_policy"
+      ]
+    },
+    {
+      "id": "11 CCR 7150",
+      "title": "When a business must conduct a risk assessment (regulation)",
+      "controls": [
+        "gov.risk_assessment",
+        "ai.impact_bias"
+      ]
+    },
+    {
+      "id": "11 CCR 7200",
+      "title": "ADMT for significant decisions subject to notice, opt-out and access (regulation)",
+      "controls": [
+        "ai.transparency",
+        "ai.explanation",
+        "ai.contestability"
+      ]
+    }
+  ]
+}

@@ -15,8 +15,8 @@ async function load(slug: string) {
   const facts = await gatherOrgFacts(row.orgId);
   if (!facts) return null;
   const sections = normaliseSections(row.sections);
-  const controls = sections.frameworks ? await computeControls(row.orgId) : [];
-  return buildTrustView(facts, sections, controls, { intro: row.intro, contactEmail: row.contactEmail, updatedAt: new Date().toISOString() });
+  const tracked = sections.frameworks ? await computeControls(row.orgId) : { frameworks: [], controls: [] };
+  return buildTrustView(facts, sections, tracked, { intro: row.intro, contactEmail: row.contactEmail, updatedAt: new Date().toISOString() });
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {

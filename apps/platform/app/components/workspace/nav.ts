@@ -5,7 +5,7 @@ import {
   Award, MessageSquare,
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
-  FileBarChart, UserCog, Lock, Target, LineChart,
+  FileBarChart, UserCog, Lock, Target, LineChart, Library,
 } from 'lucide-react';
 import { canManageTeamAndKeys } from '@/lib/roles';
 import { staffCan, canUseHq, type WorkspaceUser } from '@/lib/workspace';
@@ -65,7 +65,8 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'Compliance Tracking',
     summary: 'The requirements that apply to you, and the evidence against each.',
     items: [
-      { label: 'Controls', href: '/controls', icon: Layers, description: 'Each framework control, and the evidence behind it.' },
+      { label: 'Frameworks', href: '/frameworks', icon: Library, description: 'SOC 2, ISO 27001, GDPR and more: choose what you track, or add your own.' },
+      { label: 'Controls', href: '/controls', icon: Layers, description: 'Each framework requirement, and the evidence behind it.' },
       { label: 'Automated checks', href: '/checks', icon: ListChecks, description: 'What AIC found in your connected systems, and how to fix it.' },
       { label: 'Connected systems', href: '/integrations', icon: Plug, description: 'GitHub and AI providers AIC reads, and how.' },
       { label: 'Evidence Vault', href: '/evidence', icon: ShieldCheck, description: 'Requirements for your Division and the evidence you have filed.' },
