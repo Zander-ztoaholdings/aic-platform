@@ -3,7 +3,7 @@ import { getTenantDb, questionnaireItems, questionnaires, eq, and } from '@aic/d
 import { policyCaller } from '@/lib/policies';
 import { isUuid } from '@/lib/policy-hash';
 import { gatherOrgFacts } from '@/lib/org-facts';
-import { draftAnswer } from '@/lib/questionnaire';
+import { draftQuestions } from '@/lib/ai/draft-questions';
 
 /**
  * Work on one answer. action:
@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   } else if (action === 'redraft') {
     const facts = await gatherOrgFacts(c.orgId);
     if (!facts) return NextResponse.json({ error: 'Organisation not found' }, { status: 404 });
-    const d = draftAnswer(item.question, facts);
+    const [d] = await draftQuestions(c.orgId, [item.question], facts);
     set = { draft: d.draft, topic: d.topic, sources: d.sources, status: item.status === 'approved' ? 'approved' : d.status };
   } else {
     return NextResponse.json({ error: 'Unknown action.' }, { status: 400 });

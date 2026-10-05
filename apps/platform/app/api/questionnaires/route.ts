@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, questionnaires, questionnaireItems, eq, desc, sql } from '@aic/db';
 import { policyCaller } from '@/lib/policies';
 import { gatherOrgFacts } from '@/lib/org-facts';
-import { parseQuestions, draftAnswer } from '@/lib/questionnaire';
+import { parseQuestions } from '@/lib/questionnaire';
+import { draftQuestions } from '@/lib/ai/draft-questions';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,10 +36,11 @@ export async function POST(request: NextRequest) {
   const facts = await gatherOrgFacts(c.orgId);
   if (!facts) return NextResponse.json({ error: 'Organisation not found' }, { status: 404 });
 
+  const drafts = await draftQuestions(c.orgId, questions, facts);
   const id = await getTenantDb(c.orgId).query(async (tx) => {
     const [q] = await tx.insert(questionnaires).values({ orgId: c.orgId, title, requester: requester || null, createdBy: c.userId }).returning({ id: questionnaires.id });
     await tx.insert(questionnaireItems).values(questions.map((question, i) => {
-      const d = draftAnswer(question, facts);
+      const d = drafts[i];
       return { questionnaireId: q.id, orgId: c.orgId, position: i + 1, question, draft: d.draft, topic: d.topic, sources: d.sources, status: d.status };
     }));
     return q.id;

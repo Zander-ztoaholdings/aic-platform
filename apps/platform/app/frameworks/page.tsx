@@ -99,12 +99,26 @@ function CustomEditor({ initial, common, areas, onClose, onSaved }: {
   const title = useMemo(() => Object.fromEntries(common.map((c) => [c.key, c.title])), [common]);
   const grouped = useMemo(() => Object.entries(areas).map(([a, label]) => ({ label, items: common.filter((c) => c.area === a) })), [areas, common]);
 
-  function addFromPaste() {
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestNote, setSuggestNote] = useState('');
+  async function addFromPaste() {
     const parsed = parseRequirementList(paste);
     if (!parsed.length) return;
     const offset = reqs.length;
-    setReqs([...reqs, ...parsed.map((p, i) => ({ id: /^\d+$/.test(p.id) ? String(offset + i + 1) : p.id, title: p.title, controls: suggestControls(p.title) }))]);
+    const added = parsed.map((p, i) => ({ id: /^\d+$/.test(p.id) ? String(offset + i + 1) : p.id, title: p.title, controls: suggestControls(p.title) }));
+    setReqs((cur) => [...cur, ...added]);
     setPaste('');
+    // Ask AIC for a better first guess; keep the keyword guess if it cannot answer.
+    setSuggesting(true); setSuggestNote('');
+    try {
+      const r = await fetch('/api/frameworks/suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requirements: added.map(({ id, title }) => ({ id, title })) }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.map) {
+        const ids = new Set(added.map((a) => a.id));
+        setReqs((cur) => cur.map((x) => (ids.has(x.id) && Array.isArray(j.map[x.id]) ? { ...x, controls: j.map[x.id] } : x)));
+        setSuggestNote(j.source === 'ai' ? 'AIC read each requirement and suggested controls. Check every one before saving.' : 'Controls suggested from keywords. Check every one before saving.');
+      }
+    } finally { setSuggesting(false); }
   }
   const update = (i: number, r: Partial<CustomReq>) => setReqs(reqs.map((x, j) => (j === i ? { ...x, ...r } : x)));
 
@@ -125,7 +139,7 @@ function CustomEditor({ initial, common, areas, onClose, onSaved }: {
         <h2 className="text-[16px] font-semibold text-[#0e1b2c]">{initial ? `Edit ${initial.name}` : 'Add your own framework'}</h2>
         <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f5] text-[#0e1b2c]" aria-label="Close"><X className="h-4 w-4" /></button>
       </div>
-      <p className="text-[13px] leading-relaxed text-[#5e6b7b]">A customer&apos;s security schedule, an internal standard, a regulator&apos;s letter. Paste its requirements, one per line, and AIC suggests which common controls each one maps to. Check every suggestion: it is a keyword match, not a judgement. Your own frameworks never appear on your public Trust page.</p>
+      <p className="text-[13px] leading-relaxed text-[#5e6b7b]">A customer&apos;s security schedule, an internal standard, a regulator&apos;s letter. Paste its requirements, one per line, and AIC suggests which common controls each one maps to. Check every suggestion: it is a first guess, not a judgement. Your own frameworks never appear on your public Trust page.</p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-[13px] font-medium text-[#0e1b2c]">Name
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={120} placeholder="e.g. Acme Bank supplier schedule" className="mt-1 h-11 w-full rounded-xl border border-[#dde2e8] bg-white px-3 text-[15px] font-normal outline-none focus:border-[#a8772a]" />
@@ -139,7 +153,9 @@ function CustomEditor({ initial, common, areas, onClose, onSaved }: {
         <textarea id="paste" value={paste} onChange={(e) => setPaste(e.target.value)} rows={4}
           placeholder={'4.1, Suppliers must enforce multi-factor authentication for all staff\n4.2, Backups are tested at least annually\n4.3, Security incidents are reported to Acme within 24 hours'}
           className="mt-1 w-full rounded-xl border border-[#dde2e8] bg-white px-3 py-2.5 text-[14px] leading-relaxed outline-none focus:border-[#a8772a]" />
-        <button type="button" onClick={addFromPaste} disabled={!paste.trim()} className="mt-2 inline-flex h-10 items-center gap-1.5 rounded-full border border-[#dde2e8] bg-white px-4 text-[13px] font-medium text-[#0e1b2c] hover:border-[#a8772a] disabled:opacity-40"><Plus className="h-4 w-4" />Add these</button>
+        <button type="button" onClick={addFromPaste} disabled={!paste.trim() || suggesting} className="mt-2 inline-flex h-10 items-center gap-1.5 rounded-full border border-[#dde2e8] bg-white px-4 text-[13px] font-medium text-[#0e1b2c] hover:border-[#a8772a] disabled:opacity-40"><Plus className="h-4 w-4" />Add these</button>
+        {suggesting && <p className="mt-2 text-[13px] text-[#8a6a1f]">AIC is reading the requirements and suggesting controls…</p>}
+        {!suggesting && suggestNote && <p className="mt-2 text-[13px] text-[#5e6b7b]">{suggestNote}</p>}
       </div>
       {reqs.length > 0 && (
         <ul className="divide-y divide-[#eef1f5] rounded-xl border border-[#dde2e8]">

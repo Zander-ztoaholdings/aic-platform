@@ -8,6 +8,7 @@ import { sendDecisionCallback } from '@/lib/decision-callback';
 /**
  * A named person approves or overrides a held decision. Session only: an API
  * key identifies a system, and the whole point is that a person decided.
+ * A decision that was never held can be overridden after the fact.
  * Body: { action: 'approve' | 'override', note?: string, outcome?: unknown }
  * An override needs a reason (at least 10 characters) and the outcome that
  * replaces the system's.
@@ -36,7 +37,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       await tx.update(decisionRecords).set({ reviewStatus: 'expired' }).where(eq(decisionRecords.id, id));
       return { error: 'The review deadline for this decision has passed. The sending system has been told it expired.', status: 409 } as const;
     }
-    if (d.reviewStatus !== 'pending') return { error: 'This decision is not waiting for review.', status: 409 } as const;
+    // A held decision can be approved or overridden. A decision that was never
+    // held can still be overridden after the fact, from the decision log: the
+    // person changed the outcome in their own system and records it here,
+    // against the decision itself rather than by retyping it.
+    const afterTheFact = d.reviewStatus === 'not_required';
+    if (d.reviewStatus !== 'pending' && !(afterTheFact && b.action === 'override')) {
+      return { error: d.reviewStatus === 'overridden' ? 'This decision has already been overridden.' : 'This decision is not waiting for review.', status: 409 } as const;
+    }
 
     const now = new Date();
     const override = b.action === 'override';
@@ -44,7 +52,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       reviewStatus: override ? 'overridden' : 'approved',
       reviewedBy: userId, reviewedAt: now, reviewNote: note || null,
       ...(override ? { finalOutcome: b.outcome as object, isHumanOverride: true, overrideReason: note, overriddenBy: userId } : {}),
-    }).where(and(eq(decisionRecords.id, id), eq(decisionRecords.reviewStatus, 'pending'))).returning();
+    }).where(and(eq(decisionRecords.id, id), eq(decisionRecords.reviewStatus, d.reviewStatus))).returning();
     if (!updated) return { error: 'Someone else reviewed this decision first.', status: 409 } as const;
 
     await tx.insert(hitlLogs).values({

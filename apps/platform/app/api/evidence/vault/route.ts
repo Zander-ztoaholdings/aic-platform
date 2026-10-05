@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { controlFromSlot } from '@/lib/common-controls';
+import { parseTriage } from '@/lib/ai/triage';
 import { getTenantDb, auditRequirements, auditDocuments, organizations, eq, asc, desc } from '@aic/db';
 import { auth } from '@aic/auth';
 import { fetchPublishedStandard, type PublishedStandard } from '@/lib/standard';
@@ -42,6 +43,7 @@ export async function GET() {
         createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : null,
         verificationOutcome: d.verificationOutcome,
         verificationNotes: d.verificationNotes,
+        triage: parseTriage(d.aiTriageNotes),
         verifiedAt: d.verifiedAt ? new Date(d.verifiedAt).toISOString() : null,
         supersededBy: d.supersededBy,
       }));

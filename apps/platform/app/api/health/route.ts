@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { aiConfigured, aiModel } from '@/lib/ai/claude';
 import { getSystemDb, probeTenantIsolation, sql, EncryptionService } from '@aic/db';
 import { storageHealth } from '@aic/db/storage';
 import { standardHealth } from '@/lib/standard';
@@ -132,6 +133,12 @@ export async function GET() {
   checks.encryption = EncryptionService.isConfigured()
     ? { status: 'ok', latency_ms: 0, detail: 'key configured' }
     : { status: 'error', latency_ms: 0, detail: 'not configured: set ENCRYPTION_KEY' };
+
+  // AIC's own model account (questionnaire drafts, control suggestions, document first reads).
+  // Optional: without it those features fall back to rules, so this is reported as ok either way.
+  checks.ai_assist = aiConfigured()
+    ? { status: 'ok', latency_ms: 0, detail: `on (${aiModel()})` }
+    : { status: 'ok', latency_ms: 0, detail: 'off: rules only (set AIC_AI_API_KEY to switch on)' };
 
   // Evidence storage. Uploads fail without it, so it is reported, not assumed.
   const stoStart = Date.now();

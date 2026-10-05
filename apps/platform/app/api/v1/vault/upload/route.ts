@@ -3,7 +3,8 @@ import { auth } from '@aic/auth';
 import { getSystemDb, auditDocuments, auditRequirements, and, eq } from '@aic/db';
 import { StorageService, storageConfig } from '@aic/db/storage';
 import { canManageCompliance } from '@/lib/roles';
-import { CONTROL_SLOT_PREFIX, controlFromSlot } from '@/lib/common-controls';
+import { CONTROL_SLOT_PREFIX, controlFromSlot, COMMON_BY_KEY } from '@/lib/common-controls';
+import { triageDocument } from '@/lib/ai/triage';
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -32,10 +33,14 @@ export async function POST(req: NextRequest) {
     // If the submission names a requirement, it must be one of this
     // organisation's own — otherwise evidence could be attached to another
     // org's requirement, and the chain would record something untrue.
+    let purpose = slotType;
+    let guidance: string | null = null;
+    const controlKey = controlFromSlot(slotType);
+    if (controlKey) { purpose = `the control "${COMMON_BY_KEY[controlKey].title}"`; guidance = COMMON_BY_KEY[controlKey].evidence; }
     if (requirementId) {
       const check = getSystemDb();
       const [req_] = await check
-        .select({ id: auditRequirements.id })
+        .select({ id: auditRequirements.id, code: auditRequirements.code, title: auditRequirements.title, guidance: auditRequirements.evidenceGuidance })
         .from(auditRequirements)
         .where(and(
           eq(auditRequirements.id, requirementId),
@@ -49,6 +54,8 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+      purpose = `requirement ${req_.code ?? ''} of the AIC standard: ${req_.title}`.trim();
+      guidance = req_.guidance ?? null;
     }
 
     // 1. Persist to the evidence bucket (MinIO or any S3-compatible store)
@@ -68,7 +75,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'The file could not be stored. Nothing was saved; please try again.' }, { status: 502 });
     }
 
-    // 2. Register in Database
+    // 2. A first read by AIC's model, when configured, so the person filing
+    // learns straight away if the file is not what is asked for. Never blocks
+    // the upload and never sets the document's status.
+    const triage = await triageDocument({ fileName: file.name, buf: buffer, purpose, guidance });
+
+    // 3. Register in Database
     const db = getSystemDb();
     const [doc] = await db.insert(auditDocuments).values({
       orgId: session.user.orgId,
@@ -80,11 +92,13 @@ export async function POST(req: NextRequest) {
       uploadedBy: session.user.id,
       status: 'UPLOADED',
       requirementId,
+      aiTriageNotes: triage ? JSON.stringify(triage) : null,
     }).returning();
 
     return NextResponse.json({ 
       success: true, 
       document: doc,
+      triage,
       message: 'Evidence received. An AIC assessor will review it.' 
     });
 

@@ -134,6 +134,16 @@ As of 5 October 2026 aic-engine had **never been deployed** in Coolify (no deplo
 
 Systems that hold a decision for a person (`require_review: true`) can be called back. Callbacks are signed with a per-organisation secret derived from `INTEGRATIONS_STATE_SECRET`, so that variable must be set (`openssl rand -hex 32`) before clients use callbacks. Changing it later changes every organisation's signing secret, so set it once and keep it in the password manager.
 
+## 10b. AI assistance (optional)
+
+Three features use a language model when one is configured: drafting questionnaire answers the rules cannot place, suggesting which common controls a custom framework's requirements map to, and a first read of each uploaded evidence document. Without it they fall back to rules and nothing breaks.
+
+1. Create an API key on **AIC's own** Anthropic account (not a client's). Ask Anthropic for zero data retention on that account.
+2. Set `AIC_AI_API_KEY` on aic-platform. Optionally `AIC_AI_MODEL` (default `claude-sonnet-4-5`; set it to a current model name if that one is retired).
+3. Before switching it on for a client, the DPA must list Anthropic as a sub-processor and cover the transfer outside South Africa (POPIA section 72). Until the lawyer has signed that off, leave it off in production.
+
+**Check:** `/api/health` shows `ai_assist: on (<model>)`. Upload a PDF in the Evidence Vault; the confirmation shows AIC's first read.
+
 ## 11. The security mailbox
 
 `SECURITY.md` in both repositories and the website's /security page give `security@aiccertified.cloud` as the address for reporting vulnerabilities. Create it (an alias to Zander is fine), and check that it receives mail from outside before the pages go live.

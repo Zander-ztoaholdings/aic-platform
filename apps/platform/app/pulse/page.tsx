@@ -7,6 +7,9 @@ import { Activity, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardShell from '../components/DashboardShell';
 import { ReviewQueue } from './ReviewQueue';
+import { OverridePanel } from './OverridePanel';
+import { outcomeOptions, reasonOptions, outcomeLabel } from '@/lib/override';
+import { Fragment } from 'react';
 import { SectionCard } from '../components/ui/Eyebrow';
 import { canRecordDecisions } from '../../lib/roles';
 
@@ -39,6 +42,9 @@ type Decision = {
   overrideReason: string | null;
   overriddenBy: string | null;
   createdAt: string;
+  reviewStatus?: string;
+  finalOutcome?: unknown;
+  externalRef?: string | null;
 };
 
 type AiSystem = { id: string; name: string };
@@ -88,6 +94,7 @@ export default function PulsePage() {
   const [systems, setSystems] = useState<AiSystem[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
+  const [overriding, setOverriding] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const [systemName, setSystemName] = useState('');
@@ -179,7 +186,7 @@ export default function PulsePage() {
           <PageHeader eyebrow="AI overview" title="Decision log" lede="Decisions your systems have recorded, the human overrides, and who made them." />
         </div>
 
-        <ReviewQueue />
+        <ReviewQueue history={decisions} onChange={load} />
 
         <SectionCard>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -190,6 +197,112 @@ export default function PulsePage() {
           </div>
         </SectionCard>
 
+        <SectionCard className="!p-0 overflow-hidden">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <p className="text-sm">Loading the decision log…</p>
+            </div>
+          ) : decisions.length === 0 ? (
+            <div className="text-center py-16">
+              <Activity className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+              <h2 className="text-sm font-bold text-aic-navy mb-1">Nothing recorded yet</h2>
+              <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
+                Decisions arrive here as your systems send them to AIC. Each one can be overridden from its row,
+                in two taps.
+              </p>
+            </div>
+          ) : (
+            <>
+            {/* Phones: one card per decision, so the override panel has the full width. */}
+            <ul className="md:hidden divide-y divide-gray-100">
+              {decisions.map((d) => (
+                <li key={d.id} className="px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-bold text-aic-navy break-words">{d.systemName}</div>
+                      <div className="mt-0.5 text-sm text-gray-600">{summarize(d.outcome)} <span className="text-[11px] text-gray-400">· {timeAgo(d.createdAt)}</span></div>
+                    </div>
+                    {canOverride && !d.isHumanOverride && d.reviewStatus !== 'pending' && d.reviewStatus !== 'expired' && overriding !== d.id && (
+                      <button type="button" onClick={() => setOverriding(d.id)} className="inline-flex h-10 shrink-0 items-center rounded-full border border-[#dde2e8] bg-white px-4 text-[13px] font-medium text-[#0e1b2c]">Override</button>
+                    )}
+                  </div>
+                  {d.isHumanOverride && (
+                    <div className="mt-2">
+                      <span className="text-[12px] font-bold first-cap text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Overridden{outcomeLabel(d.finalOutcome) ? ` to ${outcomeLabel(d.finalOutcome)}` : ''}</span>
+                      {d.overrideReason && <div className="text-xs text-gray-500 mt-1">{d.overrideReason}</div>}
+                    </div>
+                  )}
+                  {overriding === d.id && (
+                    <div className="mt-3">
+                      <OverridePanel id={d.id} original={d.outcome} outcomes={outcomeOptions(decisions, d.systemName, d.outcome)} reasons={reasonOptions(decisions, d.systemName)}
+                        onDone={() => { setOverriding(null); toast.success('Override recorded.'); load(); }} onCancel={() => setOverriding(null)} />
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-[12px] first-cap text-gray-400 border-b border-gray-100">
+                    <th className="px-5 py-3 font-bold">System</th>
+                    <th className="px-5 py-3 font-bold">Outcome</th>
+                    <th className="px-5 py-3 font-bold">Override</th>
+                    <th className="px-5 py-3 font-bold">Recorded</th>
+                    {canOverride && <th className="px-5 py-3"><span className="sr-only">Actions</span></th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {decisions.map((d) => (
+                    <Fragment key={d.id}>
+                    <tr className="align-top">
+                      <td className="px-5 py-3 font-bold text-aic-navy">{d.systemName}</td>
+                      <td className="px-5 py-3 max-w-md text-gray-600">
+                        {summarize(d.outcome)}
+                        {d.explanation && <div className="text-xs text-gray-400 mt-0.5">{d.explanation}</div>}
+                      </td>
+                      <td className="px-5 py-3">
+                        {d.isHumanOverride ? (
+                          <div>
+                            <span className="text-[12px] font-bold first-cap text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
+                              Overridden{outcomeLabel(d.finalOutcome) ? ` to ${outcomeLabel(d.finalOutcome)}` : ''}
+                            </span>
+                            {d.overrideReason && (
+                              <div className="text-xs text-gray-500 mt-1 max-w-xs">{d.overrideReason}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3 font-mono text-[11px] text-gray-400 whitespace-nowrap">
+                        {timeAgo(d.createdAt)}
+                      </td>
+                      {canOverride && (
+                        <td className="px-5 py-2 text-right">
+                          {!d.isHumanOverride && d.reviewStatus !== 'pending' && d.reviewStatus !== 'expired' && overriding !== d.id && (
+                            <button type="button" onClick={() => setOverriding(d.id)} className="inline-flex h-9 items-center rounded-full border border-[#dde2e8] bg-white px-3.5 text-[13px] font-medium text-[#0e1b2c] hover:border-[#a8772a]">Override</button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                    {overriding === d.id && (
+                      <tr>
+                        <td colSpan={5} className="px-5 pb-4">
+                          <OverridePanel id={d.id} original={d.outcome} outcomes={outcomeOptions(decisions, d.systemName, d.outcome)} reasons={reasonOptions(decisions, d.systemName)}
+                            onDone={() => { setOverriding(null); toast.success('Override recorded.'); load(); }} onCancel={() => setOverriding(null)} />
+                        </td>
+                      </tr>
+                    )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            </>
+          )}
+        </SectionCard>
         {canOverride && (
           <SectionCard>
             {!formOpen ? (
@@ -198,7 +311,7 @@ export default function PulsePage() {
                 onClick={() => setFormOpen(true)}
                 className="flex items-center gap-2 font-mono text-xs font-bold text-[#c9920a] hover:text-aic-navy transition-colors"
               >
-                <ShieldCheck className="w-3.5 h-3.5" /> Record a human override
+                <ShieldCheck className="w-3.5 h-3.5" /> Record an override for a decision that is not in the log
               </button>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -218,8 +331,8 @@ export default function PulsePage() {
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 leading-relaxed max-w-xl">
-                  For a decision a system made that you reviewed and changed. Under HU-2 this has to be
-                  attributable to a named, signed-in person — that&apos;s you, right now.
+                  Only for a decision your systems did not send to AIC. If it is in the log below, press
+                  <strong> Override</strong> on its row instead: the system and outcome are already filled in.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -297,64 +410,6 @@ export default function PulsePage() {
           </SectionCard>
         )}
 
-        <SectionCard className="!p-0 overflow-hidden">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <p className="text-sm">Loading the decision log…</p>
-            </div>
-          ) : decisions.length === 0 ? (
-            <div className="text-center py-16">
-              <Activity className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-              <h2 className="text-sm font-bold text-aic-navy mb-1">Nothing recorded yet</h2>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto leading-relaxed">
-                Decisions arrive here as your systems log them via the API, or as your team records a
-                human override manually{canOverride ? ' — above' : ''}.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left text-[12px] first-cap text-gray-400 border-b border-gray-100">
-                    <th className="px-5 py-3 font-bold">System</th>
-                    <th className="px-5 py-3 font-bold">Outcome</th>
-                    <th className="px-5 py-3 font-bold">Override</th>
-                    <th className="px-5 py-3 font-bold">Recorded</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {decisions.map((d) => (
-                    <tr key={d.id} className="align-top">
-                      <td className="px-5 py-3 font-bold text-aic-navy">{d.systemName}</td>
-                      <td className="px-5 py-3 max-w-md text-gray-600">
-                        {summarize(d.outcome)}
-                        {d.explanation && <div className="text-xs text-gray-400 mt-0.5">{d.explanation}</div>}
-                      </td>
-                      <td className="px-5 py-3">
-                        {d.isHumanOverride ? (
-                          <div>
-                            <span className="text-[12px] font-bold first-cap text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
-                              Overridden
-                            </span>
-                            {d.overrideReason && (
-                              <div className="text-xs text-gray-500 mt-1 max-w-xs">{d.overrideReason}</div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-gray-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="px-5 py-3 font-mono text-[11px] text-gray-400 whitespace-nowrap">
-                        {timeAgo(d.createdAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </SectionCard>
       </div>
     </DashboardShell>
   );

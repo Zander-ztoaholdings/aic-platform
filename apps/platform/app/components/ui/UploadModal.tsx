@@ -1,5 +1,7 @@
 'use client';
 
+import { TriageNote } from './TriageNote';
+import type { Triage } from '@/lib/ai/triage-shared';
 import { useState, useRef, useCallback } from 'react';
 import { X, Upload, FileText, Info, Check } from 'lucide-react';
 import { Eyebrow } from './Eyebrow';
@@ -35,6 +37,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedCount, setUploadedCount] = useState(0);
+  const [triages, setTriages] = useState<{ name: string; triage: Triage }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -70,6 +73,8 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               : `${file.name}: upload failed (${res.status})`
           );
         }
+        const j = await res.json().catch(() => ({}));
+        if (j.triage) setTriages((t) => [...t, { name: file.name, triage: j.triage as Triage }]);
         uploaded += 1;
         setUploadedCount(uploaded);
       }
@@ -118,6 +123,11 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               <p className="text-sm text-[#6b7280] mb-6">
                 {uploadedCount} file{uploadedCount !== 1 ? 's' : ''} stored and checksummed.
               </p>
+              {triages.length > 0 && (
+                <div className="mb-6 space-y-2">
+                  {triages.map((t) => <TriageNote key={t.name} triage={t.triage} filename={triages.length > 1 ? t.name : undefined} />)}
+                </div>
+              )}
               <button
                 onClick={onClose}
                 className="inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5"

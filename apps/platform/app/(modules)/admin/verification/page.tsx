@@ -1,6 +1,8 @@
 'use client';
 
 import { controlFromSlot, COMMON_BY_KEY } from '@/lib/common-controls';
+import { parseTriage } from '@/lib/ai/triage-shared';
+import { TriageNote } from '@/app/components/ui/TriageNote';
 import { Eyebrow } from '@/app/components/ui/Eyebrow';
 import { useCallback, useEffect, useState } from 'react';
 import { Download } from 'lucide-react';
@@ -21,7 +23,7 @@ type Org = { orgId: string; name: string; division: number | null; total: number
 type Doc = {
   id: string; title: string; fileSize: string | null; createdAt: string | null;
   verificationOutcome: string | null; verificationNotes: string | null; verifiedAt: string | null;
-  slotType?: string | null; requirementCode: string | null; requirementText: string | null; evidenceGuidance: string | null; uploadedBy: string | null;
+  slotType?: string | null; aiTriageNotes?: string | null; requirementCode: string | null; requirementText: string | null; evidenceGuidance: string | null; uploadedBy: string | null;
 };
 
 const OUTCOME_PILL: Record<string, { tone: 'good' | 'warn' | 'bad'; label: string }> = {
@@ -167,6 +169,7 @@ function ReviewCard({ d, onDone }: { d: Doc; onDone: () => void }) {
         {integrity === 'verified' && <span className="text-[#2e7a57]">Fingerprint matches</span>}
         {integrity === 'mismatch' && <span className="text-[#b23a35] font-medium">Fingerprint does not match what was filed</span>}
       </div>
+      {!outcome && parseTriage(d.aiTriageNotes) && <TriageNote compact triage={parseTriage(d.aiTriageNotes)!} />}
       <textarea
         value={notes}
         onChange={(e) => setNotes(e.target.value)}

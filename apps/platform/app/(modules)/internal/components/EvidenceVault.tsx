@@ -1,5 +1,7 @@
 'use client';
 
+import { TriageNote } from '@/app/components/ui/TriageNote';
+import type { Triage } from '@/lib/ai/triage-shared';
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, Upload, Download } from 'lucide-react';
 import { Eyebrow } from '@/app/components/ui/Eyebrow';
@@ -188,6 +190,7 @@ export default function EvidenceVault() {
                                       )}
                                     </div>
                                     {d.verificationNotes && <p className="mt-1 text-[13px] text-[#5e6b7b] sm:pl-5">Assessor: {d.verificationNotes}</p>}
+                                    {!d.verificationOutcome && !d.supersededBy && (d as { triage?: Triage | null }).triage && <div className="mt-2 sm:pl-5"><TriageNote compact triage={(d as { triage?: Triage | null }).triage!} /></div>}
                                   </li>
                                 ))}
                               </ul>

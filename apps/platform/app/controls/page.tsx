@@ -8,6 +8,8 @@ import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '../components/ui/PageHeader';
 import type { EvaluatedControl, EvaluatedCommonControl, ControlStatus, FrameworkMeta } from '@/lib/controls';
 import { AREA_LABEL, controlSlot, type CommonArea } from '@/lib/common-controls';
+import { TriageNote } from '../components/ui/TriageNote';
+import type { Triage } from '@/lib/ai/triage-shared';
 
 /**
  * Requirements by framework, each with the evidence on the platform that
@@ -64,8 +66,9 @@ function UploadButton({ controlKey, onDone }: { controlKey: string; onDone: () =
   const ref = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [triage, setTriage] = useState<Triage | null>(null);
   async function send(file: File) {
-    setBusy(true); setMsg(null);
+    setBusy(true); setMsg(null); setTriage(null);
     const fd = new FormData();
     fd.append('file', file);
     fd.append('slotType', controlSlot(controlKey));
@@ -74,6 +77,7 @@ function UploadButton({ controlKey, onDone }: { controlKey: string; onDone: () =
     setBusy(false);
     if (!r.ok) { setMsg({ ok: false, text: j.error ?? 'The file could not be filed.' }); return; }
     setMsg({ ok: true, text: `${file.name} filed. An AIC assessor will review it.` });
+    setTriage(j.triage ?? null);
     onDone();
   }
   return (
@@ -81,9 +85,10 @@ function UploadButton({ controlKey, onDone }: { controlKey: string; onDone: () =
       <input ref={ref} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) send(f); e.target.value = ''; }} />
       <button type="button" onClick={() => ref.current?.click()} disabled={busy}
         className="inline-flex h-10 items-center gap-2 rounded-full border border-[#dde2e8] bg-white px-4 text-[13px] font-medium text-[#0e1b2c] hover:border-[#a8772a] disabled:opacity-50">
-        <Upload className="h-4 w-4" />{busy ? 'Filing…' : 'File a document'}
+        <Upload className="h-4 w-4" />{busy ? 'Filing and reading…' : 'File a document'}
       </button>
       {msg && <span className={`text-[13px] ${msg.ok ? 'text-[#2e7a57]' : 'text-[#b23a35]'}`}>{msg.text}</span>}
+      {triage && <div className="w-full"><TriageNote triage={triage} /></div>}
     </div>
   );
 }
