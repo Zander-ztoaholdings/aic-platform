@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSystemDb, getTenantIsolationStatus, sql } from '@aic/db';
+import { getSystemDb, probeTenantIsolation, sql } from '@aic/db';
 import { standardHealth } from '@/lib/standard';
 
 /**
@@ -120,8 +120,10 @@ export async function GET() {
 
   // Row-level security is only enforced when the app connects as the
   // restricted role. Reported, so it cannot be silently off.
-  const iso = getTenantIsolationStatus();
-  checks.tenant_isolation = { status: iso.enforced ? 'ok' : 'error', latency_ms: 0, detail: iso.enforced ? 'enforced' : 'not enforced: set TENANT_DATABASE_URL' };
+  const isoStart = Date.now();
+  const iso = await probeTenantIsolation();
+  checks.tenant_isolation = { status: iso.enforced ? 'ok' : 'error', latency_ms: Date.now() - isoStart, detail: iso.detail };
+  if (!iso.enforced) console.error('[HEALTH] tenant isolation:', iso.detail);
 
   // 4. The published standard. Registration cannot generate a roadmap without
   //    it, so a signup failing for this reason should be visible here first

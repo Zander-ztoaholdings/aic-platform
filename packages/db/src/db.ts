@@ -108,6 +108,31 @@ export function getTenantIsolationStatus() {
 }
 
 /**
+ * The same question, answered by trying it: signs in as the tenant role and
+ * asks Postgres who it is and whether that role can bypass row-level security.
+ * The variable being set is not proof; on 5 October 2026 it was set with a
+ * password the database did not accept, health said "enforced", and every
+ * client page failed. This is what /api/health reports now.
+ */
+export async function probeTenantIsolation(): Promise<{ enforced: boolean; detail: string }> {
+  if (!process.env.TENANT_DATABASE_URL) {
+    return { enforced: false, detail: 'not enforced: set TENANT_DATABASE_URL' };
+  }
+  getTenantDbInstance();
+  try {
+    const r = await tenantPool!.query(
+      `SELECT current_user AS u, (SELECT rolsuper OR rolbypassrls FROM pg_roles WHERE rolname = current_user) AS bypass`
+    );
+    const row = r.rows[0] as { u: string; bypass: boolean };
+    if (row.bypass) return { enforced: false, detail: `not enforced: ${row.u} can bypass row-level security` };
+    return { enforced: true, detail: `enforced (signed in as ${row.u})` };
+  } catch (e) {
+    const err = e as { code?: string; message?: string };
+    return { enforced: false, detail: `tenant role cannot sign in: ${err.code ?? ''} ${err.message ?? 'unknown error'}`.trim() };
+  }
+}
+
+/**
  * SOVEREIGN TENANT ISOLATION (ZERO-BYPASS)
  * 
  * Returns a database instance scoped to a specific organization.

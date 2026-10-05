@@ -61,7 +61,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:pg18
         env:
           POSTGRES_USER: aic
           POSTGRES_PASSWORD: aic

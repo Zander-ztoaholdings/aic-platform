@@ -22,13 +22,13 @@ psql "$DATABASE_URL" -f db/manual/013_policies.sql
 
 ## 2. Tenant isolation (row-level security)
 
-Migration 008 created a database role, `aic_tenant`, that cannot read another organisation's rows. The app only uses it once it has a password and a connection string.
+Done on 5 October 2026. Migration 008 created a database role, `aic_tenant`, that cannot read another organisation's rows; the platform uses it through `TENANT_DATABASE_URL` (same host and database as `DATABASE_URL`, user `aic_tenant`).
 
-1. In the Postgres container: `psql -U postgres -d aic -c "ALTER ROLE aic_tenant WITH PASSWORD '<openssl rand -hex 24>'"`
-2. On aic-platform in Coolify, add `TENANT_DATABASE_URL`: the same as `DATABASE_URL` with the user and password swapped for `aic_tenant` and the new password.
-3. Redeploy.
+**Check:** `/api/health` shows `tenant_isolation: ok, enforced (signed in as aic_tenant)`. The check actually signs in, so a wrong password shows as `tenant role cannot sign in: 28P01 …` rather than a false green.
 
-**Check:** `/api/health` shows `tenant_isolation: ok, enforced`. If it shows `not enforced`, the app is still running organisation queries as the owner role and relying on the `org_id` filter alone.
+**If the password and the variable ever disagree** (every client page shows the System Error screen and the log says `password authentication failed for user "aic_tenant"`): paste `db/manual/fix-tenant-password-in-platform-terminal.txt` into the aic-platform terminal. It sets the role's password to exactly what `TENANT_DATABASE_URL` contains and tests the login, without printing it. No redeploy needed.
+
+**Changing the owner (`postgres`) password:** edit every variable that carries it first (on 5 October: `DATABASE_URL` and `POSTGRES_URL` on aic-platform and aic-web, Prod and Preview), then run `ALTER ROLE postgres WITH PASSWORD '…'` in the Postgres terminal with the value copied from one of those variables, then redeploy aic-platform and aic-web straight away, then update the password field on the Postgres resource in Coolify so its backups keep working.
 
 ## 3. Encryption key
 
@@ -50,24 +50,32 @@ The limiter uses the same `REDIS_URL` as the event bus, which should already be 
 
 ## 5. Backups and the restore test
 
-Coolify's own Postgres backup is a convenience, not a backup: it sits on the same server. `scripts/backup/backup.sh` sends an encrypted copy elsewhere.
+As of 5 October 2026 production had **no backups at all**. Production runs Postgres 18 (`pgvector/pgvector:pg18`), so any `pg_dump` / `pg_restore` you use must be version 18 or newer.
 
-**One-time:**
+**Today, in Coolify (ten minutes, no server access needed).**
 
-1. On your laptop, not the server: `age-keygen -o ~/.config/aic/backup.key`. It prints a public key (`age1…`). Put the private key file in the password manager as an attachment and keep one offline copy. The server only ever gets the public key, so someone who takes over the server cannot read old backups.
-2. Create a bucket at Backblaze B2 or Cloudflare R2 (both cost little at this size), with an application key limited to that bucket.
-3. On the VPS: `apt install postgresql-client-16 age rclone`, then `rclone config` to add the bucket as a remote, for example `b2`.
-4. Add a cron entry for root on the VPS (02:30 UTC, after the integrations sync):
+1. Create a bucket at Backblaze B2 or Cloudflare R2, with an application key limited to that bucket.
+2. In Coolify, **Storages → Add S3 storage**, enter the endpoint, bucket, key and secret, and press **Validate**.
+3. Open the Postgres resource → **Backups → Add scheduled backup**: frequency `30 2 * * *` (02:30 UTC), tick **Save to S3** with that storage, keep 30 locally and 30 in S3. Save, then press **Backup now** once and check the file appears in the bucket.
+
+That gives a daily, off-server copy. It is not encrypted by AIC (the provider encrypts at rest), and it does not include evidence files.
+
+**Next, the encrypted backup with evidence files** (`scripts/backup/backup.sh`). On the VPS, as root:
+
+1. On your laptop, not the server: `age-keygen -o ~/.config/aic/backup.key`. It prints a public key (`age1…`). Keep the private key file in the password manager and one offline copy; the server only gets the public key, so someone who takes the server cannot read old backups.
+2. `apt install age rclone`, then `rclone config` to add the bucket as a remote, for example `b2`.
+3. Find the database container name with `docker ps --format '{{.Names}}' | grep mkmg7` and copy the script to `/opt/aic/scripts/backup/`.
+4. Add a cron entry for root:
 
 ```
-30 2 * * * DATABASE_URL='postgres://…' AGE_RECIPIENT='age1…' RCLONE_REMOTE='b2:aic-backups/prod' MINIO_RCLONE_REMOTE='minio:aic-evidence' /opt/aic/scripts/backup/backup.sh >> /var/log/aic-backup.log 2>&1
+45 2 * * * PG_CONTAINER='<container name>' AGE_RECIPIENT='age1…' RCLONE_REMOTE='b2:aic-backups/prod' /opt/aic/scripts/backup/backup.sh >> /var/log/aic-backup.log 2>&1
 ```
 
-`MINIO_RCLONE_REMOTE` is the evidence bucket; add MinIO as a second rclone remote (type S3, provider Minio, endpoint the MinIO URL). Leave it out and only the database is backed up, which loses every evidence file.
+With `PG_CONTAINER` set, the dump runs inside the database container with its own `pg_dump`, so the versions always match and no database port is opened. The container name changes when Coolify recreates the database, so re-check it after any database redeploy; the log will say `No such container` if it is stale. Add `MINIO_RCLONE_REMOTE` once evidence storage exists (see "Evidence storage" below); without it only the database is backed up.
 
 The script keeps 30 daily and 12 monthly copies.
 
-**Monthly, and after any change to the above:** on your laptop,
+**Monthly, and after any change to the above:** on your laptop, with Postgres 18 client tools (`brew install postgresql@18`) and a local Postgres 18 to restore into:
 
 ```
 AGE_IDENTITY=~/.config/aic/backup.key RCLONE_REMOTE=b2:aic-backups/prod \
@@ -75,7 +83,9 @@ RESTORE_URL=postgres://postgres:postgres@localhost:5432/postgres \
 scripts/backup/restore-test.sh
 ```
 
-It restores the newest dump into a throwaway database and checks that every migration is present and the core tables hold rows. Write the date and result in the operations log. A backup nobody has restored is a hope.
+It restores the newest dump into a throwaway database and checks that the core tables hold rows. For a Coolify backup instead, download the newest file from the bucket and run `pg_restore --list` on it, then restore it into a throwaway database the same way. Write the date and result in the operations log. A backup nobody has restored is a hope.
+
+**Evidence storage.** Uploaded evidence goes to MinIO (`MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_USE_SSL`). The 5 October inventory listed no MinIO resource in Coolify. If those variables are not set on aic-platform, uploads are failing in production and must be fixed before any client relies on the Evidence Vault: add MinIO as a Coolify resource (or point the variables at an S3-compatible bucket), set the variables, and test one upload.
 
 ## 6. Error and uptime monitoring
 

@@ -11,14 +11,20 @@
 #   4. Uploads to S3-compatible storage (Backblaze B2, Cloudflare R2, AWS S3).
 #   5. Keeps 30 daily and 12 monthly copies; deletes older ones.
 #
-# Needs on the host: pg_dump (16), age, rclone. Environment:
-#   DATABASE_URL           owner connection string
+# Needs on the host: age, rclone, and either docker (set PG_CONTAINER: the dump
+# then runs inside the database container with its own pg_dump, so the client
+# version always matches the server and no database port is opened) or a
+# pg_dump whose major version is at least the server's (production is 18).
+# Environment:
+#   PG_CONTAINER           the Postgres container name (docker ps), preferred
+#   DATABASE_URL           owner connection string, used only without PG_CONTAINER
 #   AGE_RECIPIENT          the backup public key (age1…)
 #   RCLONE_REMOTE          configured rclone remote:bucket/path, e.g. b2:aic-backups/prod
 #   MINIO_RCLONE_REMOTE    optional rclone remote for the evidence bucket, e.g. minio:aic-evidence
 set -euo pipefail
 
-: "${DATABASE_URL:?DATABASE_URL is required}"
+: "${PG_CONTAINER:=}"
+if [ -z "$PG_CONTAINER" ]; then : "${DATABASE_URL:?set PG_CONTAINER or DATABASE_URL}"; fi
 : "${AGE_RECIPIENT:?AGE_RECIPIENT is required}"
 : "${RCLONE_REMOTE:?RCLONE_REMOTE is required}"
 
@@ -28,8 +34,13 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 echo "[backup] dumping database"
-pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL" > "$work/db.dump"
-pg_restore --list "$work/db.dump" > /dev/null   # a dump that cannot be listed is not a backup
+if [ -n "$PG_CONTAINER" ]; then
+  docker exec "$PG_CONTAINER" sh -c 'pg_dump --format=custom --no-owner --no-privileges -U "${POSTGRES_USER:-postgres}" "${POSTGRES_DB:-postgres}"' > "$work/db.dump"
+  docker exec -i "$PG_CONTAINER" pg_restore --list < "$work/db.dump" > /dev/null   # a dump that cannot be listed is not a backup
+else
+  pg_dump --format=custom --no-owner --no-privileges "$DATABASE_URL" > "$work/db.dump"
+  pg_restore --list "$work/db.dump" > /dev/null
+fi
 age -r "$AGE_RECIPIENT" -o "$work/db-$stamp.dump.age" "$work/db.dump"
 (cd "$work" && sha256sum "db-$stamp.dump.age" > "db-$stamp.dump.age.sha256")
 
