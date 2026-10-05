@@ -15,7 +15,7 @@
     "db:migrate": "tsx src/migrate.ts"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^18.0.5",
     "drizzle-orm": "^0.45.1",
     "ioredis": "^5.9.3",
     "minio": "^8.0.6",
