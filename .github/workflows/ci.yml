@@ -1,0 +1,88 @@
+# Runs on every pull request and every push to main. Nothing reaches
+# production that has not type-checked, linted, passed its tests, built, and
+# had every migration applied to a fresh database.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Types, lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Type check
+        working-directory: apps/platform
+        run: npx tsc --noEmit -p .
+      - name: Lint
+        working-directory: apps/platform
+        run: npx eslint . --quiet
+      - name: Tests
+        working-directory: apps/platform
+        run: npx vitest run
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: check
+    env:
+      # Placeholders: the build must not need real secrets.
+      DATABASE_URL: postgres://ci:ci@localhost:5432/ci
+      AUTH_SECRET: ci-build-secret-ci-build-secret-ci-build
+      NEXTAUTH_URL: https://app.example.test
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - working-directory: apps/platform
+        run: NODE_OPTIONS=--max-old-space-size=4096 npx next build
+
+  migrations:
+    name: Migrations apply to a fresh database
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aic
+          POSTGRES_PASSWORD: aic
+          POSTGRES_DB: aic
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U aic" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://aic:aic@localhost:5432/aic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Schema from schema.ts
+        run: yes '' | npx drizzle-kit push --force
+      - name: Hand-written migrations, in order
+        run: for f in db/manual/0*.sql; do echo "== $f"; node scripts/apply-sql.mjs "$f"; done
+      - name: Every migration present
+        run: node scripts/verify-migrations.mjs
+      - name: Applying them twice changes nothing
+        run: for f in db/manual/0*.sql; do node scripts/apply-sql.mjs "$f" > /dev/null; done

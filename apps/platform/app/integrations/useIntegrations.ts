@@ -5,8 +5,8 @@ import type { CheckDefinition } from '@/lib/integrations/catalog';
 
 export type Integration = {
   id: string;
-  provider: 'github' | 'openai' | 'anthropic';
-  mode: 'github_app' | 'exporter' | 'api_key';
+  provider: 'github' | 'microsoft' | 'openai' | 'anthropic';
+  mode: 'github_app' | 'admin_consent' | 'exporter' | 'api_key';
   status: 'pending' | 'active' | 'error' | 'disconnected';
   accountLabel: string | null;
   externalId: string | null;
@@ -32,6 +32,7 @@ export type Check = {
 export type IntegrationsData = {
   canManage: boolean;
   githubAppConfigured: boolean;
+  microsoftConfigured: boolean;
   integrations: Integration[];
   checks: Check[];
   catalog: CheckDefinition[];

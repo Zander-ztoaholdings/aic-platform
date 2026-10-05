@@ -63,7 +63,7 @@ export default async function ContinuityDashboard() {
           <StandingSeal phase={phaseFromCertificationStatus(overview?.organisation.certificationStatus)} />
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-medium text-[#8a6a1f]">Continuity record</p>
-            <h1 className="mt-1 font-serif text-[32px] sm:text-[40px] leading-[1.08] font-semibold text-[#0e1b2c] tracking-[-0.01em]">
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               {overview?.organisation.name ?? 'Your organisation'}
             </h1>
             <p className="mt-3 text-[15px] text-[#5e6b7b] max-w-xl leading-relaxed">

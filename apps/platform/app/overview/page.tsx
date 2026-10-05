@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import type { Session } from 'next-auth';
 import { getSession } from '../../lib/auth';
-import { buildOrgOverview, type Gap } from '../../lib/org-overview';
+import { buildOrgOverview } from '../../lib/org-overview';
 import { canManageEstate, canEditOrgProfile } from '../../lib/roles';
 import DashboardShell from '../components/DashboardShell';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
@@ -160,7 +160,7 @@ export default async function OrgOverviewPage() {
     return (
       <DashboardShell>
         <div className="max-w-2xl mx-auto py-20 text-center">
-          <h1 className="font-serif text-2xl font-bold text-aic-navy">Organisation not found</h1>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Organisation not found</h1>
           <p className="mt-2 text-sm text-gray-500">
             This account is not attached to an organisation record.
           </p>
@@ -180,7 +180,7 @@ export default async function OrgOverviewPage() {
             <div className="text-[12px] font-bold text-aic-gold first-cap">
               Organisation AI Overview
             </div>
-            <h1 className="mt-2 font-serif text-3xl font-bold text-aic-navy tracking-tight">
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               {organisation.name}
             </h1>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">

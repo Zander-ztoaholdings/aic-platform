@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import DashboardShell from '../components/DashboardShell';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { canEditOrgProfile, canManageTeamAndKeys } from '../../lib/roles';
@@ -146,43 +147,36 @@ export default function OrganizationalSettings() {
 
     return (
         <DashboardShell>
-            <div className="max-w-4xl mx-auto space-y-12">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-aic-black/5 pb-6 md:pb-8">
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-aic-black tracking-tight tracking-tighter">Organizational Standards</h1>
-                        <p className="text-gray-500 font-serif mt-4 italic text-lg leading-relaxed">
-                            Configure your institutional profile and security protocols.
-                        </p>
-                    </div>
-                </div>
+            <div className="max-w-4xl space-y-6">
+                <PageHeader eyebrow="Account" title="Team and organisation" lede="Your organisation’s details as AIC holds them, and the people who can sign in to this workspace." />
 
                 {loading ? (
-                    <div className="text-center py-20 text-gray-400 italic font-serif">Loading organizational settings...</div>
+                    <p className="py-10 text-sm text-[#5e6b7b]">Loading…</p>
                 ) : (
-                <div className="grid grid-cols-1 gap-4 md:gap-12">
+                <div className="grid grid-cols-1 gap-5">
                     {/* Institutional Profile */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Institutional Profile</h3>
+                    <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Organisation</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                             <div>
-                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Entity Name</label>
+                                <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Organisation name</label>
                                 <input
-                                    className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="w-full bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                     value={settings.name}
                                     disabled={!canEditProfile}
                                     onChange={e => setSettings(prev => ({ ...prev, name: e.target.value }))}
                                 />
                             </div>
                             <div>
-                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Compliance Tier</label>
-                                <div className="px-4 py-3 bg-aic-black text-aic-paper font-mono text-[11.5px] font-bold rounded-xl inline-block">
+                                <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Tier</label>
+                                <div className="inline-flex h-11 items-center rounded-full border border-[#dde2e8] bg-[#f5f7f9] px-4 text-sm font-medium text-[#0e1b2c]">
                                     {String(settings.tier ?? '').replace('TIER_', 'Tier ')}
                                 </div>
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Primary Compliance Email</label>
+                                <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Contact email</label>
                                 <input
-                                    className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
+                                    className="w-full bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
                                     value={settings.contactEmail}
                                     readOnly
                                 />
@@ -191,11 +185,11 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Team Management */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Team Management</h3>
+                    <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Team</h3>
 
                         {!canManageTeam ? (
-                            <p className="text-sm font-serif text-gray-500 italic">
+                            <p className="text-sm text-[#5e6b7b]">
                                 Only an administrator can invite team members. Ask an admin on your team to add you.
                             </p>
                         ) : (
@@ -244,9 +238,9 @@ export default function OrganizationalSettings() {
                         }} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                 <div>
-                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Full Name</label>
+                                    <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Full name</label>
                                     <input
-                                        className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
+                                        className="w-full bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
                                         placeholder="Full name"
                                         value={inviteName}
                                         onChange={e => setInviteName(e.target.value)}
@@ -254,9 +248,9 @@ export default function OrganizationalSettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Institutional Email</label>
+                                    <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Email</label>
                                     <input
-                                        className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
+                                        className="w-full bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
                                         placeholder="name@company.com"
                                         type="email"
                                         value={inviteEmail}
@@ -265,14 +259,14 @@ export default function OrganizationalSettings() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[12px] font-bold text-gray-400 first-cap mb-3">Institutional Role</label>
+                                    <label className="block text-[13px] font-medium text-[#5e6b7b] mb-1.5">Role</label>
                                     <select
-                                        className="w-full bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all appearance-none"
+                                        className="w-full bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all appearance-none"
                                         value={inviteRole}
                                         onChange={e => setInviteRole(e.target.value)}
                                     >
-                                        <option value="ORG_USER">ORG USER (day-to-day access)</option>
-                                        <option value="ORG_ADMIN">ORG ADMIN (full org access)</option>
+                                        <option value="ORG_USER">Member (day-to-day work)</option>
+                                        <option value="ORG_ADMIN">Administrator (full org access)</option>
                                     </select>
                                 </div>
                             </div>
@@ -280,7 +274,7 @@ export default function OrganizationalSettings() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="bg-aic-black text-aic-paper px-5 md:px-8 py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-red transition-all disabled:opacity-50"
+                                    className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                                 >
                                     Invite team member
                                 </button>
@@ -291,22 +285,21 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Security Protocol */}
-                    <section className="bg-[#080808] text-aic-paper p-6 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-6 md:p-10 opacity-5 font-serif italic text-4xl md:text-6xl select-none first-cap">Security</div>
-                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10 relative z-10">Security Protocol</h3>
+                    <section className="bg-white border border-[#dde2e8] text-[#0e1b2c] p-5 md:p-7 rounded-xl">
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5 relative z-10">Security</h3>
 
                         <div className="space-y-8 relative z-10">
-                            <div className="p-4 sm:p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
+                            <div className="p-4 sm:p-6 bg-[#f5f7f9] border border-[#dde2e8] rounded-xl">
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
                                     <div>
-                                        <p className="text-sm font-serif font-bold text-aic-paper mb-1">Multi-Factor Authentication (MFA)</p>
+                                        <p className="text-sm font-semibold text-[#0e1b2c] mb-1">Two-step sign-in (MFA)</p>
                                         <p className="text-[12px] text-gray-500 first-cap">Required for {String(settings.tier ?? '').replace('TIER_', 'Tier ')} organisations</p>
                                     </div>
                                     <div className="flex items-center gap-4">
-                                        {settings.twoFactorEnabled && <span className="text-[11px] font-mono font-bold text-aic-gold bg-aic-gold/10 px-2 py-1 rounded">Active</span>}
+                                        {settings.twoFactorEnabled && <span className="text-[12px] font-medium text-[#2f7d4f] bg-[#2f7d4f]/10 px-2.5 py-1 rounded-full">Active</span>}
                                         <button 
                                             onClick={startMfaSetup}
-                                            className="bg-aic-paper/10 hover:bg-aic-paper/20 text-aic-paper px-4 py-2 rounded-lg text-[12px] font-bold first-cap transition-all"
+                                            className="inline-flex h-11 items-center rounded-full bg-[#0e1b2c] hover:bg-[#22344a] text-white px-5 text-sm font-medium transition-all"
                                         >
                                             {settings.twoFactorEnabled ? 'Reset MFA' : 'Configure MFA'}
                                         </button>
@@ -317,14 +310,14 @@ export default function OrganizationalSettings() {
                                     <motion.div 
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: 'auto' }}
-                                        className="mt-6 pt-6 border-t border-aic-paper/10 space-y-6"
+                                        className="mt-6 pt-6 border-t border-[#dde2e8] space-y-6"
                                     >
                                         <div className="flex flex-col md:flex-row gap-8 items-center">
-                                            <div className="bg-aic-paper p-4 rounded-2xl">
+                                            <div className="bg-white border border-[#dde2e8] p-3 rounded-xl">
                                                 <img src={mfaSetup.qrCode} alt="MFA QR Code" className="w-32 h-32" />
                                             </div>
                                             <div className="flex-1 space-y-4">
-                                                <p className="text-xs text-gray-400 leading-relaxed font-serif">
+                                                <p className="text-[13px] text-[#5e6b7b] leading-relaxed">
                                                     1. Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)<br/>
                                                     2. Enter the 6-digit verification code below to confirm setup.
                                                 </p>
@@ -335,7 +328,7 @@ export default function OrganizationalSettings() {
                                                         placeholder="000000"
                                                         value={mfaToken}
                                                         onChange={e => setMfaToken(e.target.value)}
-                                                        className="bg-aic-paper/5 border border-aic-paper/10 rounded-xl p-3 font-mono text-center tracking-[0.5em] focus:border-aic-gold outline-none w-32"
+                                                        className="bg-[#f5f7f9] border border-[#dde2e8] rounded-xl p-3 font-mono text-center tracking-[0.5em] focus:border-aic-gold outline-none w-32"
                                                     />
                                                     <button 
                                                         onClick={completeMfaSetup}
@@ -346,7 +339,7 @@ export default function OrganizationalSettings() {
                                                     </button>
                                                     <button 
                                                         onClick={() => setMfaSetup(null)}
-                                                        className="text-[12px] font-bold text-gray-500 first-cap hover:text-aic-paper"
+                                                        className="text-[12px] font-bold text-gray-500 first-cap hover:text-[#0e1b2c]"
                                                     >
                                                         Cancel
                                                     </button>
@@ -357,19 +350,19 @@ export default function OrganizationalSettings() {
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center p-4 sm:p-6 bg-aic-paper/5 border border-aic-paper/10 rounded-2xl">
+                            <div className="flex justify-between items-center gap-4 p-4 sm:p-5 bg-[#f5f7f9] border border-[#dde2e8] rounded-xl">
                                 <div>
-                                    <p className="text-sm font-serif font-bold text-aic-paper mb-1">Audit Trail Cryptographic Signing</p>
-                                    <p className="text-[12px] text-gray-500 first-cap tracking-tighter italic">SHA-256 Chain Verification active</p>
+                                    <p className="text-sm font-semibold text-[#0e1b2c] mb-1">Tamper-evident record</p>
+                                    <p className="text-[13px] text-[#5e6b7b]">Each entry in your continuity record is chained to the one before it with SHA-256, so a change to any entry is detectable.</p>
                                 </div>
-                                <span className="text-[11px] font-mono font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded">Secure</span>
+                                <span className="shrink-0 text-[12px] font-medium text-[#2f7d4f] bg-[#2f7d4f]/10 px-2.5 py-1 rounded-full">On</span>
                             </div>
                         </div>
                     </section>
 
                     {/* Data Residency */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Jurisdiction & Residency</h3>
+                    <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Jurisdiction & Residency</h3>
                         <div className="flex items-center gap-6 p-4 sm:p-6 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
                             <div className="w-12 h-12 rounded-xl bg-aic-paper border border-aic-black/5 flex items-center justify-center text-2xl font-serif font-bold">ZA</div>
                             <div>
@@ -382,11 +375,11 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Developer API Access */}
-                    <section className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
-                        <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-10">Developer API Access</h3>
+                    <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Developer API Access</h3>
 
                         {!canManageTeam ? (
-                            <p className="text-sm font-serif text-gray-500 italic">
+                            <p className="text-sm text-[#5e6b7b]">
                                 API keys are managed by an administrator.
                             </p>
                         ) : (
@@ -411,7 +404,7 @@ export default function OrganizationalSettings() {
 
                         <div className="space-y-6">
                             {loadingKeys ? (
-                                <div className="text-center py-6 text-gray-400 italic font-serif text-sm">Retrieving access keys...</div>
+                                <div className="py-6 text-sm text-[#5e6b7b]">Loading…</div>
                             ) : keys.length === 0 ? (
                                 <div className="text-center py-10 bg-aic-paper/30 border border-dashed border-aic-black/10 rounded-2xl text-gray-400 italic font-serif text-sm">
                                     No active API keys found.
@@ -438,9 +431,9 @@ export default function OrganizationalSettings() {
                             )}
 
                             <form onSubmit={handleGenerateKey} className="pt-6 border-t border-aic-black/5">
-                                <div className="flex gap-4">
+                                <div className="flex flex-col sm:flex-row gap-3">
                                     <input 
-                                        className="flex-1 bg-aic-paper/50 border border-aic-black/10 rounded-xl p-4 font-serif text-sm focus:border-aic-gold outline-none transition-all"
+                                        className="flex-1 min-w-0 bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
                                         placeholder="Key Label (e.g. Production CI/CD)"
                                         value={newKeyLabel}
                                         onChange={e => setNewKeyLabel(e.target.value)}
@@ -449,7 +442,7 @@ export default function OrganizationalSettings() {
                                     <button 
                                         type="submit"
                                         disabled={saving}
-                                        className="bg-aic-black text-aic-paper px-5 md:px-8 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
+                                        className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#0e1b2c] px-5 text-sm font-medium text-white hover:bg-[#22344a] disabled:opacity-50"
                                     >
                                         Generate New Key
                                     </button>
@@ -467,7 +460,7 @@ export default function OrganizationalSettings() {
                     <button
                         onClick={handleSave}
                         disabled={saving || loading}
-                        className="bg-aic-black text-aic-paper px-6 md:px-12 py-4 text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                        className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                     >
                         {saving ? 'SAVING...' : 'SAVE_PROTOCOL_CHANGES'}
                     </button>

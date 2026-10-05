@@ -4,7 +4,7 @@ import { orgCaller, logIntegrationChange } from '@/lib/integrations/http';
 import { AI_PROVIDERS, keyShapeProblem, keyHint, pullUsage, ProviderError, PROVIDER_LABEL, type Provider } from '@/lib/integrations/providers';
 import { syncOrg } from '@/lib/integrations/sync';
 
-const PROVIDERS = ['github', ...AI_PROVIDERS] as const;
+const PROVIDERS = ['github', 'microsoft', ...AI_PROVIDERS] as const;
 type AnyProvider = (typeof PROVIDERS)[number];
 
 function parseProvider(p: string): AnyProvider | null {
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const caller = await orgCaller({ manage: true });
   if ('error' in caller) return caller.error;
   const provider = parseProvider((await params).provider);
-  if (!provider || provider === 'github') return NextResponse.json({ error: 'Unknown provider.' }, { status: 404 });
+  if (!provider || provider === 'github' || provider === 'microsoft') return NextResponse.json({ error: 'Unknown provider.' }, { status: 404 });
 
   const body = (await request.json().catch(() => ({}))) as { mode?: string; key?: string };
   const label = PROVIDER_LABEL[provider as Provider];

@@ -75,6 +75,9 @@ const PUBLIC_PATHS = [
   // The nightly connected-systems sync. No session by nature; the route
   // refuses anything without CRON_SECRET, and refuses everything if it is unset.
   "/api/cron/",
+  // GitHub App webhooks. No session by nature; every request must carry a
+  // valid signature made with GITHUB_WEBHOOK_SECRET or it is refused.
+  "/api/integrations/github/webhook",
   // AIC's usage exporter script, which organisations download to run on their
   // own side. Contains no secrets; it is the same file for everyone.
   "/exporter/",

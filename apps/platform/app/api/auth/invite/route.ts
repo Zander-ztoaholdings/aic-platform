@@ -12,7 +12,7 @@ import { ROLE_LABEL, type OrgRole } from '@/lib/roles';
  */
 export async function GET(request: NextRequest) {
   const ip = getClientIP(request);
-  if (!checkRateLimit(`invite-view:${ip}`, 30).allowed) {
+  if (!(await checkRateLimit(`invite-view:${ip}`, 30)).allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
   const token = request.nextUrl.searchParams.get('token') ?? '';

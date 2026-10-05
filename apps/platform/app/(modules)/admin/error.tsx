@@ -15,9 +15,9 @@ export default function Error({
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 sm:p-6 text-center">
-      <div className="max-w-md bg-white p-6 md:p-12 rounded-3xl border border-[#dde2e8] shadow-2xl">
+      <div className="max-w-md bg-white p-6 md:p-12 rounded-xl border border-[#dde2e8]">
         <div className="mb-8">
-          <span className="text-3xl md:text-4xl text-red-700 font-mono font-bold tracking-tighter">ERR</span>
+          <span className="text-3xl md:text-4xl text-red-700 font-mono font-bold">ERR</span>
         </div>
 
         <h2 className="text-2xl font-serif font-bold text-[#0e1b2c] mb-4 tracking-tight">

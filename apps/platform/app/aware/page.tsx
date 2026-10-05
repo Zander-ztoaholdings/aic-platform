@@ -74,7 +74,7 @@ export default function AwarePage() {
     <DashboardShell>
       <div className="mx-auto max-w-3xl">
         <Eyebrow>AIC Certification · AIC Aware</Eyebrow>
-        <h1 className="text-[28px] font-semibold tracking-tight text-aic-navy">AIC Aware</h1>
+        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">AIC Aware</h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-gray-500">
           A self-declaration of where your organisation stands on accountable AI, made by a named person
           and verifiable by anyone. It is not certification, and your badge says so.
@@ -399,7 +399,7 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
 
   return (
     <div className="mt-8 space-y-5">
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A1728] via-[#10233d] to-[#1b3350] p-5 md:p-8 text-white shadow-[0_20px_50px_rgba(10,23,40,0.25)]">
+      <div className="overflow-hidden rounded-xl bg-gradient-to-br from-[#0A1728] via-[#10233d] to-[#1b3350] p-5 md:p-8 text-white shadow-[0_20px_50px_rgba(10,23,40,0.25)]">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <div className="text-[12.5px] font-semibold first-cap text-aic-gold-light">AIC Aware · self-declared</div>

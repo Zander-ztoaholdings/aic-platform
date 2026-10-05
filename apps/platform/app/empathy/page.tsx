@@ -43,11 +43,11 @@ export default function EmpathyDemo() {
     <div className="min-h-screen bg-gray-50/50 p-5 md:p-8">
       <div className="max-w-[1600px] mx-auto">
         <header className="mb-12">
-          <div className="flex items-center gap-2 text-[#c36c32] mb-1">
+          <div className="flex items-center gap-2 text-[#8a6a1f] mb-1">
             <Heart className="w-5 h-5 fill-current" />
             <span className="text-xs font-bold first-cap">Right to Empathy</span>
           </div>
-          <h1 className="text-3xl font-bold text-[#0A1728]">Empathy Scrutiny Engine (B0-2)</h1>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Empathy Scrutiny Engine (B0-2)</h1>
           <p className="text-gray-500 max-w-2xl">Analyze automated rejection letters and AI-generated communications for violations of human dignity and emotional intelligence.</p>
         </header>
 
@@ -56,14 +56,14 @@ export default function EmpathyDemo() {
           <div className="space-y-6">
             <Card className="p-4 sm:p-6 border-none shadow-sm">
               <h3 className="font-bold text-[#0A1728] mb-4 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-[#c36c32]" />
+                <MessageSquare className="w-5 h-5 text-[#8a6a1f]" />
                 Communication Draft
               </h3>
               <textarea 
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Paste the automated rejection email or notification text here..."
-                className="w-full h-64 bg-gray-50 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#c36c32]/20 resize-none border-none"
+                className="w-full h-64 bg-gray-50 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#a8772a]/20 resize-none border-none"
               />
               <div className="mt-4 flex justify-between items-center">
                 <div className="text-xs text-gray-400">Supported standards: ISO/IEC 42001, POPIA Sec 71</div>
@@ -92,13 +92,13 @@ export default function EmpathyDemo() {
             {result ? (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
                 <Card className="p-5 md:p-8 border-none shadow-md overflow-hidden relative">
-                  <div className="absolute top-0 left-0 w-1 h-full bg-[#c36c32]"></div>
+                  <div className="absolute top-0 left-0 w-1 h-full bg-[#a8772a]"></div>
                   
                   <div className="flex justify-between items-start mb-8">
                     <div>
                       <div className="text-xs font-bold text-gray-400 first-cap mb-1">Dignity Score</div>
                       <div className="text-[2rem] leading-tight md:text-5xl font-black text-[#0A1728]">
-                        {Math.round(result.score * 100)}<span className="text-[#c36c32] font-normal text-2xl">%</span>
+                        {Math.round(result.score * 100)}<span className="text-[#8a6a1f] font-normal text-2xl">%</span>
                       </div>
                     </div>
                     <Badge className={result.score > 0.7 ? "bg-green-500" : "bg-red-500"}>
@@ -108,7 +108,7 @@ export default function EmpathyDemo() {
 
                   <div className="space-y-6">
                     <div>
-                      <h4 className="font-bold text-sm text-[#0A1728] mb-3 first-cap tracking-tighter">AI Analysis Findings</h4>
+                      <h4 className="font-bold text-sm text-[#0A1728] mb-3 first-cap">AI Analysis Findings</h4>
                       <div className="space-y-2">
                         {result.violations?.length > 0 ? (
                           result.violations.map((v: string, i: number) => (
@@ -136,7 +136,7 @@ export default function EmpathyDemo() {
                 </Card>
               </motion.div>
             ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center p-6 md:p-12 border-2 border-dashed border-gray-200 rounded-3xl opacity-50">
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 md:p-12 border-2 border-dashed border-gray-200 rounded-xl opacity-50">
                 <Heart className="w-12 h-12 text-gray-300 mb-4" />
                 <h3 className="font-bold text-gray-400">Analysis Results</h3>
                 <p className="text-sm text-gray-400">Run the scrutiny engine to see results here.</p>

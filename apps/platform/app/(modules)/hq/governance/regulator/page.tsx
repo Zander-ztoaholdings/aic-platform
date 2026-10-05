@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { motion } from 'framer-motion';
 
@@ -13,8 +14,9 @@ export default function RegulatorRelationsPage() {
         <div className="space-y-12">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
                 <div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight mb-4 tracking-tighter text-[#0e1b2c]">Information Regulator</h1>
-                    <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
+                    <Eyebrow>HQ regulation</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Information Regulator</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         Formalizing the institutional relationship between AIC and the POPIA enforcement authority.
                     </p>
                 </div>
@@ -26,8 +28,7 @@ export default function RegulatorRelationsPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12">
                 {/* MoU Draft Section */}
-                <div className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-[3rem] shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-6 md:p-12 opacity-5 font-serif italic text-4xl md:text-6xl">DRAFT</div>
+                <div className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-xl relative overflow-hidden">
                     <h3 className="font-serif text-2xl mb-8 text-[#0e1b2c]">Memorandum of Understanding (MoU)</h3>
                     <div className="prose prose-invert prose-sm font-serif italic text-gray-500 space-y-6">
                         <p>1. **Objective:** To establish a voluntary certification mechanism that demonstrates compliance with POPIA Section 71.</p>

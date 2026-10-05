@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import DashboardShell from '../components/DashboardShell';
 import { motion } from 'framer-motion';
-import { Trophy, Globe, TrendingUp, UserCheck, ShieldCheck, Loader2, Zap, BarChart3 } from 'lucide-react';
+import { Trophy, Globe, TrendingUp, UserCheck, ShieldCheck, Loader2, BarChart3 } from 'lucide-react';
 
 export default function GlobalLeaderboard() {
   const [data, setData] = useState<any>(null);
@@ -23,7 +23,7 @@ export default function GlobalLeaderboard() {
     <DashboardShell>
       <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
         <Loader2 className="w-10 h-10 animate-spin text-[#8a6a1f]" />
-        <p className="italic text-aic-slate font-serif">Aggregating global accountability metrics...</p>
+        <p className="text-sm text-[#5e6b7b]">Loading…</p>
       </div>
     </DashboardShell>
   );
@@ -44,10 +44,10 @@ export default function GlobalLeaderboard() {
               <Globe className="w-4 h-4" />
               Global AI Integrity Index
             </div>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-[#0e1b2c] tracking-tighter leading-none">
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               Accountability Leaders<span className="text-[#8a6a1f]">.</span>
             </h1>
-            <p className="text-xl text-aic-slate font-serif leading-relaxed italic max-w-2xl">
+            <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
               Transparent benchmarking of algorithmic maturity. Ranking organizations by their verified commitment to the Five Algorithmic Rights.
             </p>
           </div>
@@ -61,39 +61,38 @@ export default function GlobalLeaderboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-[#f5f7f9] p-6 md:p-10 rounded-[3rem] border border-[#dde2e8] shadow-2xl relative overflow-hidden group hover:border-aic-cyan/30 transition-all"
+              className="bg-[#f5f7f9] p-6 md:p-10 rounded-xl border border-[#dde2e8] relative overflow-hidden group hover:border-aic-cyan/30 transition-all"
             >
               <div className="p-4 bg-aic-cyan/5 rounded-2xl mb-8 w-fit group-hover:bg-aic-cyan/10 transition-colors">
                 <s.icon className="w-6 h-6 text-[#8a6a1f]" />
               </div>
               <p className="text-[12px] font-bold text-aic-slate first-cap mb-3">{s.label}</p>
-              <p className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] tracking-tighter">{s.value}</p>
+              <p className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c]">{s.value}</p>
             </motion.div>
           ))}
         </div>
 
         {/* Rankings Table */}
-        <section className="bg-[#f5f7f9] border border-[#dde2e8] p-6 md:p-12 rounded-[3.5rem] shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-6 md:p-12 opacity-[0.02] font-serif italic text-9xl select-none pointer-events-none first-cap tracking-tighter">Maturity</div>
+        <section className="bg-[#f5f7f9] border border-[#dde2e8] p-6 md:p-12 rounded-[3.5rem] relative overflow-hidden">
           
           <div className="flex items-center justify-between mb-12 relative z-10">
             <div className="flex items-center gap-4">
               <Trophy className="w-8 h-8 text-[#8a6a1f]" />
               <h3 className="font-serif text-3xl font-bold text-[#0e1b2c]">Institutional Standings</h3>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-aic-cyan/5 border border-aic-cyan/20 rounded-full text-[12px] font-bold text-[#8a6a1f] first-cap">
-              <Zap className="w-3 h-3 fill-aic-cyan" /> Live Telemetry Active
-            </div>
           </div>
 
           <div className="space-y-4 relative z-10">
+            {data && !data.leaderboard?.length && (
+              <p className="text-sm text-[#5e6b7b]">No organisation has agreed to appear on the index yet.</p>
+            )}
             {(data?.leaderboard || []).map((org: any, i: number) => (
               <motion.div 
                 key={org.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 + (i * 0.05) }}
-                className="flex items-center justify-between p-5 md:p-8 bg-[#f5f7f9] border border-[#dde2e8] rounded-3xl hover:bg-[#eef1f5] hover:border-aic-cyan/20 transition-all group"
+                className="flex items-center justify-between p-5 md:p-8 bg-[#f5f7f9] border border-[#dde2e8] rounded-xl hover:bg-[#eef1f5] hover:border-aic-cyan/20 transition-all group"
               >
                 <div className="flex items-center gap-8">
                   <span className="font-mono text-lg font-bold text-aic-slate w-8">{String(i + 1).padStart(2, '0')}</span>

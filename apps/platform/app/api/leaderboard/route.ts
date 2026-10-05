@@ -59,11 +59,11 @@ export async function GET() {
       LIMIT 10
     `);
 
-    const [cohort]: any = await db.execute(sql`
+    const [cohort]: any = (await db.execute(sql`
       SELECT COUNT(*)::int AS n, AVG(integrity_score)::numeric AS avg_integrity
       FROM organizations
       WHERE public_directory_visible = TRUE
-    `);
+    `) as unknown as { rows: unknown[] }).rows;
 
     const n = Number(cohort?.n ?? 0);
 
@@ -81,16 +81,16 @@ export async function GET() {
       });
     }
 
-    const [overrides]: any = await db.execute(sql`
+    const [overrides]: any = (await db.execute(sql`
       SELECT
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE is_human_override)::int AS overridden
       FROM decision_records
-    `);
+    `) as unknown as { rows: unknown[] }).rows;
 
-    const [ledger]: any = await db.execute(sql`
+    const [ledger]: any = (await db.execute(sql`
       SELECT COUNT(*)::int AS formal FROM audit_ledger WHERE type = 'FORMAL'
-    `);
+    `) as unknown as { rows: unknown[] }).rows;
 
     const totalDecisions = Number(overrides?.total ?? 0);
     const overridden = Number(overrides?.overridden ?? 0);

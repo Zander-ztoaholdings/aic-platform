@@ -130,7 +130,7 @@ export function PulseMonitor({
         <svg width={svgW} height={svgH} className="flex-shrink-0">
           <polyline
             fill="none"
-            stroke="#c36c32"
+            stroke="#a8772a"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"

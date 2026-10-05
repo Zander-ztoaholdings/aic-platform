@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useCallback, useEffect, useState } from 'react';
 import AdminShell from '@/app/components/admin/AdminShell';
@@ -50,7 +51,8 @@ export default function AdminAwareBadges() {
     <AdminShell>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-[#0e1b2c]">AIC Aware badges</h1>
+          <Eyebrow>Register</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">AIC Aware badges</h1>
           <p className="text-sm text-gray-500 mt-1">Every badge issued, its status, and revocation. A revoked badge shows as revoked on its registry entry and on every site that embeds it.</p>
         </div>
 

@@ -1,79 +1,71 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { Pill, ago } from '@/app/components/admin/ui';
+
+/**
+ * Quality control: the evidence decisions assessors recorded in the last 60
+ * days, for a second reviewer to sample. Replaces three invented "QC-102"
+ * tasks attributed to a fictional "Dr. Sarah Khumalo" and a "98.4% accuracy"
+ * figure nothing measured.
+ */
+
+type Decision = { id: string; title: string; outcome: string; notes: string | null; verified_at: string; org_id: string; organisation: string; requirement: string | null; reviewer: string | null };
+const TONE: Record<string, 'good' | 'warn' | 'bad'> = { ACCEPTED: 'good', INSUFFICIENT: 'warn', REJECTED: 'bad' };
+const LABEL: Record<string, string> = { ACCEPTED: 'Accepted', INSUFFICIENT: 'Not enough', REJECTED: 'Rejected' };
 
 export default function QualityControlPage() {
-    const [tasks] = useState([
-        { id: 'QC-102', entity: 'Example Bank Ltd Audit', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REPORT' },
-        { id: 'QC-103', entity: 'Example Insurer SPI Policy', auditor: 'Auditor #04', status: 'FLAGGED', type: 'REQUIREMENT' },
-        { id: 'QC-104', entity: 'Example Healthcare XAI', auditor: 'Dr. Sarah Khumalo', status: 'PENDING', type: 'REQUIREMENT' }
-    ]);
+  const [rows, setRows] = useState<Decision[] | null>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    fetch('/api/v1/admin/qc', { cache: 'no-store' })
+      .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error(b.error); setRows(b.decisions); })
+      .catch((e) => setError(e.message || 'Could not load decisions.'));
+  }, []);
 
-    return (
-        <div className="space-y-12">
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
-                <div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4">Operations QC</h1>
-                    <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
-                        Ensuring the highest standard of audit integrity. Secondary review board for all institutional certifications.
-                    </p>
+  const byReviewer = new Map<string, number>();
+  for (const r of rows ?? []) byReviewer.set(r.reviewer ?? 'Unknown', (byReviewer.get(r.reviewer ?? 'Unknown') ?? 0) + 1);
+
+  return (
+    <div className="space-y-6">
+      <header>
+        <Eyebrow>HQ operations</Eyebrow>
+        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Quality control</h1>
+        <p className="mt-1 text-sm text-[#5e6b7b] max-w-2xl">
+          Evidence decisions from the last 60 days. Sample them: open the file, read the note, and if you disagree, record a new outcome on the
+          evidence review page. Both decisions stay on the record.
+        </p>
+      </header>
+      {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {rows && rows.length === 0 && (
+        <div className="rounded-xl border border-dashed border-[#c9ced6] bg-white p-6 text-sm text-[#5e6b7b]">No evidence decisions have been recorded in the last 60 days.</div>
+      )}
+      {rows && rows.length > 0 && (
+        <>
+          <p className="text-sm text-[#0e1b2c]">
+            {rows.length} decision{rows.length === 1 ? '' : 's'}: {[...byReviewer].map(([n, c]) => `${n} ${c}`).join(', ')}.
+          </p>
+          <ul className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee]">
+            {rows.map((r) => (
+              <li key={r.id} className="p-4 sm:p-5 space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-[#0e1b2c]">{r.organisation}</span>
+                  {r.requirement && <span className="text-sm text-[#5e6b7b]">{r.requirement}</span>}
+                  <Pill tone={TONE[r.outcome] ?? 'neutral'}>{LABEL[r.outcome] ?? r.outcome}</Pill>
                 </div>
-                <div className="text-right">
-                    <p className="text-[12px] font-bold text-blue-700 first-cap mb-2">Internal Health</p>
-                    <div className="text-2xl font-serif text-[#0e1b2c]">98.4% Accuracy</div>
-                </div>
-            </div>
-
-            <div className="bg-white border border-[#dde2e8] rounded-[2.5rem] overflow-hidden">
-                <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left">
-                    <thead className="bg-[#f5f7f9] border-b border-[#dde2e8] text-[12px] font-bold text-gray-500 first-cap">
-                        <tr>
-                            <th className="p-5 md:p-8 text-center">Reference</th>
-                            <th className="p-5 md:p-8">Audit Entity</th>
-                            <th className="p-5 md:p-8">Originating Auditor</th>
-                            <th className="p-5 md:p-8">Status</th>
-                            <th className="p-5 md:p-8 text-right">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#e6e9ee] font-serif">
-                        {tasks.map((task, i) => (
-                            <motion.tr 
-                                key={task.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.05 }}
-                                className="hover:bg-[#eef1f5] transition-colors group"
-                            >
-                                <td className="p-5 md:p-8 text-center font-mono text-[11.5px] text-gray-600 group-hover:text-[#8a6a1f] transition-colors">{task.id}</td>
-                                <td className="p-5 md:p-8 text-[#0e1b2c] font-bold tracking-tight">
-                                    {task.entity}
-                                    <span className="block text-[12px] text-gray-600 first-cap mt-1">{task.type}</span>
-                                </td>
-                                <td className="p-5 md:p-8 text-gray-500">{task.auditor}</td>
-                                <td className="p-5 md:p-8">
-                                    <span className={`px-3 py-1 rounded-full border text-[12px] font-bold first-cap ${
-                                        task.status === 'PENDING' ? 'bg-aic-gold/10 text-[#8a6a1f] border-aic-gold/20' : 'bg-aic-red/10 text-aic-red border-aic-red/20'
-                                    }`}>
-                                        {task.status}
-                                    </span>
-                                </td>
-                                <td className="p-5 md:p-8 text-right">
-                                    <button className="bg-[#0e1b2c] text-white px-4 sm:px-6 py-2 rounded-xl text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all shadow-xl">
-                                        REVIEW_EVIDENCE
-                                    </button>
-                                </td>
-                            </motion.tr>
-                        ))}
-                    </tbody>
-                </table></div>
-            </div>
-
-            <div className="mt-12 p-6 md:p-12 bg-[#f5f7f9] border border-dashed border-[#dde2e8] rounded-[3rem] text-center">
-                <p className="text-gray-600 font-serif italic text-sm mb-0 leading-relaxed">
-                    Quality Control is mandatory for 10% of all Tier 3 audits and 100% of all Tier 1 audits prior to final registry anchoring.
+                <p className="text-[13px] text-[#5e6b7b]">
+                  <a href={`/api/evidence/${r.id}/file`} className="underline decoration-[#d5dbe2] underline-offset-2 text-[#0e1b2c]">{r.title}</a>
+                  {' '}decided by {r.reviewer ?? 'an unknown reviewer'} {ago(r.verified_at)}.
                 </p>
-            </div>
-        </div>
-    );
+                {r.notes && <p className="text-[13px] text-[#0e1b2c]">“{r.notes}”</p>}
+              </li>
+            ))}
+          </ul>
+          <Link href="/admin/verification" className="inline-block text-sm font-medium text-[#8a6a1f] hover:underline">Open evidence review</Link>
+        </>
+      )}
+    </div>
+  );
 }

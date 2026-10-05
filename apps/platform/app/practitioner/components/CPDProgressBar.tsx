@@ -12,7 +12,7 @@ interface CPDProgressBarProps {
 
 export const CPDProgressBar = ({ progress, label, sublabel }: CPDProgressBarProps) => {
   return (
-    <div className="bg-aic-paper/[0.02] p-6 md:p-10 rounded-[3rem] border border-aic-paper/5 shadow-2xl relative overflow-hidden group">
+    <div className="bg-aic-paper/[0.02] p-6 md:p-10 rounded-xl border border-aic-paper/5 relative overflow-hidden group">
       {/* Background Glow */}
       <div className="absolute -top-24 -right-24 w-48 h-48 bg-aic-cyan/5 blur-[80px] rounded-full group-hover:bg-aic-cyan/10 transition-colors" />
 
@@ -26,7 +26,7 @@ export const CPDProgressBar = ({ progress, label, sublabel }: CPDProgressBarProp
           {sublabel && <p className="text-xs text-aic-slate italic font-serif mt-2">{sublabel}</p>}
         </div>
         <div className="text-right">
-          <span className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-aic-paper tracking-tighter">{progress}%</span>
+          <span className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-aic-paper">{progress}%</span>
         </div>
       </div>
 

@@ -17,14 +17,14 @@ const GENERIC = 'If an account exists for that address, a reset link is on its w
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
-    if (!checkRateLimit(`forgot:${ip}`, 5, 15 * 60_000).allowed) {
+    if (!(await checkRateLimit(`forgot:${ip}`, 5, 15 * 60_000)).allowed) {
       return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
     }
 
     const body = (await request.json().catch(() => null)) as { email?: unknown } | null;
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-    if (!checkRateLimit(`forgot-email:${email}`, 3, 60 * 60_000).allowed) {
+    if (!(await checkRateLimit(`forgot-email:${email}`, 3, 60 * 60_000)).allowed) {
       return NextResponse.json({ success: true, message: GENERIC });
     }
 

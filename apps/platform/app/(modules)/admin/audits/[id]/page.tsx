@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState, use } from 'react';
 import AdminShell from '../../components/AdminShell';
@@ -55,21 +56,22 @@ export default function AuditsDetailPage({ params: paramsPromise }: { params: Pr
             <div className="max-w-5xl mx-auto space-y-12">
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-3xl font-serif font-bold text-[#0e1b2c] tracking-tight">Requirement Verification</h1>
-                        <p className="text-gray-500 font-serif mt-2 italic">Detailed evidence review for Organization ID: {orgId.substring(0, 8)}</p>
+                        <Eyebrow>Assessments</Eyebrow>
+                        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Requirement Verification</h1>
+                        <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Detailed evidence review for Organization ID: {orgId.substring(0, 8)}</p>
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     {loading ? (
-                        <div className="p-6 md:p-12 text-center text-gray-500 italic">Syncing with secure vault...</div>
+                        <div className="p-6 md:p-10 text-center text-sm text-[#5e6b7b]">Loading…</div>
                     ) : requirements.map((req, i) => (
                         <motion.div 
                             key={req.id}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.05 }}
-                            className="bg-white border border-[#dde2e8] p-5 md:p-8 rounded-3xl group"
+                            className="bg-white border border-[#dde2e8] p-5 md:p-8 rounded-xl group"
                         >
                             <div className="flex justify-between items-start mb-8">
                                 <div>
@@ -93,7 +95,7 @@ export default function AuditsDetailPage({ params: paramsPromise }: { params: Pr
                                         {req.evidence_url}
                                     </a>
                                 ) : (
-                                    <p className="text-gray-600 font-serif italic text-sm">No evidence submitted yet.</p>
+                                    <p className="text-sm text-[#5e6b7b]">No evidence submitted yet.</p>
                                 )}
                             </div>
 

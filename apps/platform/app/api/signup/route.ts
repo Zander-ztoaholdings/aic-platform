@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         // is reachable without a session. Unthrottled, that is a free write
         // primitive against the production database for anyone who finds it.
         const ip = getClientIP(request);
-        const { allowed } = checkRateLimit(`signup:${ip}`, 5, 60 * 60_000);
+        const { allowed } = await checkRateLimit(`signup:${ip}`, 5, 60 * 60_000);
         if (!allowed) {
             return NextResponse.json(
                 { error: 'Too many signup attempts. Please try again later.' },

@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react';
 import DashboardShell from '../components/DashboardShell';
@@ -53,20 +54,21 @@ export default function IncidentsPage() {
 
     return (
         <DashboardShell>
-            <div className="max-w-6xl mx-auto pb-24">
-                <div className="mb-12">
-                    <h1 className="text-3xl font-serif font-bold text-aic-black underline decoration-aic-gold underline-offset-8">Human Accountability Queue</h1>
-                    <p className="text-gray-500 font-serif mt-4 italic">Resolve citizen appeals and maintain POPIA Section 71 compliance.</p>
+            <div className="max-w-6xl pb-24">
+                <div className="mb-8">
+                    <Eyebrow>Compliance tracking</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Incidents and appeals</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Appeals from people affected by an automated decision, and AI incidents your team has reported. Each one needs a person to review it.</p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-12">
                     {/* List View */}
                     <div className="lg:col-span-2 space-y-6">
                         {loading ? (
-                            <div className="p-6 md:p-12 text-center text-gray-500 italic">Syncing with appeal registry...</div>
+                            <div className="p-6 text-sm text-[#5e6b7b]">Loading…</div>
                         ) : incidents.length === 0 ? (
-                            <div className="p-6 md:p-12 border border-dashed border-aic-black/10 rounded-[2rem] text-center">
-                                <p className="text-gray-400 font-serif italic">No open appeals found. Your systems are maintaining human dignity.</p>
+                            <div className="p-6 md:p-8 border border-[#dde2e8] bg-white rounded-xl">
+                                <p className="text-sm text-[#5e6b7b]">No open appeals or incidents.</p>
                             </div>
                         ) : incidents.map((inc) => (
                             <motion.div 
@@ -89,7 +91,7 @@ export default function IncidentsPage() {
                                     <span className="text-[11.5px] font-mono text-gray-400">{new Date(inc.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-aic-black mb-2">{inc.citizen_email}</h3>
-                                <p className="text-sm font-serif text-gray-500 italic truncate mb-4">"{inc.description}"</p>
+                                <p className="text-sm text-[#5e6b7b] truncate mb-4">"{inc.description}"</p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[12px] font-bold text-aic-gold first-cap">{inc.system_name}</span>
                                     <span className="text-[11.5px] font-mono text-gray-400">View Details →</span>
@@ -107,7 +109,7 @@ export default function IncidentsPage() {
                                     initial={{ opacity: 0, x: 20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: 20 }}
-                                    className="bg-aic-black text-aic-paper p-6 md:p-12 rounded-[2.5rem] shadow-2xl h-fit border border-aic-paper/5"
+                                    className="bg-aic-black text-aic-paper p-6 md:p-12 rounded-xl h-fit border border-aic-paper/5"
                                 >
                                     <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-8">Incident Detail</h3>
                                     <div className="space-y-6 mb-12">
@@ -168,8 +170,8 @@ export default function IncidentsPage() {
                                     </div>
                                 </motion.div>
                             ) : (
-                                <div className="p-6 md:p-12 border border-dashed border-aic-black/10 rounded-[2.5rem] text-center bg-aic-paper/30">
-                                    <p className="text-gray-400 font-serif italic text-sm">Select an incident from the queue to perform human review.</p>
+                                <div className="p-6 md:p-8 border border-dashed border-[#dde2e8] rounded-xl">
+                                    <p className="text-sm text-[#5e6b7b]">Choose an item on the left to review it.</p>
                                 </div>
                             )}
                         </AnimatePresence>

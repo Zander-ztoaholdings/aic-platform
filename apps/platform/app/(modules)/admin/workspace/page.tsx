@@ -142,7 +142,7 @@ export default function GovernanceWorkspace() {
                 ISO 42001 Governance Workspace
               </span>
             </div>
-            <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] tracking-tighter leading-none">
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               Algorithm Audit Trail.
             </h1>
             
@@ -184,7 +184,7 @@ export default function GovernanceWorkspace() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <Loader2 className="w-8 h-8 animate-spin text-[#8a6a1f]" />
-            <p className="font-serif italic text-gray-500">Syncing governance blocks...</p>
+            <p className="text-sm text-[#5e6b7b]">Loading…</p>
           </div>
         ) : (
           <>
@@ -237,7 +237,7 @@ export default function GovernanceWorkspace() {
               <motion.footer 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-5 md:p-8 bg-red-700 text-aic-paper rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center gap-8"
+                className="p-5 md:p-8 bg-red-700 text-aic-paper rounded-xl shadow-2xl flex flex-col md:flex-row items-center gap-8"
               >
                 <div className="p-4 bg-[#f5f7f9] rounded-2xl">
                   <UserCheck className="w-8 h-8" />

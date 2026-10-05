@@ -3,6 +3,7 @@ import { getTenantDb, integrations, integrationChecks, aiSystems, eq } from '@ai
 import { orgCaller } from '@/lib/integrations/http';
 import { CHECKS } from '@/lib/integrations/catalog';
 import { githubAppConfigured } from '@/lib/integrations/github';
+import { microsoftConfigured } from '@/lib/integrations/microsoft';
 
 /**
  * Connected systems and the latest result of every automated check, for the
@@ -23,13 +24,14 @@ export async function GET() {
   return NextResponse.json({
     canManage: caller.canManage,
     githubAppConfigured: githubAppConfigured(),
+    microsoftConfigured: microsoftConfigured(),
     integrations: rows.map((i) => ({
       id: i.id,
       provider: i.provider,
       mode: i.mode,
       status: i.status,
       accountLabel: i.accountLabel,
-      externalId: i.provider === 'github' ? i.externalId : null,
+      externalId: i.provider === 'github' || i.provider === 'microsoft' ? i.externalId : null,
       secretHint: i.secretHint,
       lastSyncedAt: i.lastSyncedAt,
       lastError: i.lastError,

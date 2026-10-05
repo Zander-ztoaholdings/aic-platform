@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -28,7 +29,8 @@ export default function OrganisationsPage() {
 
   return (
     <AdminShell>
-      <h1 className="text-2xl font-semibold text-[#0e1b2c]">Organisations</h1>
+      <Eyebrow>Register</Eyebrow>
+      <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Organisations</h1>
       <p className="mt-1 text-sm text-[#5e6b7b]">Client organisations and their people. Suspend access, rename, or delete an empty organisation.</p>
       <input className={`${field} mt-6 max-w-sm`} placeholder="Search organisations" value={q} onChange={(e) => setQ(e.target.value)} />
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}

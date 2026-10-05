@@ -1,9 +1,10 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import { Eye, Download, Info } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow, SectionCard, CopperTag } from '../components/ui/Eyebrow';
+import { SectionCard, CopperTag } from '../components/ui/Eyebrow';
 import { ScoreRing } from '../components/ui/ScoreRing';
 
 type Report = {
@@ -31,7 +32,7 @@ export default function ReportsPage() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <Eyebrow>Monthly Compliance Reports</Eyebrow>
+        <PageHeader eyebrow="Compliance tracking" title="Reports" lede="Monthly reports generated from your record on the 1st of each month." />
 
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-2.5 items-start">
           <Info className="w-4 h-4 text-[#c9920a] flex-shrink-0 mt-0.5" />

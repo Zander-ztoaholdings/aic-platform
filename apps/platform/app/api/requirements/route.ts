@@ -44,8 +44,6 @@ export async function GET() {
   }
 }
 
-const ENGINE_URL = process.env.ENGINE_URL || 'http://localhost:8000';
-const ENGINE_API_KEY = process.env.ENGINE_API_KEY || '';
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -79,33 +77,13 @@ export async function PATCH(request: NextRequest) {
           return NextResponse.json({ error: 'Requirement not found or access denied' }, { status: 404 });
       }
 
-      // 1. Trigger Automated Technical Verification (Deep Tech Step)
-      const simulatedDocText = "This policy ensures human intervention and a manual override for all decisions. Data subjects have a right to appeal and request an explanation of the logic involved.";
-
-      let findings = 'Automated scan pending.';
-      let autoStatus = 'SUBMITTED';
-
-      try {
-          const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-          if (ENGINE_API_KEY) headers['X-API-Key'] = ENGINE_API_KEY;
-
-          const verifyRes = await fetch(`${ENGINE_URL}/api/v1/audit/verify-document`, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({ text: simulatedDocText })
-          });
-
-          if (verifyRes.ok) {
-              const result = await verifyRes.json();
-              findings = `Automated Verification: ${result.verification_score}% compliance. ${result.findings.join(' ')}`;
-              if (result.verification_score < 75) {
-                  autoStatus = 'FLAGGED';
-                  findings += ` Missing: ${result.missing_elements.join(', ')}`;
-              }
-          }
-      } catch (engineErr) {
-          console.error('Engine Verification Failed:', engineErr);
-      }
+      // This used to send a hard-coded paragraph ("This policy ensures human
+      // intervention…") to the engine as if it were the client's document, and
+      // store the engine's score as the finding. That is a fabricated
+      // verification. Evidence is now verified by a named assessor in
+      // /admin/verification; submitting only records that it was submitted.
+      const findings = null;
+      const autoStatus = 'SUBMITTED';
 
       // 2. Update the requirement with automated findings
       await tx
@@ -120,7 +98,7 @@ export async function PATCH(request: NextRequest) {
 
       return NextResponse.json({ 
           success: true, 
-          message: 'Evidence submitted and technically verified.',
+          message: 'Evidence submitted. An AIC assessor will review it.',
           findings 
       });
     });

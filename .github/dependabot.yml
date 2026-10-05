@@ -1,0 +1,18 @@
+# Weekly dependency updates, grouped so they arrive as one pull request per
+# ecosystem rather than thirty. Security updates are raised immediately
+# regardless of this schedule once Dependabot alerts are on.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

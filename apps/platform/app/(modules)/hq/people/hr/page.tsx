@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { motion } from 'framer-motion';
 
@@ -58,14 +59,11 @@ export default function InstitutionalRolesPage() {
         <div className="space-y-16">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
                 <div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4">Institutional Roles</h1>
-                    <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
+                    <Eyebrow>HQ people</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Institutional Roles</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         Defining the standards of excellence for the generation of accountability officers.
                     </p>
-                </div>
-                <div className="text-right">
-                    <p className="text-[12px] font-bold text-gray-600 first-cap mb-2">Registry Version</p>
-                    <div className="text-2xl font-serif text-[#0e1b2c]">Standard 3.1</div>
                 </div>
             </div>
 
@@ -76,7 +74,7 @@ export default function InstitutionalRolesPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white border border-[#dde2e8] rounded-[3rem] p-6 md:p-12 hover:border-[#dde2e8] transition-all group relative overflow-hidden"
+                        className="bg-white border border-[#dde2e8] rounded-xl p-6 md:p-12 hover:border-[#dde2e8] transition-all group relative overflow-hidden"
                     >
                         <div className="absolute top-0 right-0 p-6 md:p-12 opacity-5 font-serif italic text-8xl group-hover:opacity-10 transition-opacity">{role.grade}</div>
                         
@@ -115,7 +113,7 @@ export default function InstitutionalRolesPage() {
                 ))}
             </div>
 
-            <div className="p-6 md:p-12 border border-dashed border-[#dde2e8] rounded-[3rem] text-center bg-[#f5f7f9]">
+            <div className="p-6 md:p-12 border border-dashed border-[#dde2e8] rounded-xl text-center bg-[#f5f7f9]">
                 <p className="text-gray-600 font-serif italic text-sm mb-8">
                     Looking to join the mission? All applicants must undergo the preliminary ethics screening.
                 </p>

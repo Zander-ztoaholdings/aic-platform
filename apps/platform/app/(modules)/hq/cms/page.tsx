@@ -1,4 +1,5 @@
 'use client'
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -78,8 +79,9 @@ export default function CMSPage() {
                 >
                     <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-serif font-medium tracking-tight">Public Insights</h1>
-                            <p className="text-gray-500 font-serif mt-2 italic text-lg text-[#8a6a1f]">The "Voice of the Pioneer" content management.</p>
+                            <Eyebrow>HQ growth</Eyebrow>
+                            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Public Insights</h1>
+                            <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">The "Voice of the Pioneer" content management.</p>
                         </div>
                         <button 
                             onClick={() => setIsComposing(true)}
@@ -89,7 +91,7 @@ export default function CMSPage() {
                         </button>
                     </div>
 
-                    <div className="bg-white border border-[#dde2e8] rounded-3xl overflow-hidden shadow-2xl">
+                    <div className="bg-white border border-[#dde2e8] rounded-xl overflow-hidden">
                         <div className="p-4 sm:p-6 border-b border-[#dde2e8] bg-[#f5f7f9] flex justify-between items-center">
                             <span className="text-[12px] font-bold text-gray-500 first-cap">Active Archive</span>
                             <div className="flex gap-4">
@@ -104,7 +106,7 @@ export default function CMSPage() {
                         
                         <div className="divide-y divide-[#e6e9ee]">
                             {loading ? (
-                                <div className="p-6 md:p-12 text-center text-gray-500 font-serif italic">Syncing with content core...</div>
+                                <div className="p-6 md:p-10 text-center text-sm text-[#5e6b7b]">Loading…</div>
                             ) : posts.length === 0 ? (
                                 <div className="p-6 md:p-12 text-center text-gray-500">No posts found. Create your first insight.</div>
                             ) : posts.map((post, i) => (
@@ -153,7 +155,7 @@ export default function CMSPage() {
                     className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-12"
                 >
                     {/* Editor Form */}
-                    <div className="space-y-8 bg-white p-6 md:p-12 rounded-[3rem] border border-[#dde2e8]">
+                    <div className="space-y-8 bg-white p-6 md:p-12 rounded-xl border border-[#dde2e8]">
                         <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:items-center mb-8">
                             <h2 className="text-2xl font-serif font-bold">New Insight</h2>
                             <button onClick={() => setIsComposing(false)} className="text-[12px] font-bold text-gray-500 hover:text-[#0e1b2c] first-cap">Discard</button>
@@ -207,7 +209,7 @@ export default function CMSPage() {
                     <div className="space-y-8 p-6 md:p-12">
                         <span className="text-[12px] font-bold text-[#8a6a1f] first-cap">Live Verification Preview</span>
                         <div className="prose prose-invert prose-aic font-serif">
-                            <h1 className="text-[2rem] leading-tight md:text-5xl font-medium tracking-tight mb-8">{newPost.title || 'Draft Title'}</h1>
+                            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">{newPost.title || 'Draft Title'}</h1>
                             <div className="opacity-80 leading-relaxed text-lg">
                                 <ReactMarkdown>{newPost.content || '*Content preview will appear here as you type...*'}</ReactMarkdown>
                             </div>
@@ -217,7 +219,7 @@ export default function CMSPage() {
             )}
         </AnimatePresence>
 
-        <div className="p-6 md:p-12 border border-dashed border-[#dde2e8] rounded-3xl text-center">
+        <div className="p-6 md:p-12 border border-dashed border-[#dde2e8] rounded-xl text-center">
             <span className="text-2xl block mb-4">🛡️</span>
             <p className="text-gray-500 font-serif italic text-sm">
                 Markdown Engine v2.0 <br />

@@ -73,7 +73,7 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
                     initial={{ opacity: 0, scale: 0.95, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="relative w-full max-w-lg bg-aic-paper rounded-3xl shadow-2xl overflow-hidden border border-aic-black/5"
+                    className="relative w-full max-w-lg bg-aic-paper rounded-xl overflow-hidden border border-aic-black/5"
                 >
                     <div className="p-5 md:p-8">
                         <div className="flex justify-between items-start mb-8">
@@ -119,7 +119,7 @@ export default function EvidenceModal({ isOpen, onClose, requirement, onSubmit }
                             <button 
                                 type="submit" 
                                 disabled={isUploading}
-                                className="w-full bg-aic-black text-aic-paper py-4 rounded-xl font-bold text-xs first-cap hover:bg-aic-gold transition-colors disabled:opacity-50"
+                                className="w-full inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                             >
                                 {isUploading ? 'TRANSMITTING EVIDENCE...' : 'CONFIRM SUBMISSION'}
                             </button>

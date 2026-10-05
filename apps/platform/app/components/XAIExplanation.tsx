@@ -19,7 +19,7 @@ export default function XAIExplanation({ explanation }: XAIExplanationProps) {
         .slice(0, 10);
 
     return (
-        <div className="bg-aic-paper border border-aic-black/5 p-6 md:p-10 rounded-[2.5rem] shadow-xl">
+        <div className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
             <div className="flex justify-between items-start mb-12">
                 <div>
                     <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-4">Explainability Engine</h3>

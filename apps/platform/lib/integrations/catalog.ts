@@ -11,7 +11,7 @@
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'unknown';
 
-export type CheckSource = 'github' | 'ai_provider';
+export type CheckSource = 'github' | 'ai_provider' | 'microsoft';
 
 export interface CheckDefinition {
   key: string;
@@ -107,6 +107,40 @@ export const CHECKS: CheckDefinition[] = [
     why: 'Usage shows models being called. Each should belong to a declared AI system, so someone is accountable for what it does.',
     fix: 'Link each listed model to the declared system that uses it (or mark it as not used for decisions), or have the exporter name the system on each usage line.',
     controls: ['AIC HU-1', 'POPIA s71'],
+  },
+
+  // ── Microsoft 365: who can sign in, and how ───────────────────────────────
+  {
+    key: 'm365.mfa_enforced',
+    source: 'microsoft',
+    title: 'A second factor is required at sign-in',
+    why: 'A password alone is the most common way into a company. Microsoft 365 can require a second factor of everyone; this checks that it does.',
+    fix: 'In Entra ID, turn on security defaults, or create a Conditional Access policy that requires multifactor authentication for all users.',
+    controls: ['ISO 27001 A.8.5', 'POPIA s19'],
+  },
+  {
+    key: 'm365.mfa_registered',
+    source: 'microsoft',
+    title: 'Everyone has a second factor registered',
+    why: 'A requirement nobody has registered for is not protection yet. People without a registered method are the gap.',
+    fix: 'Ask each listed person to register the Microsoft Authenticator app at aka.ms/mysecurityinfo. Start with administrators.',
+    controls: ['ISO 27001 A.8.5', 'ISO 27001 A.5.17'],
+  },
+  {
+    key: 'm365.global_admins',
+    source: 'microsoft',
+    title: 'Global administrators are few, but more than one',
+    why: 'Every global administrator can change anything in the tenant. Too many widens the target; only one means losing that account locks everyone out.',
+    fix: 'Keep two to four global administrators. Give everyone else a narrower admin role for the job they do.',
+    controls: ['ISO 27001 A.8.2', 'ISO 27001 A.5.15'],
+  },
+  {
+    key: 'm365.stale_accounts',
+    source: 'microsoft',
+    title: 'Unused accounts are switched off',
+    why: 'Accounts of people who have left, or never used them, still open doors. Nobody notices when one is misused.',
+    fix: 'Disable each listed account if the person has left or no longer needs it, and add account removal to your leaver process.',
+    controls: ['ISO 27001 A.5.18', 'POPIA s19'],
   },
 ];
 

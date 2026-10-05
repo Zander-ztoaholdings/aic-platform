@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { motion } from 'framer-motion';
 import { SADC_LEGAL_REGISTRY } from '@aic/legal';
@@ -11,8 +12,9 @@ export default function RegionalExpansionPage() {
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
                 <div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4 text-[#0e1b2c]">Global Expansion</h1>
-                    <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
+                    <Eyebrow>HQ regulation</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Global Expansion</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         Strategic tracking of AIC institutional entry across global jurisdictions.
                     </p>
                 </div>
@@ -29,7 +31,7 @@ export default function RegionalExpansionPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-[3rem] relative overflow-hidden group hover:border-aic-gold/20 transition-all"
+                        className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-xl relative overflow-hidden group hover:border-aic-gold/20 transition-all"
                     >
                         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-12 relative z-10">
                             <div className="lg:col-span-1 border-r border-[#dde2e8] pr-12">
@@ -48,7 +50,7 @@ export default function RegionalExpansionPage() {
                                 <div className="flex flex-wrap gap-2">
 :apps/platform/app/(modules)/hq/governance/expansion/page.tsx
                                     {j.rights.map((r: string) => (
-                                        <span key={r} className="px-3 py-1 bg-[#f5f7f9] rounded-lg text-[12px] text-gray-500 first-cap tracking-tighter italic">:apps/hq/app/governance/expansion/page.tsx
+                                        <span key={r} className="px-3 py-1 bg-[#f5f7f9] rounded-lg text-[12px] text-gray-500 first-cap italic">:apps/hq/app/governance/expansion/page.tsx
                                             {r}
                                         </span>
                                     ))}

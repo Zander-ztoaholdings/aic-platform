@@ -1,9 +1,10 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import { Plus, Copy, Check, ExternalLink, Lock, Trash2 } from 'lucide-react';
 import DashboardShell from '../../components/DashboardShell';
-import { Eyebrow, SectionCard } from '../../components/ui/Eyebrow';
+import { SectionCard } from '../../components/ui/Eyebrow';
 import { StatusChip } from '../../components/ui/StatusChip';
 
 type ApiKey = {
@@ -99,7 +100,7 @@ export default function KeysPage() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <Eyebrow>API & Access Keys</Eyebrow>
+        <PageHeader eyebrow="Account" title="API and access keys" lede="Keys let your systems record decisions and send usage to AIC. Each key works for your organisation only." />
 
         {/* Revealed key banner */}
         {revealedKey && (

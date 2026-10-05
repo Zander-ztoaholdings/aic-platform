@@ -1,4 +1,5 @@
 'use client'
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useState, useEffect } from 'react'
 import AdminShell from '../components/AdminShell'
@@ -122,23 +123,24 @@ export default function AuditsPage() {
   return (
     <AdminShell>
       <div className="space-y-8">
+        <PageHeader eyebrow="Assessments" title="Audits" lede="Scheduled and completed audits across client organisations, and who is assigned to each." />
         {/* Stats Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
             <p className="text-gray-500 text-xs first-cap mb-2">Scheduled</p>
-            <p className="text-3xl font-bold text-amber-700">{upcoming.length}</p>
+            <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{upcoming.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
             <p className="text-gray-500 text-xs first-cap mb-2">In Progress</p>
-            <p className="text-3xl font-bold text-blue-700">{inProgress.length}</p>
+            <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{inProgress.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
             <p className="text-gray-500 text-xs first-cap mb-2">Completed (YTD)</p>
-            <p className="text-3xl font-bold text-green-700">{completed.length}</p>
+            <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{completed.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
             <p className="text-gray-500 text-xs first-cap mb-2">Findings (YTD)</p>
-            <p className="text-3xl font-bold">
+            <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">
               {completed.reduce((sum, a) => sum + (a.findings || 0), 0)}
             </p>
           </div>
@@ -175,7 +177,7 @@ export default function AuditsPage() {
         {/* Schedule Modal */}
         {isScheduling && (
           <div className="fixed inset-0 bg-white backdrop-blur-sm z-50 flex items-center justify-center p-4 sm:p-6">
-            <div className="bg-white border border-[#dde2e8] rounded-2xl p-5 md:p-8 max-w-lg w-full shadow-2xl">
+            <div className="bg-white border border-[#dde2e8] rounded-2xl p-5 md:p-8 max-w-lg w-full">
               <h3 className="text-xl font-bold mb-6">Schedule Institutional Audit</h3>
               <form onSubmit={handleCreateAudit} className="space-y-6">
                 <div>
@@ -248,7 +250,7 @@ export default function AuditsPage() {
         {/* Audit Sections */}
         <div className="space-y-6">
           {loading ? (
-            <div className="py-20 text-center text-gray-500 italic">Synchronizing institutional audit registry...</div>
+            <div className="py-10 text-sm text-[#5e6b7b]">Loading…</div>
           ) : (
             <>
           {/* In Progress */}
@@ -297,7 +299,7 @@ export default function AuditsPage() {
 
           {/* Upcoming */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-amber-700">Upcoming Schedule</h3>
+            <h3 className="text-base font-semibold mb-3 text-[#0e1b2c]">Upcoming</h3>
             <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden">
               <div className="overflow-x-auto"><table className="min-w-[640px] w-full">
                 <thead className="bg-white text-gray-500 text-[12px] first-cap">
@@ -310,7 +312,7 @@ export default function AuditsPage() {
                 </thead>
                 <tbody className="divide-y divide-[#e6e9ee]">
                   {upcoming.length === 0 ? (
-                    <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic">No audits scheduled for this period.</td></tr>
+                    <tr><td colSpan={4} className="p-6 md:p-10 text-center text-sm text-[#5e6b7b]">No audits scheduled for this period.</td></tr>
                   ) : upcoming.map((audit) => (
                     <tr key={audit.id} className="hover:bg-[#eef1f5]">
                       <td className="p-4 font-medium">{audit.org_name}</td>
@@ -341,7 +343,7 @@ export default function AuditsPage() {
 
           {/* Completed */}
           <div>
-            <h3 className="text-lg font-bold mb-4 text-green-700">Audit History</h3>
+            <h3 className="text-base font-semibold mb-3 text-[#0e1b2c]">Completed</h3>
             <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden text-gray-500">
               <div className="overflow-x-auto"><table className="min-w-[640px] w-full">
                 <thead className="bg-white text-gray-500 text-[12px] first-cap">
@@ -354,14 +356,14 @@ export default function AuditsPage() {
                 </thead>
                 <tbody className="divide-y divide-[#e6e9ee]">
                   {completed.length === 0 ? (
-                    <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 italic">No completed audits in historical registry.</td></tr>
+                    <tr><td colSpan={4} className="p-6 md:p-10 text-center text-sm text-[#5e6b7b]">No completed audits yet.</td></tr>
                   ) : completed.map((audit) => (
                     <tr key={audit.id} className="hover:bg-[#eef1f5]">
                       <td className="p-4 font-medium text-[#0e1b2c]">{audit.org_name}</td>
                       <td className="p-4 text-sm">{audit.auditor_name}</td>
                       <td className="p-4 text-sm font-mono">{new Date(audit.updated_at || audit.created_at).toLocaleDateString()}</td>
                       <td className="p-4">
-                        <span className="text-[11.5px] font-bold font-mono text-green-700 bg-green-50 px-2 py-1 rounded">
+                        <span className="text-[11.5px] font-bold font-mono text-[#0e1b2c] bg-green-50 px-2 py-1 rounded">
                           CERTIFIED_COMPLIANT
                         </span>
                       </td>

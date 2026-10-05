@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSystemDb, sql } from '@aic/db';
+import { getSystemDb, getTenantIsolationStatus, sql } from '@aic/db';
 import { standardHealth } from '@/lib/standard';
 
 /**
@@ -85,8 +85,9 @@ export async function GET() {
       ['audit_documents', 'requirement_id'],     // 002
       ['audit_documents', 'verified_by'],        // 002
       ['issued_certifications', 'suspended_at'], // 002
+      ['api_keys', 'key_lookup'],                // 012
     ];
-    const expectedTables = ['audit_findings', 'corrective_actions']; // 002
+    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies']; // 002, 011, 013
 
     const found = await db.execute(sql`
       SELECT table_name, column_name FROM information_schema.columns
@@ -109,13 +110,18 @@ export async function GET() {
       ? {
           status: 'error',
           latency_ms: Date.now() - schemaStart,
-          detail: `behind — missing ${missing.join(', ')} (apply db/manual/002 and 003)`,
+          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 013)`,
         }
-      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 003' };
+      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 013' };
   } catch (err: unknown) {
     console.error('[HEALTH] schema check failed:', err);
     checks.schema = { status: 'error', latency_ms: Date.now() - schemaStart, detail: 'Could not read' };
   }
+
+  // Row-level security is only enforced when the app connects as the
+  // restricted role. Reported, so it cannot be silently off.
+  const iso = getTenantIsolationStatus();
+  checks.tenant_isolation = { status: iso.enforced ? 'ok' : 'error', latency_ms: 0, detail: iso.enforced ? 'enforced' : 'not enforced: set TENANT_DATABASE_URL' };
 
   // 4. The published standard. Registration cannot generate a roadmap without
   //    it, so a signup failing for this reason should be visible here first

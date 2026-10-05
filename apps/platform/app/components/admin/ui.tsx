@@ -32,7 +32,7 @@ export function Button({ variant = 'default', className = '', ...p }: React.Butt
 export function Panel({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-white" onClick={onClose}>
-      <aside onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-md overflow-y-auto border-l border-[#dde2e8] bg-white p-4 sm:p-6 shadow-2xl" role="dialog" aria-label={title}>
+      <aside onClick={(e) => e.stopPropagation()} className="h-full w-full max-w-md overflow-y-auto border-l border-[#dde2e8] bg-white p-4 sm:p-6" role="dialog" aria-label={title}>
         <div className="mb-6 flex items-start justify-between gap-4">
           <h2 className="text-lg font-semibold text-[#0e1b2c]">{title}</h2>
           <button onClick={onClose} className="rounded-md px-2 text-[#8a95a3] hover:text-[#0e1b2c]" aria-label="Close">✕</button>

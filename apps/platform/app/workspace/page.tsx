@@ -186,7 +186,7 @@ export default function GovernanceWorkspace() {
                 ISO 42001 Governance Workspace
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold text-[#0e1b2c] tracking-tighter leading-none">
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               Algorithm Audit Trail<span className={getAccentColor()}>.</span>
             </h1>
             
@@ -256,13 +256,13 @@ export default function GovernanceWorkspace() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
             <Loader2 className="w-8 h-8 animate-spin text-[#8a6a1f]" />
-            <p className="font-serif italic text-aic-slate">Synchronizing sovereign ledger...</p>
+            <p className="text-sm text-[#5e6b7b]">Loading…</p>
           </div>
         ) : (
           <>
             {/* Empathy Controller */}
             <section className="border-t border-[#dde2e8] py-10">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-[#f5f7f9] p-5 md:p-8 rounded-3xl border border-[#dde2e8]">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-12 bg-[#f5f7f9] p-5 md:p-8 rounded-xl border border-[#dde2e8]">
                 <div className="max-w-sm text-center md:text-left">
                   <h3 className="font-serif text-2xl font-bold mb-3 text-[#0e1b2c]">Human Impact Context</h3>
                   <p className="text-sm text-aic-slate italic">
@@ -309,7 +309,7 @@ export default function GovernanceWorkspace() {
               <motion.footer 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="p-6 md:p-10 bg-aic-red/10 border border-aic-red/30 text-[#0e1b2c] rounded-[3rem] shadow-2xl flex flex-col md:flex-row items-center gap-10 overflow-hidden relative group"
+                className="p-6 md:p-10 bg-aic-red/10 border border-aic-red/30 text-[#0e1b2c] rounded-xl flex flex-col md:flex-row items-center gap-10 overflow-hidden relative group"
               >
                 <div className="absolute inset-0 bg-aic-red/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="p-5 bg-aic-red/20 rounded-2xl relative z-10">

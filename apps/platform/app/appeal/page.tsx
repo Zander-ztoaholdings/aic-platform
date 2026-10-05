@@ -38,11 +38,11 @@ export default function AppealPortal() {
 
     return (
         <div className="min-h-screen bg-aic-paper flex flex-col items-center justify-center p-4 sm:p-6">
-            <div className="max-w-2xl w-full bg-aic-paper border border-aic-black/5 rounded-[3rem] p-6 md:p-12 shadow-2xl">
+            <div className="max-w-2xl w-full bg-aic-paper border border-aic-black/5 rounded-xl p-6 md:p-12">
                 <div className="mb-12 text-center">
                     <span className="text-3xl md:text-4xl block mb-6">⚖️</span>
-                    <h1 className="text-3xl font-serif font-bold text-aic-black">Citizen Appeal Portal</h1>
-                    <p className="text-gray-500 font-serif mt-4 italic">Exercise your Right to Representation under POPIA Section 71.</p>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Citizen Appeal Portal</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Exercise your Right to Representation under POPIA Section 71.</p>
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -75,7 +75,7 @@ export default function AppealPortal() {
                                 </div>
                                 <button 
                                     onClick={() => setStep(2)}
-                                    className="w-full bg-aic-black text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all"
+                                    className="w-full inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                                 >
                                     PROCEED TO APPEAL
                                 </button>
@@ -120,7 +120,7 @@ export default function AppealPortal() {
                                     <button 
                                         type="submit"
                                         disabled={loading}
-                                        className="flex-[2] bg-aic-black text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all"
+                                        className="flex-[2] inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                                     >
                                         {loading ? 'SUBMITTING...' : 'SUBMIT APPEAL'}
                                     </button>

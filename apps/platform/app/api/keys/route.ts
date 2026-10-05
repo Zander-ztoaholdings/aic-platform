@@ -3,6 +3,7 @@ import { getTenantDb, apiKeys, eq, and, desc } from '@aic/db';
 import { getSession } from '@/lib/auth';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { apiKeyLookup } from '@/lib/api-key-auth';
 import type { Session } from 'next-auth';
 
 export async function GET() {
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
         name: label || 'Default Key',
         keyPrefix: prefix,
         keyHash: keyHash,
+        keyLookup: apiKeyLookup(fullKey),
         isActive: true
       });
 

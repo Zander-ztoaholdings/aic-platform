@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -41,8 +42,9 @@ export default function RevenueVelocityPage() {
     <div className="space-y-16">
       <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
         <div>
-          <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4">Pipeline Velocity</h1>
-          <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
+          <Eyebrow>HQ growth</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Pipeline Velocity</h1>
+          <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
             Tracking institutional pipeline flow and market expansion speed.
           </p>
         </div>
@@ -61,7 +63,7 @@ export default function RevenueVelocityPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white border border-[#dde2e8] p-6 md:p-10 rounded-[2.5rem] relative overflow-hidden group hover:border-[#dde2e8] transition-all"
+            className="bg-white border border-[#dde2e8] p-6 md:p-10 rounded-xl relative overflow-hidden group hover:border-[#dde2e8] transition-all"
           >
             <div className={`absolute top-0 right-0 w-1/3 h-full ${s.color} blur-[100px] opacity-20 pointer-events-none group-hover:opacity-40 transition-opacity`} />
             <div className="flex justify-between items-center relative z-10">
@@ -77,7 +79,7 @@ export default function RevenueVelocityPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-[3rem] flex flex-col justify-center">
+      <div className="bg-white border border-[#dde2e8] p-6 md:p-12 rounded-xl flex flex-col justify-center">
         <h4 className="font-serif text-2xl text-[#0e1b2c] mb-4 italic">Pipeline Insight</h4>
         <p className="text-gray-500 font-serif text-sm leading-relaxed mb-8 italic">
           Real-time entity counts from the growth registry. Revenue projections require Stripe billing integration.

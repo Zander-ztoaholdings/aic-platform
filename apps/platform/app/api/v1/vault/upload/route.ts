@@ -68,13 +68,10 @@ export async function POST(req: NextRequest) {
       requirementId,
     }).returning();
 
-    // 3. Trigger AI Triage (Async Background Task Placeholder)
-    console.log(`[AI FACTORY] Triggering triage for document ${doc.id}`);
-
     return NextResponse.json({ 
       success: true, 
       document: doc,
-      message: 'Document secured in vault. AI Triage initiated.' 
+      message: 'Evidence received. An AIC assessor will review it.' 
     });
 
   } catch (error) {

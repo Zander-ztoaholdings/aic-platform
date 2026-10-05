@@ -32,6 +32,7 @@ function worst(cs: Check[]): Check['status'] {
 
 const SUBJECT_NOUN: Record<string, [string, string]> = {
   github: ['repository', 'repositories'],
+  microsoft: ['tenant', 'tenants'],
   openai: ['provider', 'providers'],
   anthropic: ['provider', 'providers'],
 };
@@ -210,6 +211,18 @@ function Detail({ check, data, reload }: { check: Check; data: IntegrationsData;
           </li>
         ))}
         {d.pulls.length > 8 && <li className="text-[13px] text-[#8a95a3]">and {d.pulls.length - 8} more</li>}
+      </ul>
+    );
+  }
+
+  const people = (check.detail as { people?: ({ name: string; upn?: string; admin?: boolean } | string)[] }).people;
+  if (people && people.length > 0) {
+    return (
+      <ul className="text-[13px] text-[#0e1b2c] space-y-0.5">
+        {people.slice(0, 12).map((p, i) => (
+          <li key={i}>{typeof p === 'string' ? p : `${p.name}${p.admin ? ' (administrator)' : ''}`}</li>
+        ))}
+        {people.length > 12 && <li className="text-[#8a95a3]">and {people.length - 12} more</li>}
       </ul>
     );
   }

@@ -29,7 +29,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
   const [showMethod, setShowMethod] = useState(false);
   
   const col = overall >= 71 ? 'text-emerald-600' : overall >= 41 ? 'text-aic-gold' : 'text-red-600';
-  const strokeCol = overall >= 71 ? '#059669' : overall >= 41 ? '#c36c32' : '#dc2626';
+  const strokeCol = overall >= 71 ? '#059669' : overall >= 41 ? '#a8772a' : '#dc2626';
   const band = overall >= 71 ? 'Healthy' : overall >= 41 ? 'Attention' : 'Action Required';
   const bandVariant = overall >= 71 ? 'default' : overall >= 41 ? 'secondary' : 'destructive';
 

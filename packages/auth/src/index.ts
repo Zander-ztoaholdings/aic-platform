@@ -3,7 +3,7 @@ import { type JWT } from "next-auth/jwt"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import MicrosoftEntraIDProvider from "next-auth/providers/microsoft-entra-id"
-import { getSystemDb, users, organizations, auditLogs, eq, like } from "@aic/db"
+import { getSystemDb, users, organizations, auditLogs, eq, like, EncryptionService } from "@aic/db"
 import { UserRole, CertificationTier, Permissions } from "@aic/types"
 import jwt from 'jsonwebtoken';
 import { MFAService } from "./services/mfa";
@@ -166,7 +166,7 @@ export const authConfig: NextAuthConfig = {
                 throw new Error("MFA_REQUIRED")
               }
 
-              const isMFAValid = MFAService.verifyToken(user.twoFactorSecret, mfaToken);
+              const isMFAValid = MFAService.verifyToken(EncryptionService.decryptOrPlain(user.twoFactorSecret), mfaToken);
               
               if (!isMFAValid) {
                 // Check backup codes (Phase 1-1)

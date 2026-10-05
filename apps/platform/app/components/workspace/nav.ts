@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   LayoutDashboard, Boxes, Activity, Sparkles,
-  ShieldCheck, AlertTriangle, Siren, FileCheck, Plug,
+  ShieldCheck, AlertTriangle, Siren, FileCheck, Plug, ScrollText, Layers,
   Award, MessageSquare,
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
@@ -64,9 +64,11 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'Compliance Tracking',
     summary: 'The requirements that apply to you, and the evidence against each.',
     items: [
+      { label: 'Controls', href: '/controls', icon: Layers, description: 'Each framework control, and the evidence behind it.' },
       { label: 'Automated checks', href: '/checks', icon: ListChecks, description: 'What AIC found in your connected systems, and how to fix it.' },
       { label: 'Connected systems', href: '/integrations', icon: Plug, description: 'GitHub and AI providers AIC reads, and how.' },
       { label: 'Evidence Vault', href: '/evidence', icon: ShieldCheck, description: 'Requirements for your Division and the evidence you have filed.' },
+      { label: 'Policies', href: '/policies', icon: ScrollText, description: 'Your policies, the version in force, and who has accepted it.' },
       { label: 'Assessor Findings', href: '/findings', icon: AlertTriangle, description: 'What the assessor raised, and your corrective actions.' },
       { label: 'Incidents', href: '/incidents', icon: Siren, description: 'AI incidents reported, and how each was resolved.' },
       { label: 'Reports', href: '/reports', icon: FileCheck, description: 'Reports generated from your record.' },
@@ -131,7 +133,7 @@ export const STAFF_NAV: NavGroup[] = [
       { label: 'Users', href: '/admin/users', icon: UserCog, description: 'Accounts across every organisation.', visible: (u) => staffCan(u, 'manage_users') },
       { label: 'Permissions', href: '/admin/permissions', icon: Lock, description: 'Roles and what each may do.', visible: (u) => staffCan(u, 'manage_roles') },
       { label: 'Leads', href: '/admin/leads', icon: Target, description: 'The commercial pipeline.', visible: (u) => staffCan(u, 'access_hq') },
-      { label: 'HQ', href: '/hq/governance', icon: LineChart, description: 'Revenue, people, content and company governance.', visible: (u) => canUseHq(u) },
+      { label: 'HQ', href: '/hq/governance', icon: LineChart, description: 'Growth, operations, people and regulation.', visible: (u) => canUseHq(u) },
     ],
   },
 ];

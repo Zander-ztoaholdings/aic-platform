@@ -1,4 +1,5 @@
 'use client'
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react'
 import AdminShell from '../components/AdminShell'
@@ -99,8 +100,9 @@ export default function LeadsPage() {
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:justify-between gap-4 md:items-end">
           <div>
-            <h1 className="text-2xl font-bold">Inbound Leads</h1>
-            <p className="text-gray-500 font-serif mt-1 text-sm italic">Prospective organizations captured via Self-Assessment and Contact forms.</p>
+            <Eyebrow>Administration</Eyebrow>
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Inbound Leads</h1>
+            <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Prospective organizations captured via Self-Assessment and Contact forms.</p>
           </div>
           <div className="flex items-center gap-6">
             <button

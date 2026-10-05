@@ -52,7 +52,7 @@ export function EvidenceByRight({ rights, onViewAll }: EvidenceByRightProps) {
                   <span className="text-[12px] text-gray-400 first-cap flex-shrink-0">{r.evidenceMet}/{r.evidenceTotal}</span>
                 </div>
                 <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full transition-all duration-1000 ease-out" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#10b981' : pct >= 50 ? '#c36c32' : '#ef4444' }} />
+                  <div className="h-full transition-all duration-1000 ease-out" style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#10b981' : pct >= 50 ? '#a8772a' : '#ef4444' }} />
                 </div>
               </div>
 

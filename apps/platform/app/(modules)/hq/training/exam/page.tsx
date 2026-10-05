@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -76,11 +77,12 @@ export default function BoardExamPage() {
         return (
             <div className="max-w-3xl mx-auto text-center py-24">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="w-24 h-24 bg-aic-gold/10 border border-aic-gold/30 rounded-3xl flex items-center justify-center mx-auto mb-12">
+                    <div className="w-24 h-24 bg-aic-gold/10 border border-aic-gold/30 rounded-xl flex items-center justify-center mx-auto mb-12">
                         <svg className="w-10 h-10 text-[#8a6a1f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                     </div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] mb-6 tracking-tighter">Lead Auditor Board Exam</h1>
-                    <p className="text-gray-500 font-serif italic text-lg mb-12 leading-relaxed">
+                    <Eyebrow>Assessor academy</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Lead Auditor Board Exam</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         You are about to enter the high-stakes certification environment. Passing this exam authorizes you to represent AIC in institutional audits.
                     </p>
                     <div className="bg-[#f5f7f9] border border-[#dde2e8] p-5 md:p-8 rounded-2xl mb-12 text-left">
@@ -143,7 +145,7 @@ export default function BoardExamPage() {
                     </p>
                     
                     {pass ? (
-                        <div className="bg-green-50 border border-green-200 p-6 md:p-10 rounded-[3rem] mb-12">
+                        <div className="bg-green-50 border border-green-200 p-6 md:p-10 rounded-xl mb-12">
                             <p className="text-green-700 text-[12px] font-bold first-cap mb-4">Registry Entry Created</p>
                             <p className="text-sm text-gray-500 font-serif leading-relaxed italic mb-8 max-w-md mx-auto">
                                 "We hereby recognize your competence as a Lead Auditor. Your digital credentials have been issued."
@@ -156,7 +158,7 @@ export default function BoardExamPage() {
                             </button>
                         </div>
                     ) : (
-                        <div className="bg-aic-red/5 border border-aic-red/20 p-5 md:p-8 rounded-[2rem] mb-12">
+                        <div className="bg-aic-red/5 border border-aic-red/20 p-5 md:p-8 rounded-xl mb-12">
                             <p className="text-aic-red text-[12px] font-bold first-cap mb-4">Remediation Required</p>
                             <p className="text-sm text-gray-500 font-serif leading-relaxed italic">
                                 Please review the Technical Bias Audit domain and attempt the examination again in 24 hours.
@@ -164,7 +166,7 @@ export default function BoardExamPage() {
                         </div>
                     )}
 
-                    <Link href="/training" className="inline-block bg-[#f5f7f9] border border-[#dde2e8] text-[#0e1b2c] px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-aic-paper hover:text-black transition-all">
+                    <Link href="/hq/training" className="inline-block bg-[#f5f7f9] border border-[#dde2e8] text-[#0e1b2c] px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-aic-paper hover:text-black transition-all">
                         RETURN_TO_ACADEMY
                     </Link>
                 </motion.div>

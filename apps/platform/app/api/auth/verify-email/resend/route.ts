@@ -9,7 +9,7 @@ export async function POST() {
   const session = await auth();
   const userId = session?.user?.id as string | undefined;
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!checkRateLimit(`verify-resend:${userId}`, 3, 60 * 60_000).allowed) {
+  if (!(await checkRateLimit(`verify-resend:${userId}`, 3, 60 * 60_000)).allowed) {
     return NextResponse.json({ error: 'A link was sent recently. Please check your inbox, or try again in an hour.' }, { status: 429 });
   }
 

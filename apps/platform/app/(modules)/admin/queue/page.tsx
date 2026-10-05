@@ -1,10 +1,10 @@
 "use client";
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/app/components/admin/AdminShell";
 import { 
   Search, 
-  Filter, 
   FileText, 
   AlertCircle, 
   Clock, 
@@ -53,7 +53,8 @@ export default function AdminQueue() {
     <div>
       <div className="max-w-[1600px] mx-auto">
         <header className="mb-6 md:mb-8">
-          <h1 className="text-2xl font-bold text-[#0e1b2c]">Review queue</h1>
+          <Eyebrow>Assessments</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Review queue</h1>
           <p className="mt-1 text-sm text-[#5e6b7b]">Evidence submitted by clients, waiting for review.</p>
         </header>
 
@@ -81,7 +82,7 @@ export default function AdminQueue() {
           
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-3 bg-aic-paper">
-              <Loader2 className="w-10 h-10 animate-spin text-[#c36c32]" />
+              <Loader2 className="w-10 h-10 animate-spin text-[#8a6a1f]" />
               <p className="text-gray-500">Loading submission queue...</p>
             </div>
           ) : (
@@ -168,7 +169,7 @@ export default function AdminQueue() {
         {selectedItem && (
           <div className="space-y-8">
             <div>
-              <div className="text-[12px] font-bold text-[#c36c32] first-cap mb-1">Organization</div>
+              <div className="text-[12px] font-bold text-[#8a6a1f] first-cap mb-1">Organization</div>
               <h4 className="text-xl font-black text-[#0A1728]">{selectedItem.org}</h4>
               <p className="text-xs text-gray-500 font-mono mt-1">{selectedItem.id}</p>
             </div>
@@ -193,7 +194,7 @@ export default function AdminQueue() {
 
             <div className="space-y-4">
               <h5 className="text-[12px] font-bold text-gray-500 first-cap border-b border-gray-100 pb-2 flex items-center gap-2">
-                <Zap className="w-3 h-3 text-[#c36c32]" /> AI Triage Findings
+                <Zap className="w-3 h-3 text-[#8a6a1f]" /> AI Triage Findings
               </h5>
               <div className="p-4 bg-white text-[#0e1b2c] rounded-xl shadow-lg shadow-gray-200">
                 <p className="text-xs leading-relaxed text-[#5e6b7b] italic">

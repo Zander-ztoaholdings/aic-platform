@@ -31,7 +31,7 @@ export async function POST(request: Request) {
    * threshold, so this cannot be used to guess one account's password faster
    * than the login form allows, from any number of addresses.
    */
-  const perIp = checkRateLimit(`mfa-grant-ip:${ip}`, 30, 15 * 60 * 1000);
+  const perIp = await checkRateLimit(`mfa-grant-ip:${ip}`, 30, 15 * 60 * 1000);
   if (!perIp.allowed) {
     return NextResponse.json({ throttled: true }, { status: 429 });
   }
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     };
     if (!email || !password) return refuse();
 
-    const perAccount = checkRateLimit(
+    const perAccount = await checkRateLimit(
       `mfa-grant-acct:${email.toLowerCase()}`,
       10,
       15 * 60 * 1000

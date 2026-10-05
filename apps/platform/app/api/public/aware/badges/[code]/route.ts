@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
   const ip = getClientIP(request);
-  if (!checkRateLimit(`aware-verify:${ip}`, 120).allowed) {
+  if (!(await checkRateLimit(`aware-verify:${ip}`, 120)).allowed) {
     return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
   }
 

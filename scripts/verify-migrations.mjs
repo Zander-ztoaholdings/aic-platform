@@ -84,6 +84,9 @@ check(
 );
 check(await hasColumn('hitl_logs', 'org_id'), '009 hitl org scope', '009 hitl org scope MISSING  <-- certificate issuance fails once the new code deploys');
 check(await hasTable('aware_badges') && await hasColumn('aware_assessments', 'attested_at'), '010 aware badges', '010 aware badges MISSING  <-- /aware and badge verification fail without this');
+check(await hasTable('integrations') && await hasTable('integration_checks'), '011 integrations', '011 integrations MISSING  <-- Connected systems and Automated checks fail without this');
+check(await hasColumn('api_keys', 'key_lookup'), '012 api key lookup', '012 api key lookup MISSING  <-- creating an API key fails without this');
+check(await hasTable('org_policies') && await hasTable('policy_acceptances'), '013 policies', '013 policies MISSING  <-- the Policies pages fail without this');
 
 console.log('\nRow-level security');
 const rls = await one(`

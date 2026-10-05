@@ -1,8 +1,9 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Eyebrow, SectionCard, CopperTag } from '@/app/components/ui/Eyebrow';
+import { SectionCard, CopperTag } from '@/app/components/ui/Eyebrow';
 import { StatusChip } from '@/app/components/ui/StatusChip';
 
 /**
@@ -104,7 +105,7 @@ export default function OrganisationProfile() {
   if (loading) {
     return (
       <div className="space-y-5">
-        <Eyebrow>Organisation Profile</Eyebrow>
+        <PageHeader eyebrow="Account" title="Organisation profile" lede="Your organisation as AIC holds it: details, certificate, accountable person and declared AI systems." />
         <SectionCard className="p-5 md:p-8 text-center">
           <p className="text-xs text-[#9ca3af]">Loading organisation profile…</p>
         </SectionCard>
@@ -115,7 +116,7 @@ export default function OrganisationProfile() {
   if (error || !data) {
     return (
       <div className="space-y-5">
-        <Eyebrow>Organisation Profile</Eyebrow>
+        <PageHeader eyebrow="Account" title="Organisation profile" lede="Your organisation as AIC holds it: details, certificate, accountable person and declared AI systems." />
         <SectionCard className="p-5 md:p-8 text-center">
           <p className="text-xs text-[#9ca3af]">Could not load the organisation profile. Try refreshing.</p>
         </SectionCard>
@@ -137,17 +138,13 @@ export default function OrganisationProfile() {
     { k: 'Standard Version', v: organisation.standardVersion ?? '—' },
     { k: 'Certification Status', v: organisation.certificationStatus ?? '—' },
     { k: 'Primary AI Officer', v: organisation.primaryAiOfficer ?? 'Not recorded' },
-    {
-      k: 'Integrity Score',
-      v: organisation.integrityScore !== null ? String(organisation.integrityScore) : '—',
-    },
   ];
 
   const evidenceOutcomes = Object.entries(evidence.byVerificationOutcome).filter(([k]) => k !== 'UNSPECIFIED');
 
   return (
     <div className="space-y-5">
-      <Eyebrow>Organisation Profile</Eyebrow>
+      <PageHeader eyebrow="Account" title="Organisation profile" lede="Your organisation as AIC holds it: details, certificate, accountable person and declared AI systems." />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-start">
         {/* Left column */}

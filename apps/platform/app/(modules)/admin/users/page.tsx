@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -56,7 +57,8 @@ function PeoplePage() {
     <AdminShell>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-[#0e1b2c]">People</h1>
+          <Eyebrow>Administration</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">People</h1>
           <p className="mt-1 text-sm text-[#5e6b7b]">Every account on the platform. Change roles, move people between organisations, and control access.</p>
         </div>
         <Button variant="primary" onClick={() => setCreating(true)}>Add an account</Button>

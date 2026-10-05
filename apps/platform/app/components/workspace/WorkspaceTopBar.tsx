@@ -31,7 +31,7 @@ type Tone = 'light' | 'dark';
 
 const TONE = {
   light: {
-    bar: 'bg-white/85 border-[#0a1728]/[0.06] text-[#0A1728]',
+    bar: 'bg-white/70 backdrop-saturate-[1.8] border-[#0a1728]/[0.06] text-[#0A1728]',
     muted: 'text-[#6b7280]',
     faint: 'text-[#9ca3af]',
     trigger: 'text-[#374151] hover:text-[#0A1728] hover:bg-[#0a1728]/[0.04] data-[state=open]:bg-[#0a1728]/[0.05] data-[state=open]:text-[#0A1728]',
@@ -102,7 +102,7 @@ export function WorkspaceTopBar({
 
   return (
     <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${t.bar}`}>
-      <div className="max-w-[1400px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-8">
+      <div className="max-w-[1200px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-8">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
@@ -145,7 +145,7 @@ export function WorkspaceTopBar({
                   </NavigationMenu.Trigger>
 
                   <NavigationMenu.Content
-                    className={`absolute left-0 top-full mt-2 w-[420px] rounded-2xl border p-2 z-50 ${t.panel} data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95`}
+                    className={`absolute left-0 top-full mt-2 w-[420px] rounded-2xl border p-2 z-50 ${t.panel} menu-pop`}
                   >
                     <p className={`px-3 pt-2 pb-2.5 text-[12px] leading-snug ${t.muted}`}>{group.summary}</p>
                     <ul className="space-y-0.5">
@@ -207,7 +207,7 @@ export function WorkspaceTopBar({
               <DropdownMenu.Content
                 align="end"
                 sideOffset={8}
-                className={`z-50 w-64 rounded-2xl border p-1.5 ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'} data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95`}
+                className={`z-50 w-64 rounded-2xl border p-1.5 ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'} menu-pop`}
               >
                 <div className="px-3 py-2.5">
                   <p className="text-[13px] font-semibold truncate">{display}</p>
@@ -252,9 +252,9 @@ export function WorkspaceTopBar({
       {/* Small screens: the same groups as one list. */}
       {mobileOpen && (
         <div className="md:hidden fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-[#0A1728]/30 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-0 bg-[#0A1728]/30 backdrop-blur-sm scrim-in" onClick={() => setMobileOpen(false)} />
           <nav
-            className={`absolute inset-y-0 left-0 w-[88%] max-w-sm overflow-y-auto overscroll-contain border-r px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'}`}
+            className={`sheet-in absolute inset-y-0 left-0 w-[88%] max-w-sm overflow-y-auto overscroll-contain border-r px-4 pt-3 pb-[max(1.5rem,env(safe-area-inset-bottom))] ${t.panel} ${tone === 'dark' ? 'text-white' : 'text-[#0A1728]'}`}
             aria-label="Workspace"
           >
             <div className="flex items-center justify-between mb-2">

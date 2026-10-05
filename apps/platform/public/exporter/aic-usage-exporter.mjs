@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global process, fetch, console, URLSearchParams */
 /**
  * AIC usage exporter — runs on YOUR side, with YOUR provider admin key.
  *

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (!orgId || !canManageTeamAndKeys(session!.user.role as string | undefined)) {
       return NextResponse.json({ error: 'Only an organisation admin can invite people.' }, { status: 403 });
     }
-    if (!checkRateLimit(`invite:${session!.user.id}`, 30, 60 * 60_000).allowed) {
+    if (!(await checkRateLimit(`invite:${session!.user.id}`, 30, 60 * 60_000)).allowed) {
       return NextResponse.json({ error: 'Too many invitations in a short time. Please try again later.' }, { status: 429 });
     }
 

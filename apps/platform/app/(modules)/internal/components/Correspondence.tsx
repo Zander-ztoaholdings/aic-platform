@@ -1,8 +1,9 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import { Send, Info, Check } from 'lucide-react';
-import { Eyebrow, SectionCard } from '@/app/components/ui/Eyebrow';
+import { SectionCard } from '@/app/components/ui/Eyebrow';
 import { StatusChip } from '@/app/components/ui/StatusChip';
 
 type Message = {
@@ -58,7 +59,7 @@ export default function Correspondence() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5 items-start">
       <div className="space-y-4">
-        <Eyebrow>Auditor Correspondence</Eyebrow>
+        <PageHeader eyebrow="AIC Certification" title="Correspondence" lede="Messages with your assessor. Everything here is kept on the record." />
 
         <SectionCard>
           <div className="flex justify-between items-center mb-4">

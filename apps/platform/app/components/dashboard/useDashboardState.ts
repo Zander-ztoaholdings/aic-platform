@@ -17,6 +17,7 @@ export interface OrgSummary {
   corrections: {
     open: number;
   };
+  checks?: { failing: number; total: number };
 }
 
 export function useDashboardState() {

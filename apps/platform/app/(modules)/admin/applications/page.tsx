@@ -1,4 +1,5 @@
 'use client'
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react'
 import AdminShell from '../components/AdminShell'
@@ -24,7 +25,8 @@ export default function ApplicationsPage() {
     <AdminShell>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Alpha Program Applications</h1>
+          <Eyebrow>Assessments</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Alpha Program Applications</h1>
           <p className="text-gray-500 text-xs first-cap">{applications.length} Total</p>
         </div>
 

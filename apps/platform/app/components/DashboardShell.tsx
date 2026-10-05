@@ -1,4 +1,5 @@
 'use client';
+import { PageTransition } from '@/app/components/ui/PageTransition';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -89,11 +90,11 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         phase={phaseFromCertificationStatus(org?.certificationStatus)}
         decisions={orgSummary?.decisions.recorded ?? null}
         overrideRate={orgSummary?.decisions.humanOverrideRate ?? null}
-        integrityScore={org?.integrityScore ?? null}
+        failingChecks={orgSummary?.checks && orgSummary.checks.total > 0 ? orgSummary.checks.failing : null}
         openCorrections={orgSummary?.corrections.open ?? null}
       /></div>
       <OnboardingTour orgName={org?.name ?? null} />
-      <main className="max-w-[1400px] mx-auto px-5 md:px-8 pt-6 pb-16 md:py-7 fade-up">{children}</main>
+      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-20 md:pt-12 md:pb-24"><PageTransition>{children}</PageTransition></main>
     </div>
   );
 }

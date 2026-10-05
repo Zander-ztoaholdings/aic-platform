@@ -1,10 +1,9 @@
 "use client";
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useState, useEffect } from "react";
 import AdminShell from "@/app/components/admin/AdminShell";
 import { 
-  Shield, 
-  Plus, 
   Settings, 
   Lock, 
   History, 
@@ -51,26 +50,17 @@ export default function AdminPermissions() {
 
   return (
     <AdminShell>
-    <div className="p-2 md:p-4">
-      <div className="max-w-[1600px] mx-auto">
-        <header className="mb-8 flex justify-between items-center">
-          <div>
-            <div className="flex items-center gap-2 text-[#c36c32] mb-1">
-              <Shield className="w-5 h-5" />
-              <span className="text-xs font-bold first-cap">System Integrity</span>
-            </div>
-            <h1 className="text-3xl font-bold text-[#0A1728]">God Mode: Permission Engine</h1>
-          </div>
-          <div className="flex gap-3">
-            <button className="flex items-center gap-2 bg-white text-[#0e1b2c] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1a3160] transition-all">
-              <Plus className="w-4 h-4" /> Create Custom Role
-            </button>
-          </div>
+    <div>
+      <div>
+        <header className="mb-8">
+          <Eyebrow>Administration</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Permissions</h1>
+          <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">What each staff role may do. A change takes effect straight away for everyone who holds that role.</p>
         </header>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40 gap-3">
-            <Loader2 className="w-10 h-10 animate-spin text-[#c36c32]" />
+            <Loader2 className="w-10 h-10 animate-spin text-[#8a6a1f]" />
             <p className="text-gray-500">Initializing permission engine...</p>
           </div>
         ) : (
@@ -79,7 +69,7 @@ export default function AdminPermissions() {
             <div className="lg:col-span-3 space-y-2">
               <button 
                 onClick={() => setActiveTab('roles')}
-                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'roles' ? 'bg-aic-paper shadow-md border-l-4 border-[#c36c32] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'roles' ? 'bg-aic-paper shadow-md border-l-4 border-[#a8772a] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
               >
                 <div className="flex items-center gap-3">
                   <Settings className="w-5 h-5" />
@@ -89,7 +79,7 @@ export default function AdminPermissions() {
               </button>
               <button 
                 onClick={() => setActiveTab('capabilities')}
-                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'capabilities' ? 'bg-aic-paper shadow-md border-l-4 border-[#c36c32] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'capabilities' ? 'bg-aic-paper shadow-md border-l-4 border-[#a8772a] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
               >
                 <div className="flex items-center gap-3">
                   <Lock className="w-5 h-5" />
@@ -99,7 +89,7 @@ export default function AdminPermissions() {
               </button>
               <button 
                 onClick={() => setActiveTab('audit')}
-                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'audit' ? 'bg-aic-paper shadow-md border-l-4 border-[#c36c32] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
+                className={`w-full flex items-center justify-between p-4 rounded-xl transition-all ${activeTab === 'audit' ? 'bg-aic-paper shadow-md border-l-4 border-[#a8772a] text-[#0A1728]' : 'text-gray-500 hover:bg-gray-100'}`}
               >
                 <div className="flex items-center gap-3">
                   <History className="w-5 h-5" />
@@ -124,10 +114,10 @@ export default function AdminPermissions() {
                         <button 
                           key={role.id}
                           onClick={() => setSelectedRole(role)}
-                          className={`w-full text-left p-4 rounded-xl border transition-all ${selectedRole?.id === role.id ? 'border-[#c36c32] bg-[#c36c32]/5 shadow-sm' : 'border-gray-50 hover:border-gray-200'}`}
+                          className={`w-full text-left p-4 rounded-xl border transition-all ${selectedRole?.id === role.id ? 'border-[#a8772a] bg-[#a8772a]/5 shadow-sm' : 'border-gray-50 hover:border-gray-200'}`}
                         >
                           <div className="font-bold text-[#0A1728]">{role.name}</div>
-                          <div className="text-[12px] text-gray-500 first-cap tracking-tighter">{role.slug}</div>
+                          <div className="text-[12px] text-gray-500 first-cap">{role.slug}</div>
                         </button>
                       ))}
                     </div>
@@ -183,7 +173,7 @@ export default function AdminPermissions() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {availableCapabilities.map(cap => (
                       <Card key={cap.id} className="p-4 border-gray-100 shadow-none bg-gray-50/50">
-                        <div className="text-xs font-bold text-[#c36c32] first-cap mb-1">{cap.category}</div>
+                        <div className="text-xs font-bold text-[#8a6a1f] first-cap mb-1">{cap.category}</div>
                         <div className="font-bold text-[#0A1728]">{cap.name}</div>
                         <div className="text-[11.5px] text-gray-500 font-mono mt-1">{cap.slug}</div>
                       </Card>
@@ -194,9 +184,9 @@ export default function AdminPermissions() {
 
               {activeTab === 'audit' && (
                 <div className="p-5 md:p-8 text-center py-20">
-                  <History className="w-12 h-12 text-[#0e1b2c] mx-auto mb-4" />
-                  <h2 className="text-xl font-bold text-[#0A1728] mb-2">Audit Ledger Coming Soon</h2>
-                  <p className="text-gray-500 text-sm max-w-sm mx-auto">Real-time immutable tracking of permission changes is currently being integrated with the Sovereign System Ledger.</p>
+                  <History className="w-8 h-8 text-[#9aa5b1] mx-auto mb-3" />
+                  <h2 className="text-base font-semibold text-[#0e1b2c] mb-2">No permission log yet</h2>
+                  <p className="text-gray-500 text-sm max-w-sm mx-auto">Changes to roles are not yet recorded in a log of their own. Changes to individual accounts are recorded on the Users page.</p>
                 </div>
               )}
             </div>
@@ -206,9 +196,9 @@ export default function AdminPermissions() {
         <div className="mt-8 p-4 sm:p-6 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-4">
           <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0" />
           <div>
-            <h4 className="font-bold text-amber-800 mb-1">Administrative Critical Path</h4>
+            <h4 className="font-semibold text-amber-900 mb-1">Changes apply immediately</h4>
             <p className="text-amber-700 text-sm leading-relaxed">
-              You are currently in <strong>God Mode</strong>. Changes made here bypass standard approval flows and are logged directly to the Sovereign System Ledger. Ensure all custom role creations align with the AIC Personnel Certification Manual.            </p>
+              Removing a capability from a role takes it away from every staff member with that role at their next request. Check who holds the role before you change it.            </p>
           </div>
         </div>
       </div>

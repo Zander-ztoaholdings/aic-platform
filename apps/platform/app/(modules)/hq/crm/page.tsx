@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -53,8 +54,9 @@ export default function EnterpriseCRMPage() {
         <div className="space-y-12">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#0e1b2c] tracking-tight mb-4 tracking-tighter">Enterprise CRM</h1>
-                    <p className="text-gray-500 font-serif italic text-lg leading-relaxed max-w-2xl">
+                    <Eyebrow>HQ growth</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Enterprise CRM</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         Global pipeline management for AI accountability certification.
                     </p>
                 </div>
@@ -66,7 +68,7 @@ export default function EnterpriseCRMPage() {
                 </div>
             </div>
 
-            <div className="bg-white border border-[#dde2e8] rounded-[2.5rem] overflow-hidden">
+            <div className="bg-white border border-[#dde2e8] rounded-xl overflow-hidden">
                 <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left">
                     <thead className="bg-[#f5f7f9] border-b border-[#dde2e8] text-[12px] font-bold text-gray-500 first-cap">
                         <tr>
@@ -79,7 +81,7 @@ export default function EnterpriseCRMPage() {
                     </thead>
                     <tbody className="divide-y divide-[#e6e9ee] font-serif">
                         {loading ? (
-                            <tr><td colSpan={5} className="p-20 text-center text-gray-600 italic">Syncing with growth registry...</td></tr>
+                            <tr><td colSpan={5} className="p-10 text-center text-sm text-[#5e6b7b]">Loading…</td></tr>
                         ) : (
                             leads.map((lead, i) => (
                                 <motion.tr 
@@ -91,7 +93,7 @@ export default function EnterpriseCRMPage() {
                                 >
                                     <td className="p-5 md:p-8">
                                         <p className="text-lg font-bold text-[#0e1b2c] tracking-tight">{lead.company || lead.email.split('@')[1]}</p>
-                                        <p className="text-[12px] text-gray-500 first-cap tracking-tighter mt-1">{lead.email}</p>
+                                        <p className="text-[12px] text-gray-500 first-cap mt-1">{lead.email}</p>
                                     </td>
                                     <td className="p-5 md:p-8">
                                         <span className="font-mono text-[11.5px] text-gray-500">{lead.source}</span>

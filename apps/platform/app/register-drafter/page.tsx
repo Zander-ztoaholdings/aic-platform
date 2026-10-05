@@ -54,7 +54,7 @@ export default function RegisterDrafterPage() {
         <Eyebrow>AI Overview · AI Estate</Eyebrow>
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
-          <h1 className="font-serif text-2xl font-bold text-[#0f1f3d]">Register Drafter</h1>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Register Drafter</h1>
           <CopperTag>Coming Soon</CopperTag>
         </div>
 

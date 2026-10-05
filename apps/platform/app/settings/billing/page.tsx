@@ -55,8 +55,8 @@ export default function BillingSettings() {
             <div className="max-w-5xl mx-auto space-y-12 pb-24">
                 <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-aic-black/5 pb-6 md:pb-8">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-aic-black tracking-tighter">Institutional Subscriptions</h1>
-                        <p className="text-gray-500 font-serif mt-4 italic text-lg leading-relaxed">
+                        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Institutional Subscriptions</h1>
+                        <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                             Select the accountability tier required for your institutional risk profile.
                         </p>
                     </div>
@@ -67,7 +67,7 @@ export default function BillingSettings() {
                         <motion.div 
                             key={tier.name}
                             whileHover={{ y: -5 }}
-                            className="bg-aic-paper border border-aic-black/5 rounded-[2.5rem] p-6 md:p-10 shadow-xl flex flex-col"
+                            className="bg-aic-paper border border-aic-black/5 rounded-xl p-6 md:p-10 flex flex-col"
                         >
                             <h3 className="text-[12px] font-bold text-aic-gold first-cap mb-6">{tier.name}</h3>
                             <div className="mb-10">
@@ -87,7 +87,7 @@ export default function BillingSettings() {
                             <button 
                                 onClick={() => handleSubscribe(tier.id)}
                                 disabled={!!loading}
-                                className="w-full bg-aic-black text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all disabled:opacity-50"
+                                className="w-full inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                             >
                                 {loading === tier.id ? 'Connecting…' : `Choose ${tier.name}`}
                             </button>
@@ -95,8 +95,7 @@ export default function BillingSettings() {
                     ))}
                 </div>
 
-                <div className="bg-[#080808] text-aic-paper p-6 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 p-6 md:p-12 opacity-5 font-serif italic text-4xl md:text-6xl select-none first-cap">Billing</div>
+                <div className="bg-[#080808] text-aic-paper p-6 md:p-12 rounded-xl shadow-2xl relative overflow-hidden">
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div>
                             <h3 className="font-serif text-2xl font-bold mb-2">Custom Enterprise Frameworks</h3>

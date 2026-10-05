@@ -17,13 +17,18 @@ import { useIntegrations, call, ago, type Integration, type IntegrationsData } f
  * security lead) reads it top to bottom.
  */
 
-type Source = 'github' | 'openai' | 'anthropic';
+type Source = 'github' | 'microsoft' | 'openai' | 'anthropic';
 
 const SOURCES: { key: Source; name: string; reads: string }[] = [
   {
     key: 'github',
     name: 'GitHub',
     reads: 'Branch rules, merged pull requests and their reviews, Dependabot and secret-scanning alerts, and which repositories depend on AI libraries.',
+  },
+  {
+    key: 'microsoft',
+    name: 'Microsoft 365',
+    reads: 'Whether a second factor is required and registered, who the global administrators are, and which accounts have gone unused. Never mail, files or chats.',
   },
   {
     key: 'openai',
@@ -69,6 +74,8 @@ function IntegrationsPage() {
     const c = params.get('connected');
     const e = params.get('error');
     if (c === 'github') setNotice('GitHub is connected. AIC is reading your repositories now; checks appear in a minute or two.');
+    else if (c === 'microsoft') setNotice('Microsoft 365 is connected. AIC is reading your tenant now; checks appear in a minute or two.');
+    else if (params.get('microsoft') === 'declined') setNotice('Microsoft did not grant AIC access. Only a global administrator of the tenant can approve it.');
     else if (params.get('github') === 'requested') setNotice('GitHub sent your request to an owner of the GitHub organisation. Once they approve it, come back and connect again.');
     else if (e === 'state') setNotice('That GitHub link expired or belonged to another session. Start the connection again.');
     else if (e) setNotice('GitHub could not be connected. Try again, and check you installed the AIC app rather than a different one.');
@@ -165,6 +172,8 @@ function IntegrationsPage() {
                   <div className="mt-5 pt-5 border-t border-[#e6e9ee]">
                     {s.key === 'github' ? (
                       <GitHubPanel data={data} i={i} onDone={(m) => { setOpen(null); if (m) setNotice(m); reload(); }} />
+                    ) : s.key === 'microsoft' ? (
+                      <MicrosoftPanel data={data} i={i} onDone={(m) => { setOpen(null); if (m) setNotice(m); reload(); }} />
                     ) : (
                       <ProviderPanel provider={s.key} i={i} onDone={(m) => { setOpen(null); if (m) setNotice(m); reload(); }} />
                     )}
@@ -197,7 +206,11 @@ function IntegrationsPage() {
 
 function ConnectionFacts({ i }: { i: Integration }) {
   const facts: string[] = [];
-  if (i.provider === 'github') {
+  if (i.provider === 'microsoft') {
+    const tn = i.settings.tenantName as string | undefined;
+    facts.push(tn ? `Tenant ${tn}` : 'Tenant connected');
+    if (typeof i.settings.users === 'number') facts.push(`${i.settings.users} accounts`);
+  } else if (i.provider === 'github') {
     if (i.accountLabel) facts.push(`Installed on ${i.accountLabel}`);
     if (typeof i.settings.repositoriesTotal === 'number') {
       const n = i.settings.repositoriesTotal;
@@ -277,6 +290,61 @@ function GitHubPanel({ data, i, onDone }: { data: IntegrationsData; i?: Integrat
         className="inline-flex items-center justify-center gap-2 h-11 sm:h-10 px-5 rounded-full bg-[#0e1b2c] text-white text-[14px] font-semibold hover:bg-[#22344a] disabled:opacity-40 w-full sm:w-auto"
       >
         <Github className="w-4 h-4" /> {busy ? 'Opening GitHub…' : 'Continue to GitHub'}
+      </button>
+      {err && <p className="text-[13px] text-[#b23a35]">{err}</p>}
+    </div>
+  );
+}
+
+function MicrosoftPanel({ data, i, onDone }: { data: IntegrationsData; i?: Integration; onDone: (msg?: string) => void }) {
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  async function connect() {
+    setBusy(true);
+    setErr('');
+    const r = await call('/api/integrations/microsoft/connect', 'POST');
+    if (!r.ok) { setErr(r.error!); setBusy(false); return; }
+    window.location.href = r.data!.url as string;
+  }
+
+  async function disconnect() {
+    if (!confirm('Disconnect Microsoft 365? AIC stops checking your tenant. To remove its access completely, also delete the AIC app under Entra ID → Enterprise applications.')) return;
+    setBusy(true);
+    const r = await call('/api/integrations/microsoft', 'DELETE');
+    setBusy(false);
+    if (!r.ok) { setErr(r.error!); return; }
+    onDone('Microsoft 365 is disconnected. To remove AIC’s access completely, delete the AIC app under Entra ID → Enterprise applications.');
+  }
+
+  if (i && i.status !== 'disconnected') {
+    return (
+      <div className="space-y-4">
+        <p className="text-[14px] leading-relaxed text-[#5e6b7b]">
+          AIC holds only your tenant id. To remove its access, delete the AIC app under Entra ID → Enterprise applications; AIC notices on the next check.
+        </p>
+        <button onClick={disconnect} disabled={busy} className="h-11 sm:h-9 px-4 rounded-full text-[14px] font-medium text-[#b23a35] hover:bg-[#b23a35]/5 disabled:opacity-50">
+          Disconnect
+        </button>
+        {err && <p className="text-[13px] text-[#b23a35]">{err}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <ol className="space-y-2 text-[14px] leading-relaxed text-[#0e1b2c] list-decimal pl-5">
+        <li>A <strong className="font-semibold">global administrator</strong> of your Microsoft 365 tenant needs to do this step.</li>
+        <li>Microsoft shows the permissions AIC asks for. Every one is read-only: users, sign-in policies, admin roles and sign-in reports.</li>
+        <li>You come back here, and the first checks run straight away. Two of them need an Entra ID P1 or P2 licence; without one they show “could not check”.</li>
+      </ol>
+      {!data.microsoftConfigured && <p className="text-[13px] text-[#b45309]">Microsoft 365 connections are not switched on for this AIC server yet.</p>}
+      <button
+        onClick={connect}
+        disabled={busy || !data.microsoftConfigured}
+        className="inline-flex items-center justify-center gap-2 h-11 sm:h-10 px-5 rounded-full bg-[#0e1b2c] text-white text-[14px] font-semibold hover:bg-[#22344a] disabled:opacity-40 w-full sm:w-auto"
+      >
+        {busy ? 'Opening Microsoft…' : 'Continue to Microsoft'}
       </button>
       {err && <p className="text-[13px] text-[#b23a35]">{err}</p>}
     </div>

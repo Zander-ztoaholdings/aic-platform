@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -32,14 +33,11 @@ export default function AuditorAcademy() {
         <div className="space-y-12">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-12">
                 <div>
-                    <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-medium tracking-tight tracking-tighter mb-4">Lead Auditor Academy</h1>
-                    <p className="text-gray-500 font-serif italic text-lg max-w-2xl">
+                    <Eyebrow>HQ operations</Eyebrow>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Lead Auditor Academy</h1>
+                    <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
                         Training the generation of accountability officers who will safeguard the continent's digital future.
                     </p>
-                </div>
-                <div className="text-right">
-                    <p className="text-[12px] font-bold text-[#8a6a1f] first-cap mb-2">Class of 2026</p>
-                    <div className="text-3xl md:text-4xl font-serif">58 Enrolled</div>
                 </div>
             </div>
 
@@ -50,22 +48,22 @@ export default function AuditorAcademy() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white border border-[#dde2e8] p-6 md:p-10 rounded-[2.5rem] flex flex-col justify-between group hover:border-aic-gold/30 transition-all"
+                        className="bg-white border border-[#dde2e8] p-6 md:p-10 rounded-xl flex flex-col justify-between group hover:border-aic-gold/30 transition-all"
                     >
                         <div>
                             <div className="flex justify-between items-start mb-8">
                                 <span className="px-3 py-1 rounded-full bg-[#f5f7f9] border border-[#dde2e8] text-[11px] font-mono font-bold text-gray-500">
-                                    {item.modules} MODULES
+                                    {item.modules} modules
                                 </span>
-                                <span className={`text-[12px] font-bold first-cap ${item.status === 'LOCKED' ? 'text-gray-700' : 'text-aic-gold animate-pulse'}`}>
-                                    {item.status.replace('_', ' ').toLowerCase()}
+                                <span className="text-[12px] font-medium text-[#5e6b7b]">
+                                    {item.status === 'LOCKED' ? 'Locked' : 'Available'}
                                 </span>
                             </div>
                             <h3 className="text-2xl font-serif font-bold text-[#0e1b2c] mb-4 group-hover:text-[#8a6a1f] transition-colors tracking-tight">{item.title}</h3>
                             <p className="text-sm text-gray-500 font-serif leading-relaxed italic mb-8">"{item.description}"</p>
                         </div>
                         <Link 
-                            href={item.status === 'LOCKED' ? '#' : `/training/curriculum/${item.id}`}
+                            href={item.status === 'LOCKED' ? '#' : `/hq/training/curriculum/${item.id}`}
                             className={`w-full py-4 text-center rounded-xl text-[12px] font-bold first-cap transition-all ${
                                 item.status === 'LOCKED' 
                                 ? 'bg-white text-zinc-700 cursor-not-allowed' 
@@ -78,15 +76,14 @@ export default function AuditorAcademy() {
                 ))}
             </div>
 
-            <div className="bg-gradient-to-r from-aic-gold/10 to-transparent border border-aic-gold/20 p-6 md:p-12 rounded-[3rem] flex justify-between items-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6 md:p-12 opacity-5 font-serif italic text-4xl md:text-6xl">Exam</div>
+            <div className="bg-gradient-to-r from-aic-gold/10 to-transparent border border-aic-gold/20 p-6 md:p-12 rounded-xl flex justify-between items-center relative overflow-hidden">
                 <div className="max-w-xl">
                     <h4 className="font-serif text-2xl mb-4">Certification Examination</h4>
                     <p className="text-gray-500 font-serif italic leading-relaxed text-sm">
                         Candidates who complete all 3 domains are eligible for the Lead Auditor Board Exam. Passing authorizes you to issue AIC-Certified status to institutional entities.
                     </p>
                 </div>
-                <Link href="/training/exam" className="bg-white border border-[#dde2e8] text-[#0e1b2c] px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all shadow-2xl">
+                <Link href="/hq/training/exam" className="bg-white border border-[#dde2e8] text-[#0e1b2c] px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-aic-gold hover:text-black transition-all">
                     Start the board exam
                 </Link>
             </div>

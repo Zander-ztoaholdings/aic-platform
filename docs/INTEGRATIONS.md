@@ -1,6 +1,6 @@
-# Connected systems: GitHub and AI providers
+# Connected systems: GitHub, Microsoft 365 and AI providers
 
-The Vanta-style part of the platform. An organisation connects GitHub and/or an AI provider. AIC reads them every night (or when someone presses **Check now**), runs its automated checks, and stores the latest result of each. Whenever a check goes from passing to failing, or back again, AIC writes an event to the organisation's continuity record, but only for an organisation that has already begun that record.
+The Vanta-style part of the platform. An organisation connects GitHub, Microsoft 365 and/or an AI provider. AIC reads them every night (or when someone presses **Check now**), runs its automated checks, and stores the latest result of each. Whenever a check goes from passing to failing, or back again, AIC writes an event to the organisation's continuity record, but only for an organisation that has already begun that record.
 
 Where things live:
 
@@ -9,17 +9,22 @@ Where things live:
 | Check definitions (why, fix, controls) | `apps/platform/lib/integrations/catalog.ts` |
 | GitHub App auth and reads | `lib/integrations/github.ts` |
 | GitHub check rules (pure, tested) | `lib/integrations/github-checks.ts` |
+| GitHub webhook (signature, debounce) | `lib/integrations/webhook.ts`, `app/api/integrations/github/webhook/route.ts` |
+| Microsoft Graph reads | `lib/integrations/microsoft.ts` |
+| Microsoft 365 check rules (pure, tested) | `lib/integrations/microsoft-checks.ts` |
 | OpenAI / Anthropic pull and mapping | `lib/integrations/providers.ts` |
 | AI provider check rules (pure, tested) | `lib/integrations/provider-checks.ts` |
 | One sync of one organisation | `lib/integrations/sync.ts` |
 | Pages | `/integrations` (Connected systems), `/checks` (Automated checks) |
 | Exporter clients run themselves | `apps/platform/public/exporter/aic-usage-exporter.mjs` |
 | Tables | `integrations`, `integration_checks` (`db/manual/011_integrations.sql`) |
-| Tests | `__tests__/lib/integrations.test.ts` |
+| Tests | `__tests__/lib/integrations.test.ts`, `__tests__/lib/compliance.test.ts` |
 
 ## How AIC gets access
 
 **GitHub** works through a GitHub App that belongs to AIC. The client installs it on the repositories they choose, and every permission it asks for is read-only. AIC never holds a password or token belonging to the client. Each time it reads, it signs a short JWT with its own App key and exchanges it for an installation token that lasts one hour. Uninstalling the App on GitHub cuts off access immediately, and the next sync marks the connection as disconnected.
+
+**Microsoft 365** works through an Entra application that belongs to AIC. A Global Administrator of the client's tenant grants it read-only application permissions on Microsoft's own consent screen. AIC stores only the tenant id; each read uses AIC's own client secret to get a one-hour token for that tenant. Removing the app under Enterprise applications in the client's Entra admin centre cuts off access, and the next sync marks the connection as disconnected. AIC reads security settings, MFA registration, the Global Administrator list and last sign-in dates. It never reads mail, files, chats or calendars.
 
 **AI providers** can be connected in one of two ways, and the client picks which (decided by Zander in October 2026):
 
@@ -48,7 +53,12 @@ Do this under the AIC GitHub organisation, at **Settings → Developer settings 
    - **Callback URL:** leave it empty. AIC does not sign users in with GitHub.
    - **Setup URL:** `https://app.aiccertified.cloud/api/integrations/github/callback`
    - Tick **Redirect on update**.
-2. **Webhook:** untick **Active**. AIC does not use webhooks yet.
+2. **Webhook:** tick **Active**.
+   - **Webhook URL:** `https://app.aiccertified.cloud/api/integrations/github/webhook`
+   - **Webhook secret:** generate with `openssl rand -hex 32` and keep it for `GITHUB_WEBHOOK_SECRET`.
+   - After the permissions below are set, under **Subscribe to events** tick: Branch protection rule, Dependabot alert, Organization, Pull request, Pull request review, Repository, Repository ruleset, Secret scanning alert. (Installation events are always sent.)
+
+   With the webhook on, a change on GitHub is re-checked within about a minute instead of waiting for the night. Uninstalling the App disconnects the organisation straight away. Requests without a valid signature are refused.
 3. **Repository permissions.** Set each of these to Read-only; leave everything else at No access:
    - Administration
    - Contents
@@ -69,6 +79,7 @@ A permission the client declines makes the affected check show "Could not check"
 | `GITHUB_APP_ID` | the App ID |
 | `GITHUB_APP_SLUG` | the App's URL name, e.g. `aic-compliance` |
 | `GITHUB_APP_PRIVATE_KEY` | contents of the `.pem` (multi-line is fine; `\n` sequences also work) |
+| `GITHUB_WEBHOOK_SECRET` | the webhook secret from step 2. Without it the webhook refuses every request (the nightly sync still works) |
 | `INTEGRATIONS_STATE_SECRET` | `openssl rand -hex 32` |
 | `CRON_SECRET` | `openssl rand -hex 32` (at least 24 characters, or the nightly job refuses) |
 | `ENCRYPTION_KEY` | must already be set. In production the app refuses to store a provider key without it |
@@ -79,6 +90,29 @@ Redeploy after setting them. Until the three `GITHUB_APP_*` variables are presen
 
 - **Command:** `wget -qO- --post-data='' --header="Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3001/api/cron/integrations`
 - **Frequency:** `0 2 * * *`. That is 02:00 UTC, which is 04:00 in South Africa.
+
+### 5. Register the Microsoft Entra application (for Microsoft 365)
+
+In AIC's own Microsoft tenant, at **Entra admin centre → Identity → Applications → App registrations → New registration**:
+
+1. **Name:** `AIC Compliance`. **Supported account types:** Accounts in any organisational directory (multitenant). **Redirect URI:** platform Web, `https://app.aiccertified.cloud/api/integrations/microsoft/callback`.
+2. **API permissions → Add a permission → Microsoft Graph → Application permissions.** Add these, all read-only:
+   - `Organization.Read.All`
+   - `Policy.Read.All`
+   - `User.Read.All`
+   - `AuditLog.Read.All` (for MFA registration and last sign-in dates)
+   - `RoleManagement.Read.Directory`
+
+   Do not grant admin consent in AIC's own tenant unless you want to test against it; each client grants consent for their own tenant.
+3. **Certificates & secrets → New client secret.** 24 months. Copy the value straight away; it is shown only once. Put a reminder in the calendar a month before it expires.
+4. Set on aic-platform in Coolify and redeploy:
+
+| Variable | Value |
+|---|---|
+| `MS_CLIENT_ID` | the Application (client) ID |
+| `MS_CLIENT_SECRET` | the secret value |
+
+Until both are set, the Microsoft 365 row shows that it is not switched on yet. Stale-account and MFA-registration checks need a Microsoft Entra ID P1 or P2 licence in the client's tenant; without one they show "Could not check" rather than passing.
 
 ## The checks
 
@@ -100,6 +134,15 @@ Redeploy after setting them. Until the three `GITHUB_APP_*` variables are presen
 |---|---|
 | Two-factor sign-in is required | The organisation's security setting. |
 
+**Microsoft 365, per tenant**
+
+| Check | What it looks at |
+|---|---|
+| A second factor is required to sign in | Security defaults, or an enabled Conditional Access policy that requires MFA for all users. |
+| Everyone has a second factor registered | Members (not guests) without a registered MFA method. Lists the names. |
+| Global administrators are few and named | Two to four passes; one warns (no backup); five or more fails. |
+| Unused accounts are switched off | Enabled member accounts with no sign-in for 90 days. |
+
 **AI providers, per provider**
 
 | Check | What it looks at |
@@ -109,8 +152,10 @@ Redeploy after setting them. Until the three `GITHUB_APP_*` variables are presen
 
 ## Not verified against the real services yet
 
-Everything above was tested against a local mock of GitHub, OpenAI and Anthropic. The mock is built from the published API shapes. Before you tell a client it works, check these three things on a real account:
+Everything above was tested against a local mock of GitHub, Microsoft Graph, OpenAI and Anthropic. The mock is built from the published API shapes. Before you tell a client it works, check these things on a real account:
 
 1. **Anthropic cost unit.** The cost report's `amount` is treated as cents: `ANTHROPIC_AMOUNT_DIVISOR` in `providers.ts`, and the `/ 100` in the exporter. Compare one day against the Console.
 2. **GitHub `state` round-trip.** The install link carries a signed `state` parameter, and GitHub should hand it back to the Setup URL. If the callback ever lands on `?error=state`, this is where to look.
 3. **OpenAI `group_by`.** The exporter sends `group_by` twice (once for model, once for project). If OpenAI rejects that, send only `group_by=model`; you lose per-project attribution.
+4. **Microsoft admin consent.** The consent link goes to the `organizations` endpoint, and Microsoft sends back `tenant` and `admin_consent=True`. Connect AIC's own tenant first and confirm the four checks appear.
+5. **GitHub webhook.** In the App's **Advanced** tab, the recent deliveries should show 200 responses. A 401 means `GITHUB_WEBHOOK_SECRET` does not match.

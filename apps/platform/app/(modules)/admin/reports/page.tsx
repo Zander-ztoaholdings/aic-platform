@@ -1,90 +1,103 @@
-'use client'
+'use client';
 
-import AdminShell from '../components/AdminShell'
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
+import { useEffect, useState } from 'react';
+import AdminShell from '../components/AdminShell';
+import { ago } from '@/app/components/admin/ui';
+
+/**
+ * Register-wide figures. Replaces three invented headline numbers
+ * ("Certification velocity 4.2 weeks", "Bias incidence 1.8%", "Regulatory
+ * coverage 84%") and three reports that were never generated. Every figure
+ * here is a query; where nothing exists to measure, it says so.
+ */
+
+type Data = {
+  orgs: { total: number; with_systems: number; with_person: number };
+  byStatus: { status: string; n: number }[];
+  velocity: { median_days: number | null; n: number };
+  evidence: { waiting: number; oldest: string | null; accepted: number; rejected: number };
+  findings: { open: number; overdue: number };
+  checks: { orgs: number; failing: number };
+  reports: { id: string; organisation: string | null; month_year: string; integrity_score: number; is_finalized: boolean; created_at: string }[];
+};
+
+function Figure({ label, value, note }: { label: string; value: string; note: string }) {
+  return (
+    <div className="bg-white border border-[#dde2e8] rounded-xl p-4 sm:p-5">
+      <p className="text-[13px] text-[#5e6b7b]">{label}</p>
+      <p className="mt-1 text-[28px] font-semibold text-[#0e1b2c] tabular-nums">{value}</p>
+      <p className="mt-1 text-[13px] text-[#5e6b7b]">{note}</p>
+    </div>
+  );
+}
 
 export default function ReportsPage() {
-  const reportCategories = [
-    { title: 'Certification Velocity', value: '4.2 weeks', trend: '-12%', desc: 'Average time from application to seal.' },
-    { title: 'Bias Incidence Rate', value: '1.8%', trend: '+0.2%', desc: 'Flagged decisions across all Tier 1 systems.' },
-    { title: 'Regulatory Coverage', value: '84%', trend: '+5%', desc: 'Section 71 compliance density in audited orgs.' },
-  ]
-
-  const recentReports = [
-    { id: 1, name: 'Monthly Integrity Summary - Jan 2026', date: 'Feb 1, 2026', type: 'SYSTEM' },
-    { id: 2, name: 'Industry Benchmark: Banking Sector', date: 'Jan 28, 2026', type: 'ANALYTICS' },
-    { id: 3, name: 'Information Regulator Compliance Audit', date: 'Jan 15, 2026', type: 'REGULATORY' },
-  ]
+  const [d, setD] = useState<Data | null>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    fetch('/api/v1/admin/reports', { cache: 'no-store' })
+      .then(async (r) => { const b = await r.json(); if (!r.ok) throw new Error(b.error); setD(b); })
+      .catch((e) => setError(e.message || 'Could not load figures.'));
+  }, []);
 
   return (
     <AdminShell>
-      <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">System Analytics & Reports</h1>
-          <button className="bg-[#0e1b2c] text-aic-paper px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#22344a] transition-colors">
-            Generate Custom Report
-          </button>
-        </div>
-
-        {/* Aggregate Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          {reportCategories.map((cat) => (
-            <div key={cat.title} className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-              <p className="text-gray-500 text-xs first-cap mb-2">{cat.title}</p>
-              <div className="flex items-baseline gap-2 mb-2">
-                <p className="text-3xl font-bold">{cat.value}</p>
-                <span className={cat.trend.startsWith('-') ? 'text-green-700 text-xs' : 'text-red-700 text-xs'}>
-                  {cat.trend}
-                </span>
+      <div className="space-y-6">
+        <header>
+          <Eyebrow>Register</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Register figures</h1>
+          <p className="mt-1 text-sm text-[#5e6b7b] max-w-2xl">Counts across every organisation on the platform, from the records themselves.</p>
+        </header>
+        {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {!d && !error && <p className="text-sm text-[#5e6b7b]">Loading…</p>}
+        {d && (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Figure label="Organisations" value={String(d.orgs.total)} note={`${d.orgs.with_systems} have declared an AI system; ${d.orgs.with_person} have named an accountable person.`} />
+              <Figure
+                label="Application to first certificate"
+                value={d.velocity.median_days === null ? '—' : `${Math.round(d.velocity.median_days)} days`}
+                note={d.velocity.n === 0 ? 'No certificate has been issued yet.' : `Median across ${d.velocity.n} certified organisation${d.velocity.n === 1 ? '' : 's'}.`}
+              />
+              <Figure
+                label="Evidence waiting for review"
+                value={String(d.evidence.waiting)}
+                note={d.evidence.oldest ? `Oldest filed ${ago(d.evidence.oldest)}. ${d.evidence.accepted} accepted, ${d.evidence.rejected} sent back so far.` : `${d.evidence.accepted} accepted, ${d.evidence.rejected} sent back so far.`}
+              />
+              <Figure label="Open findings" value={String(d.findings.open)} note={`${d.findings.overdue} past their due date.`} />
+              <Figure label="Failing automated checks" value={String(d.checks.failing)} note={`Across ${d.checks.orgs} organisation${d.checks.orgs === 1 ? '' : 's'} with connected systems.`} />
+              <div className="bg-white border border-[#dde2e8] rounded-xl p-4 sm:p-5">
+                <p className="text-[13px] text-[#5e6b7b]">Where organisations stand</p>
+                <ul className="mt-2 space-y-1">
+                  {d.byStatus.map((s) => (
+                    <li key={s.status} className="flex justify-between text-[14px] text-[#0e1b2c]">
+                      <span>{s.status.charAt(0) + s.status.slice(1).toLowerCase().replace(/_/g, ' ')}</span>
+                      <span className="tabular-nums">{s.n}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-gray-500 text-sm font-serif">{cat.desc}</p>
             </div>
-          ))}
-        </div>
 
-        {/* Report Queue */}
-        <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden">
-          <div className="p-4 sm:p-6 border-b border-[#dde2e8] bg-white">
-            <h2 className="font-bold">Recent Generated Reports</h2>
-          </div>
-          <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left text-sm">
-            <thead className="bg-white text-gray-500 first-cap text-xs">
-              <tr>
-                <th className="p-4">Report Name</th>
-                <th className="p-4">Type</th>
-                <th className="p-4">Generated Date</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e6e9ee]">
-              {recentReports.map((report) => (
-                <tr key={report.id} className="hover:bg-[#eef1f5] transition-colors">
-                  <td className="p-4 font-medium">{report.name}</td>
-                  <td className="p-4">
-                    <span className="bg-[#f5f7f9] px-2 py-1 rounded text-[11.5px] text-gray-500 font-mono">
-                      {report.type}
-                    </span>
-                  </td>
-                  <td className="p-4 text-gray-500">{report.date}</td>
-                  <td className="p-4 text-right">
-                    <button className="text-blue-700 hover:text-blue-700 text-xs">
-                      Download PDF
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table></div>
-        </div>
-
-        {/* Visual Placeholder for Charts */}
-        <div className="h-64 bg-white rounded-xl border border-[#dde2e8] border-dashed flex items-center justify-center">
-          <div className="text-center">
-            <span className="text-3xl md:text-4xl block mb-2">📊</span>
-            <p className="text-gray-500 text-xs first-cap">Interactive Visualization Engine Offline</p>
-            <p className="text-gray-600 text-[11.5px] mt-1 italic">Waiting for more data points from active certifications</p>
-          </div>
-        </div>
+            <section className="bg-white border border-[#dde2e8] rounded-xl overflow-hidden">
+              <h2 className="px-4 sm:px-5 py-4 border-b border-[#e6e9ee] font-semibold text-[#0e1b2c]">Monthly compliance reports</h2>
+              {d.reports.length === 0 ? (
+                <p className="p-5 text-sm text-[#5e6b7b]">No monthly report has been generated yet.</p>
+              ) : (
+                <ul className="divide-y divide-[#e6e9ee]">
+                  {d.reports.map((r) => (
+                    <li key={r.id} className="px-4 sm:px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm">
+                      <span className="font-medium text-[#0e1b2c] flex-1">{r.organisation ?? 'Organisation removed'}, {r.month_year}</span>
+                      <span className="text-[#5e6b7b]">{r.is_finalized ? 'Final' : 'Draft'}, generated {ago(r.created_at)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </AdminShell>
-  )
+  );
 }

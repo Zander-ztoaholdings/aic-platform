@@ -37,6 +37,8 @@ export interface PublishedStandard {
    * worse than a terse one.
    */
   rights?: Partial<Record<RightCode, { name: string; blurb: string }>>;
+  /** Evidence tiers A–D as published: label, weight and what counts. */
+  tiers?: Record<string, { label: string; weight?: number; desc: string }>;
 }
 
 /** 1 Sovereign … 5 Artificial. Modes of operation, not grades. */

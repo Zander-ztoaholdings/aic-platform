@@ -1,164 +1,88 @@
-'use client'
+import Link from 'next/link';
+import { ChevronRight } from 'lucide-react';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+/**
+ * The HQ front door.
+ *
+ * This page used to be a staff-provisioning screen that asked for a password
+ * in a browser prompt, posted to an /api/users route that does not exist, and
+ * "toggled" permissions only in local state. Real account and permission
+ * management lives at /admin/users and /admin/permissions, which write to the
+ * database and the admin log. HQ had no menu of its own either, so most of its
+ * pages could only be reached by typing the address. This lists them.
+ */
 
-export default function GovernancePage() {
-  const [users, setUsers] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+const SECTIONS: { title: string; items: { href: string; label: string; description: string }[] }[] = [
+  {
+    title: 'Growth',
+    items: [
+      { href: '/hq/growth/revenue', label: 'Pipeline', description: 'Leads by stage, from the commercial pipeline.' },
+      { href: '/hq/crm', label: 'CRM', description: 'Every lead and where it came from.' },
+      { href: '/hq/subscribers', label: 'Newsletter subscribers', description: 'Sign-ups for The Pulse, with a CSV export.' },
+      { href: '/hq/cms', label: 'Public insights', description: 'Articles published on the public site.' },
+    ],
+  },
+  {
+    title: 'Operations',
+    items: [
+      { href: '/hq/operations/qc', label: 'Quality control', description: 'Evidence decisions and how consistently they are made.' },
+      { href: '/hq/intelligence/engine', label: 'Audit engine', description: 'Whether the engine is reachable, and what it has run.' },
+      { href: '/hq/training', label: 'Assessor academy', description: 'Curriculum and the lead assessor exam.' },
+    ],
+  },
+  {
+    title: 'People',
+    items: [
+      { href: '/hq/people/performance', label: 'Staff activity', description: 'What each staff member has recorded, from the logs.' },
+      { href: '/hq/people/hr', label: 'Roles', description: 'AIC’s own roles and who holds them.' },
+      { href: '/admin/users', label: 'Users', description: 'Create, suspend and change accounts. Every change is logged.' },
+      { href: '/admin/permissions', label: 'Permissions', description: 'What each staff role may do.' },
+    ],
+  },
+  {
+    title: 'Regulation',
+    items: [
+      { href: '/hq/governance/regulator', label: 'Information Regulator', description: 'POPIA and AIC’s position with the regulator.' },
+      { href: '/hq/governance/legal', label: 'Regulatory stack', description: 'The laws and standards AIC maps to.' },
+      { href: '/hq/governance/sadc', label: 'SADC mapping', description: 'Data-protection law across the region.' },
+      { href: '/hq/governance/expansion', label: 'Expansion', description: 'Markets beyond South Africa.' },
+    ],
+  },
+];
 
-  const fetchUsers = () => {
-    fetch('/api/users')
-      .then(res => res.json())
-      .then(data => {
-        setUsers(data.users || [])
-        setLoading(false);
-      });
-  }
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const handleProvision = async () => {
-    const name = prompt("Full Name:");
-    if (!name) return;
-    const email = prompt("Email:");
-    if (!email) return;
-    const password = prompt("Temporary Password:");
-    if (!password) return;
-    // 4-tier model (2026-09): AIC's own personnel are AIC_SUPER_ADMIN or
-    // AIC_AUDITOR now, not ADMIN/AUDITOR/VIEWER - see lib/roles.ts.
-    const role = prompt("Role (AIC_SUPER_ADMIN, AIC_AUDITOR):", "AIC_AUDITOR");
-    if (!role) return;
-
-    try {
-        const response = await fetch('/api/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                name, 
-                email, 
-                password, 
-                role,
-                permissions: {
-                    view_dashboard: true,
-                    view_crm: role === 'AIC_SUPER_ADMIN',
-                    view_cms: role === 'AIC_SUPER_ADMIN',
-                    view_audits: true,
-                    verify_evidence: role === 'AIC_AUDITOR' || role === 'AIC_SUPER_ADMIN',
-                    view_academy: true
-                }
-            })
-        });
-
-        if (response.ok) {
-            alert("Personnel provisioned successfully.");
-            fetchUsers();
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Provisioning failed.");
-    }
-  }
-
-  const handleTogglePermission = async (userId: string, permission: string, currentVal: boolean) => {
-      // In a real app, this would be a PATCH to /api/users
-      // Mocking state update for immediate feedback
-      setUsers(prev => prev.map(u => {
-          if (u.id === userId) {
-              const newPerms = { ...u.permissions, [permission]: !currentVal };
-              return { ...u, permissions: newPerms };
-          }
-          return u;
-      }));
-      console.log(`Setting ${permission} to ${!currentVal} for user ${userId}`);
-  };
-
-  const permissionKeys = [
-      { id: 'view_crm', label: 'CRM' },
-      { id: 'view_cms', label: 'CMS' },
-      { id: 'view_audits', label: 'Audits' },
-      { id: 'verify_evidence', label: 'Verify' },
-      { id: 'view_academy', label: 'Academy' }
-  ];
-
+export default function HqHome() {
   return (
-      <div className="max-w-6xl space-y-12">
-        <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end border-b border-[#dde2e8] pb-6 md:pb-8">
-            <div>
-                <h1 className="text-3xl md:text-4xl font-serif font-medium tracking-tight underline decoration-aic-gold underline-offset-8">Institutional Control</h1>
-                <p className="text-gray-500 font-serif mt-4 italic text-lg max-w-xl">Super-Admin Governance: Managing team access, roles, and functional permissions across the AIC ecosystem.</p>
-            </div>
-            <button 
-                onClick={handleProvision}
-                className="bg-[#0e1b2c] text-white px-5 md:px-8 py-3 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-colors shadow-xl"
-            >
-                + Provision New Account
-            </button>
-        </div>
+    <div className="max-w-5xl space-y-8">
+      <header>
+        <Eyebrow>HQ</Eyebrow>
+        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">AIC headquarters</h1>
+        <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
+          AIC’s own business: growth, operations, people and regulation. Client assessment work stays under Assessments and Register.
+        </p>
+      </header>
 
-        <div className="bg-white border border-[#dde2e8] rounded-[2.5rem] overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left text-sm font-serif">
-                <thead className="bg-[#f5f7f9] border-b border-[#dde2e8]">
-                    <tr>
-                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">User Details</th>
-                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap">Role</th>
-                        <th className="p-4 sm:p-6 text-[12px] font-bold text-gray-500 first-cap text-center">Advanced Permissions</th>
-                        <th className="p-4 sm:p-6 text-right text-[12px] font-bold text-gray-500 first-cap">Last Access</th>
-                    </tr>
-                </thead>
-                <tbody className="divide-y divide-[#e6e9ee]">
-                    {loading ? (
-                        <tr><td colSpan={4} className="p-6 md:p-12 text-center text-gray-500 font-serif italic">Accessing personnel database...</td></tr>
-                    ) : users.map((user, _i) => (
-                        <motion.tr 
-                            key={user.id}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="hover:bg-[#eef1f5] transition-colors group"
-                        >
-                            <td className="p-4 sm:p-6">
-                                <p className="font-bold text-[#0e1b2c] text-lg leading-none mb-1">
-                                    {user.name} {user.is_super_admin && <span className="text-[11px] text-[#8a6a1f] border border-aic-gold/20 px-1 ml-2 font-mono">SUPER</span>}
-                                </p>
-                                <p className="text-[11.5px] font-mono text-gray-500">{user.email}</p>
-                            </td>
-                            <td className="p-4 sm:p-6">
-                                <span className={`text-[12px] first-cap px-2 py-0.5 rounded border ${
-                                    user.role === 'AIC_SUPER_ADMIN' ? 'border-aic-gold text-[#8a6a1f] bg-aic-gold/5' : 'border-[#dde2e8] text-gray-500'
-                                }`}>
-                                    {user.role}
-                                </span>
-                            </td>
-                            <td className="p-4 sm:p-6">
-                                <div className="flex justify-center gap-3">
-                                    {permissionKeys.map((p) => (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => handleTogglePermission(user.id, p.id, user.permissions?.[p.id])}
-                                            className={`flex flex-col items-center gap-1 group/btn`}
-                                        >
-                                            <div className={`w-3 h-3 rounded-full border transition-all ${
-                                                user.permissions?.[p.id] ? 'bg-aic-gold border-aic-gold shadow-[0_0_8px_rgba(212,175,55,0.4)]' : 'bg-transparent border-[#dde2e8]'
-                                            }`} />
-                                            <span className={`text-[12px] first-cap transition-colors ${
-                                                user.permissions?.[p.id] ? 'text-[#8a6a1f]' : 'text-gray-600 group-hover/btn:text-gray-400'
-                                            }`}>{p.label}</span>
-                                        </button>
-                                    ))}
-                                </div>
-                            </td>
-                            <td className="p-4 sm:p-6 text-right">
-                                <span className="text-[12px] text-gray-500 first-cap">
-                                    {user.last_login ? new Date(user.last_login).toLocaleString() : 'Never'}
-                                </span>
-                            </td>
-                        </motion.tr>
-                    ))}
-                </tbody>
-            </table></div>
-        </div>
-      </div>
-  )
+      {SECTIONS.map((s) => (
+        <section key={s.title}>
+          <h2 className="mb-3 text-base font-semibold text-[#0e1b2c]">{s.title}</h2>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {s.items.map((i) => (
+              <li key={i.href}>
+                <Link
+                  href={i.href}
+                  className="lift group flex h-full items-start justify-between gap-3 rounded-xl border border-[#dde2e8] bg-white p-4 transition-colors hover:border-[#a8772a]"
+                >
+                  <span>
+                    <span className="block text-sm font-semibold text-[#0e1b2c]">{i.label}</span>
+                    <span className="mt-1 block text-[13px] leading-relaxed text-[#5e6b7b]">{i.description}</span>
+                  </span>
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[#9aa5b1] group-hover:text-[#8a6a1f]" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
 }

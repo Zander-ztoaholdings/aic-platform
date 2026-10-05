@@ -52,6 +52,10 @@ export async function GET() {
       corrections: {
         open: openCorrections,
       },
+      checks: {
+        failing: (overview.checks ?? []).filter((c) => c.status === 'fail').length,
+        total: (overview.checks ?? []).length,
+      },
     });
   } catch (error) {
     console.error('[SECURITY] Shell Summary GET Error:', error);

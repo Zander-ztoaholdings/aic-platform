@@ -1,4 +1,5 @@
 'use client';
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,7 +29,7 @@ export default function POPIAFundamentalsPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-12">
             <div className="flex flex-col sm:flex-row sm:justify-between gap-4 sm:items-center mb-12">
-                <Link href="/training" className="text-[12px] font-bold text-gray-500 hover:text-[#0e1b2c] transition-colors first-cap">
+                <Link href="/hq/training" className="text-[12px] font-bold text-gray-500 hover:text-[#0e1b2c] transition-colors first-cap">
                     ← Back to Academy
                 </Link>
                 <div className="flex gap-2">
@@ -48,10 +49,11 @@ export default function POPIAFundamentalsPage() {
                 >
                     <div className="space-y-6">
                         <span className="text-[#8a6a1f] text-[12px] font-bold first-cap">Lesson 0{step + 1} / 0{lessons.length}</span>
-                        <h1 className="text-[2rem] leading-tight md:text-5xl font-serif font-bold text-[#0e1b2c] tracking-tight">{lessons[step].title}</h1>
+                        <Eyebrow>Assessor academy</Eyebrow>
+                        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">{lessons[step].title}</h1>
                     </div>
 
-                    <div className="bg-white border border-[#dde2e8] p-16 rounded-[3rem] shadow-2xl relative overflow-hidden">
+                    <div className="bg-white border border-[#dde2e8] p-16 rounded-xl relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-aic-gold/30" />
                         <p className="text-xl text-gray-500 font-serif leading-relaxed italic mb-12">
                             "{lessons[step].content}"

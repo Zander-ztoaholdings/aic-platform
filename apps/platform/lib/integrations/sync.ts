@@ -10,6 +10,8 @@ import {
 import { evaluateRepo, evaluateOrg2fa } from './github-checks';
 import { pullUsage, ProviderError, type Provider } from './providers';
 import { evaluateProvider } from './provider-checks';
+import { collectTenantFacts, microsoftConfigured, MicrosoftError } from './microsoft';
+import { evaluateTenant } from './microsoft-checks';
 import { observeEstate } from '../continuity-store';
 
 /**
@@ -173,6 +175,13 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
       let settings: object | undefined;
       if (i.provider === 'github') {
         ({ results, settings } = await githubResults(i, declared.ids));
+      } else if (i.provider === 'microsoft') {
+        if (!microsoftConfigured()) throw new Error('The AIC Microsoft app is not configured on this server.');
+        if (!i.externalId) throw new Error('No Microsoft tenant is recorded for this connection.');
+        const facts = await collectTenantFacts(i.externalId);
+        const subject = facts.tenantName ?? i.accountLabel ?? i.externalId;
+        results = evaluateTenant(subject, facts);
+        settings = { ...((i.settings as object) ?? {}), tenantName: facts.tenantName, users: facts.users?.length ?? null };
       } else {
         results = await providerResults(orgId, i, declared);
       }
@@ -185,14 +194,19 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
       );
       outcomes.push({ provider: i.provider, status: 'ok', checks: results.length });
     } catch (err) {
-      const status = err instanceof GitHubError || err instanceof ProviderError ? err.status : 0;
+      const status = err instanceof GitHubError || err instanceof ProviderError || err instanceof MicrosoftError ? err.status : 0;
       // 404 on the installation, or 401/403 on a provider key, means access was
       // withdrawn on the other side — not a transient fault.
-      const gone = (i.provider === 'github' && status === 404) || (i.provider !== 'github' && (status === 401 || status === 403));
+      const gone =
+        (i.provider === 'github' && status === 404) ||
+        (i.provider === 'microsoft' && status === 403) ||
+        (i.provider !== 'github' && i.provider !== 'microsoft' && (status === 401 || status === 403));
       const message = gone
         ? i.provider === 'github'
           ? 'The AIC GitHub App was uninstalled or lost access. Reconnect to resume checks.'
-          : 'The provider rejected the stored key. It may have been revoked; paste a new one.'
+          : i.provider === 'microsoft'
+            ? 'Microsoft no longer lets AIC read this tenant. An administrator may have removed the AIC app; reconnect to resume checks.'
+            : 'The provider rejected the stored key. It may have been revoked; paste a new one.'
         : (err as Error).message;
       await db.query(async (tx) => {
         await tx.update(integrations)

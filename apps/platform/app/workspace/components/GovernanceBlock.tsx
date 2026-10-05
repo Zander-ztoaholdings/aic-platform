@@ -99,7 +99,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
 
       {block.type === 'model-card' && (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 bg-[#f5f7f9] p-5 md:p-8 rounded-[2rem] border border-dashed border-[#dde2e8]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 bg-[#f5f7f9] p-5 md:p-8 rounded-xl border border-dashed border-[#dde2e8]">
             <div className="space-y-4">
               <label className="flex items-center gap-2 text-[12px] font-bold text-aic-slate first-cap">
                 <Cpu className="w-3 h-3" /> Model Designation

@@ -1,3 +1,4 @@
+import { EncryptionService } from '@aic/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { auth } from '@aic/auth';
@@ -98,7 +99,9 @@ export async function POST(request: Request) {
         await db.query(async (tx) => {
             await tx.update(users)
                 .set({
-                    twoFactorSecret: secret,
+                    // Encrypted at rest; read back with decryptOrPlain, which
+                    // also reads secrets stored before this change.
+                    twoFactorSecret: EncryptionService.encrypt(secret),
                     twoFactorEnabled: true
                 })
                 .where(eq(users.id, who.userId));

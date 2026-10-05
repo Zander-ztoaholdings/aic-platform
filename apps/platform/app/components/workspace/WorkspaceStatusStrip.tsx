@@ -19,13 +19,14 @@ export function WorkspaceStatusStrip({
   phase,
   decisions,
   overrideRate,
-  integrityScore,
+  failingChecks,
   openCorrections,
 }: {
   phase: number;
   decisions: number | null;
   overrideRate: number | null;
-  integrityScore: number | null;
+  /** Failing automated checks; null when nothing is connected. */
+  failingChecks: number | null;
   openCorrections: number | null;
 }) {
   const stage = PHASES.find((p) => p.id === phase);
@@ -34,7 +35,7 @@ export function WorkspaceStatusStrip({
   const stats = [
     { label: 'Decisions recorded', value: fmt(decisions, (v) => v.toLocaleString()), warn: false },
     { label: 'Override rate', value: fmt(overrideRate, (v) => `${(v * 100).toFixed(1)}%`), warn: false },
-    { label: 'Integrity score', value: fmt(integrityScore, (v) => `${v}/100`), warn: integrityScore !== null && integrityScore < 60 },
+    { label: 'Failing checks', value: fmt(failingChecks, (v) => `${v}`), warn: failingChecks !== null && failingChecks > 0 },
     { label: 'Open corrections', value: fmt(openCorrections, (v) => `${v}`), warn: openCorrections !== null && openCorrections > 0 },
   ];
 
@@ -54,11 +55,11 @@ export function WorkspaceStatusStrip({
         )}
         {flagged.map((s) => (
           <span key={s.label} className="shrink-0 text-[#b45309]">
-            {s.label === 'Open corrections' ? `${s.value} open` : `${s.label} ${s.value}`}
+            {s.label === 'Open corrections' ? `${s.value} open` : s.label === 'Failing checks' ? `${s.value} failing` : `${s.label} ${s.value}`}
           </span>
         ))}
       </div>
-      <div className="hidden sm:flex max-w-[1400px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
+      <div className="hidden sm:flex max-w-[1200px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
         {stage && (
           <span className="flex items-center gap-2 text-[#6b7280]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a]" aria-hidden />

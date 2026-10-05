@@ -1,205 +1,149 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import AdminShell from '../components/AdminShell'
+import { Eyebrow } from '@/app/components/ui/Eyebrow';
+import { useCallback, useEffect, useState } from 'react';
+import AdminShell from '../components/AdminShell';
+import { Pill, Button, field } from '@/app/components/admin/ui';
 
-interface Certification {
-  id: string
-  organization: string
-  tier: 'TIER_1' | 'TIER_2' | 'TIER_3'
-  status: 'ACTIVE' | 'EXPIRING_SOON' | 'EXPIRED' | 'SUSPENDED'
-  issued_at: string
-  expires_at: string
-  integrity_score: number
-  last_audit: string
-  ai_systems: number
-}
+/**
+ * Issued certificates and their lifecycle.
+ *
+ * This page used to render five hard-coded "Example Bank Ltd (demo)"
+ * certificates with invented integrity scores. It now reads
+ * issued_certifications. Suspension, reinstatement and revocation go through
+ * the existing lifecycle route, which requires a reason and records who.
+ */
 
-const tierInfo = {
-  TIER_1: { label: 'Critical', color: 'text-red-700', bg: 'bg-red-50' },
-  TIER_2: { label: 'Elevated', color: 'text-orange-700', bg: 'bg-orange-50' },
-  TIER_3: { label: 'Standard', color: 'text-green-700', bg: 'bg-green-50' },
-}
+type Cert = {
+  id: string; certNumber: string; standard: string | null; status: string | null;
+  issueDate: string | null; expiryDate: string; suspensionReason: string | null; revocationReason: string | null;
+  organisation: string | null; division: number | null;
+};
 
-const statusInfo = {
-  ACTIVE: { label: 'Active', color: 'text-green-700', bg: 'bg-green-50' },
-  EXPIRING_SOON: { label: 'Expiring Soon', color: 'text-amber-700', bg: 'bg-yellow-50' },
-  EXPIRED: { label: 'Expired', color: 'text-red-700', bg: 'bg-red-50' },
-  SUSPENDED: { label: 'Suspended', color: 'text-gray-500', bg: 'bg-gray-500/20' },
+const DAY = 86_400_000;
+const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
+
+function effective(c: Cert): { key: string; label: string; tone: 'good' | 'warn' | 'bad' | 'neutral' } {
+  const left = new Date(c.expiryDate).getTime() - Date.now();
+  if (c.status === 'REVOKED') return { key: 'revoked', label: 'Revoked', tone: 'bad' };
+  if (c.status === 'SUSPENDED') return { key: 'suspended', label: 'Suspended', tone: 'warn' };
+  if (c.status === 'EXPIRED' || left < 0) return { key: 'expired', label: 'Expired', tone: 'neutral' };
+  if (left < 60 * DAY) return { key: 'expiring', label: `Expires in ${Math.ceil(left / DAY)} days`, tone: 'warn' };
+  return { key: 'active', label: 'Active', tone: 'good' };
 }
 
 export default function CertificationsPage() {
-  const [selectedTier, setSelectedTier] = useState<string>('ALL')
+  const [certs, setCerts] = useState<Cert[] | null>(null);
+  const [canManage, setCanManage] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [error, setError] = useState('');
 
-  const certifications: Certification[] = [
-    {
-      id: 'AIC-2026-0001',
-      organization: 'Example Bank Ltd (demo)',
-      tier: 'TIER_1',
-      status: 'ACTIVE',
-      issued_at: '2026-01-01',
-      expires_at: '2027-01-01',
-      integrity_score: 94,
-      last_audit: '2026-01-15',
-      ai_systems: 12
-    },
-    {
-      id: 'AIC-2026-0002',
-      organization: 'Example Healthcare Group (demo)',
-      tier: 'TIER_1',
-      status: 'ACTIVE',
-      issued_at: '2025-12-15',
-      expires_at: '2026-12-15',
-      integrity_score: 91,
-      last_audit: '2026-01-20',
-      ai_systems: 8
-    },
-    {
-      id: 'AIC-2026-0003',
-      organization: 'Example Telecom Ltd (demo)',
-      tier: 'TIER_2',
-      status: 'EXPIRING_SOON',
-      issued_at: '2025-02-10',
-      expires_at: '2026-02-10',
-      integrity_score: 87,
-      last_audit: '2025-11-10',
-      ai_systems: 3
-    },
-    {
-      id: 'AIC-2025-0089',
-      organization: 'Example Retail Group (demo)',
-      tier: 'TIER_2',
-      status: 'ACTIVE',
-      issued_at: '2025-10-01',
-      expires_at: '2026-10-01',
-      integrity_score: 89,
-      last_audit: '2026-01-05',
-      ai_systems: 4
-    },
-    {
-      id: 'AIC-2025-0045',
-      organization: 'Example Insurance Group (demo)',
-      tier: 'TIER_1',
-      status: 'ACTIVE',
-      issued_at: '2025-08-15',
-      expires_at: '2026-08-15',
-      integrity_score: 92,
-      last_audit: '2025-12-20',
-      ai_systems: 6
-    },
-  ]
+  const load = useCallback(async () => {
+    const res = await fetch('/api/v1/admin/certifications', { cache: 'no-store' });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) { setError(body.error || 'Could not load certificates.'); return; }
+    setCerts(body.certificates);
+    setCanManage(body.canManageLifecycle);
+  }, []);
+  useEffect(() => { load(); }, [load]);
 
-  const filtered = selectedTier === 'ALL'
-    ? certifications
-    : certifications.filter(c => c.tier === selectedTier)
-
-  const stats = {
-    total: certifications.length,
-    tier1: certifications.filter(c => c.tier === 'TIER_1').length,
-    tier2: certifications.filter(c => c.tier === 'TIER_2').length,
-    tier3: certifications.filter(c => c.tier === 'TIER_3').length,
-    expiringSoon: certifications.filter(c => c.status === 'EXPIRING_SOON').length,
-  }
+  const counts: Record<string, number> = {};
+  for (const c of certs ?? []) counts[effective(c).key] = (counts[effective(c).key] ?? 0) + 1;
+  const shown = (certs ?? []).filter((c) => filter === 'all' || effective(c).key === filter);
+  const FILTERS: [string, string][] = [['all', 'All'], ['active', 'Active'], ['expiring', 'Expiring soon'], ['suspended', 'Suspended'], ['expired', 'Expired'], ['revoked', 'Revoked']];
 
   return (
     <AdminShell>
-      <div className="space-y-8">
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
-          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Total Active</p>
-            <p className="text-3xl font-bold">{stats.total}</p>
+      <div className="space-y-6">
+        <header>
+          <Eyebrow>Register</Eyebrow>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Certificates</h1>
+          <p className="mt-1 text-sm text-[#5e6b7b] max-w-2xl">Every certificate AIC has issued. A suspension or revocation needs a reason and is shown on the public register.</p>
+        </header>
+        {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+        {certs && certs.length === 0 && (
+          <div className="rounded-xl border border-dashed border-[#c9ced6] bg-white p-6 text-sm text-[#5e6b7b]">
+            No certificates have been issued yet. A certificate is issued from an organisation’s completed assessment.
           </div>
-          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Tier 1 (Critical)</p>
-            <p className="text-3xl font-bold text-red-700">{stats.tier1}</p>
-          </div>
-          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Tier 2 (Elevated)</p>
-            <p className="text-3xl font-bold text-orange-700">{stats.tier2}</p>
-          </div>
-          <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Tier 3 (Standard)</p>
-            <p className="text-3xl font-bold text-green-700">{stats.tier3}</p>
-          </div>
-          <div className="bg-white p-4 sm:p-6 rounded-xl border border-yellow-200">
-            <p className="text-amber-700 text-xs first-cap mb-2">Expiring Soon</p>
-            <p className="text-3xl font-bold text-amber-700">{stats.expiringSoon}</p>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex gap-2 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0">
-          {['ALL', 'TIER_1', 'TIER_2', 'TIER_3'].map((tier) => (
-            <button
-              key={tier}
-              onClick={() => setSelectedTier(tier)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedTier === tier
-                  ? 'bg-[#0e1b2c] text-aic-paper'
-                  : 'bg-[#f5f7f9] text-gray-500 hover:bg-[#eef1f5]'
-              }`}
-            >
-              {tier === 'ALL' ? 'All tiers' : tier.replace('TIER_', 'Tier ')}
-            </button>
-          ))}
-        </div>
-
-        {/* Certifications Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-          {filtered.map((cert) => (
-            <div
-              key={cert.id}
-              className="bg-white rounded-xl border border-[#dde2e8] p-4 sm:p-6 hover:border-[#dde2e8] transition-colors"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="font-mono text-sm text-gray-500">{cert.id}</p>
-                  <h3 className="text-xl font-bold mt-1">{cert.organization}</h3>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${tierInfo[cert.tier].bg} ${tierInfo[cert.tier].color}`}>
-                    {tierInfo[cert.tier].label}
-                  </span>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusInfo[cert.status].bg} ${statusInfo[cert.status].color}`}>
-                    {statusInfo[cert.status].label}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <p className="text-xs text-gray-500 first-cap">Integrity Score</p>
-                  <p className={`text-2xl font-bold ${
-                    cert.integrity_score >= 90 ? 'text-green-700' :
-                    cert.integrity_score >= 70 ? 'text-amber-700' : 'text-red-700'
-                  }`}>
-                    {cert.integrity_score}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 first-cap">AI Systems</p>
-                  <p className="text-2xl font-bold">{cert.ai_systems}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 first-cap">Last Audit</p>
-                  <p className="text-sm font-mono">{cert.last_audit}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between text-sm border-t border-[#dde2e8] pt-4">
-                <div className="text-gray-500">
-                  Valid until: <span className="text-[#0e1b2c]">{cert.expires_at}</span>
-                </div>
-                <div className="flex gap-3">
-                  <button className="text-blue-700 hover:text-blue-700">View Details</button>
-                  <button className="text-gray-500 hover:text-gray-700">Schedule Audit</button>
-                </div>
-              </div>
+        )}
+        {certs && certs.length > 0 && (
+          <>
+            <div className="flex gap-2 overflow-x-auto -mx-5 px-5 sm:mx-0 sm:px-0">
+              {FILTERS.map(([k, label]) => (
+                <button key={k} onClick={() => setFilter(k)} className={`h-9 px-3.5 rounded-full text-[13px] font-medium whitespace-nowrap border ${filter === k ? 'bg-[#0e1b2c] text-white border-[#0e1b2c]' : 'bg-white text-[#5e6b7b] border-[#dde2e8]'}`}>
+                  {label} {k === 'all' ? certs.length : counts[k] ?? 0}
+                </button>
+              ))}
             </div>
-          ))}
-        </div>
+            <div className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee]">
+              {shown.map((c) => <CertRow key={c.id} c={c} canManage={canManage} onDone={load} />)}
+              {shown.length === 0 && <p className="p-5 text-sm text-[#5e6b7b]">None in this group.</p>}
+            </div>
+          </>
+        )}
       </div>
     </AdminShell>
-  )
+  );
+}
+
+function CertRow({ c, canManage, onDone }: { c: Cert; canManage: boolean; onDone: () => void }) {
+  const [action, setAction] = useState<'SUSPEND' | 'REINSTATE' | 'REVOKE' | null>(null);
+  const [reason, setReason] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const st = effective(c);
+
+  async function submit() {
+    setBusy(true);
+    setErr('');
+    const res = await fetch(`/api/v1/certifications/${encodeURIComponent(c.certNumber)}/lifecycle`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, reason }),
+    });
+    const body = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) { setErr(body.message || body.error || 'That change was refused.'); return; }
+    setAction(null);
+    setReason('');
+    onDone();
+  }
+
+  return (
+    <div className="p-4 sm:p-5 space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-start gap-2 sm:gap-6">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[15px] font-semibold text-[#0e1b2c]">{c.organisation ?? 'Organisation removed'}</span>
+            <Pill tone={st.tone}>{st.label}</Pill>
+          </div>
+          <p className="mt-1 text-[13px] text-[#5e6b7b]">
+            {c.certNumber}. {c.standard ?? 'AIC standard'}{c.division ? `, Division ${c.division}` : ''}. Issued {fmt(c.issueDate)}, expires {fmt(c.expiryDate)}.
+          </p>
+          {(c.suspensionReason || c.revocationReason) && (
+            <p className="mt-1 text-[13px] text-[#b45309]">Reason: {c.revocationReason ?? c.suspensionReason}</p>
+          )}
+        </div>
+        {canManage && st.key !== 'revoked' && (
+          <div className="flex gap-2 shrink-0">
+            {c.status === 'SUSPENDED'
+              ? <Button onClick={() => setAction('REINSTATE')}>Reinstate</Button>
+              : <Button onClick={() => setAction('SUSPEND')}>Suspend</Button>}
+            <Button variant="danger" onClick={() => setAction('REVOKE')}>Revoke</Button>
+          </div>
+        )}
+      </div>
+      {action && (
+        <div className="rounded-xl border border-[#e7d9b8] bg-[#fbf7ee] p-4 space-y-2">
+          <p className="text-[13px] font-semibold text-[#0e1b2c]">
+            {action === 'REVOKE' ? 'Revoke this certificate. This cannot be undone.' : action === 'SUSPEND' ? 'Suspend this certificate.' : 'Reinstate this certificate.'}
+          </p>
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} placeholder="The reason, as it will be recorded (at least 10 characters)" className={field} />
+          <div className="flex gap-2">
+            <Button variant={action === 'REVOKE' ? 'danger' : 'primary'} disabled={busy || reason.trim().length < 10} onClick={submit}>Confirm</Button>
+            <Button variant="ghost" onClick={() => setAction(null)}>Cancel</Button>
+          </div>
+          {err && <p className="text-[13px] text-[#b23a35]">{err}</p>}
+        </div>
+      )}
+    </div>
+  );
 }

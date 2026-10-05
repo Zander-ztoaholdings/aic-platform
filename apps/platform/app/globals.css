@@ -177,7 +177,7 @@ body {
 
 /* ─── Animations ─────────────────────────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes copperPulse {
@@ -196,7 +196,83 @@ body {
   animation: copperPulse 3s ease-in-out infinite;
 }
 .fade-up {
-  animation: fadeUp 0.2s ease;
+  animation: fadeUp 0.5s var(--ease-apple) both;
+}
+
+/* ─── Motion ─────────────────────────────────────────────────────
+ * One easing for everything that moves: the curve iOS uses for sheets and
+ * springs, which starts quickly and settles slowly. Durations stay short
+ * (under half a second) and nothing loops. Movement is a few pixels, never
+ * across the screen. All of it switches off for people who ask the system
+ * for reduced motion. */
+:root {
+  --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-apple-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes menuPop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes sheetIn {
+  from { transform: translateX(-100%); }
+  to   { transform: none; }
+}
+@keyframes scrimIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* A new page settles in; its first-level sections follow a beat apart. */
+.page-enter { animation: pageEnter 0.55s var(--ease-apple) both; }
+.page-enter > * > * { animation: pageEnter 0.6s var(--ease-apple) both; }
+.page-enter > * > *:nth-child(2) { animation-delay: 40ms; }
+.page-enter > * > *:nth-child(3) { animation-delay: 80ms; }
+.page-enter > * > *:nth-child(4) { animation-delay: 120ms; }
+.page-enter > * > *:nth-child(5) { animation-delay: 160ms; }
+.page-enter > * > *:nth-child(n+6) { animation-delay: 200ms; }
+
+.menu-pop { transform-origin: top left; animation: menuPop 0.24s var(--ease-apple) both; }
+[data-align="end"] > .menu-pop, .menu-pop[data-align="end"] { transform-origin: top right; }
+.sheet-in { animation: sheetIn 0.42s var(--ease-apple) both; }
+.scrim-in { animation: scrimIn 0.3s var(--ease-apple-soft) both; }
+
+/* Press feedback: controls give slightly under the finger, like a native
+ * button, and come back on release. */
+@layer base {
+  button, [role="button"], a[class*="rounded-full"], a[class*="rounded-xl"] {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale, translate;
+    transition-duration: 200ms;
+    transition-timing-function: var(--ease-apple);
+  }
+  button:not(:disabled):active, [role="button"]:active, a[class*="rounded-full"]:active {
+    scale: 0.97;
+  }
+  a[class*="rounded-xl"]:active { scale: 0.99; }
+}
+
+/* Cards that are links lift a touch on hover, on devices that hover. */
+@media (hover: hover) {
+  a.lift, .lift-children > a {
+    transition: translate 0.35s var(--ease-apple), box-shadow 0.35s var(--ease-apple), border-color 0.2s ease;
+  }
+  a.lift:hover, .lift-children > a:hover {
+    translate: 0 -2px;
+    box-shadow: 0 12px 32px -16px rgba(14, 27, 44, 0.22);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  button:not(:disabled):active, [role="button"]:active, a:active { scale: none !important; }
 }
 
 /* ─── Sentence-case labels ───────────────────────────────────────

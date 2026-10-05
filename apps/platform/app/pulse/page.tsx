@@ -1,11 +1,12 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { Activity, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow, SectionCard } from '../components/ui/Eyebrow';
+import { SectionCard } from '../components/ui/Eyebrow';
 import { canRecordDecisions } from '../../lib/roles';
 
 /**
@@ -173,8 +174,8 @@ export default function PulsePage() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <Eyebrow>Decision Log</Eyebrow>
+        <div>
+          <PageHeader eyebrow="AI overview" title="Decision log" lede="Decisions your systems have recorded, the human overrides, and who made them." />
         </div>
 
         <SectionCard>

@@ -464,6 +464,10 @@ export const apiKeys = pgTable('api_keys', {
   name: varchar('name', { length: 255 }).notNull(),
   keyPrefix: varchar('key_prefix', { length: 16 }).notNull(),
   keyHash: varchar('key_hash', { length: 255 }).notNull(),
+  /** SHA-256 of the full key (db/manual/012). An index to find the one row
+   *  to check, instead of bcrypt-comparing against every key. bcrypt stays
+   *  the actual verification. */
+  keyLookup: varchar('key_lookup', { length: 64 }).unique(),
   isActive: boolean('is_active').default(true),
   lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
@@ -1073,8 +1077,8 @@ export const llmUsageRecords = pgTable('llm_usage_records', {
 export const integrations = pgTable('integrations', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
-  provider: varchar('provider', { length: 30 }).notNull(), // 'github' | 'openai' | 'anthropic'
-  mode: varchar('mode', { length: 20 }).notNull(), // 'github_app' | 'exporter' | 'api_key'
+  provider: varchar('provider', { length: 30 }).notNull(), // 'github' | 'microsoft' | 'openai' | 'anthropic'
+  mode: varchar('mode', { length: 20 }).notNull(), // 'github_app' | 'admin_consent' | 'exporter' | 'api_key'
   status: varchar('status', { length: 20 }).notNull().default('pending'), // 'pending' | 'active' | 'error' | 'disconnected'
   externalId: varchar('external_id', { length: 100 }),
   accountLabel: varchar('account_label', { length: 255 }),
@@ -1117,4 +1121,53 @@ export const integrationChecks = pgTable('integration_checks', {
 }, (table) => ({
   orgCheckSubject: unique('integration_checks_org_check_subject').on(table.orgId, table.checkKey, table.subject),
   orgStatus: index('integration_checks_org_status_idx').on(table.orgId, table.status),
+}));
+
+/**
+ * Policies an organisation adopts, versions it publishes, and who has accepted
+ * which version (db/manual/013_policies.sql).
+ *
+ * A published version is frozen in policy_versions with a SHA-256 of its text,
+ * and an acceptance points at that version: "Thandi accepted version 3 on
+ * 4 October" has to mean the exact words of version 3, not whatever the
+ * policy says today.
+ */
+export const orgPolicies = pgTable('org_policies', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  templateKey: varchar('template_key', { length: 60 }),
+  title: varchar('title', { length: 255 }).notNull(),
+  body: text('body').notNull(),
+  publishedVersion: integer('published_version').notNull().default(0),
+  ownerId: uuid('owner_id').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+  reviewDueAt: timestamp('review_due_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgIdx: index('org_policies_org_idx').on(table.orgId),
+}));
+
+export const policyVersions = pgTable('policy_versions', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  policyId: uuid('policy_id').notNull().references(() => orgPolicies.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  body: text('body').notNull(),
+  bodyHash: varchar('body_hash', { length: 64 }).notNull(),
+  publishedAt: timestamp('published_at', { withTimezone: true }).notNull().defaultNow(),
+  publishedBy: uuid('published_by').references((): AnyPgColumn => users.id, { onDelete: 'set null' }),
+}, (table) => ({
+  policyVersion: unique('policy_versions_policy_version').on(table.policyId, table.version),
+}));
+
+export const policyAcceptances = pgTable('policy_acceptances', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  policyId: uuid('policy_id').notNull().references(() => orgPolicies.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  userId: uuid('user_id').notNull().references((): AnyPgColumn => users.id, { onDelete: 'cascade' }),
+  acceptedAt: timestamp('accepted_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  once: unique('policy_acceptances_once').on(table.policyId, table.version, table.userId),
 }));

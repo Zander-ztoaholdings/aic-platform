@@ -25,7 +25,7 @@ export default function StaffHome() {
   return (
     <AdminShell>
       <div className="mb-10">
-        <h1 className="font-serif text-3xl font-bold text-[#0e1b2c] mb-2">{first ? `Welcome back, ${first}` : 'Staff workspace'}</h1>
+        <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">{first ? `Welcome back, ${first}` : 'Staff workspace'}</h1>
         <p className="text-[#5e6b7b] text-sm max-w-xl leading-relaxed">
           Assessment work, the register and AIC&apos;s own administration. You see what your role can act on;
           everything else stays out of the way.

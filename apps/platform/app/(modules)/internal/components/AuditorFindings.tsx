@@ -1,8 +1,9 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import { Upload, Clock } from 'lucide-react';
-import { Eyebrow, SectionCard, CopperTag } from '@/app/components/ui/Eyebrow';
+import { SectionCard, CopperTag } from '@/app/components/ui/Eyebrow';
 import { StatusChip } from '@/app/components/ui/StatusChip';
 import { UploadModal } from '@/app/components/ui/UploadModal';
 
@@ -57,7 +58,7 @@ export default function AuditorFindings() {
       {uploadLabel && <UploadModal label={uploadLabel} onClose={() => setUploadLabel(null)} />}
 
       <div className="space-y-5">
-        <Eyebrow>Auditor Findings</Eyebrow>
+        <PageHeader eyebrow="Compliance tracking" title="Assessor findings" lede="What the assessor raised, and the corrective action you have taken on each." />
 
         <div className="flex flex-wrap gap-3 items-center">
           {[

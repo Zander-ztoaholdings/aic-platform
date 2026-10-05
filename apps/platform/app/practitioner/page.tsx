@@ -1,10 +1,11 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { ArrowRight, Check } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow, SectionCard, CopperTag } from '../components/ui/Eyebrow';
+import { SectionCard, CopperTag } from '../components/ui/Eyebrow';
 
 function BrandMark({ size = 60 }: { size?: number }) {
   return (
@@ -74,7 +75,7 @@ export default function PractitionerPage() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <Eyebrow>Practitioner Certification — CAAP</Eyebrow>
+        <PageHeader eyebrow="Account" title="Practitioner (CAAP)" lede="The Certified AI Accountability Professional credential: what it covers, and how to register interest." />
 
         {/* Hero banner */}
         <div className="bg-[#0a1628] rounded-2xl px-5 md:px-8 py-6 md:py-8 flex flex-col md:flex-row gap-5 md:gap-6 md:items-center">

@@ -101,14 +101,14 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
                 <motion.div
                     initial={{ scale: 0.95, y: 20 }}
                     animate={{ scale: 1, y: 0 }}
-                    className="w-full max-w-2xl bg-white border border-[#dde2e8] rounded-[2.5rem] p-6 md:p-12 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
+                    className="w-full max-w-2xl bg-white border border-[#dde2e8] rounded-xl p-6 md:p-12 shadow-[0_0_50px_rgba(212,175,55,0.15)]"
                 >
                     <div className="flex items-center gap-6 mb-12">
                         <svg className="w-6 h-6 text-[#8a6a1f]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <input
                             autoFocus
                             placeholder="QUERY REGISTRY..."
-                            className="bg-transparent border-none text-2xl font-serif text-[#0e1b2c] outline-none w-full tracking-tighter"
+                            className="bg-transparent border-none text-2xl font-serif text-[#0e1b2c] outline-none w-full"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />

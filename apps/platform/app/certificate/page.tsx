@@ -1,9 +1,10 @@
 'use client';
+import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useEffect, useState } from 'react';
 import { Download, ExternalLink, Copy, Check } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow, SectionCard } from '../components/ui/Eyebrow';
+import { SectionCard } from '../components/ui/Eyebrow';
 
 function BrandMark({ size = 60 }: { size?: number }) {
   return (
@@ -89,7 +90,7 @@ export default function CertificatePage() {
   return (
     <DashboardShell>
       <div className="space-y-5">
-        <Eyebrow>My Certificate</Eyebrow>
+        <PageHeader eyebrow="AIC Certification" title="My certificate" lede="Your current certification status, and what stands between you and the next stage." />
 
         {!data ? (
           <SectionCard className="p-5 md:p-8 text-center">
@@ -107,7 +108,7 @@ export default function CertificatePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4 items-start">
             {/* Certificate card */}
             <SectionCard className="p-0 overflow-hidden">
-              <div className="bg-[#0a1628] px-5 md:px-8 py-8 flex gap-6 items-center">
+              <div className="bg-[#0a1628] px-5 md:px-8 py-8 flex flex-col sm:flex-row gap-5 sm:gap-6 sm:items-center">
                 <BrandMark size={72} />
                 <div className="flex-1 min-w-0">
                   <div className="text-[12px] font-bold first-cap text-[#c9920a] mb-2">
@@ -117,12 +118,9 @@ export default function CertificatePage() {
                     {org?.name ?? '—'}
                   </h2>
                 </div>
-                <div className="ml-auto text-right flex-shrink-0">
-                  <div className="font-mono text-3xl font-bold text-[#c9920a] leading-none">
-                    {org?.integrityScore ?? 0}
-                  </div>
-                  <div className="font-mono text-[11px] text-white/40 tracking-[0.15em] mt-1">INTEGRITY SCORE</div>
-                </div>
+                {/* No number here: the register shows status bands only (Zander,
+                    Sep 2026). A certificate carrying a score would invite the
+                    one comparison the standard does not make. */}
               </div>
 
               <div className="p-4 sm:p-6">

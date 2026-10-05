@@ -22,7 +22,7 @@ export async function adminActor(capability: Capability): Promise<AdminActor | n
 export async function recordAdminAction(input: {
   actorId: string;
   orgId: string | null;
-  targetType: 'ADMIN_USER' | 'ADMIN_ORG';
+  targetType: 'ADMIN_USER' | 'ADMIN_ORG' | 'ADMIN_EVIDENCE';
   targetId: string | null;
   previous: unknown;
   next: unknown;
