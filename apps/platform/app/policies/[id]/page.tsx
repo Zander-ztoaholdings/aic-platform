@@ -88,7 +88,7 @@ function PolicyDetail() {
               <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded-lg border border-[#dde2e8] px-3 h-11 text-[15px] outline-none focus:border-[#a8772a]" />
             </label>
             <label className="block text-[13px] font-medium text-[#0e1b2c]">Text
-              <span className="block text-[12.5px] font-normal text-[#5e6b7b]">“# ” for the title, “## ” for a section, “- ” for a bullet. Replace everything in [square brackets].</span>
+              <span className="block text-[12.5px] font-normal text-[#5e6b7b]">“# ” for the title, “## ” for a section, “- ” for a bullet. Anything still in [square brackets] must be replaced before publishing.</span>
               <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={24} className="mt-1 w-full rounded-lg border border-[#dde2e8] px-3 py-2 text-[14px] leading-relaxed font-mono outline-none focus:border-[#a8772a]" />
             </label>
             <label className="block text-[13px] font-medium text-[#0e1b2c]">Next review due

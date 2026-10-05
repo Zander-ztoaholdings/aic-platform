@@ -169,6 +169,8 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
   const now = new Date();
 
   for (const i of rows) {
+    // The demo company's connections are fixtures: there is nothing to reach.
+    if (i.mode === 'demo') continue;
     if (i.status === 'disconnected') continue;
     try {
       let results: CheckResult[];

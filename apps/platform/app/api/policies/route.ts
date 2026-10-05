@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, orgPolicies, policyAcceptances, eq, asc } from '@aic/db';
 import { policyCaller, orgMembers } from '@/lib/policies';
 import { POLICY_TEMPLATES, TEMPLATE_BY_KEY } from '@/lib/policy-templates';
+import { BUILDERS, cleanAnswers, missingAnswers } from '@/lib/policy-builder';
+import { builderContext } from '@/lib/policy-builder-data';
 
 /** The organisation's policies, how many members accepted the current version, and templates not yet adopted. */
 export async function GET() {
@@ -34,15 +36,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const c = await policyCaller({ manage: true });
   if ('error' in c) return c.error;
-  const body = (await request.json().catch(() => ({}))) as { templateKey?: string; title?: string };
+  const body = (await request.json().catch(() => ({}))) as { templateKey?: string; title?: string; answers?: unknown };
   const t = body.templateKey ? TEMPLATE_BY_KEY[body.templateKey] : null;
   if (body.templateKey && !t) return NextResponse.json({ error: 'Unknown template.' }, { status: 400 });
   const title = t?.title ?? (body.title ?? '').trim();
   if (!title) return NextResponse.json({ error: 'Give the policy a title.' }, { status: 400 });
+  // From the builder: the text is assembled from the answers, so no blank survives.
+  let text = t?.body ?? `# ${title}\n\n`;
+  if (t && body.answers !== undefined && BUILDERS[t.key]) {
+    const b = BUILDERS[t.key];
+    const answers = cleanAnswers(b, body.answers);
+    const missing = missingAnswers(b, answers);
+    if (missing.length) return NextResponse.json({ error: `Answer this first: ${missing[0]}` }, { status: 400 });
+    text = b.render(answers, await builderContext(c.orgId));
+  }
   const db = getTenantDb(c.orgId);
   const [row] = await db.query((tx) =>
     tx.insert(orgPolicies)
-      .values({ orgId: c.orgId, templateKey: t?.key ?? null, title, body: t?.body ?? `# ${title}\n\n`, ownerId: c.userId })
+      .values({ orgId: c.orgId, templateKey: t?.key ?? null, title, body: text, ownerId: c.userId })
       .returning({ id: orgPolicies.id })
   );
   return NextResponse.json({ id: row.id }, { status: 201 });

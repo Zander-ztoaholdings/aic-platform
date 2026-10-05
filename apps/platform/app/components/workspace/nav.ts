@@ -123,7 +123,7 @@ export const STAFF_NAV: NavGroup[] = [
     label: 'Register',
     summary: 'Client organisations, certificates and reports.',
     items: [
-      { label: 'Organisations', href: '/admin/organizations', icon: Building2, description: 'The client files assigned to you.', visible: (u) => staffCan(u, 'view_all_orgs') },
+      { label: 'Organisations', href: '/admin/organizations', icon: Building2, description: 'Everyone registered, and the files you hold.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Certifications', href: '/admin/certifications', icon: Award, description: 'Issued certificates and their lifecycle.', visible: (u) => staffCan(u, 'conduct_assessment') },
       { label: 'AIC Aware badges', href: '/admin/aware', icon: BadgeCheck, description: 'Issued badges, their status, and revocation.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Reports', href: '/admin/reports', icon: FileBarChart, description: 'Assessment reports across the register.', visible: (u) => staffCan(u, 'conduct_assessment') },
@@ -139,6 +139,7 @@ export const STAFF_NAV: NavGroup[] = [
       { label: 'Permissions', href: '/admin/permissions', icon: Lock, description: 'Roles and what each may do.', visible: (u) => staffCan(u, 'manage_roles') },
       { label: 'Leads', href: '/admin/leads', icon: Target, description: 'The commercial pipeline.', visible: (u) => staffCan(u, 'access_hq') },
       { label: 'HQ', href: '/hq/governance', icon: LineChart, description: 'Growth, operations, people and regulation.', visible: (u) => canUseHq(u) },
+      { label: 'Demo company', href: '/admin/demo', icon: Sparkles, description: 'Build or reset Highveld Credit (Demo) for a prospect demo.', visible: (u) => !!u.isSuperAdmin },
     ],
   },
 ];

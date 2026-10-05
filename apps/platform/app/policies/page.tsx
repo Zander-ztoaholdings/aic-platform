@@ -85,16 +85,21 @@ export default function PoliciesPage() {
             {d.canManage && d.templates.length > 0 && (
               <section className="space-y-3">
                 <h2 className="text-[16px] font-semibold text-[#0e1b2c]">Templates</h2>
-                <p className="text-[14px] text-[#5e6b7b]">Each is a starting point written for AIC’s requirements. Adapt it to what you actually do before publishing.</p>
+                <p className="text-[14px] text-[#5e6b7b]">Answer a few questions and AIC writes the policy for you, using what it already knows about your organisation. You can edit every word before publishing.</p>
                 <div className="grid sm:grid-cols-2 gap-3">
                   {d.templates.map((t) => (
                     <div key={t.key} className="bg-white border border-[#dde2e8] rounded-xl p-4 flex flex-col">
                       <p className="text-[15px] font-semibold text-[#0e1b2c]">{t.title}</p>
                       <p className="mt-1 text-[13.5px] text-[#5e6b7b] flex-1">{t.summary}</p>
                       <p className="mt-2 text-[12.5px] text-[#8a95a3]">Evidence towards {t.controls.join(', ')}.</p>
-                      <button onClick={() => adopt(t.key)} disabled={busy === t.key} className="mt-3 self-start h-10 sm:h-9 px-4 rounded-full border border-[#d5dbe2] text-[14px] font-medium text-[#0e1b2c] hover:border-[#a8772a] disabled:opacity-50">
-                        {busy === t.key ? 'Adopting…' : 'Adopt and edit'}
-                      </button>
+                      <div className="mt-3 flex flex-wrap items-center gap-3">
+                        <button onClick={() => router.push(`/policies/new/${t.key}`)} className="h-10 sm:h-9 px-4 rounded-full bg-[#0e1b2c] text-[14px] font-medium text-white hover:bg-[#22344a]">
+                          Build it with AIC
+                        </button>
+                        <button onClick={() => adopt(t.key)} disabled={busy === t.key} className="text-[13px] font-medium text-[#5e6b7b] hover:text-[#0e1b2c] disabled:opacity-50">
+                          {busy === t.key ? 'Adopting…' : 'or start from the plain text'}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

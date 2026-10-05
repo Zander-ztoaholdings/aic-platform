@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSystemDb, auditDocuments, eq } from '@aic/db';
+import { getSystemDb, auditDocuments, eq, organizations } from '@aic/db';
 import { adminActor, recordAdminAction } from '@/lib/admin';
 
 const OUTCOMES = ['ACCEPTED', 'REJECTED', 'INSUFFICIENT'] as const;
@@ -25,6 +25,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const db = getSystemDb();
   const [doc] = await db.select().from(auditDocuments).where(eq(auditDocuments.id, id)).limit(1);
   if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!actor.isSuperAdmin && doc.orgId) {
+    const [o] = await db.select({ a: organizations.auditorId }).from(organizations).where(eq(organizations.id, doc.orgId)).limit(1);
+    if (o?.a !== actor.id) return NextResponse.json({ error: 'This file is not assigned to you.' }, { status: 403 });
+  }
 
   const now = new Date();
   await db

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
-import { getSystemDb, auditDocuments, eq } from '@aic/db';
+import { getSystemDb, auditDocuments, organizations, eq } from '@aic/db';
 import { StorageService } from '@aic/db/storage';
 import { auth } from '@aic/auth';
 import { hasCapability } from '@/lib/rbac';
@@ -23,8 +23,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!doc) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const ownOrg = !!session?.user?.orgId && session.user.orgId === doc.orgId;
-  if (!ownOrg && !(await hasCapability(userId, 'conduct_assessment'))) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  if (!ownOrg) {
+    // Staff: super admins, or the assessor who holds this organisation's file.
+    if (!(await hasCapability(userId, 'conduct_assessment'))) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!session?.user?.isSuperAdmin && doc.orgId) {
+      const [o] = await getSystemDb().select({ a: organizations.auditorId }).from(organizations).where(eq(organizations.id, doc.orgId)).limit(1);
+      if (o?.a !== userId) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
   }
 
   let buffer: Buffer;

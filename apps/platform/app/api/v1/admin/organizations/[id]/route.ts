@@ -14,6 +14,7 @@ const Action = z.discriminatedUnion('action', [
   z.object({ action: z.literal('rename'), name: z.string().trim().min(2).max(200), reason: z.string().trim().min(3) }),
   z.object({ action: z.literal('suspend'), reason: z.string().trim().min(3) }),
   z.object({ action: z.literal('restore'), reason: z.string().trim().min(3) }),
+  z.object({ action: z.literal('assign'), auditorId: z.string().uuid().nullable(), reason: z.string().trim().min(3) }),
 ]);
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -31,6 +32,20 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (a.action === 'rename') {
     await db.update(organizations).set({ name: a.name }).where(eq(organizations.id, id));
     await recordAdminAction({ actorId: actor.id, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: { name: org.name }, next: { name: a.name }, reason: a.reason });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (a.action === 'assign') {
+    // Super admins assign; the assessor still has to clear a conflict check
+    // before opening the file (see claim), so assignment alone grants nothing.
+    if (!actor.isSuperAdmin) return NextResponse.json({ error: 'Only a super admin assigns files.' }, { status: 403 });
+    if (a.auditorId) {
+      const [u] = await db.select({ role: users.role, active: users.isActive }).from(users).where(eq(users.id, a.auditorId)).limit(1);
+      if (!u || (u.role !== 'AIC_AUDITOR' && u.role !== 'AIC_SUPER_ADMIN') || u.active === false) return NextResponse.json({ error: 'That person is not an active AIC assessor.' }, { status: 400 });
+    }
+    const [before] = await db.select({ auditorId: organizations.auditorId }).from(organizations).where(eq(organizations.id, id)).limit(1);
+    await db.update(organizations).set({ auditorId: a.auditorId }).where(eq(organizations.id, id));
+    await recordAdminAction({ actorId: actor.id, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: { auditorId: before?.auditorId ?? null }, next: { auditorId: a.auditorId }, reason: a.reason });
     return NextResponse.json({ ok: true });
   }
 

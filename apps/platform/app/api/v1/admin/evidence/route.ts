@@ -3,7 +3,7 @@ import { getSystemDb, auditDocuments, auditRequirements, organizations, users, e
 import { adminActor } from '@/lib/admin';
 
 /**
- * The assessor's queue. Without ?orgId, every organisation with evidence and
+ * The assessor's queue: the files they hold (super admins: every file). Without ?orgId, each organisation with evidence and
  * how much of it is waiting for review. With ?orgId, that organisation's
  * evidence, newest first, each with the requirement it was filed against.
  */
@@ -25,12 +25,18 @@ export async function GET(request: NextRequest) {
       })
       .from(organizations)
       .innerJoin(auditDocuments, eq(auditDocuments.orgId, organizations.id))
+      .where(actor.isSuperAdmin ? undefined : eq(organizations.auditorId, actor.id))
       .groupBy(organizations.id, organizations.name, organizations.division)
       .orderBy(desc(sql`count(${auditDocuments.id}) filter (where ${auditDocuments.verificationOutcome} is null)`));
     return NextResponse.json({ organisations: rows });
   }
 
   if (!/^[0-9a-f-]{36}$/i.test(orgId)) return NextResponse.json({ error: 'Unknown organisation' }, { status: 400 });
+  // An assessor opens only the files they hold (after a conflict declaration); super admins see all.
+  if (!actor.isSuperAdmin) {
+    const [o] = await db.select({ a: organizations.auditorId }).from(organizations).where(eq(organizations.id, orgId)).limit(1);
+    if (o?.a !== actor.id) return NextResponse.json({ error: 'This file is not assigned to you. Take it from the register first.' }, { status: 403 });
+  }
   const docs = await db
     .select({
       id: auditDocuments.id,

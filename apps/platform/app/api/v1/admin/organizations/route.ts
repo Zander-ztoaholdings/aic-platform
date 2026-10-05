@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
-import { getSystemDb, organizations, eq, sql } from '@aic/db';
+import { getSystemDb, sql } from '@aic/db';
 import { hasCapability } from '@/lib/rbac';
 
 /**
- * The organisations an AIC staff member may see.
+ * The register, for AIC staff.
  *
- * `view_all_orgs` used to mean the whole register for anyone holding it, which
- * put every client organisation in front of every auditor regardless of whether
- * they had any part in assessing it. Impartiality is easier to demonstrate when
- * an assessor's view is limited to the files they are actually on, and
- * organizations.auditor_id already records that assignment.
+ * Every assessor sees who is registered, in summary: name, Division, sector,
+ * where they are in certification, when they signed up, and which assessor
+ * holds the file. An assessor who cannot see the register cannot help a new
+ * client or pick up an unassigned file, and a list of names is not evidence.
  *
- * A super-admin still sees the register — somebody has to be able to assign
- * work and see the pipeline whole. An auditor sees their own assignments, and
- * an auditor with no assignments sees an empty list rather than everything,
- * which is the correct direction for that mistake to fall.
+ * What stays limited is the file itself. Opening an organisation's evidence
+ * is for the assessor assigned to it, after a conflict declaration (see
+ * [id]/claim), and for super admins.
  */
 export async function GET() {
   const session = await auth();
@@ -26,19 +24,18 @@ export async function GET() {
 
   try {
     const db = getSystemDb();
-
-    const rows = session.user.isSuperAdmin
-      ? (await db.execute(sql`
-          SELECT o.*, o.created_at AS "createdAt",
-                 (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid') AS "memberCount",
-                 (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND COALESCE(u.is_active, true) AND u.email NOT LIKE '%@removed.invalid') AS "activeMembers"
-          FROM organizations o ORDER BY o.name`)).rows
-      : await db
-          .select()
-          .from(organizations)
-          .where(eq(organizations.auditorId, session.user.id as string))
-          .orderBy(organizations.name);
-
+    const me = session.user.id as string;
+    const rows = (await db.execute(sql`
+      SELECT o.id, o.name, o.legal_name AS "legalName", o.division, o.sector, o.size_band AS "sizeBand",
+             o.certification_status AS "certificationStatus", o.contact_email AS "contactEmail",
+             o.created_at AS "createdAt", o.signup_completed_at AS "signupCompletedAt",
+             o.auditor_id AS "auditorId", a.name AS "auditorName", (o.auditor_id = ${me}) AS "assignedToMe",
+             (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid') AS "memberCount",
+             (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND COALESCE(u.is_active, true) AND u.email NOT LIKE '%@removed.invalid') AS "activeMembers",
+             (SELECT count(*)::int FROM audit_documents d WHERE d.org_id = o.id AND d.verification_outcome IS NULL AND d.superseded_by IS NULL) AS "waitingEvidence",
+             (SELECT max(u.last_login) FROM users u WHERE u.org_id = o.id) AS "lastActive"
+      FROM organizations o LEFT JOIN users a ON a.id = o.auditor_id
+      ORDER BY o.created_at DESC NULLS LAST`)).rows;
     return NextResponse.json(rows);
   } catch (_error) {
     return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });

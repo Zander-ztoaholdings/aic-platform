@@ -44,7 +44,8 @@ export default function VerificationPage() {
     const body = await res.json().catch(() => ({}));
     if (!res.ok) { setError(body.error || 'Could not load the queue.'); return; }
     setOrgs(body.organisations);
-    setOrgId((cur) => cur ?? body.organisations[0]?.orgId ?? null);
+    const wanted = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('org') : null;
+    setOrgId((cur) => cur ?? (wanted && body.organisations.some((o: Org) => o.orgId === wanted) ? wanted : body.organisations[0]?.orgId ?? null));
   }, []);
 
   const loadDocs = useCallback(async (id: string) => {
