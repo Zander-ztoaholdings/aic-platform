@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   if (ids.length > BULK_MAX) return NextResponse.json({ error: `At most ${BULK_MAX} at a time.` }, { status: 400 });
 
   const plan = kind === 'organizations'
-    ? planOrgs(action as OrgAction, await orgFacts(ids))
+    ? planOrgs(action as OrgAction, await orgFacts(ids, actor.id))
     : planUsers(action as UserAction, await userFacts(ids), actor, await activeSuperAdmins());
   const doing = plan.filter((p) => !p.skip);
   const phrase = confirmPhrase(kind, action, doing.length);
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   for (const item of doing) {
     try {
       if (kind === 'organizations') {
-        if (action === 'delete') await purgeOrg(item.id);
+        if (action === 'delete') await purgeOrg(item.id, actor.id);
         else if (action === 'suspend') await suspendOrg(item.id, actor.id, reason);
         else await restoreOrg(item.id, actor.id, reason);
       } else {

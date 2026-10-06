@@ -57,8 +57,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     // Suspending deactivates every active member and records exactly who, so
     // restoring brings back those people and not anyone deactivated for
     // another reason.
+    // AIC staff attached to the organisation, and the person suspending it,
+    // are never switched off with it (see keepOnOrgAction in lib/admin-bulk).
     const deactivated = await db.update(users).set({ isActive: false, updatedAt: new Date() })
-      .where(and(eq(users.orgId, id), sql`COALESCE(${users.isActive}, true) = true`))
+      .where(and(eq(users.orgId, id), sql`COALESCE(${users.isActive}, true) = true`, sql`${users.id} <> ${actor.id}::uuid`,
+        sql`COALESCE(${users.isSuperAdmin}, false) = false`, sql`COALESCE(${users.role}::text, '') NOT IN ('AIC_SUPER_ADMIN', 'AIC_AUDITOR')`))
       .returning({ id: users.id });
     await recordAdminAction({ actorId: actor.id, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: null, next: { suspended: true, userIds: deactivated.map((u) => u.id) }, reason: a.reason });
     return NextResponse.json({ ok: true, deactivated: deactivated.length });

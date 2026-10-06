@@ -15,7 +15,7 @@
  */
 import bcrypt from 'bcryptjs';
 import crypto from 'node:crypto';
-import { getSystemDb, users, organizations, hitlLogs, and, eq, desc, inArray, sql } from '@aic/db';
+import { getSystemDb, users, organizations, hitlLogs, and, eq, desc, inArray, ne, sql } from '@aic/db';
 import { recordAdminAction } from './admin';
 
 export const BULK_MAX = 50;
@@ -35,20 +35,31 @@ export function confirmPhrase(kind: 'organizations' | 'users', action: string, n
   return `${action} ${n} ${noun}`;
 }
 
-export type OrgFacts = { id: string; name: string; members: number; activeMembers: number; systems: number; decisions: number; documents: number; certs: number; badges: number };
+/**
+ * `members` and `activeMembers` count the organisation's own people only.
+ * AIC staff attached to it (`staff`), and the person running the action
+ * (`includesActor`), are never removed or switched off by an organisation-level
+ * action: they are detached and kept. A super admin's account sat inside a
+ * test organisation in October 2026, a bulk delete removed it with the rest,
+ * and the person running the delete was locked out of AIC.
+ */
+export type OrgFacts = { id: string; name: string; members: number; activeMembers: number; staff: number; includesActor: boolean; systems: number; decisions: number; documents: number; certs: number; badges: number };
 export type PlanItem = { id: string; label: string; detail: string; skip: string | null };
 
 /** Pure: what a bulk organisation action will do to each one. */
 export function planOrgs(action: OrgAction, orgs: OrgFacts[]): PlanItem[] {
   return orgs.map((o) => {
-    const detail = action === 'delete'
+    const kept = o.staff > 0
+      ? `; ${o.includesActor ? (o.staff === 1 ? 'your own account' : `your own account and ${o.staff - 1} other AIC staff account${o.staff === 2 ? '' : 's'}`) : `${o.staff} AIC staff account${o.staff === 1 ? '' : 's'}`} detached and kept`
+      : '';
+    const detail = (action === 'delete'
       ? `${o.members} member${o.members === 1 ? '' : 's'} removed, ${o.systems} AI system${o.systems === 1 ? '' : 's'}, ${o.decisions.toLocaleString('en-GB')} decision${o.decisions === 1 ? '' : 's'} and ${o.documents} document${o.documents === 1 ? '' : 's'} deleted`
       : action === 'suspend' ? `${o.activeMembers} active member${o.activeMembers === 1 ? '' : 's'} signed out and blocked`
-        : 'Members blocked by the last suspension can sign in again';
+        : 'Members blocked by the last suspension can sign in again') + (action === 'restore' ? '' : kept);
     let skip: string | null = null;
     if (o.id === DEMO_ORG_ID) skip = 'The demo company: rebuild or remove it from Admin, Demo company.';
     else if (action === 'delete' && (o.certs > 0 || o.badges > 0)) skip = 'Holds a certificate or an AIC Aware badge, which AIC must keep. Suspend it instead.';
-    else if (action === 'suspend' && o.activeMembers === 0) skip = 'Nobody to suspend: no active members.';
+    else if (action === 'suspend' && o.activeMembers === 0) skip = 'Nobody to suspend: no active members of its own.';
     return { id: o.id, label: o.name, detail, skip };
   });
 }
@@ -95,12 +106,17 @@ export async function checkOwnPassword(userId: string, password: unknown): Promi
 
 // ── Reading what is there ───────────────────────────────────────────────────
 
-export async function orgFacts(ids: string[]): Promise<OrgFacts[]> {
+/** AIC's own people: never removed or switched off by an action on an organisation. */
+const IS_STAFF = sql`(COALESCE(u.is_super_admin, false) OR u.role IN ('AIC_SUPER_ADMIN', 'AIC_AUDITOR'))`;
+
+export async function orgFacts(ids: string[], actorId: string): Promise<OrgFacts[]> {
   if (!ids.length) return [];
   const r = await getSystemDb().execute(sql`
     SELECT o.id, o.name,
-      (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid') AS members,
-      (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND COALESCE(u.is_active, true) AND u.email NOT LIKE '%@removed.invalid') AS "activeMembers",
+      (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid' AND NOT ${IS_STAFF} AND u.id <> ${actorId}::uuid) AS members,
+      (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND COALESCE(u.is_active, true) AND u.email NOT LIKE '%@removed.invalid' AND NOT ${IS_STAFF} AND u.id <> ${actorId}::uuid) AS "activeMembers",
+      (SELECT count(*)::int FROM users u WHERE u.org_id = o.id AND u.email NOT LIKE '%@removed.invalid' AND (${IS_STAFF} OR u.id = ${actorId}::uuid)) AS staff,
+      EXISTS (SELECT 1 FROM users u WHERE u.org_id = o.id AND u.id = ${actorId}::uuid) AS "includesActor",
       (SELECT count(*)::int FROM ai_systems s WHERE s.org_id = o.id) AS systems,
       (SELECT count(*)::int FROM decision_records d WHERE d.org_id = o.id) AS decisions,
       (SELECT count(*)::int FROM audit_documents a WHERE a.org_id = o.id) AS documents,
@@ -108,7 +124,7 @@ export async function orgFacts(ids: string[]): Promise<OrgFacts[]> {
       (SELECT count(*)::int FROM aware_badges b WHERE b.org_id = o.id) AS badges
     FROM organizations o WHERE o.id IN (${sql.join(ids.map((i) => sql`${i}::uuid`), sql`, `)})
     ORDER BY o.name`);
-  return (r.rows as OrgFacts[]).map((o) => ({ ...o, members: Number(o.members), activeMembers: Number(o.activeMembers), systems: Number(o.systems), decisions: Number(o.decisions), documents: Number(o.documents), certs: Number(o.certs), badges: Number(o.badges) }));
+  return (r.rows as OrgFacts[]).map((o) => ({ ...o, members: Number(o.members), activeMembers: Number(o.activeMembers), staff: Number(o.staff), includesActor: !!o.includesActor, systems: Number(o.systems), decisions: Number(o.decisions), documents: Number(o.documents), certs: Number(o.certs), badges: Number(o.badges) }));
 }
 
 export async function userFacts(ids: string[]): Promise<UserFacts[]> {
@@ -139,10 +155,16 @@ const anonymised = async (id: string) => ({
  * organisation cleared, read from Postgres so a table added later cannot
  * block it. All in one transaction: it goes completely or not at all.
  */
-export async function purgeOrg(id: string): Promise<void> {
+/** True for an account an organisation-level action must leave alone. */
+export function keepOnOrgAction(u: { id: string; isSuperAdmin: boolean | null; role: string | null }, actorId: string): boolean {
+  return u.id === actorId || !!u.isSuperAdmin || u.role === 'AIC_SUPER_ADMIN' || u.role === 'AIC_AUDITOR';
+}
+
+export async function purgeOrg(id: string, actorId: string): Promise<void> {
   const db = getSystemDb();
-  const members = await db.select({ id: users.id }).from(users).where(eq(users.orgId, id));
-  const blanks = await Promise.all(members.map(async (m) => ({ id: m.id, set: await anonymised(m.id) })));
+  const members = await db.select({ id: users.id, isSuperAdmin: users.isSuperAdmin, role: users.role }).from(users).where(eq(users.orgId, id));
+  // AIC staff and the person running the delete are detached, never removed.
+  const blanks = await Promise.all(members.map(async (m) => ({ id: m.id, set: keepOnOrgAction(m, actorId) ? {} : await anonymised(m.id) })));
   await db.transaction(async (tx) => {
     for (const b of blanks) await tx.update(users).set({ ...b.set, orgId: null }).where(eq(users.id, b.id));
     const refs = await tx.execute(sql`
@@ -164,7 +186,9 @@ export async function purgeOrg(id: string): Promise<void> {
 export async function suspendOrg(id: string, actorId: string, reason: string): Promise<number> {
   const db = getSystemDb();
   const off = await db.update(users).set({ isActive: false, updatedAt: new Date() })
-    .where(and(eq(users.orgId, id), sql`COALESCE(${users.isActive}, true) = true`)).returning({ id: users.id });
+    .where(and(eq(users.orgId, id), sql`COALESCE(${users.isActive}, true) = true`, ne(users.id, actorId),
+      sql`COALESCE(${users.isSuperAdmin}, false) = false`, sql`COALESCE(${users.role}::text, '') NOT IN ('AIC_SUPER_ADMIN', 'AIC_AUDITOR')`))
+    .returning({ id: users.id });
   // The same record a single suspension writes, so either kind of restore finds it.
   await recordAdminAction({ actorId, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: null, next: { suspended: true, userIds: off.map((u) => u.id), bulk: true }, reason });
   return off.length;

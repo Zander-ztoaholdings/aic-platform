@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 vi.mock('@aic/auth', () => ({ auth: vi.fn() }));
-import { confirmPhrase, planOrgs, planUsers, DEMO_ORG_ID, type OrgFacts, type UserFacts } from '@/lib/admin-bulk';
+import { confirmPhrase, planOrgs, planUsers, keepOnOrgAction, DEMO_ORG_ID, type OrgFacts, type UserFacts } from '@/lib/admin-bulk';
 
-const org = (o: Partial<OrgFacts>): OrgFacts => ({ id: 'o1', name: 'Test Org', members: 2, activeMembers: 2, systems: 1, decisions: 10, documents: 3, certs: 0, badges: 0, ...o });
+const org = (o: Partial<OrgFacts>): OrgFacts => ({ id: 'o1', name: 'Test Org', members: 2, activeMembers: 2, staff: 0, includesActor: false, systems: 1, decisions: 10, documents: 3, certs: 0, badges: 0, ...o });
 const user = (u: Partial<UserFacts>): UserFacts => ({ id: 'u1', email: 'a@x.test', name: 'A', role: 'ORG_USER', isSuperAdmin: false, isActive: true, removed: false, ...u });
 
 describe('bulk actions: the safety rules', () => {
@@ -31,5 +31,12 @@ describe('bulk actions: the safety rules', () => {
   it('skips what is already in the asked-for state', () => {
     expect(planUsers('reactivate', [user({ isActive: true })], { id: 'x', isSuperAdmin: true }, 1)[0].skip).toMatch(/Already active/);
     expect(planUsers('remove', [user({ removed: true })], { id: 'x', isSuperAdmin: true }, 1)[0].skip).toMatch(/Already removed/);
+  });
+  it('never removes or switches off AIC staff, or the person running it, with an organisation', () => {
+    expect(keepOnOrgAction({ id: 'me', isSuperAdmin: false, role: 'ORG_ADMIN' }, 'me')).toBe(true);
+    expect(keepOnOrgAction({ id: 'x', isSuperAdmin: true, role: 'ORG_ADMIN' }, 'me')).toBe(true);
+    expect(keepOnOrgAction({ id: 'x', isSuperAdmin: false, role: 'AIC_AUDITOR' }, 'me')).toBe(true);
+    expect(keepOnOrgAction({ id: 'x', isSuperAdmin: false, role: 'ORG_USER' }, 'me')).toBe(false);
+    expect(planOrgs('delete', [org({ staff: 1, includesActor: true })])[0].detail).toMatch(/your own account detached and kept/);
   });
 });

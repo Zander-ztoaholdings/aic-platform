@@ -1,0 +1,76 @@
+cat > /tmp/aic-recover-admin.mjs <<'AIC_END'
+// Restores a super admin account that a bulk organisation delete removed by mistake.
+// Paste this whole file into Coolify -> aic-platform -> Terminal. It asks before it changes anything,
+// and the new password is typed into the terminal, never into a chat or a file.
+import { createRequire } from 'node:module';
+import readline from 'node:readline';
+// The platform image is a trimmed build, so look for each package in every place it can live.
+const bases = ['/app/apps/platform/server.js', '/app/server.js', '/app/package.json', '/app/apps/platform/package.json', '/app/node_modules/.package-lock.json', import.meta.url];
+const load = (m) => { for (const b of bases) { try { return createRequire(b)(m); } catch {} } return null; };
+const pg = load('pg');
+if (!pg) { console.error("The 'pg' package is not in this container. Send this output to Claude."); process.exit(1); }
+// bcryptjs may not be in the trimmed build. If it is not, Postgres hashes the
+// password itself with pgcrypto, which writes the same bcrypt format.
+const bcrypt = load('bcryptjs');
+const url = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+if (!url) { console.error('No DATABASE_URL in this container.'); process.exit(1); }
+
+// Answers are read line by line as they arrive, so typing ahead (or pasting) is safe.
+const rl = readline.createInterface({ input: process.stdin, terminal: process.stdin.isTTY });
+const lines = []; const waiting = [];
+rl.on('line', (l) => { const w = waiting.shift(); if (w) w(l); else lines.push(l); });
+let hidden = false;
+if (process.stdin.isTTY) rl._writeToOutput = (s) => { if (!hidden || s.includes('\n') || s.includes('\r')) process.stdout.write(hidden ? '\n' : s); };
+const next = () => new Promise((r) => { if (lines.length) r(lines.shift()); else waiting.push(r); });
+const ask = async (q) => { process.stdout.write(q); return next(); };
+const askHidden = async (q) => { process.stdout.write(q); hidden = true; const a = await next(); hidden = false; if (!process.stdin.isTTY) process.stdout.write('\n'); return a; };
+
+const db = new pg.Client({ connectionString: url });
+await db.connect();
+
+// The account that ran the bulk delete is recorded as its actor; that is the one to restore.
+const { rows } = await db.query(`
+  SELECT u.id, u.role, u.email, h.created_at
+  FROM hitl_logs h JOIN users u ON u.id = h.actor_id
+  WHERE h.target_type = 'ADMIN_ORG' AND h.new_value->>'bulk' = 'delete'
+    AND u.email LIKE 'removed+%@removed.invalid'
+  ORDER BY h.created_at DESC LIMIT 5`);
+if (!rows.length) {
+  console.log('No removed account ran a bulk delete. Nothing to restore; send this output to Claude.');
+  await db.end(); rl.close(); process.exit(0);
+}
+const t = rows[0];
+console.log(`\nFound the account that ran the bulk delete at ${new Date(t.created_at).toISOString()}:`);
+console.log(`  id ${t.id}, role ${t.role}, now ${t.email}\n`);
+
+const email = (await ask('Email to sign in with again: ')).trim().toLowerCase();
+if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { console.log('That is not an email address. Nothing changed.'); process.exit(1); }
+const taken = await db.query('SELECT 1 FROM users WHERE lower(email) = $1 AND id <> $2', [email, t.id]);
+if (taken.rows.length) { console.log('Another account already uses that email. Nothing changed; send this output to Claude.'); process.exit(1); }
+const name = (await ask('Your name as it should appear: ')).trim() || 'AIC super admin';
+const pw = await askHidden('New password (at least 12 characters, not shown): ');
+if (pw.length < 12) { console.log('Too short. Nothing changed.'); process.exit(1); }
+const pw2 = await askHidden('Same password again: ');
+if (pw !== pw2) { console.log('The two passwords differ. Nothing changed.'); process.exit(1); }
+const go = (await ask(`\nRestore ${email} as an active super admin? Type yes: `)).trim().toLowerCase();
+if (go !== 'yes') { console.log('Nothing changed.'); process.exit(0); }
+
+let hash;
+if (bcrypt) hash = await bcrypt.hash(pw, 12);
+else {
+  try {
+    await db.query('CREATE EXTENSION IF NOT EXISTS pgcrypto');
+    hash = (await db.query("SELECT crypt($1, gen_salt('bf', 12)) AS h", [pw])).rows[0].h;
+  } catch (e) { console.log('Could not hash the password here: ' + e.message + '. Nothing changed; send this output to Claude.'); process.exit(1); }
+}
+const r = await db.query(`
+  UPDATE users SET email = $1, name = $2, password_hash = $3, is_active = true, is_super_admin = true,
+    role = 'AIC_SUPER_ADMIN', failed_login_attempts = 0, lockout_until = NULL, updated_at = now()
+  WHERE id = $4 AND email LIKE 'removed+%@removed.invalid'
+  RETURNING id`, [email, name, hash, t.id]);
+console.log(r.rowCount === 1
+  ? `\n✓ Restored. Sign in as ${email}. Two-factor was cleared by the removal, so you will be asked to set it up again.`
+  : '\n✗ Not restored. Send this output to Claude.');
+await db.end(); rl.close();
+AIC_END
+node /tmp/aic-recover-admin.mjs
