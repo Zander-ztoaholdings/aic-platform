@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTenantDb, agents, agentRuns, eq, ne, and, desc } from '@aic/db';
 import { orgCaller, guarded } from '@/lib/registers/caller';
 import { cleanAgent, slugify, TOOLS_NOTICE, DEFAULT_LIMITS } from '@/lib/agents/config';
-import { publicAgent, agentChoices, linksBelong } from '@/lib/agents/view';
+import { publicAgent, agentChoices, linksBelong, consentedTenants, pinTenants } from '@/lib/agents/view';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
   return guarded('017', async () => {
     const bad = await linksBelong(c.orgId, v.value.ownerUserId, v.value.aiSystemId);
     if (bad) return NextResponse.json({ error: bad }, { status: 400 });
+    v.value.tools = pinTenants(v.value.tools, await consentedTenants(c.orgId));
     const db = getTenantDb(c.orgId);
     const taken = new Set((await db.query((tx) => tx.select({ slug: agents.slug }).from(agents).where(eq(agents.orgId, c.orgId)))).map((r) => r.slug));
     const base = slugify(v.value.name);

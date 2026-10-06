@@ -166,6 +166,16 @@ It needs `ENCRYPTION_KEY` (section 3) to store model keys and secret headers. Ru
 
 The page and the API both state that the runtime is optional and neither raises nor lowers an organisation's chance of being certified (`TOOLS_NOTICE` in `lib/agents/config.ts`). Keep the same sentence on aiccertified.cloud.
 
+### SharePoint for agents
+
+An agent can be given one SharePoint document library (optionally one folder in it), read only or read and write. It goes through a separate Entra app, not the one that reads evidence for certification, so agent access and assessment access never share a credential. To switch it on, register that app once:
+
+1. Entra admin centre, App registrations, New registration: name "AIC Agents", accounts in any organisational directory (multi-tenant), redirect URI (Web) `https://app.aiccertified.cloud/api/agents/sharepoint/callback`.
+2. API permissions: Microsoft Graph, Application permissions, `Sites.Selected` only. Nothing else; the agent page warns a client if the app can see more than the one site.
+3. Certificates and secrets: a client secret. Set `MS_AGENT_CLIENT_ID` (the application id) and `MS_AGENT_CLIENT_SECRET` on aic-platform.
+
+Each client's global administrator consents once from the agent's Tools tab and signs in once straight after (AIC reads the organisation from Microsoft's ID token rather than trusting the tenant on the consent redirect, and refuses guests), then grants the site with one Graph request (the steps, with AIC's app id filled in, are on the same tab), then presses Check access. Agents can list folders, read Markdown, text, CSV, JSON, HTML and Word files, and, when allowed, write Markdown, text, CSV, JSON or HTML files; a write never overwrites unless the model asks to and, by default, a person approves it. There is no search, because Microsoft Graph search ignores Sites.Selected and would answer from the whole tenant. PDFs are not read yet.
+
 ## 11. The security mailbox
 
 `SECURITY.md` in both repositories and the website's /security page give `security@aiccertified.cloud` as the address for reporting vulnerabilities. Create it (an alias to Zander is fine), and check that it receives mail from outside before the pages go live.

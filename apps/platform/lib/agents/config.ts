@@ -13,6 +13,9 @@
  * Pure: tested in __tests__/lib/agents.test.ts.
  */
 import { isPrivateHost } from '../connectors/http';
+import { cleanSharePointTool, sharePointSpec, type SharePointTool } from './sharepoint-scope';
+
+export type { SharePointTool } from './sharepoint-scope';
 
 export const TOOLS_NOTICE =
   'The agent runtime is a tool AIC offers for your own use. Using it is optional, and it neither raises nor lowers your chance of being certified by AIC: an assessment looks at the evidence for each requirement, wherever your agents run.';
@@ -59,7 +62,7 @@ export type HttpTool = {
 };
 export type AskTool = { kind: 'ask_a_person'; name: 'ask_a_person' };
 export type DecisionTool = { kind: 'record_decision'; name: 'record_decision' };
-export type AgentTool = HttpTool | AskTool | DecisionTool;
+export type AgentTool = HttpTool | AskTool | DecisionTool | SharePointTool;
 
 export type AgentLimits = {
   maxSteps: number;
@@ -90,11 +93,12 @@ export function cleanTool(t: unknown): { tool: AgentTool } | { error: string } {
   const o = (t ?? {}) as Record<string, unknown>;
   if (o.kind === 'ask_a_person') return { tool: { kind: 'ask_a_person', name: 'ask_a_person' } };
   if (o.kind === 'record_decision') return { tool: { kind: 'record_decision', name: 'record_decision' } };
-  if (o.kind !== 'http') return { error: 'Unknown kind of tool.' };
+  if (o.kind !== 'http' && o.kind !== 'sharepoint') return { error: 'Unknown kind of tool.' };
   const name = str(o.name, 40).toLowerCase();
   if (!TOOL_NAME.test(name) || RESERVED.includes(name)) return { error: `“${name || 'tool'}” is not a usable tool name: use lower case letters, numbers and underscores.` };
   const description = str(o.description, 600);
   if (description.length < 10) return { error: `Describe what ${name} is for, so the model knows when to use it.` };
+  if (o.kind === 'sharepoint') return cleanSharePointTool(o, name, description);
   let base: URL;
   try { base = new URL(str(o.baseUrl, 300)); } catch { return { error: `${name}: the address is not a web address.` }; }
   if (base.protocol !== 'https:') return { error: `${name}: the address must start with https://` };
@@ -154,6 +158,7 @@ export function readinessProblems(a: { instructions: string; modelKeyHint: strin
   if (!a.modelKeyHint) out.push('Add the model key the agent runs with.');
   if (!a.ownerUserId) out.push('Name the person accountable for this agent.');
   if (a.instructions.trim().length < 20) out.push('Write instructions of at least a sentence or two.');
+  for (const t of a.tools) if (t.kind === 'sharepoint' && !t.tenantId) out.push(`Connect Microsoft 365 for ${t.name}, so AIC can reach the site.`);
   if (a.tools.some((t) => t.kind === 'record_decision') && !a.aiSystemId) out.push('Link the agent to a declared AI system, so its decisions land in that system’s log.');
   return out;
 }
@@ -199,6 +204,7 @@ export function modelToolSpecs(tools: AgentTool[]): { name: string; description:
     if (t.kind === 'ask_a_person') {
       return { name: t.name, description: 'Ask the accountable person a question and wait for their answer. Use it when you are unsure, or before doing anything you have been told needs a person.', schema: { type: 'object', properties: { question: { type: 'string' } }, required: ['question'] } };
     }
+    if (t.kind === 'sharepoint') return sharePointSpec(t);
     if (t.kind === 'record_decision') {
       return { name: t.name, description: 'Record a decision this agent made about a person or case in the organisation’s decision log, with the outcome and a plain explanation. Use it whenever you decide something that affects someone.', schema: { type: 'object', properties: { subject: { type: 'string', description: 'A reference for the case, not personal details' }, outcome: { type: 'string' }, explanation: { type: 'string' } }, required: ['outcome', 'explanation'] } };
     }

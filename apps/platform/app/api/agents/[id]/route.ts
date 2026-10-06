@@ -4,7 +4,8 @@ import { orgCaller, guarded } from '@/lib/registers/caller';
 import { isUuid } from '@/lib/policy-hash';
 import { cleanAgent, readinessProblems, TOOLS_NOTICE, type AgentTool } from '@/lib/agents/config';
 import { loadAgent, readToolSecrets } from '@/lib/agents/runtime';
-import { publicAgent, agentChoices, linksBelong } from '@/lib/agents/view';
+import { publicAgent, agentChoices, linksBelong, consentedTenants, pinTenants } from '@/lib/agents/view';
+import { sharePointConfigured, agentAppId } from '@/lib/agents/sharepoint';
 
 export const dynamic = 'force-dynamic';
 type Ctx = { params: Promise<{ id: string }> };
@@ -17,7 +18,12 @@ export async function GET(_r: NextRequest, { params }: Ctx) {
   return guarded('017', async () => {
     const a = await loadAgent(c.orgId, id);
     if (!a || a.status === 'archived') return NextResponse.json({ error: 'Not found' }, { status: 404 });
-    return NextResponse.json({ agent: publicAgent(a), notice: TOOLS_NOTICE, canManage: c.canManage, encryption: EncryptionService.isConfigured(), ...(await agentChoices(c.orgId)) });
+    // A tenant this organisation already consented for on another agent, so a new SharePoint tool needs no second consent.
+    const knownTenant = [...(await consentedTenants(c.orgId))][0] ?? null;
+    return NextResponse.json({
+      agent: publicAgent(a), notice: TOOLS_NOTICE, canManage: c.canManage, isAdmin: c.isAdmin, encryption: EncryptionService.isConfigured(), ...(await agentChoices(c.orgId)),
+      sharePoint: { configured: sharePointConfigured(), appId: agentAppId(), knownTenant },
+    });
   });
 }
 
@@ -45,6 +51,7 @@ export async function PATCH(request: NextRequest, { params }: Ctx) {
       if ('error' in v) return NextResponse.json({ error: v.error }, { status: 400 });
       const bad = await linksBelong(c.orgId, v.value.ownerUserId, v.value.aiSystemId);
       if (bad) return NextResponse.json({ error: bad }, { status: 400 });
+      v.value.tools = pinTenants(v.value.tools, await consentedTenants(c.orgId));
       Object.assign(set, v.value, { version: a.version + 1 });
       next = { ...next, instructions: v.value.instructions, ownerUserId: v.value.ownerUserId, tools: v.value.tools, aiSystemId: v.value.aiSystemId };
       if (v.value.provider !== a.provider && !('modelKey' in body)) { set.modelKeyCiphertext = null; set.modelKeyHint = null; next.modelKeyHint = null; }

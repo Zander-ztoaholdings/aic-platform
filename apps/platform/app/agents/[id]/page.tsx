@@ -7,30 +7,33 @@ import { ArrowLeft, Check, Copy, Pause, Play, Plus, Trash2 } from 'lucide-react'
 import DashboardShell from '../../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 import { STATUS, RUN_STATUS, ToolsNotice } from '../shared';
+import { SharePointTools, blankSp, type SpForm, type SpSetup } from './SharePointTools';
 import {
   AGENT_MODELS, AGENT_PROVIDERS, PROVIDER_LABEL, APPROVAL_LABEL, HTTP_METHODS, LIMIT_RANGE,
   type AgentProvider, type AgentLimits, type Approval, type HttpMethod,
 } from '@/lib/agents/config';
 
 type HttpToolView = { kind: 'http'; name: string; description: string; baseUrl: string; methods: HttpMethod[]; pathPrefixes: string[]; approval: Approval; secretHeaders: string[]; secretsSet?: string[] };
-type ToolView = HttpToolView | { kind: 'ask_a_person'; name: 'ask_a_person' } | { kind: 'record_decision'; name: 'record_decision' };
+type SpToolView = Omit<SpForm, 'saved'>;
+type ToolView = HttpToolView | SpToolView | { kind: 'ask_a_person'; name: 'ask_a_person' } | { kind: 'record_decision'; name: 'record_decision' };
 type Agent = {
   id: string; name: string; purpose: string | null; ownerUserId: string | null; aiSystemId: string | null; provider: AgentProvider; model: string;
   instructions: string; tools: ToolView[]; limits: AgentLimits; status: string; modelKeyHint: string | null; version: number; problems: string[];
 };
-type Data = { agent: Agent; notice: string; canManage: boolean; encryption: boolean; people: { id: string; name: string; email: string }[]; systems: { id: string; name: string }[] };
+type Data = { agent: Agent; notice: string; canManage: boolean; isAdmin: boolean; sharePoint: SpSetup; encryption: boolean; people: { id: string; name: string; email: string }[]; systems: { id: string; name: string }[] };
 type Run = { id: string; status: string; trigger: string; input: string; steps: number; costUsd: string; startedAt: string; agentVersion: number };
 
 type HttpForm = Omit<HttpToolView, 'pathPrefixes' | 'secretsSet'> & { paths: string; secrets: Record<string, string>; secretsSet: string[] };
 type Form = {
   name: string; purpose: string; provider: AgentProvider; model: string; ownerUserId: string; aiSystemId: string; instructions: string;
-  ask: boolean; decide: boolean; http: HttpForm[]; limits: { maxSteps: string; maxTokensPerRun: string; maxRunsPerDay: string; monthlyBudgetUsd: string }; modelKey: string;
+  ask: boolean; decide: boolean; http: HttpForm[]; sp: SpForm[]; limits: { maxSteps: string; maxTokensPerRun: string; maxRunsPerDay: string; monthlyBudgetUsd: string }; modelKey: string;
 };
 
 const toForm = (a: Agent): Form => ({
   name: a.name, purpose: a.purpose ?? '', provider: a.provider, model: a.model, ownerUserId: a.ownerUserId ?? '', aiSystemId: a.aiSystemId ?? '', instructions: a.instructions,
   ask: a.tools.some((t) => t.kind === 'ask_a_person'), decide: a.tools.some((t) => t.kind === 'record_decision'),
   http: a.tools.filter((t): t is HttpToolView => t.kind === 'http').map((t) => ({ ...t, paths: t.pathPrefixes.join('\n'), secrets: {}, secretsSet: t.secretsSet ?? [] })),
+  sp: a.tools.filter((t): t is SpToolView => t.kind === 'sharepoint').map((t) => ({ ...t, folder: t.folder ?? '', saved: true })),
   limits: { maxSteps: String(a.limits.maxSteps ?? 10), maxTokensPerRun: String(a.limits.maxTokensPerRun ?? 60000), maxRunsPerDay: String(a.limits.maxRunsPerDay ?? 200), monthlyBudgetUsd: a.limits.monthlyBudgetUsd == null ? '' : String(a.limits.monthlyBudgetUsd) },
   modelKey: '',
 });
@@ -63,6 +66,18 @@ export default function AgentPage({ params }: { params: Promise<{ id: string }> 
     fetch(`/api/agents/${id}/runs`, { cache: 'no-store' }).then(async (r) => { if (r.ok) setRuns((await r.json()).runs); });
   }, [id]);
   useEffect(load, [load]);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('sharepoint');
+    const text: Record<string, { ok: boolean; text: string }> = {
+      connected: { ok: true, text: 'Microsoft 365 is connected. Your administrator now gives AIC the site (the steps are on the Tools tab), then press Check access.' },
+      declined: { ok: false, text: 'Microsoft 365 was not connected: the consent was declined.' },
+      permission: { ok: false, text: 'Only an organisation admin can connect Microsoft 365.' },
+      state: { ok: false, text: 'That connection link had expired. Start again.' },
+      failed: { ok: false, text: 'Microsoft did not confirm the consent. Try again, signed in as a global administrator.' },
+      wrongtenant: { ok: false, text: 'The person who signed in is not a member of the organisation that consented, so AIC did not connect it. Sign in with an account from that organisation.' },
+    };
+    if (q && text[q]) { setMsg(text[q]); setTab('tools'); window.history.replaceState(null, '', window.location.pathname); }
+  }, []);
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((x) => (x ? { ...x, [k]: v } : x));
   const setTool = (i: number, patch: Partial<HttpForm>) => setF((x) => (x ? { ...x, http: x.http.map((t, j) => (j === i ? { ...t, ...patch } : t)) } : x));
@@ -86,6 +101,7 @@ export default function AgentPage({ params }: { params: Promise<{ id: string }> 
       tools: [
         ...(x.ask ? [{ kind: 'ask_a_person' }] : []),
         ...(x.decide ? [{ kind: 'record_decision' }] : []),
+        ...x.sp.map((t) => ({ kind: 'sharepoint', name: t.name, description: t.description, tenantId: t.tenantId, siteUrl: t.siteUrl, library: t.library, folder: t.folder, access: t.access, approval: t.approval })),
         ...x.http.map((t) => ({ kind: 'http', name: t.name, description: t.description, baseUrl: t.baseUrl, methods: t.methods, approval: t.approval, secretHeaders: t.secretHeaders.filter(Boolean), pathPrefixes: t.paths.split('\n').map((p) => p.trim()).filter(Boolean) })),
       ],
       limits: { maxSteps: x.limits.maxSteps, maxTokensPerRun: x.limits.maxTokensPerRun, maxRunsPerDay: x.limits.maxRunsPerDay, monthlyBudgetUsd: x.limits.monthlyBudgetUsd === '' ? null : x.limits.monthlyBudgetUsd },
@@ -93,10 +109,10 @@ export default function AgentPage({ params }: { params: Promise<{ id: string }> 
   }
 
   async function save() {
-    if (!f) return;
+    if (!f) return false;
     const toolSecrets: Record<string, Record<string, string>> = {};
     for (const t of f.http) for (const [h, v] of Object.entries(t.secrets)) if (v) (toolSecrets[t.name] ??= {})[h] = v;
-    await patch({ ...configBody(f), ...(f.modelKey ? { modelKey: f.modelKey } : {}), ...(Object.keys(toolSecrets).length ? { toolSecrets } : {}) }, 'Saved.');
+    return patch({ ...configBody(f), ...(f.modelKey ? { modelKey: f.modelKey } : {}), ...(Object.keys(toolSecrets).length ? { toolSecrets } : {}) }, 'Saved.');
   }
 
   async function run() {
@@ -204,6 +220,10 @@ export default function AgentPage({ params }: { params: Promise<{ id: string }> 
                 <label className="mt-3 flex items-start gap-3"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#0e1b2c]" disabled={!edit} checked={f.ask} onChange={(e) => set('ask', e.target.checked)} /><span><span className="font-medium">Ask a person</span><span className="block text-[13.5px] text-[#5e6b7b]">The run waits until the accountable person, or anyone who can manage compliance, answers in AIC.</span></span></label>
                 <label className="mt-3 flex items-start gap-3"><input type="checkbox" className="mt-1 h-4 w-4 accent-[#0e1b2c]" disabled={!edit} checked={f.decide} onChange={(e) => set('decide', e.target.checked)} /><span><span className="font-medium">Record decisions</span><span className="block text-[13.5px] text-[#5e6b7b]">Decisions the agent makes about a person or case go into your decision log, on the same ledger as the rest.</span></span></label>
               </div>
+              <SharePointTools
+                agentId={id} tools={f.sp} setTools={(sp) => set('sp', sp)} setup={d.sharePoint} edit={edit} isAdmin={d.isAdmin}
+                dirty={f.sp.some((t) => !t.saved)} onSaveFirst={save}
+              />
               {f.http.map((t, i) => (
                 <div key={i} className="grid gap-4 rounded-2xl border border-[#dde2e8] bg-white p-5 text-[14px] font-medium text-[#0e1b2c] md:grid-cols-2">
                   <label className="block">Tool name<input className={input} disabled={!edit} value={t.name} onChange={(e) => setTool(i, { name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') })} placeholder="claims_api" /></label>
@@ -239,6 +259,7 @@ export default function AgentPage({ params }: { params: Promise<{ id: string }> 
               {edit && (
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => setF((x) => (x ? { ...x, http: [...x.http, blankTool()] } : x))} className="inline-flex h-11 items-center gap-1.5 rounded-full border border-[#dde2e8] bg-white px-5 text-sm font-medium text-[#0e1b2c] hover:border-[#a8772a]"><Plus className="h-4 w-4" />Add a web address the agent may call</button>
+                  <button type="button" onClick={() => set('sp', [...f.sp, blankSp(d.sharePoint.knownTenant)])} className="inline-flex h-11 items-center gap-1.5 rounded-full border border-[#dde2e8] bg-white px-5 text-sm font-medium text-[#0e1b2c] hover:border-[#a8772a]"><Plus className="h-4 w-4" />Add a SharePoint library</button>
                   <button type="button" disabled={busy} onClick={save} className="inline-flex h-11 items-center rounded-full bg-[#0e1b2c] px-5 text-sm font-medium text-white hover:bg-[#22344a] disabled:opacity-40">{busy ? 'Saving…' : 'Save the tools'}</button>
                 </div>
               )}

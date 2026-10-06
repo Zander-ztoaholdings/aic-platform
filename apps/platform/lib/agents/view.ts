@@ -36,3 +36,21 @@ export async function linksBelong(orgId: string, ownerUserId: string | null, aiS
   if (aiSystemId && !systems.some((s) => s.id === aiSystemId)) return 'Choose one of your declared AI systems.';
   return null;
 }
+
+/**
+ * Microsoft tenants this organisation has consented for. A tenant reaches an
+ * agent only through the consent callback, which proves it with a token; a
+ * tenant id typed into a request is never trusted, or one organisation could
+ * point its agent at another organisation's consented tenant.
+ */
+export async function consentedTenants(orgId: string): Promise<Set<string>> {
+  const rows = await getTenantDb(orgId).query((tx) => tx.select({ tools: agents.tools }).from(agents).where(eq(agents.orgId, orgId)));
+  const out = new Set<string>();
+  for (const t of rows.flatMap((r) => (r.tools as AgentTool[]) ?? [])) if (t.kind === 'sharepoint' && t.tenantId) out.add(t.tenantId);
+  return out;
+}
+
+/** Drops any SharePoint tenant the organisation has not consented for. */
+export function pinTenants(tools: AgentTool[], allowed: Set<string>): AgentTool[] {
+  return tools.map((t) => (t.kind === 'sharepoint' && t.tenantId && !allowed.has(t.tenantId) ? { ...t, tenantId: null } : t));
+}

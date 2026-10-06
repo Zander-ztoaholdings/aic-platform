@@ -11,6 +11,7 @@ import { createHash } from 'crypto';
 import { checkHttpCall, modelToolSpecs, type AgentLimits, type AgentProvider, type AgentTool, type HttpTool } from './config';
 import { callModel, ModelError, type Msg, type ToolCall } from './models';
 import { isPrivateHost } from '../connectors/http';
+import { checkSharePointCall, type SharePointTool, type SpOp } from './sharepoint-scope';
 
 export type StepKind =
   | 'started' | 'model' | 'tool_call' | 'tool_result' | 'refused' | 'approval_requested' | 'approved' | 'denied'
@@ -42,6 +43,8 @@ export type EngineDeps = {
   priceOf: (model: string, inputTokens: number, outputTokens: number) => number | null;
   recordUsage: (model: string, inputTokens: number, outputTokens: number, costUsd: number | null) => Promise<void>;
   recordDecision: (d: { subject: string | null; outcome: string; explanation: string }) => Promise<{ id: string }>;
+  /** Runs an already-checked SharePoint operation (lib/agents/sharepoint.ts). */
+  sharePoint?: (tool: SharePointTool, call: SpOp) => Promise<{ ok: boolean; content: string }>;
   fetch?: typeof fetch;
 };
 
@@ -173,6 +176,24 @@ export async function advance(agent: AgentSnapshot, run: RunRecord, deps: Engine
         results.push({ id: c.id, name: c.name, content: `Recorded as decision ${d.id}.` });
         continue;
       }
+      if (tool.kind === 'sharepoint') {
+        const sp = checkSharePointCall(tool, c.input);
+        if (!sp.allowed) {
+          await deps.appendStep('refused', c.name, { reason: sp.reason, action: c.input.action, path: c.input.path });
+          results.push({ id: c.id, name: c.name, content: `Refused by AIC: ${sp.reason}`, isError: true });
+          continue;
+        }
+        if (sp.needsApproval) {
+          const body = sp.call.op === 'write' ? { replace: sp.call.replace, content: sp.call.content.slice(0, 4000) } : null;
+          await deps.appendStep('approval_requested', c.name, { method: sp.call.op, url: sp.where, body });
+          return pause(r, { kind: 'approval', call: c, url: sp.where, method: sp.call.op, body: body ?? undefined }, results, reply.calls.slice(i + 1), deps);
+        }
+        if (!(await deps.agentIsActive())) { r.error = 'The agent was paused, so the run stopped.'; return finish('stopped', 'stopped', { reason: r.error }); }
+        const out = deps.sharePoint ? await deps.sharePoint(tool, sp.call) : { ok: false, content: 'SharePoint is not available here.' };
+        await deps.appendStep('tool_result', c.name, { action: sp.call.op, path: sp.call.path, ok: out.ok, chars: out.content.length });
+        results.push({ id: c.id, name: c.name, content: out.content, isError: !out.ok });
+        continue;
+      }
       const scope = checkHttpCall(tool, { method: String(c.input.method ?? ''), path: String(c.input.path ?? ''), query: (c.input.query as Record<string, string>) ?? undefined, body: c.input.body });
       if (!scope.allowed) {
         await deps.appendStep('refused', c.name, { reason: scope.reason, method: c.input.method, path: c.input.path });
@@ -232,10 +253,19 @@ export async function resume(
     await deps.appendStep('approved', p.call.name, {}, actorId);
     if (!(await deps.agentIsActive())) { r.status = 'stopped'; r.error = 'The agent was paused, so the run stopped.'; await deps.appendStep('stopped', null, { reason: r.error }); await deps.saveRun(r); return r; }
     const tool = agent.tools.find((t) => t.name === p.call.name);
-    if (tool?.kind !== 'http' || p.kind !== 'approval') return { error: 'The tool is no longer set up on this agent.' };
-    const out = await execHttp(tool, p.url, p.method, p.body, agent.toolSecrets[tool.name] ?? {}, deps.fetch ?? fetch);
-    await deps.appendStep('tool_result', tool.name, { status: out.status, ok: out.ok, chars: out.content.length });
-    content = out.content; isError = !out.ok;
+    if (!tool || (tool.kind !== 'http' && tool.kind !== 'sharepoint') || p.kind !== 'approval') return { error: 'The tool is no longer set up on this agent.' };
+    if (tool.kind === 'sharepoint') {
+      // Checked again against the tool as it is now, in case it was narrowed while the run waited.
+      const sp = checkSharePointCall(tool, p.call.input);
+      const out = !sp.allowed ? { ok: false, content: `Refused by AIC: ${sp.reason}` }
+        : deps.sharePoint ? await deps.sharePoint(tool, sp.call) : { ok: false, content: 'SharePoint is not available here.' };
+      await deps.appendStep('tool_result', tool.name, { action: sp.allowed ? sp.call.op : null, path: sp.allowed ? sp.call.path : null, ok: out.ok, chars: out.content.length });
+      content = out.content; isError = !out.ok;
+    } else {
+      const out = await execHttp(tool, p.url, p.method, p.body, agent.toolSecrets[tool.name] ?? {}, deps.fetch ?? fetch);
+      await deps.appendStep('tool_result', tool.name, { status: out.status, ok: out.ok, chars: out.content.length });
+      content = out.content; isError = !out.ok;
+    }
   }
   // Put the paused call's result in the tool message pushed at pause.
   const last = r.state.messages[r.state.messages.length - 1];

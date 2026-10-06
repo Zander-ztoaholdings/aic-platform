@@ -10,6 +10,7 @@ import {
 import { recordDecisionWithLedger } from '@/lib/ledger';
 import { findPrice, priced, costAt } from '@/lib/spend-switch';
 import { cleanLimits, readinessProblems, type AgentProvider, type AgentTool } from './config';
+import { runSharePoint } from './sharepoint';
 import { advance, resume, stepHash, type AgentSnapshot, type EngineDeps, type RunRecord, type RunState, type StepKind } from './engine';
 
 type AgentRow = typeof agents.$inferSelect;
@@ -75,6 +76,7 @@ function depsFor(orgId: string, agent: AgentRow, runId: string, trigger: { via: 
         inputTokens: i, outputTokens: o, costUsd: cost === null ? null : cost.toFixed(4), source: 'aic_runtime', ingestedVia: trigger.via, submittedBy: trigger.userId,
       }));
     },
+    sharePoint: (tool, call) => runSharePoint(tool, call),
     recordDecision: async (d) => {
       let systemName = agent.name;
       if (agent.aiSystemId) {
