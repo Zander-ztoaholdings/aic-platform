@@ -55,14 +55,14 @@ export default function EnterpriseCRMPage() {
             <div className="flex flex-col sm:flex-row sm:justify-between gap-5 sm:items-end">
                 <div>
                     <Eyebrow>HQ growth</Eyebrow>
-                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Enterprise CRM</h1>
+                    <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">CRM</h1>
                     <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
-                        Global pipeline management for AI accountability certification.
+                        Every lead, where it came from, and where it stands.
                     </p>
                 </div>
                 <div className="flex gap-4">
                     <div className="bg-white border border-[#dde2e8] px-4 sm:px-6 py-3 rounded-2xl text-right">
-                        <p className="text-[12px] text-gray-600 first-cap mb-1">Total Pipeline</p>
+                        <p className="text-[12px] text-gray-600 first-cap mb-1">Pipeline</p>
                         <p className="text-xl font-serif font-bold">—</p>
                     </div>
                 </div>
@@ -72,10 +72,10 @@ export default function EnterpriseCRMPage() {
                 <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-left">
                     <thead className="bg-[#f5f7f9] border-b border-[#dde2e8] text-[12px] font-bold text-gray-500 first-cap">
                         <tr>
-                            <th className="p-5 md:p-8">Institutional Entity</th>
-                            <th className="p-5 md:p-8">Engagement Source</th>
-                            <th className="p-5 md:p-8">Intent Score</th>
-                            <th className="p-5 md:p-8">Account Status</th>
+                            <th className="p-5 md:p-8">Organisation</th>
+                            <th className="p-5 md:p-8">Source</th>
+                            <th className="p-5 md:p-8">Score</th>
+                            <th className="p-5 md:p-8">Status</th>
                             <th className="p-5 md:p-8 text-right">Action</th>
                         </tr>
                     </thead>
@@ -96,9 +96,9 @@ export default function EnterpriseCRMPage() {
                                         <p className="text-[12px] text-gray-500 first-cap mt-1">{lead.email}</p>
                                     </td>
                                     <td className="p-5 md:p-8">
-                                        <span className="font-mono text-[11.5px] text-gray-500">{lead.source}</span>
+                                        <span className="text-[11.5px] text-gray-500">{lead.source}</span>
                                     </td>
-                                    <td className="p-5 md:p-8 text-[#8a6a1f] font-mono font-bold text-lg">
+                                    <td className="p-5 md:p-8 text-[#8a6a1f] font-bold text-lg">
                                         {lead.score || 0}%
                                     </td>
                                     <td className="p-5 md:p-8">
@@ -116,7 +116,7 @@ export default function EnterpriseCRMPage() {
                                     </td>
                                     <td className="p-5 md:p-8 text-right">
                                         <button className="text-[12px] font-bold text-gray-500 group-hover:text-[#0e1b2c] transition-colors first-cap">
-                                            Manage Lead →
+                                            Manage lead
                                         </button>
                                     </td>
                                 </motion.tr>

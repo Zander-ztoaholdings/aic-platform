@@ -47,10 +47,10 @@ export function WorkspaceStatusStrip({
           line scrolled sideways and cut off mid-word at 390px. */}
       <div className="sm:hidden px-5 py-2.5 flex items-center justify-between gap-3 text-[13px]">
         {stage && (
-          <span className="flex items-center gap-2 text-[#6b7280] min-w-0">
+          <span className="flex items-center gap-2 text-[#5e6b7b] min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a] shrink-0" aria-hidden />
             <span className="font-semibold text-[#0A1728] truncate">{stage.label}</span>
-            <span className="text-[#9ca3af] shrink-0">{phase + 1} of {PHASES.length}</span>
+            <span className="text-[#8a95a3] shrink-0">{phase + 1} of {PHASES.length}</span>
           </span>
         )}
         {flagged.map((s) => (
@@ -61,18 +61,18 @@ export function WorkspaceStatusStrip({
       </div>
       <div className="hidden sm:flex max-w-[1200px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
         {stage && (
-          <span className="flex items-center gap-2 text-[#6b7280]">
+          <span className="flex items-center gap-2 text-[#5e6b7b]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a]" aria-hidden />
             Stage
             <span className="font-semibold text-[#0A1728]">{stage.label}</span>
-            <span className="text-[#9ca3af]">
+            <span className="text-[#8a95a3]">
               {phase + 1} of {PHASES.length}
             </span>
           </span>
         )}
         <span className="w-px h-4 bg-[#0a1728]/[0.08] shrink-0" aria-hidden />
         {stats.map((s) => (
-          <span key={s.label} className="flex items-center gap-1.5 text-[#6b7280]">
+          <span key={s.label} className="flex items-center gap-1.5 text-[#5e6b7b]">
             {s.label}
             <span className={`font-semibold tabular-nums ${s.warn ? 'text-[#b45309]' : 'text-[#0A1728]'}`}>{s.value}</span>
           </span>

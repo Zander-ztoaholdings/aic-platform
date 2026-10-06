@@ -59,7 +59,7 @@ export default function BiasMethodologyModule() {
                             "{lessons[step].content}"
                         </p>
                         
-                        <div className="bg-white border border-[#dde2e8] p-5 md:p-8 rounded-2xl font-mono text-[11.5px] text-aic-gold/80 flex items-center justify-between">
+                        <div className="bg-white border border-[#dde2e8] p-5 md:p-8 rounded-2xl text-[11.5px] text-aic-gold/80 flex items-center justify-between">
                             <span>{lessons[step].code}</span>
                             <span className="text-[12px] text-gray-600 first-cap">Audit_Logic_v3.1</span>
                         </div>
@@ -71,7 +71,7 @@ export default function BiasMethodologyModule() {
                 <button 
                     onClick={() => setStep(Math.max(0, step - 1))}
                     disabled={step === 0}
-                    className="px-5 md:px-10 py-4 font-mono text-[11.5px] font-bold text-gray-500 hover:text-[#0e1b2c] transition-all disabled:opacity-0"
+                    className="px-5 md:px-10 py-4 text-[11.5px] font-bold text-gray-500 hover:text-[#0e1b2c] transition-all disabled:opacity-0"
                 >
                     PREVIOUS_MODULE
                 </button>

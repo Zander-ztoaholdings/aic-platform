@@ -104,7 +104,7 @@ export default function BillingSettings() {
                             </p>
                         </div>
                         <button className="bg-aic-white text-aic-navy px-5 md:px-10 py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold transition-all">
-                            Contact Lead Auditor
+                            Contact your lead auditor
                         </button>
                     </div>
                 </div>

@@ -37,7 +37,7 @@ export default function RegulatoryStackPage() {
                         className="bg-white border border-[#dde2e8] p-5 md:p-8 rounded-xl flex items-center justify-between group hover:border-aic-gold/30 transition-all"
                     >
                         <div className="flex items-center gap-8">
-                            <span className="font-mono text-xs text-gray-600">0{i+1}</span>
+                            <span className="text-xs text-gray-600">0{i+1}</span>
                             <div>
                                 <h3 className="text-xl font-serif font-bold text-[#0e1b2c] group-hover:text-[#8a6a1f] transition-colors">{law.name}</h3>
                                 <p className="text-sm text-gray-500 italic mt-1">{law.interpretation}</p>
@@ -61,7 +61,7 @@ export default function RegulatoryStackPage() {
                     All interpretative notes are verified against the 2026 High Court precedents on algorithmic agency.
                 </p>
                 <button className="bg-[#0e1b2c] text-white px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all shadow-2xl">
-                    DOWNLOAD LEGAL HANDBOOK
+                    Download the legal handbook
                 </button>
             </div>
         </div>

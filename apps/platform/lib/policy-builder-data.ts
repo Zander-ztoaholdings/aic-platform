@@ -1,7 +1,8 @@
 import { getTenantDb, organizations, users, accountablePersons, integrations, and, eq, isNull } from '@aic/db';
+import { CONNECTORS } from './connectors/catalog';
 import type { BuilderContext } from './policy-builder';
 
-const PROVIDER: Record<string, string> = { github: 'GitHub', microsoft: 'Microsoft 365', openai: 'OpenAI', anthropic: 'Anthropic' };
+const PROVIDER: Record<string, string> = { github: 'GitHub', microsoft: 'Microsoft 365', openai: 'OpenAI', anthropic: 'Anthropic', ...Object.fromEntries(CONNECTORS.map((c) => [c.key, c.name])) };
 
 /** What AIC already knows that a policy needs: names, people, connected systems. */
 export async function builderContext(orgId: string): Promise<BuilderContext> {

@@ -53,7 +53,7 @@ function VerifyEmailContent() {
           <p className="text-[13px] leading-relaxed text-[#6b7485]">
             If you’re signed in, you can send a new link from AIC Aware. Links expire after 48 hours.
           </p>
-          <Link href="/start" className="text-sm font-medium text-[#0A1728] hover:text-[#c9920a]">Go to AIC →</Link>
+          <Link href="/start" className="text-sm font-medium text-[#0A1728] hover:text-[#a8772a]">Go to AIC</Link>
         </div>
       )}
     </AuthFrame>

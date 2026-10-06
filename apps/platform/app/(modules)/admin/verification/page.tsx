@@ -74,7 +74,7 @@ export default function VerificationPage() {
           </p>
         </header>
         {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-        {orgs && orgs.length === 0 && <p className="text-sm text-[#5e6b7b]">No organisation has filed evidence yet.</p>}
+        {orgs && orgs.length === 0 && <p className="text-sm text-[#5e6b7b]">No files to review. Files appear here once you take an organisation on, from the Organisations page.</p>}
 
         {orgs && orgs.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5 items-start">

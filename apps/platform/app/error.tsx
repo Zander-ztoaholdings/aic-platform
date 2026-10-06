@@ -33,7 +33,7 @@ export default function Error({
           onClick={reset}
           className="block w-full inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
         >
-          Retry Operation
+          Try again
         </button>
       </div>
 

@@ -7,11 +7,11 @@ export default function NotFound() {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 sm:p-6 text-center">
       <div className="max-w-md">
         <div className="mb-8">
-          <span className="text-4xl md:text-6xl font-mono font-bold text-aic-gold/20">404</span>
+          <span className="text-4xl md:text-6xl font-bold text-aic-gold/20">404</span>
         </div>
 
         <h2 className="text-3xl font-serif font-bold text-[#0e1b2c] mb-4 tracking-tight">
-          Resource Not Found.
+          Page not found.
         </h2>
 
         <p className="text-gray-500 font-serif text-sm leading-relaxed mb-10">

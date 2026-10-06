@@ -59,7 +59,7 @@ export function GapMixChart({ gaps }: { gaps: Gap[] }) {
           <li key={d.key} className="flex items-center gap-2 text-sm">
             <span className={`size-2.5 rounded-full ${SEVERITY_DOT[d.key]}`} />
             <span className="text-gray-600">{d.severity}</span>
-            <span className="font-mono font-bold text-aic-navy tabular-nums">{d.value}</span>
+            <span className="font-bold text-aic-navy tabular-nums">{d.value}</span>
           </li>
         ))}
       </ul>

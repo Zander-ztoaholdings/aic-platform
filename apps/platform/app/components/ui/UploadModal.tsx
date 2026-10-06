@@ -99,15 +99,15 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
     >
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden animate-[fadeUp_0.2s_ease]">
         {/* Header */}
-        <div className="px-4 sm:px-6 py-5 border-b border-[#e5e7eb] flex items-start justify-between">
+        <div className="px-4 sm:px-6 py-5 border-b border-[#dde2e8] flex items-start justify-between">
           <div>
             <Eyebrow>Submit Evidence</Eyebrow>
-            <h2 className="font-serif text-lg font-bold text-[#0f1f3d] leading-snug">{label}</h2>
-            <p className="text-xs text-[#6b7280] mt-1">
+            <h2 className="font-serif text-lg font-bold text-[#0e1b2c] leading-snug">{label}</h2>
+            <p className="text-xs text-[#5e6b7b] mt-1">
               Hashed &amp; timestamped on submission. AIC confirms receipt within 2 business days (DOC-011).
             </p>
           </div>
-          <button onClick={onClose} className="p-1.5 text-[#6b7280] hover:text-[#0f1f3d] rounded-lg">
+          <button onClick={onClose} className="p-1.5 text-[#5e6b7b] hover:text-[#0e1b2c] rounded-lg">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -119,8 +119,8 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               <div className="w-14 h-14 rounded-full bg-green-50 border-2 border-green-500 flex items-center justify-center mx-auto mb-4">
                 <Check className="w-6 h-6 text-green-600" />
               </div>
-              <h3 className="font-serif text-base font-bold text-[#0f1f3d] mb-2">Submitted Successfully</h3>
-              <p className="text-sm text-[#6b7280] mb-6">
+              <h3 className="font-serif text-base font-bold text-[#0e1b2c] mb-2">Submitted Successfully</h3>
+              <p className="text-sm text-[#5e6b7b] mb-6">
                 {uploadedCount} file{uploadedCount !== 1 ? 's' : ''} stored and checksummed.
               </p>
               {triages.length > 0 && (
@@ -130,7 +130,7 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               )}
               <button
                 onClick={onClose}
-                className="inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5"
+                className="inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#a8772a] text-white rounded-full px-5 py-2.5"
               >
                 Close
               </button>
@@ -145,16 +145,16 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
                 onClick={() => inputRef.current?.click()}
                 className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
                   dragging
-                    ? 'border-[#c9920a] bg-amber-50'
-                    : 'border-[#e5e7eb] bg-[#f9fafb] hover:border-[#c9920a]/50'
+                    ? 'border-[#a8772a] bg-amber-50'
+                    : 'border-[#dde2e8] bg-[#f5f7f9] hover:border-[#a8772a]/50'
                 }`}
               >
-                <Upload className={`w-7 h-7 mx-auto mb-2 ${dragging ? 'text-[#c9920a]' : 'text-[#9ca3af]'}`} />
-                <p className="text-sm font-semibold text-[#0f1f3d] mb-1">
-                  Drop files or <span className="text-[#c9920a]">browse</span>
+                <Upload className={`w-7 h-7 mx-auto mb-2 ${dragging ? 'text-[#a8772a]' : 'text-[#8a95a3]'}`} />
+                <p className="text-sm font-semibold text-[#0e1b2c] mb-1">
+                  Drop files or <span className="text-[#a8772a]">browse</span>
                 </p>
-                <p className="text-[12px] text-[#9ca3af] first-cap">
-                  PDF · DOCX · XLSX · PNG — max 50MB
+                <p className="text-[12px] text-[#8a95a3] first-cap">
+                  PDF, Word, Excel or PNG, up to 50 MB
                 </p>
                 <input
                   ref={inputRef}
@@ -171,16 +171,16 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
                   {files.map((file, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-2.5 px-3 py-2 bg-[#f9fafb] border border-[#e5e7eb] rounded-lg"
+                      className="flex items-center gap-2.5 px-3 py-2 bg-[#f5f7f9] border border-[#dde2e8] rounded-lg"
                     >
-                      <FileText className="w-3.5 h-3.5 text-[#c9920a] flex-shrink-0" />
-                      <span className="flex-1 text-xs font-medium text-[#0f1f3d] truncate">{file.name}</span>
-                      <span className="font-mono text-[11px] text-[#9ca3af]">
+                      <FileText className="w-3.5 h-3.5 text-[#a8772a] flex-shrink-0" />
+                      <span className="flex-1 text-xs font-medium text-[#0e1b2c] truncate">{file.name}</span>
+                      <span className="text-[11px] text-[#8a95a3]">
                         {(file.size / 1024).toFixed(0)} KB
                       </span>
                       <button
                         onClick={() => setFiles((fs) => fs.filter((_, j) => j !== i))}
-                        className="text-[#9ca3af] hover:text-[#0f1f3d]"
+                        className="text-[#8a95a3] hover:text-[#0e1b2c]"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -198,8 +198,8 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
 
               {/* Warning */}
               <div className="mt-4 bg-amber-50 border border-amber-200/80 rounded-lg px-3 py-2.5 flex gap-2">
-                <Info className="w-3.5 h-3.5 text-[#c9920a] flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-[#0f1f3d] leading-relaxed">
+                <Info className="w-3.5 h-3.5 text-[#a8772a] flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-[#0e1b2c] leading-relaxed">
                   Submission confirms evidence accurately reflects current governance. False submissions may void
                   certification under DOC-004.
                 </p>
@@ -209,14 +209,14 @@ export function UploadModal({ label, onClose, slotType, requirementId, onUploade
               <div className="flex gap-2.5 mt-5">
                 <button
                   onClick={onClose}
-                  className="flex-none inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap text-[#6b7280] border border-[#e5e7eb] rounded-full px-5 py-2.5 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+                  className="flex-none inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap text-[#5e6b7b] border border-[#dde2e8] rounded-full px-5 py-2.5 hover:border-[#a8772a] hover:text-[#a8772a] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
                   disabled={files.length === 0 || busy}
-                  className="flex-1 inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#b07d08] transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#a8772a] text-white rounded-full px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#b07d08] transition-colors"
                 >
                   {busy ? (
                     <>

@@ -30,7 +30,7 @@ export default function UnauthorizedPage() {
 
         <div className="bg-[#f5f7f9] backdrop-blur-xl rounded-2xl p-4 sm:p-6 border border-[#dde2e8] mb-6">
           <h2 className="text-sm text-gray-500 first-cap mb-4">
-            Your Current Role
+            Your current role
           </h2>
           <p className="text-[#0e1b2c] text-lg">
             Contact your administrator if you believe this is an error.

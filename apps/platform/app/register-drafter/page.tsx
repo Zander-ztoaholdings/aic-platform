@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronDown, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { ChevronDown, Sparkles, ShieldCheck } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { Eyebrow, SectionCard, CopperTag } from '../components/ui/Eyebrow';
 
@@ -51,14 +51,14 @@ export default function RegisterDrafterPage() {
   return (
     <DashboardShell>
       <div className="max-w-3xl mx-auto pb-24 md:pt-8">
-        <Eyebrow>AI Overview · AI Estate</Eyebrow>
+        <Eyebrow>AI overview</Eyebrow>
 
         <div className="flex flex-wrap items-center gap-3 mb-3">
           <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Register Drafter</h1>
-          <CopperTag>Coming Soon</CopperTag>
+          <CopperTag>Coming soon</CopperTag>
         </div>
 
-        <p className="text-sm text-[#4b5563] leading-relaxed mb-8 max-w-xl">
+        <p className="text-sm text-[#4a5666] leading-relaxed mb-8 max-w-xl">
           Declaring an AI system today means knowing AIC&apos;s taxonomy before you start — risk
           tier, lifecycle stage, which Right applies. Register Drafter is a planned assistant that
           would take a plain-language description of a system and turn it into a draft declaration
@@ -67,10 +67,10 @@ export default function RegisterDrafterPage() {
         </p>
 
         <SectionCard className="mb-8 flex items-start gap-3.5">
-          <Sparkles className="w-4 h-4 text-[#c9920a] flex-shrink-0 mt-0.5" />
+          <Sparkles className="w-4 h-4 text-[#a8772a] flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-xs font-semibold text-[#0f1f3d] mb-1">Not built yet — and won&apos;t default silently</p>
-            <p className="text-xs text-[#6b7280] leading-relaxed">
+            <p className="text-xs font-semibold text-[#0e1b2c] mb-1">Not built yet — and won&apos;t default silently</p>
+            <p className="text-xs text-[#5e6b7b] leading-relaxed">
               This needs a provider decision before it can be built: which model, where the data
               residency boundary sits for a client&apos;s own system description, and how a drafted
               declaration gets checked for accuracy. That&apos;s Zander&apos;s call to make, so this stays
@@ -80,7 +80,7 @@ export default function RegisterDrafterPage() {
         </SectionCard>
 
         <div className="mb-3">
-          <span className="text-[12px] font-bold first-cap text-[#9ca3af]">
+          <span className="text-[12px] font-bold first-cap text-[#8a95a3]">
             How this will work
           </span>
         </div>
@@ -91,21 +91,21 @@ export default function RegisterDrafterPage() {
             return (
               <div
                 key={step.title}
-                className="bg-white border border-[#e5e7eb] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(10,22,40,0.05)]"
+                className="bg-white border border-[#dde2e8] rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(10,22,40,0.05)]"
               >
                 <button
                   onClick={() => toggle(i)}
-                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[#f9fafb] transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[#f5f7f9] transition-colors"
                 >
-                  <span className="font-serif text-sm font-bold text-[#0f1f3d]">{step.title}</span>
+                  <span className="font-serif text-sm font-bold text-[#0e1b2c]">{step.title}</span>
                   <ChevronDown
-                    className="w-4 h-4 text-[#9ca3af] transition-transform ml-auto flex-shrink-0"
+                    className="w-4 h-4 text-[#8a95a3] transition-transform ml-auto flex-shrink-0"
                     style={{ transform: isOpen ? 'rotate(180deg)' : 'none' }}
                   />
                 </button>
                 {isOpen && (
-                  <div className="border-t border-[#e5e7eb] px-4 pb-4 pt-3">
-                    <p className="text-xs text-[#4b5563] leading-relaxed">{step.body}</p>
+                  <div className="border-t border-[#dde2e8] px-4 pb-4 pt-3">
+                    <p className="text-xs text-[#4a5666] leading-relaxed">{step.body}</p>
                   </div>
                 )}
               </div>
@@ -113,16 +113,16 @@ export default function RegisterDrafterPage() {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[#e5e7eb]">
+        <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-[#dde2e8]">
           <ShieldCheck className="w-4 h-4 text-[#3f8f83] flex-shrink-0" />
-          <p className="text-xs text-[#6b7280] flex-1 min-w-[200px]">
+          <p className="text-xs text-[#5e6b7b] flex-1 min-w-[200px]">
             You can declare a system today — the manual form on AI Estate is live now.
           </p>
           <Link
             href="/overview"
-            className="inline-flex items-center gap-1.5 text-[12px] font-bold first-cap bg-[#0f1f3d] text-white rounded-full px-4 py-2 hover:bg-[#0A1728] transition-colors"
+            className="inline-flex items-center gap-1.5 text-[12px] font-bold first-cap bg-[#0e1b2c] text-white rounded-full px-4 py-2 hover:bg-[#0A1728] transition-colors"
           >
-            Declare a System <ArrowRight className="w-3 h-3" />
+            Declare a system
           </Link>
         </div>
       </div>

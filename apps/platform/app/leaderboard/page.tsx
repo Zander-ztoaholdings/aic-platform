@@ -95,7 +95,7 @@ export default function GlobalLeaderboard() {
                 className="flex items-center justify-between p-5 md:p-8 bg-[#f5f7f9] border border-[#dde2e8] rounded-xl hover:bg-[#eef1f5] hover:border-aic-cyan/20 transition-all group"
               >
                 <div className="flex items-center gap-8">
-                  <span className="font-mono text-lg font-bold text-aic-slate w-8">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-lg font-bold text-aic-slate w-8">{String(i + 1).padStart(2, '0')}</span>
                   <div>
                     <span className="font-serif text-2xl block text-[#0e1b2c] group-hover:text-[#8a6a1f] transition-colors">{org.name}</span>
                     <div className="flex items-center gap-3 mt-2">

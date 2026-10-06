@@ -31,14 +31,14 @@ export const EmpathySlider = ({ value, onChange }: EmpathySliderProps) => {
     <div className="flex flex-col space-y-4 w-full max-w-md bg-[#f5f7f9] backdrop-blur-md p-4 sm:p-6 rounded-2xl border border-[#dde2e8]">
       <div className="flex justify-between items-center">
         <span className="text-[12px] font-bold text-gray-500 first-cap">
-          Human Impact Magnitude
+          Human impact
         </span>
         <motion.span 
           key={value}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           className={cn(
-            "px-3 py-1 rounded-full text-[#0e1b2c] text-[11.5px] font-bold font-mono transition-colors duration-500",
+            "px-3 py-1 rounded-full text-[#0e1b2c] text-[11.5px] font-bold transition-colors duration-500",
             getThemeColor(value)
           )}
         >

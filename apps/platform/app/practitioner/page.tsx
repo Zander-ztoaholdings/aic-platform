@@ -3,7 +3,7 @@ import { PageHeader } from '@/app/components/ui/PageHeader';
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { ArrowRight, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { SectionCard, CopperTag } from '../components/ui/Eyebrow';
 
@@ -17,7 +17,7 @@ function BrandMark({ size = 60 }: { size?: number }) {
       <line x1="8" y1="41" x2="102" y2="41" stroke="#fff" strokeWidth="1" opacity="0.3"/>
       <text x="55" y="100" fontSize="40" fontWeight="700" fill="#fff" textAnchor="middle" letterSpacing="5" fontFamily="Space Grotesk,sans-serif">AIC</text>
       <line x1="8" y1="122" x2="102" y2="122" stroke="#fff" strokeWidth="1" opacity="0.3"/>
-      <text x="55" y="148" fontSize="5" fill="#c9920a" textAnchor="middle" letterSpacing="1.5" fontFamily="Space Grotesk,sans-serif" fontWeight="700">AICCERTIFIED.CLOUD</text>
+      <text x="55" y="148" fontSize="5" fill="#a8772a" textAnchor="middle" letterSpacing="1.5" fontFamily="Space Grotesk,sans-serif" fontWeight="700">AICCERTIFIED.CLOUD</text>
     </svg>
   );
 }
@@ -31,8 +31,8 @@ const DOMAINS = [
 ];
 
 const EXAM_PARTS = [
-  { part: 'Part A', title: 'Knowledge Assessment',  detail: '80 MCQ + 20 short answer · 3 hours · Closed-book · Pass mark: 65%' },
-  { part: 'Part B', title: 'Applied Simulation',    detail: 'Full audit simulation · 4 hours · Open-book · Assessed: Satisfactory' },
+  { part: 'Part A', title: 'Knowledge Assessment',  detail: '80 multiple-choice and 20 short-answer questions, 3 hours, closed book. Pass mark 65%.' },
+  { part: 'Part B', title: 'Applied Simulation',    detail: 'A full audit simulation, 4 hours, open book, assessed as satisfactory or not.' },
 ];
 
 const FEES = [
@@ -81,7 +81,7 @@ export default function PractitionerPage() {
         <div className="bg-[#0a1628] rounded-2xl px-5 md:px-8 py-6 md:py-8 flex flex-col md:flex-row gap-5 md:gap-6 md:items-center">
           <span className="hidden md:block"><BrandMark size={60} /></span>
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] font-bold first-cap text-[#c9920a] mb-2">
+            <div className="text-[12px] font-bold first-cap text-[#a8772a] mb-2">
               Certified AI Accountability Professional
             </div>
             <h2 className="font-serif text-xl font-bold text-white leading-snug mb-1.5">The CAAP Credential</h2>
@@ -92,7 +92,7 @@ export default function PractitionerPage() {
           </div>
           <div className="md:ml-auto flex-shrink-0 md:text-right flex md:block items-baseline gap-2 pt-4 md:pt-0 border-t border-white/10 md:border-0">
             <div className="text-[12px] font-bold first-cap text-white/40 mb-1">Launching</div>
-            <div className="font-serif text-xl font-bold text-[#c9920a]">Q3 2027</div>
+            <div className="font-serif text-xl font-bold text-[#a8772a]">Q3 2027</div>
           </div>
         </div>
 
@@ -101,16 +101,16 @@ export default function PractitionerPage() {
           <div className="space-y-4">
             {/* 5 Competency Domains */}
             <SectionCard>
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-4">
                 5 Competency Domains
               </div>
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {DOMAINS.map((d) => (
                   <div key={d.d} className="flex gap-3 py-3">
                     <CopperTag>{d.d}</CopperTag>
                     <div>
-                      <div className="text-xs font-semibold text-[#0f1f3d] mb-0.5">{d.t}</div>
-                      <div className="text-xs text-[#6b7280] leading-relaxed">{d.desc}</div>
+                      <div className="text-xs font-semibold text-[#0e1b2c] mb-0.5">{d.t}</div>
+                      <div className="text-xs text-[#5e6b7b] leading-relaxed">{d.desc}</div>
                     </div>
                   </div>
                 ))}
@@ -119,15 +119,15 @@ export default function PractitionerPage() {
 
             {/* Examination Structure */}
             <SectionCard>
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
-                Examination Structure
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-4">
+                How the exam works
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {EXAM_PARTS.map((p) => (
-                  <div key={p.part} className="bg-[#f9fafb] rounded-xl p-4">
+                  <div key={p.part} className="bg-[#f5f7f9] rounded-xl p-4">
                     <CopperTag>{p.part}</CopperTag>
-                    <div className="text-xs font-bold text-[#0f1f3d] mt-2 mb-1">{p.title}</div>
-                    <div className="text-xs text-[#6b7280] leading-relaxed">{p.detail}</div>
+                    <div className="text-xs font-bold text-[#0e1b2c] mt-2 mb-1">{p.title}</div>
+                    <div className="text-xs text-[#5e6b7b] leading-relaxed">{p.detail}</div>
                   </div>
                 ))}
               </div>
@@ -137,24 +137,24 @@ export default function PractitionerPage() {
           {/* Right rail */}
           <div className="space-y-3">
             <SectionCard className="p-4">
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-3">
                 Fee Structure (ZAR)
               </div>
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {FEES.map((f) => (
                   <div key={f.l} className="flex justify-between py-2">
-                    <span className="text-xs text-[#6b7280]">{f.l}</span>
-                    <span className="font-mono text-xs font-bold text-[#0f1f3d]">{f.v}</span>
+                    <span className="text-xs text-[#5e6b7b]">{f.l}</span>
+                    <span className="text-xs font-bold text-[#0e1b2c]">{f.v}</span>
                   </div>
                 ))}
               </div>
             </SectionCard>
 
             <SectionCard className="p-4">
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-2">
-                Register Interest
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-2">
+                Register interest
               </div>
-              <p className="text-xs text-[#6b7280] leading-relaxed mb-4">
+              <p className="text-xs text-[#5e6b7b] leading-relaxed mb-4">
                 CAAP launches Q3 2027. Register now to be notified when enrolment opens and to secure Founding
                 Partner pricing.
               </p>
@@ -162,14 +162,14 @@ export default function PractitionerPage() {
                 type="button"
                 onClick={handleRegisterInterest}
                 disabled={submitting || registered}
-                className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full py-2.5 hover:bg-[#b07d08] transition-colors disabled:opacity-60"
+                className="w-full inline-flex h-11 items-center justify-center gap-2 text-sm font-medium bg-[#0e1b2c] text-white rounded-full hover:bg-[#22344a] transition-colors disabled:opacity-60"
               >
                 {registered ? (
                   <>Registered <Check className="w-3 h-3" /></>
                 ) : submitting ? (
                   'Registering…'
                 ) : (
-                  <>Register Interest <ArrowRight className="w-3 h-3" /></>
+                  'Register interest'
                 )}
               </button>
             </SectionCard>

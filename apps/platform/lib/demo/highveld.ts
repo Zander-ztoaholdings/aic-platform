@@ -253,6 +253,9 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
   const ms = await conn('microsoft', 'Microsoft 365', 'demo-tenant', { tenantName: 'Highveld Credit (Demo)', users: msAccounts.length, accounts: msAccounts });
   const oa = await conn('openai', 'OpenAI', null, { links: { 'gpt-4o': SYSTEMS[2].id } });
   const an = await conn('anthropic', 'Anthropic', null, { links: { 'claude-sonnet-4-5': SYSTEMS[3].id } });
+  // Two of the newer connectors, so the catalogue shows them connected.
+  const jamf = await conn('jamf', 'Jamf Pro (Demo)', null, {});
+  const hr = await conn('bamboohr', 'BambooHR (Demo)', null, { people: STAFF.length });
   const failSince = ago(9);
   const check = (integrationId: string, checkKey: string, subject: string, status: string, summary: string, detail?: Record<string, unknown>) => ({
     orgId: DEMO_ORG_ID, integrationId, checkKey, subject, status, summary, detail: detail ?? {},
@@ -273,13 +276,17 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
     check(gh, 'github.no_exposed_secrets', 'highveld-credit/website', 'pass', 'No open secret-scanning alerts.'),
     check(gh, 'github.org_2fa_required', 'highveld-credit', 'pass', 'Two-factor sign-in is required for every member.'),
     check(ms, 'm365.mfa_enforced', 'Highveld Credit (Demo)', 'fail', 'Security defaults are off and no Conditional Access policy requires MFA for all users.'),
-    check(ms, 'm365.mfa_registered', 'Highveld Credit (Demo)', 'fail', '4 of 45 members have no second factor registered, 1 of them an administrator.'),
-    check(ms, 'm365.global_admins', 'Highveld Credit (Demo)', 'pass', '3 global administrators.'),
-    check(ms, 'm365.stale_accounts', 'Highveld Credit (Demo)', 'fail', '2 enabled accounts have not signed in for over 90 days.'),
+    check(ms, 'm365.mfa_registered', 'Highveld Credit (Demo)', 'fail', '4 of 16 accounts have no second factor registered, 1 of them an administrator.'),
+    check(ms, 'm365.global_admins', 'Highveld Credit (Demo)', 'pass', '2 global administrators: Sipho Dlamini and IT admin (break glass).'),
+    check(ms, 'm365.stale_accounts', 'Highveld Credit (Demo)', 'fail', '2 enabled accounts have not signed in for over 90 days: Reception and IT admin (break glass).'),
     check(oa, 'ai.usage_fresh', 'openai', 'pass', 'OpenAI usage reached AIC within the last day.'),
     check(oa, 'ai.models_declared', 'openai', 'fail', 'gpt-4.1 is in use but not linked to any declared system.', { models: ['gpt-4.1'] }),
     check(an, 'ai.usage_fresh', 'anthropic', 'pass', 'Anthropic usage reached AIC within the last day.'),
     check(an, 'ai.models_declared', 'anthropic', 'pass', 'Every model in use is linked to a declared system.'),
+    check(jamf, 'jamf.filevault_enabled', 'Jamf Pro (Demo)', 'fail', '1 of 9 Macs does not have FileVault on: HC-MBP-07.'),
+    check(jamf, 'jamf.os_up_to_date', 'Jamf Pro (Demo)', 'pass', 'All 9 Macs run macOS 14 or later.'),
+    check(jamf, 'jamf.device_checkin', 'Jamf Pro (Demo)', 'pass', 'All 9 Macs checked in within the last 14 days.'),
+    check(hr, 'bamboohr.people_list', 'BambooHR (Demo)', 'pass', `${STAFF.length} people, 2 of whom have left.`),
   ]);
   await observe(at(9, 2, 15), 'AIC connector sync');
 
@@ -482,7 +489,7 @@ async function seedRegisters({ ids, ago, at, msAccounts, ghAccounts }: {
   await db.insert(orgPeople).values(STAFF.map((p) => ({
     orgId: DEMO_ORG_ID, name: p.name, email: `${p.key}@${DEMO_DOMAIN}`, jobTitle: p.jobTitle, department: p.department,
     startDate: p.starts ? day(p.starts) : day(-400 - (p.name.length * 37) % 900), endDate: p.left ? day(p.left) : null,
-    source: 'import', createdAt: ago(30), updatedAt: ago(30),
+    source: 'bamboohr', externalId: String(100 + STAFF.indexOf(p)), createdAt: ago(30), updatedAt: ago(30),
   })));
   n += STAFF.length;
 

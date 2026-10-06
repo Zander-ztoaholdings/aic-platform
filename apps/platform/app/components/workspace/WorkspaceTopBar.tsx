@@ -32,15 +32,15 @@ type Tone = 'light' | 'dark';
 const TONE = {
   light: {
     bar: 'bg-white/70 backdrop-saturate-[1.8] border-[#0a1728]/[0.06] text-[#0A1728]',
-    muted: 'text-[#6b7280]',
-    faint: 'text-[#9ca3af]',
-    trigger: 'text-[#374151] hover:text-[#0A1728] hover:bg-[#0a1728]/[0.04] data-[state=open]:bg-[#0a1728]/[0.05] data-[state=open]:text-[#0A1728]',
+    muted: 'text-[#5e6b7b]',
+    faint: 'text-[#8a95a3]',
+    trigger: 'text-[#2b3a4d] hover:text-[#0A1728] hover:bg-[#0a1728]/[0.04] data-[state=open]:bg-[#0a1728]/[0.05] data-[state=open]:text-[#0A1728]',
     triggerActive: 'text-[#0A1728]',
     panel: 'bg-white border-[#0a1728]/[0.07] shadow-[0_1px_3px_rgba(10,23,40,0.05),0_18px_48px_-18px_rgba(10,23,40,0.22)]',
     item: 'hover:bg-[#0a1728]/[0.035] focus:bg-[#0a1728]/[0.035]',
-    itemActive: 'bg-[#c9920a]/[0.07]',
+    itemActive: 'bg-[#a8772a]/[0.07]',
     tile: 'bg-[#0a1728]/[0.04] text-[#0A1728]',
-    tileActive: 'bg-[#c9920a]/15 text-[#a87a08]',
+    tileActive: 'bg-[#a8772a]/15 text-[#a87a08]',
     divider: 'bg-[#0a1728]/[0.08]',
     avatar: 'bg-[#0A1728] text-white',
   },
@@ -50,13 +50,13 @@ const TONE = {
     faint: 'text-white/35',
     trigger: 'text-white/65 hover:text-white hover:bg-white/[0.06] data-[state=open]:bg-white/[0.08] data-[state=open]:text-white',
     triggerActive: 'text-white',
-    panel: 'bg-[#0f1f3d] border-white/[0.08] shadow-[0_18px_48px_-18px_rgba(0,0,0,0.6)]',
+    panel: 'bg-[#0e1b2c] border-white/[0.08] shadow-[0_18px_48px_-18px_rgba(0,0,0,0.6)]',
     item: 'hover:bg-white/[0.05] focus:bg-white/[0.05]',
-    itemActive: 'bg-[#c9920a]/[0.12]',
+    itemActive: 'bg-[#a8772a]/[0.12]',
     tile: 'bg-white/[0.06] text-white/85',
-    tileActive: 'bg-[#c9920a]/20 text-[#e4a80c]',
+    tileActive: 'bg-[#a8772a]/20 text-[#8a6a1f]',
     divider: 'bg-white/[0.1]',
-    avatar: 'bg-[#c9920a] text-[#0A1728]',
+    avatar: 'bg-[#a8772a] text-[#0A1728]',
   },
 } as const;
 
@@ -110,7 +110,7 @@ export function WorkspaceTopBar({
         {/* Brand and context — whose record this is. */}
         <Link href={homeHref} className="flex items-center gap-3 min-w-0 shrink-0">
           <span className="font-serif text-[19px] font-bold tracking-tight leading-none">
-            AIC<span className="text-[#c9920a]">.</span>
+            AIC<span className="text-[#a8772a]">.</span>
           </span>
           <span className={`hidden sm:block w-px h-6 ${t.divider}`} />
           <span className="hidden sm:flex flex-col min-w-0 max-w-[220px]">
@@ -132,10 +132,10 @@ export function WorkspaceTopBar({
                 <NavigationMenu.Item key={group.key} className="relative">
                   <NavigationMenu.Trigger
                     data-tour={`nav-${group.key}`}
-                    className={`group inline-flex items-center gap-1 h-9 px-3 rounded-lg text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#c9920a]/40 ${t.trigger} ${groupActive ? t.triggerActive : ''}`}
+                    className={`group inline-flex items-center gap-1 h-9 px-3 rounded-lg text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#a8772a]/40 ${t.trigger} ${groupActive ? t.triggerActive : ''}`}
                   >
                     {group.label}
-                    {groupActive && <span className="w-1 h-1 rounded-full bg-[#c9920a] ml-0.5" aria-hidden />}
+                    {groupActive && <span className="w-1 h-1 rounded-full bg-[#a8772a] ml-0.5" aria-hidden />}
                     <ChevronDown className="w-3.5 h-3.5 opacity-60 transition-transform duration-200 group-data-[state=open]:rotate-180" aria-hidden />
                   </NavigationMenu.Trigger>
 
@@ -186,7 +186,7 @@ export function WorkspaceTopBar({
           <DropdownMenu.Root>
             <DropdownMenu.Trigger
               data-tour="account"
-              className={`flex items-center gap-2.5 rounded-xl pl-1.5 pr-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#c9920a]/40 ${t.trigger}`}
+              className={`flex items-center gap-2.5 rounded-xl pl-1.5 pr-2 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#a8772a]/40 ${t.trigger}`}
             >
               <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold ${t.avatar}`}>
                 {user.name || user.email ? initialsOf(display) : ''}

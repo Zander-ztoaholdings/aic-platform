@@ -56,7 +56,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
   const org = orgSummary?.organisation;
   const contextDetail = org?.divisionName
-    ? `Division 0${org.division} · ${org.divisionName}`
+    ? `Division ${org.division}, ${org.divisionName}`
     : null;
 
   return (

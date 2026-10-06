@@ -73,7 +73,7 @@ export default function AdminPermissions() {
               >
                 <div className="flex items-center gap-3">
                   <Settings className="w-5 h-5" />
-                  <span className="font-semibold">Role Management</span>
+                  <span className="font-semibold">Roles</span>
                 </div>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -83,7 +83,7 @@ export default function AdminPermissions() {
               >
                 <div className="flex items-center gap-3">
                   <Lock className="w-5 h-5" />
-                  <span className="font-semibold">Capability Directory</span>
+                  <span className="font-semibold">Capabilities</span>
                 </div>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -93,7 +93,7 @@ export default function AdminPermissions() {
               >
                 <div className="flex items-center gap-3">
                   <History className="w-5 h-5" />
-                  <span className="font-semibold">Permission Audit Log</span>
+                  <span className="font-semibold">Change log</span>
                 </div>
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -169,7 +169,7 @@ export default function AdminPermissions() {
 
               {activeTab === 'capabilities' && (
                 <div className="p-5 md:p-8">
-                  <h2 className="text-2xl font-bold text-[#0A1728] mb-6">Capability Directory</h2>
+                  <h2 className="text-2xl font-bold text-[#0A1728] mb-6">Capabilities</h2>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {availableCapabilities.map(cap => (
                       <Card key={cap.id} className="p-4 border-gray-100 shadow-none bg-gray-50/50">

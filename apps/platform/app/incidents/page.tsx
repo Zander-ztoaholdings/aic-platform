@@ -88,13 +88,13 @@ export default function IncidentsPage() {
                                         }`} />
                                         <span className="text-[12px] font-bold text-gray-400 first-cap">{inc.status}</span>
                                     </div>
-                                    <span className="text-[11.5px] font-mono text-gray-400">{new Date(inc.created_at).toLocaleDateString()}</span>
+                                    <span className="text-[11.5px] text-gray-400">{new Date(inc.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-aic-black mb-2">{inc.citizen_email}</h3>
                                 <p className="text-sm text-[#5e6b7b] truncate mb-4">"{inc.description}"</p>
                                 <div className="flex justify-between items-center">
                                     <span className="text-[12px] font-bold text-aic-gold first-cap">{inc.system_name}</span>
-                                    <span className="text-[11.5px] font-mono text-gray-400">View Details →</span>
+                                    <span className="text-[12px] text-gray-500">See details</span>
                                 </div>
                             </motion.div>
                         ))}
@@ -138,7 +138,7 @@ export default function IncidentsPage() {
                                                 onClick={() => handleResolve(selectedIncident.id, 'INVESTIGATING')}
                                                 className="w-full bg-aic-gold text-black py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-paper transition-all"
                                             >
-                                                START INVESTIGATION
+                                                Start investigating
                                             </button>
                                         )}
                                         
@@ -148,13 +148,13 @@ export default function IncidentsPage() {
                                                     onClick={() => handleResolve(selectedIncident.id, 'RESOLVED')}
                                                     className="w-full bg-aic-paper text-black py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-gold transition-all"
                                                 >
-                                                    MARK AS RESOLVED
+                                                    Mark as resolved
                                                 </button>
                                                 <button 
                                                     onClick={() => handleResolve(selectedIncident.id, 'DISMISSED')}
                                                     className="w-full border border-aic-paper/20 text-aic-paper py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-red transition-all"
                                                 >
-                                                    DISMISS APPEAL
+                                                    Dismiss the appeal
                                                 </button>
                                             </>
                                         )}

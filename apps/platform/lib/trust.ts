@@ -11,6 +11,7 @@
  * Pure (apart from types): tested in __tests__/lib/trust.test.ts.
  */
 
+import { CONNECTOR_BY_KEY } from './connectors/catalog';
 import type { OrgFacts } from './org-facts';
 import type { EvaluatedControl, FrameworkMeta } from './controls';
 import { CHECK_BY_KEY } from './integrations/catalog';
@@ -68,6 +69,8 @@ export interface TrustView {
 }
 
 const AREA: Record<string, string> = { github: 'Code and change control', microsoft: 'Identity and sign-in', ai_provider: 'AI model usage' };
+// Connector checks are grouped by the kind of system they come from (devices, cloud, HR and so on).
+const CONNECTOR_AREA: Record<string, string> = { cloud: 'Cloud', identity: 'Identity and sign-in', code: 'Code and change control', ticketing: 'Security work', comms: 'Identity and sign-in', hr: 'Joiners and leavers', endpoint: 'Devices', security: 'Security tools', observability: 'Monitoring', crm: 'Identity and sign-in', password: 'Identity and sign-in' };
 
 export function buildTrustView(facts: OrgFacts, sections: Sections, tracked: { frameworks: FrameworkMeta[]; controls: EvaluatedControl[] }, page: { intro: string | null; contactEmail: string | null; updatedAt: string }): TrustView {
   const v: TrustView = { name: facts.org.legalName || facts.org.name, intro: page.intro, contactEmail: page.contactEmail, updatedAt: page.updatedAt };
@@ -87,9 +90,10 @@ export function buildTrustView(facts: OrgFacts, sections: Sections, tracked: { f
   if (sections.monitoring && facts.connectors.length) {
     const areas = new Map<string, { passing: number; total: number }>();
     for (const c of facts.checks) {
-      const src = CHECK_BY_KEY[c.key]?.source;
+      const def = CHECK_BY_KEY[c.key];
+      const src = def?.source;
       if (!src || c.status === 'unknown') continue;
-      const a = AREA[src] ?? src;
+      const a = src === 'connector' ? CONNECTOR_AREA[CONNECTOR_BY_KEY[def.connector ?? '']?.category ?? ''] ?? 'Other systems' : AREA[src] ?? src;
       const cur = areas.get(a) ?? { passing: 0, total: 0 };
       cur.total += 1;
       if (c.status === 'pass') cur.passing += 1;

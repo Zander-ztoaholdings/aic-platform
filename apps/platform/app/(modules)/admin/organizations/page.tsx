@@ -78,7 +78,7 @@ export default function OrganisationsPage() {
                 <tr key={o.id} className="border-t border-[#dde2e8] align-top hover:bg-[#f8f9fb]">
                   <td className="px-4 py-3">
                     <div className="font-medium text-[#0e1b2c]">{o.name}</div>
-                    <div className="text-xs text-[#8a95a3]">{[o.division ? `Division ${o.division}` : null, o.sector, o.sizeBand].filter(Boolean).join(' · ') || 'Profile not completed'}</div>
+                    <div className="text-xs text-[#8a95a3]">{[o.division ? `Division ${o.division}` : null, o.sector, o.sizeBand].filter(Boolean).join(', ') || 'Profile not completed'}</div>
                   </td>
                   <td className="px-4 py-3 text-[#5e6b7b]">
                     {staff?.isSuperAdmin ? <Link href={`/admin/users?org=${o.id}`} className="hover:text-[#0e1b2c] hover:underline">{o.activeMembers ?? 0} active</Link> : <span>{o.activeMembers ?? 0} active</span>}

@@ -107,7 +107,7 @@ export default function OrganisationProfile() {
       <div className="space-y-5">
         <PageHeader eyebrow="Account" title="Organisation profile" lede="Your organisation as AIC holds it: details, certificate, accountable person and declared AI systems." />
         <SectionCard className="p-5 md:p-8 text-center">
-          <p className="text-xs text-[#9ca3af]">Loading organisation profile…</p>
+          <p className="text-xs text-[#8a95a3]">Loading organisation profile…</p>
         </SectionCard>
       </div>
     );
@@ -118,26 +118,28 @@ export default function OrganisationProfile() {
       <div className="space-y-5">
         <PageHeader eyebrow="Account" title="Organisation profile" lede="Your organisation as AIC holds it: details, certificate, accountable person and declared AI systems." />
         <SectionCard className="p-5 md:p-8 text-center">
-          <p className="text-xs text-[#9ca3af]">Could not load the organisation profile. Try refreshing.</p>
+          <p className="text-xs text-[#8a95a3]">Could not load the organisation profile. Try refreshing.</p>
         </SectionCard>
       </div>
     );
   }
 
   const { organisation, certificate, inventory, accountability, evidence } = data;
+  const STATUS_WORDS: Record<string, string> = { DRAFT: 'Not yet certified', PENDING: 'In assessment', ACTIVE: 'Certified', SUSPENDED: 'Suspended', REVOKED: 'Revoked', EXPIRED: 'Expired' };
+  const OUTCOME_WORDS: Record<string, string> = { ACCEPTED: 'Accepted', INSUFFICIENT: 'Sent back for more', REJECTED: 'Not accepted' };
   const person = accountability.persons[0] ?? null;
 
   const ORG_FIELDS = [
-    { k: 'Organisation Name', v: organisation.name },
+    { k: 'Name', v: organisation.name },
     {
       k: 'Division',
       v: organisation.division
-        ? `Division ${organisation.division} — ${organisation.divisionName ?? '—'}`
+        ? `Division ${organisation.division}, ${organisation.divisionName ?? '—'}`
         : 'Not yet assigned',
     },
-    { k: 'Standard Version', v: organisation.standardVersion ?? '—' },
-    { k: 'Certification Status', v: organisation.certificationStatus ?? '—' },
-    { k: 'Primary AI Officer', v: organisation.primaryAiOfficer ?? 'Not recorded' },
+    { k: 'AIC standard version', v: organisation.standardVersion ?? '—' },
+    { k: 'Certification', v: STATUS_WORDS[organisation.certificationStatus ?? ''] ?? organisation.certificationStatus ?? '—' },
+    { k: 'Primary AI officer', v: organisation.primaryAiOfficer ?? 'Not recorded' },
   ];
 
   const evidenceOutcomes = Object.entries(evidence.byVerificationOutcome).filter(([k]) => k !== 'UNSPECIFIED');
@@ -151,14 +153,14 @@ export default function OrganisationProfile() {
         <div className="space-y-4">
           {/* Organisation Details */}
           <SectionCard>
-            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
-              Organisation Details
+            <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-4">
+              Organisation details
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {ORG_FIELDS.map((r) => (
-                <div key={r.k} className="bg-[#f9fafb] rounded-lg px-3 py-2.5">
-                  <div className="text-[12px] text-[#9ca3af] first-cap mb-1">{r.k}</div>
-                  <div className="text-xs font-semibold text-[#0f1f3d]">{r.v}</div>
+                <div key={r.k} className="bg-[#f5f7f9] rounded-lg px-3 py-2.5">
+                  <div className="text-[12px] text-[#8a95a3] first-cap mb-1">{r.k}</div>
+                  <div className="text-xs font-semibold text-[#0e1b2c]">{r.v}</div>
                 </div>
               ))}
             </div>
@@ -166,50 +168,50 @@ export default function OrganisationProfile() {
 
           {/* Certificate */}
           <SectionCard>
-            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-4">
+            <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-4">
               Certificate
             </div>
             {certificate ? (
               <div className="flex items-center gap-4">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-bold text-[#0f1f3d]">{certificate.number ?? '—'}</div>
-                  <div className="text-xs text-[#6b7280] mt-0.5">
-                    {certificate.standard ?? '—'} · Issued {date(certificate.issued)} · Expires{' '}
+                  <div className="text-sm font-bold text-[#0e1b2c]">{certificate.number ?? '—'}</div>
+                  <div className="text-xs text-[#5e6b7b] mt-0.5">
+                    {certificate.standard ?? '—'}, issued {date(certificate.issued)}, expires{' '}
                     {date(certificate.expires)}
                   </div>
                 </div>
                 <StatusChip status={certificate.status === 'ACTIVE' ? 'active' : 'pending'} />
               </div>
             ) : (
-              <p className="text-xs text-[#9ca3af]">No certificate has been issued yet.</p>
+              <p className="text-xs text-[#8a95a3]">No certificate has been issued yet.</p>
             )}
           </SectionCard>
 
           {/* Evidence verification */}
           <SectionCard>
             <div className="flex items-center justify-between mb-4">
-              <div className="text-[12px] font-bold first-cap text-[#6b7280]">
-                Evidence Verification
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b]">
+                Evidence verification
               </div>
               <Link
                 href="/evidence"
-                className="font-mono text-[11px] font-bold text-[#c9920a] hover:text-[#0f1f3d] transition-colors"
+                className="text-[11px] font-bold text-[#a8772a] hover:text-[#0e1b2c] transition-colors"
               >
-                Open the vault →
+                Open the vault
               </Link>
             </div>
             {evidenceOutcomes.length === 0 ? (
-              <p className="text-xs text-[#9ca3af]">No evidence has been verified yet.</p>
+              <p className="text-xs text-[#8a95a3]">No evidence has been verified yet.</p>
             ) : (
               <div className="flex flex-wrap gap-2 mb-2">
                 {evidenceOutcomes.map(([outcome, n]) => (
                   <CopperTag key={outcome}>
-                    {outcome}: {n}
+                    {OUTCOME_WORDS[outcome] ?? outcome}: {n}
                   </CopperTag>
                 ))}
               </div>
             )}
-            <p className="font-mono text-[11px] text-[#9ca3af]">
+            <p className="text-[11px] text-[#8a95a3]">
               Last verified: {date(evidence.lastVerifiedAt)}
             </p>
           </SectionCard>
@@ -219,35 +221,35 @@ export default function OrganisationProfile() {
         <div className="space-y-3">
           {/* Accountable Person */}
           <SectionCard className="p-4">
-            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
-              Accountable Person
+            <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-3">
+              Accountable person
             </div>
             {person ? (
               <>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-[#0f1f3d] flex items-center justify-center font-mono text-sm font-bold text-[#c9920a] flex-shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-[#0e1b2c] flex items-center justify-center text-sm font-bold text-[#a8772a] flex-shrink-0">
                     {initials(person.name)}
                   </div>
                   <div>
-                    <div className="text-sm font-bold text-[#0f1f3d]">{person.name}</div>
-                    <div className="font-mono text-[11px] text-[#c9920a]">
+                    <div className="text-sm font-bold text-[#0e1b2c]">{person.name}</div>
+                    <div className="text-[11px] text-[#a8772a]">
                       {person.jobTitle ?? 'No title recorded'}
                     </div>
                   </div>
                 </div>
-                <div className="divide-y divide-[#f3f4f6]">
+                <div className="divide-y divide-[#eef1f5]">
                   <div className="py-2">
-                    <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">
+                    <div className="text-[12px] text-[#8a95a3] first-cap mb-0.5">
                       Email
                     </div>
-                    <div className="text-xs font-medium text-[#0f1f3d]">{person.email}</div>
+                    <div className="text-xs font-medium text-[#0e1b2c]">{person.email}</div>
                   </div>
                   <div className="py-2">
-                    <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">
-                      Declaration Accepted
+                    <div className="text-[12px] text-[#8a95a3] first-cap mb-0.5">
+                      Declaration accepted
                     </div>
-                    <div className="text-xs font-medium text-[#0f1f3d]">
-                      {person.declarationVersion} · {date(person.declarationAcceptedAt)}
+                    <div className="text-xs font-medium text-[#0e1b2c]">
+                      {person.declarationVersion}, {date(person.declarationAcceptedAt)}
                     </div>
                   </div>
                 </div>
@@ -257,26 +259,26 @@ export default function OrganisationProfile() {
             )}
             <Link
               href="/overview"
-              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[11px] font-bold text-[#6b7280] border border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+              className="w-full mt-3 inline-flex items-center justify-center gap-2 text-[11px] font-bold text-[#5e6b7b] border border-[#dde2e8] rounded-full py-2 hover:border-[#a8772a] hover:text-[#a8772a] transition-colors"
             >
-              {person ? 'Change Accountable Person' : 'Declare Accountable Person'} →
+              {person ? 'Change the accountable person' : 'Declare an accountable person'}
             </Link>
           </SectionCard>
 
           {/* AI Systems in Scope */}
           <SectionCard className="p-4">
-            <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
+            <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-3">
               AI Systems in Scope
             </div>
             {inventory.systems.length === 0 ? (
-              <p className="text-xs text-[#9ca3af] mb-3">No systems declared yet.</p>
+              <p className="text-xs text-[#8a95a3] mb-3">No systems declared yet.</p>
             ) : (
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {inventory.systems.map((s) => (
                   <div key={s.id} className="flex items-center gap-2.5 py-2">
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-semibold text-[#0f1f3d] truncate">{s.name}</div>
-                      <div className="font-mono text-[11px] text-[#9ca3af]">Tier {s.riskTier ?? '—'}</div>
+                      <div className="text-xs font-semibold text-[#0e1b2c] truncate">{s.name}</div>
+                      <div className="text-[11px] text-[#8a95a3]">Tier {s.riskTier ?? '—'}</div>
                     </div>
                     <StatusChip status={systemChip(s)} />
                   </div>
@@ -285,9 +287,9 @@ export default function OrganisationProfile() {
             )}
             <Link
               href="/overview"
-              className="w-full mt-3 inline-flex items-center justify-center gap-2 font-mono text-[11px] font-bold text-[#9ca3af] border border-dashed border-[#e5e7eb] rounded-full py-2 hover:border-[#c9920a] hover:text-[#c9920a] transition-colors"
+              className="w-full mt-3 inline-flex items-center justify-center gap-2 text-[11px] font-bold text-[#8a95a3] border border-dashed border-[#dde2e8] rounded-full py-2 hover:border-[#a8772a] hover:text-[#a8772a] transition-colors"
             >
-              Declare New AI System →
+              Declare an AI system
             </Link>
           </SectionCard>
         </div>

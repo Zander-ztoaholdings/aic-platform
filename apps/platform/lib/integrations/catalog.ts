@@ -11,7 +11,9 @@
 
 export type CheckStatus = 'pass' | 'fail' | 'warn' | 'unknown';
 
-export type CheckSource = 'github' | 'ai_provider' | 'microsoft';
+import { CONNECTOR_CHECKS } from '../connectors/catalog';
+
+export type CheckSource = 'github' | 'ai_provider' | 'microsoft' | 'connector';
 
 export interface CheckDefinition {
   key: string;
@@ -22,6 +24,8 @@ export interface CheckDefinition {
   /** What to do when it fails. Plain steps, no jargon. */
   fix: string;
   controls: string[];
+  /** For connector checks: which connector runs it (lib/connectors/catalog). */
+  connector?: string;
 }
 
 export const CHECKS: CheckDefinition[] = [
@@ -143,6 +147,9 @@ export const CHECKS: CheckDefinition[] = [
     controls: ['ISO 27001 A.5.18', 'POPIA s19'],
   },
 ];
+
+// Every connector's checks (AWS, Okta, Jamf and the rest), in the same shape.
+CHECKS.push(...CONNECTOR_CHECKS.map(({ key, title, why, fix, controls, connector }) => ({ key, source: 'connector' as const, title, why, fix, controls, connector })));
 
 export const CHECK_BY_KEY: Record<string, CheckDefinition> = Object.fromEntries(CHECKS.map((c) => [c.key, c]));
 

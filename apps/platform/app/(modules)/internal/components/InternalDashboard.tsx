@@ -36,7 +36,7 @@ interface DashboardData {
 }
 
 function scoreColor(v: number) {
-  return v >= 80 ? '#16a34a' : v >= 60 ? '#c9920a' : '#dc2626';
+  return v >= 80 ? '#16a34a' : v >= 60 ? '#a8772a' : '#dc2626';
 }
 
 export default function InternalDashboard() {
@@ -55,7 +55,7 @@ export default function InternalDashboard() {
 
   if (!mounted || loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#6b7280] font-serif italic text-sm">
+      <div className="flex items-center justify-center h-64 text-[#5e6b7b] font-serif italic text-sm">
         Syncing with institutional registry…
       </div>
     );
@@ -65,7 +65,7 @@ export default function InternalDashboard() {
   const totalFlagged = RIGHTS.reduce((a, r) => a + r.flagged, 0);
 
   const stats = [
-    { label: 'Integrity Score',  value: `${overall}/100`, sub: 'Provisional Pass',       color: '#c9920a', Icon: Shield        },
+    { label: 'Integrity Score',  value: `${overall}/100`, sub: 'Provisional Pass',       color: '#a8772a', Icon: Shield        },
     { label: 'Evidence Met',     value: `11/15`,          sub: '73% complete',            color: '#16a34a', Icon: CheckCircle   },
     { label: 'Critical Flags',   value: String(totalFlagged), sub: 'Require resolution',  color: '#dc2626', Icon: AlertTriangle },
     { label: 'Days to Deadline', value: '14',             sub: 'Evidence submission',      color: '#b45309', Icon: Clock         },
@@ -91,15 +91,15 @@ export default function InternalDashboard() {
             >
               <SectionCard className="p-4">
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-[12px] font-bold first-cap text-[#6b7280]">
+                  <span className="text-[12px] font-bold first-cap text-[#5e6b7b]">
                     {s.label}
                   </span>
                   <s.Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: s.color }} />
                 </div>
-                <div className="font-mono text-2xl font-bold leading-none mb-1.5" style={{ color: s.color }}>
+                <div className="text-2xl font-bold leading-none mb-1.5" style={{ color: s.color }}>
                   {s.value}
                 </div>
-                <div className="text-xs text-[#6b7280]">{s.sub}</div>
+                <div className="text-xs text-[#5e6b7b]">{s.sub}</div>
               </SectionCard>
             </motion.div>
           ))}
@@ -114,36 +114,36 @@ export default function InternalDashboard() {
             {/* Evidence by Algorithmic Right */}
             <SectionCard>
               <div className="flex justify-between items-center mb-4">
-                <span className="text-[12px] font-bold first-cap text-[#6b7280]">
+                <span className="text-[12px] font-bold first-cap text-[#5e6b7b]">
                   Evidence by Algorithmic Right
                 </span>
                 <a
                   href="/evidence"
-                  className="font-mono text-[11px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
+                  className="text-[11px] font-bold text-[#a8772a] flex items-center gap-1 hover:underline"
                 >
                   View All <ArrowRight className="w-3 h-3" />
                 </a>
               </div>
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {RIGHTS.map((r) => {
                   const col = scoreColor(r.score);
                   return (
                     <div key={r.id} className="flex items-center gap-3 py-2.5">
                       <CopperTag>{r.tag}</CopperTag>
-                      <span className="flex-1 text-xs font-semibold text-[#0f1f3d]">{r.label}</span>
+                      <span className="flex-1 text-xs font-semibold text-[#0e1b2c]">{r.label}</span>
                       {r.flagged > 0 && (
-                        <span className="font-mono text-[11px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
+                        <span className="text-[11px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded">
                           {r.flagged} FLAGGED
                         </span>
                       )}
-                      <div className="w-20 h-1.5 bg-[#e5e7eb] rounded-full overflow-hidden">
+                      <div className="w-20 h-1.5 bg-[#dde2e8] rounded-full overflow-hidden">
                         <div
                           className="h-full rounded-full"
                           style={{ width: `${r.score}%`, background: col }}
                         />
                       </div>
                       <span
-                        className="font-mono text-xs font-bold w-7 text-right"
+                        className="text-xs font-bold w-7 text-right"
                         style={{ color: col }}
                       >
                         {r.score}
@@ -157,35 +157,35 @@ export default function InternalDashboard() {
             {/* Recent Correspondence */}
             <SectionCard>
               <div className="flex justify-between items-center mb-4">
-                <span className="text-[12px] font-bold first-cap text-[#6b7280]">
-                  Recent Correspondence
+                <span className="text-[12px] font-bold first-cap text-[#5e6b7b]">
+                  Recent correspondence
                 </span>
                 <a
                   href="/correspondence"
-                  className="font-mono text-[11px] font-bold text-[#c9920a] flex items-center gap-1 hover:underline"
+                  className="text-[11px] font-bold text-[#a8772a] flex items-center gap-1 hover:underline"
                 >
                   View All <ArrowRight className="w-3 h-3" />
                 </a>
               </div>
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {MSGS.map((m) => (
                   <div key={m.id} className="flex gap-3 py-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#f0f4f8] flex items-center justify-center font-mono text-[11px] font-bold text-[#c9920a] flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#f0f4f8] flex items-center justify-center text-[11px] font-bold text-[#a8772a] flex-shrink-0">
                       AIC
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between mb-1">
-                        <span className="text-xs font-semibold text-[#0f1f3d]">{m.author}</span>
+                        <span className="text-xs font-semibold text-[#0e1b2c]">{m.author}</span>
                         <div className="flex items-center gap-2">
                           {m.unread && (
-                            <span className="font-mono text-[11px] font-bold text-[#c9920a] bg-amber-50 px-1.5 py-0.5 rounded">
-                              UNREAD
+                            <span className="text-[11px] font-bold text-[#a8772a] bg-amber-50 px-1.5 py-0.5 rounded">
+                              Unread
                             </span>
                           )}
-                          <span className="font-mono text-[11px] text-[#9ca3af]">{m.time}</span>
+                          <span className="text-[11px] text-[#8a95a3]">{m.time}</span>
                         </div>
                       </div>
-                      <p className="text-xs text-[#6b7280] leading-relaxed line-clamp-2">{m.text}</p>
+                      <p className="text-xs text-[#5e6b7b] leading-relaxed line-clamp-2">{m.text}</p>
                     </div>
                   </div>
                 ))}
@@ -199,9 +199,9 @@ export default function InternalDashboard() {
                 <div className="space-y-4">
                   {data.activeOrgs.map((org, i) => (
                     <div key={i}>
-                      <div className="flex justify-between text-xs font-mono mb-1.5">
-                        <span className="font-bold text-[#0f1f3d] first-cap">{org.name}</span>
-                        <span className="text-[#6b7280]">{org.tier} — {org.integrity_score}%</span>
+                      <div className="flex justify-between text-xs mb-1.5">
+                        <span className="font-bold text-[#0e1b2c] first-cap">{org.name}</span>
+                        <span className="text-[#5e6b7b]">{org.tier} — {org.integrity_score}%</span>
                       </div>
                       <div className="h-1 w-full bg-[#f0f4f8] rounded-full overflow-hidden">
                         <motion.div
@@ -209,7 +209,7 @@ export default function InternalDashboard() {
                           animate={{ width: `${org.integrity_score}%` }}
                           transition={{ duration: 0.8, delay: i * 0.1 }}
                           className="h-full rounded-full"
-                          style={{ background: org.integrity_score === 100 ? '#22c55e' : '#c9920a' }}
+                          style={{ background: org.integrity_score === 100 ? '#22c55e' : '#a8772a' }}
                         />
                       </div>
                     </div>
@@ -226,13 +226,13 @@ export default function InternalDashboard() {
               <div className="flex justify-center mb-4">
                 <ScoreRing value={overall} size={100} thickness={6} />
               </div>
-              <div className="font-serif text-sm font-bold text-[#0f1f3d] mb-1">Provisional Pass</div>
-              <p className="text-xs text-[#6b7280] mb-5 leading-relaxed">
+              <div className="font-serif text-sm font-bold text-[#0e1b2c] mb-1">Provisional Pass</div>
+              <p className="text-xs text-[#5e6b7b] mb-5 leading-relaxed">
                 Right 3 (Empathy) is the primary risk to full certification.
               </p>
               <button
                 onClick={() => setUploadLabel('All Outstanding Evidence')}
-                className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#c9920a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors shadow-lg shadow-amber-500/20"
+                className="w-full inline-flex items-center justify-center gap-2 text-[12px] font-bold first-cap bg-[#a8772a] text-white rounded-full px-5 py-2.5 hover:bg-[#b07d08] transition-colors shadow-lg shadow-amber-500/20"
               >
                 Submit Evidence <ArrowRight className="w-3 h-3" />
               </button>
@@ -240,20 +240,20 @@ export default function InternalDashboard() {
 
             {/* Upcoming actions */}
             <SectionCard className="p-4">
-              <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
-                Upcoming Actions
+              <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-3">
+                Coming up
               </div>
-              <div className="divide-y divide-[#f3f4f6]">
+              <div className="divide-y divide-[#eef1f5]">
                 {UPCOMING.map((a) => (
                   <div key={a.label} className="flex justify-between items-center py-2">
                     <span
-                      className={`text-xs ${a.urgent ? 'text-red-600 font-semibold' : 'text-[#0f1f3d]'}`}
+                      className={`text-xs ${a.urgent ? 'text-red-600 font-semibold' : 'text-[#0e1b2c]'}`}
                     >
                       {a.label}
                     </span>
                     <span
-                      className={`font-mono text-[11px] font-bold ${
-                        a.urgent ? 'text-red-600' : 'text-[#9ca3af]'
+                      className={`text-[11px] font-bold ${
+                        a.urgent ? 'text-red-600' : 'text-[#8a95a3]'
                       }`}
                     >
                       {a.date}
@@ -266,19 +266,19 @@ export default function InternalDashboard() {
             {/* Live API stats */}
             {data?.stats && (
               <SectionCard className="p-4">
-                <div className="text-[12px] font-bold first-cap text-[#6b7280] mb-3">
+                <div className="text-[12px] font-bold first-cap text-[#5e6b7b] mb-3">
                   Registry
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { l: 'Pending Apps',  v: data.stats.pendingApplications },
                     { l: 'Active Certs',  v: data.stats.activeCertifications },
-                    { l: 'Total Leads',   v: data.stats.totalLeads },
+                    { l: 'Leads',   v: data.stats.totalLeads },
                     { l: 'Audits Ran',    v: data.stats.auditsTotal },
                   ].map((s) => (
                     <div key={s.l}>
-                      <div className="text-[12px] text-[#9ca3af] first-cap mb-0.5">{s.l}</div>
-                      <div className="font-mono text-lg font-bold text-[#0f1f3d]">{s.v}</div>
+                      <div className="text-[12px] text-[#8a95a3] first-cap mb-0.5">{s.l}</div>
+                      <div className="text-lg font-bold text-[#0e1b2c]">{s.v}</div>
                     </div>
                   ))}
                 </div>

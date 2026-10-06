@@ -27,6 +27,6 @@ export const SEVERITY_LABEL: Record<Gap['severity'], string> = {
 
 export const SEVERITY_CHART_COLOR: Record<Gap['severity'], string> = {
   BLOCKING: '#ef4444',
-  MATERIAL: '#c9920a',
+  MATERIAL: '#a8772a',
   ADVISORY: '#94a3b8',
 };

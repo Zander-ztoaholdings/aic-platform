@@ -14,7 +14,7 @@ export function ScoreRing({ value, size = 80, thickness = 5, showLabel = true }:
 
   const color =
     value >= 80 ? '#16a34a' :
-    value >= 60 ? '#c9920a' :
+    value >= 60 ? '#a8772a' :
     '#dc2626';
 
   return (
@@ -30,7 +30,7 @@ export function ScoreRing({ value, size = 80, thickness = 5, showLabel = true }:
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#e5e7eb"
+          stroke="#dde2e8"
           strokeWidth={thickness}
         />
         {/* Fill */}
@@ -49,14 +49,14 @@ export function ScoreRing({ value, size = 80, thickness = 5, showLabel = true }:
       {showLabel && (
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
-            className="font-mono font-bold leading-none"
+            className="font-bold leading-none"
             style={{ fontSize: size * 0.26, color }}
           >
             {value}
           </span>
           <span
-            className="font-mono leading-none mt-0.5"
-            style={{ fontSize: size * 0.1, color: '#c9920a' }}
+            className="leading-none mt-0.5"
+            style={{ fontSize: size * 0.1, color: '#a8772a' }}
           >
             / 100
           </span>

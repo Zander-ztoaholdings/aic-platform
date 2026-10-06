@@ -9,7 +9,7 @@ const STATUS_MAP: Record<ChipStatus, { label: string; bg: string; color: string;
   verified:    { label: 'Verified',    bg: 'rgba(34,197,94,.10)',   color: '#16a34a', dot: '#22c55e' },
   partial:     { label: 'Partial',     bg: 'rgba(245,158,11,.10)',  color: '#b45309', dot: '#f59e0b' },
   flagged:     { label: 'Flagged',     bg: 'rgba(239,68,68,.08)',   color: '#dc2626', dot: '#ef4444' },
-  missing:     { label: 'Missing',     bg: 'rgba(107,114,128,.08)', color: '#6b7280', dot: '#e5e7eb' },
+  missing:     { label: 'Missing',     bg: 'rgba(107,114,128,.08)', color: '#5e6b7b', dot: '#dde2e8' },
   active:      { label: 'Active',      bg: 'rgba(34,197,94,.10)',   color: '#16a34a', dot: '#22c55e' },
   expired:     { label: 'Expired',     bg: 'rgba(239,68,68,.08)',   color: '#dc2626', dot: '#ef4444' },
   signed:      { label: 'Signed',      bg: 'rgba(34,197,94,.10)',   color: '#16a34a', dot: '#22c55e' },

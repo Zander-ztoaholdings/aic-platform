@@ -12,6 +12,8 @@
  * that every key they name exists here.
  */
 
+import { CONNECTOR_CHECKS } from './connectors/catalog';
+
 export type CommonSource =
   | { kind: 'check'; key: string }
   | { kind: 'policy'; key: string }
@@ -87,6 +89,14 @@ export const COMMON_CONTROLS: CommonControl[] = [
   { key: 'priv.retention', area: 'privacy', title: 'Data kept no longer than needed', evidence: 'The retention schedule and how deletion happens.', sources: [] },
   { key: 'priv.dpo', area: 'privacy', title: 'Information Officer or DPO', evidence: 'Who it is, and their registration with the regulator where required.', sources: [] },
 ];
+
+// Connector checks join the controls their catalogue entry names (lib/connectors/catalog).
+for (const k of CONNECTOR_CHECKS) {
+  for (const key of k.common) {
+    const c = COMMON_CONTROLS.find((x) => x.key === key);
+    if (c && !c.sources.some((s) => s.kind === 'check' && s.key === k.key)) c.sources.push(check(k.key));
+  }
+}
 
 export const COMMON_BY_KEY: Record<string, CommonControl> = Object.fromEntries(COMMON_CONTROLS.map((c) => [c.key, c]));
 

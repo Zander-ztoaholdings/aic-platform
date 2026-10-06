@@ -7,32 +7,49 @@
   --font-sans:        var(--font-public-sans), system-ui, sans-serif;
 
   /* ─── AIC Brand Palette ───────────────────────────────────────── */
+  /* The AIC design language (Oct 2026): ink, brass, rule, muted, page.
+   * Older names below point at the same five colours, so pages written
+   * against the earlier navy-and-gold palette render in the current one. */
   --color-aic-navy:         #0A1728;
-  --color-aic-navy-mid:     #0f1f3d;
-  --color-aic-navy-light:   #1a3160;
-  --color-aic-copper:       #c9920a;
-  --color-aic-copper-light: #e4a80c;
-  --color-aic-copper-dim:   rgba(201, 146, 10, 0.12);
-  --color-aic-paper:        #F9F8F4;
-  --color-aic-parchment:    #F9F8F4;
-  --color-aic-black:        #0f1f3d;
+  --color-aic-navy-mid:     #0E1B2C;
+  --color-aic-navy-light:   #22344A;
+  --color-aic-copper:       #A8772A;
+  --color-aic-copper-light: #8A6A1F;
+  --color-aic-copper-dim:   rgba(168, 119, 42, 0.12);
+  --color-aic-paper:        #F5F7F9;
+  --color-aic-parchment:    #F5F7F9;
+  --color-aic-black:        #0E1B2C;
   --color-aic-white:        #ffffff;
-  --color-aic-muted:        #6b7280;
-  --color-aic-border:       #e5e7eb;
-  --color-aic-bg:           #f0f4f8;
+  --color-aic-muted:        #5E6B7B;
+  --color-aic-border:       #DDE2E8;
+  --color-aic-bg:           #F5F7F9;
   --color-aic-surface:      #ffffff;
   --color-aic-border-dark:  rgba(255, 255, 255, 0.07);
 
   /* Status colours */
-  --color-aic-green:  #22c55e;
-  --color-aic-amber:  #f59e0b;
-  --color-aic-red:    #ef4444;
+  --color-aic-green:  #2E7A57;
+  --color-aic-amber:  #B45309;
+  --color-aic-red:    #B23A35;
 
   /* Legacy aliases */
   --color-aic-obsidian: #0A1728;
-  --color-aic-cyan:     #c9920a;
-  --color-aic-slate:    #6b7280;
-  --color-aic-gold:     #c9920a;
+  --color-aic-cyan:     #A8772A;
+  --color-aic-slate:    #5E6B7B;
+  --color-aic-gold:     #A8772A;
+  --color-aic-gold-light: #C9A35C;
+
+  /* Tailwind's grey scale, retuned to the same blue-grey slate as the
+   * tokens above, so text-gray-500 and border-gray-200 match the rest. */
+  --color-gray-50:  #F5F7F9;
+  --color-gray-100: #EEF1F5;
+  --color-gray-200: #DDE2E8;
+  --color-gray-300: #C9CED6;
+  --color-gray-400: #8A95A3;
+  --color-gray-500: #5E6B7B;
+  --color-gray-600: #4A5666;
+  --color-gray-700: #2B3A4D;
+  --color-gray-800: #1A2738;
+  --color-gray-900: #0E1B2C;
 
   /* ─── shadcn semantic tokens ──────────────────────────────────────
    * The components in components/ui/ (Card, Badge, Avatar, Sidebar,
@@ -49,32 +66,32 @@
    * direction Zander asked for (Sep 2026) while keeping the brand palette
    * the rest of the app already uses.
    */
-  --color-background:            #F1F3F6;
-  --color-foreground:            #0A1728;
+  --color-background:            #F5F7F9;
+  --color-foreground:            #0E1B2C;
   --color-card:                  #ffffff;
-  --color-card-foreground:       #0A1728;
+  --color-card-foreground:       #0E1B2C;
   --color-popover:               #ffffff;
-  --color-popover-foreground:    #0A1728;
-  --color-primary:                #0A1728;
-  --color-primary-foreground:     #F9F8F4;
+  --color-popover-foreground:    #0E1B2C;
+  --color-primary:                #0E1B2C;
+  --color-primary-foreground:     #ffffff;
   --color-secondary:              #EEF1F5;
-  --color-secondary-foreground:   #0A1728;
+  --color-secondary-foreground:   #0E1B2C;
   --color-muted:                  #EEF1F5;
-  --color-muted-foreground:       #6b7280;
-  --color-accent:                 #c9920a;
-  --color-accent-foreground:      #0A1728;
-  --color-destructive:            #ef4444;
+  --color-muted-foreground:       #5E6B7B;
+  --color-accent:                 #A8772A;
+  --color-accent-foreground:      #0E1B2C;
+  --color-destructive:            #B23A35;
   --color-destructive-foreground: #ffffff;
-  --color-border:                 #e5e7eb;
-  --color-input:                  #e5e7eb;
-  --color-ring:                   #c9920a;
+  --color-border:                 #DDE2E8;
+  --color-input:                  #DDE2E8;
+  --color-ring:                   #A8772A;
 
   /* Recharts series colours, read by components/ui/chart.tsx */
-  --color-chart-1: #0A1728;
-  --color-chart-2: #c9920a;
+  --color-chart-1: #0E1B2C;
+  --color-chart-2: #A8772A;
   --color-chart-3: #3f8f83;
-  --color-chart-4: #22c55e;
-  --color-chart-5: #ef4444;
+  --color-chart-4: #2E7A57;
+  --color-chart-5: #B23A35;
 
   /* components/ui/sidebar.tsx - not yet used by any page (both the client
    * DashboardSidebar and the internal AdminShell hand-roll their own), but
@@ -232,8 +249,8 @@ body {
 }
 
 /* A new page settles in; its first-level sections follow a beat apart. */
-.page-enter { animation: pageEnter 0.55s var(--ease-apple) both; }
-.page-enter > * > * { animation: pageEnter 0.6s var(--ease-apple) both; }
+.page-enter { animation: pageEnter 0.55s var(--ease-apple) backwards; }
+.page-enter > * > * { animation: pageEnter 0.6s var(--ease-apple) backwards; }
 .page-enter > * > *:nth-child(2) { animation-delay: 40ms; }
 .page-enter > * > *:nth-child(3) { animation-delay: 80ms; }
 .page-enter > * > *:nth-child(4) { animation-delay: 120ms; }

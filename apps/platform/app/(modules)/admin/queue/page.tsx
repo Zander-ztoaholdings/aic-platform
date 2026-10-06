@@ -60,10 +60,10 @@ export default function AdminQueue() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           {[
-            { label: 'Pending Triage', value: queue.filter(q => q.status === 'UPLOADED').length.toString(), color: 'blue' },
-            { label: 'High Risk Flags', value: queue.filter(q => q.risk > 70).length.toString(), color: 'red' },
-            { label: 'AI Passed', value: queue.filter(q => q.status === 'AI_TRIAGED').length.toString(), color: 'green' },
-            { label: 'Total in Queue', value: queue.length.toString(), color: 'amber' },
+            { label: 'Waiting for triage', value: queue.filter(q => q.status === 'UPLOADED').length.toString(), color: 'blue' },
+            { label: 'Flagged high risk', value: queue.filter(q => q.risk > 70).length.toString(), color: 'red' },
+            { label: 'Passed first read', value: queue.filter(q => q.status === 'AI_TRIAGED').length.toString(), color: 'green' },
+            { label: 'In the queue', value: queue.length.toString(), color: 'amber' },
           ].map((stat, i) => (
             <Card key={i} className="p-4 gap-1 bg-[#f5f7f9] border border-[#dde2e8] shadow-none text-[#0e1b2c]">
               <div className="text-[12.5px] font-medium text-[#5e6b7b]">{stat.label}</div>
@@ -76,7 +76,7 @@ export default function AdminQueue() {
           <div className="p-4 border-b border-gray-100 flex items-center gap-4 bg-aic-paper">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-              <input type="text" placeholder="Search by Organization or ID..." className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg text-sm outline-none" />
+              <input type="text" placeholder="Search by organisation or reference" className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg text-sm outline-none" />
             </div>
           </div>
           
@@ -89,11 +89,11 @@ export default function AdminQueue() {
             <div className="overflow-x-auto bg-aic-paper"><table className="w-full min-w-[760px] text-left bg-aic-paper">
               <thead className="bg-gray-50/50 text-[12px] first-cap font-bold text-gray-500">
                 <tr>
-                  <th className="px-4 sm:px-6 py-4">Submission ID</th>
+                  <th className="px-4 sm:px-6 py-4">Reference</th>
                   <th className="px-4 sm:px-6 py-4">Organization</th>
-                  <th className="px-4 sm:px-6 py-4">Document Type</th>
-                  <th className="px-4 sm:px-6 py-4">AI Triage Status</th>
-                  <th className="px-4 sm:px-6 py-4">Risk Level</th>
+                  <th className="px-4 sm:px-6 py-4">Document</th>
+                  <th className="px-4 sm:px-6 py-4">First read</th>
+                  <th className="px-4 sm:px-6 py-4">Risk</th>
                   <th className="px-4 sm:px-6 py-4">Submitted</th>
                   <th className="px-4 sm:px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -150,7 +150,7 @@ export default function AdminQueue() {
                 {queue.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 sm:px-6 py-12 text-center text-gray-500 bg-aic-paper font-serif italic">
-                      Queue is currently clear. All certifications are up to date.
+                      Nothing is waiting for review.
                     </td>
                   </tr>
                 )}
@@ -210,7 +210,7 @@ export default function AdminQueue() {
                   <CheckCircle2 className="w-4 h-4 mr-2" /> Approve Evidence
                 </Button>
                 <Button variant="outline" className="text-red-600 border-red-100 hover:bg-red-50 w-full">
-                  <XCircle className="w-4 h-4 mr-2" /> Request Revision
+                  <XCircle className="w-4 h-4 mr-2" /> Send back for changes
                 </Button>
               </div>
             </div>

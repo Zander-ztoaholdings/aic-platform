@@ -146,6 +146,14 @@ Three features use a language model when one is configured: drafting questionnai
 
 **Check:** `/api/health` shows `ai_assist: on (<model>)`. Upload a PDF in the Evidence Vault; the confirmation shows AIC's first read.
 
+## 10c. Connectors (the 25 systems beyond GitHub, Microsoft 365 and the AI providers)
+
+The catalogue on Connected systems lists AWS, Google Cloud, Azure, Google Workspace, Okta, 1Password, GitLab, Bitbucket, Snyk, Jira, Linear, Zendesk, Slack, BambooHR, HiBob, Personio, Deel, Rippling, Intune, Jamf, Kandji, CrowdStrike, Cloudflare, Datadog and Salesforce. Each is read-only: the client pastes a read-only credential, AIC tries it once before saving, and stores it encrypted in `integrations.secret_ciphertext`, so `ENCRYPTION_KEY` (section 3) must be set or the connect button refuses to save. They run in the same nightly sync as the others. No migration is needed.
+
+Two need something on AIC's side. Intune reads devices through AIC's own Microsoft app, so add the application permission `DeviceManagementManagedDevices.Read.All` to that app in Entra and grant admin consent on AIC's tenant; each client's global administrator then re-consents once. Azure reuses the same app and needs nothing new from AIC; the client assigns Reader and Security Reader to it on each subscription.
+
+Every connector is built from the provider's documentation and tested against recorded answers, not yet against a live account. Each one says "New" in the catalogue until it has run against a real tenant; set `verified: true` in `lib/connectors/catalog.ts` once it has. The code marks the specific fields that need confirming with `// Unverified:` comments.
+
 ## 11. The security mailbox
 
 `SECURITY.md` in both repositories and the website's /security page give `security@aiccertified.cloud` as the address for reporting vulnerabilities. Create it (an alias to Zander is fine), and check that it receives mail from outside before the pages go live.

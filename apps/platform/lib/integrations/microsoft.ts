@@ -44,14 +44,15 @@ export class MicrosoftError extends Error {
   }
 }
 
-export async function tenantToken(tenantId: string): Promise<string> {
+/** An app-only token for the tenant. Graph by default; Azure Resource Manager with scope 'https://management.azure.com/.default'. */
+export async function tenantToken(tenantId: string, scope = 'https://graph.microsoft.com/.default'): Promise<string> {
   const res = await fetch(`${LOGIN()}/${encodeURIComponent(tenantId)}/oauth2/v2.0/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id: process.env.MS_CLIENT_ID!,
       client_secret: process.env.MS_CLIENT_SECRET!,
-      scope: 'https://graph.microsoft.com/.default',
+      scope,
       grant_type: 'client_credentials',
     }),
     signal: AbortSignal.timeout(20_000),

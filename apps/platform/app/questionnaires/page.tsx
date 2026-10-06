@@ -72,7 +72,7 @@ export default function QuestionnairesPage() {
                     <Link href={`/questionnaires/${q.id}`} className="group flex items-center justify-between gap-3 rounded-xl border border-[#dde2e8] bg-white p-4 hover:border-[#a8772a]">
                       <span className="min-w-0">
                         <span className="block truncate text-sm font-semibold text-[#0e1b2c]">{q.title}</span>
-                        <span className="block text-[12px] text-[#5e6b7b]">{q.approved} of {q.total} approved{q.needsInput ? ` · ${q.needsInput} need input` : ''}</span>
+                        <span className="block text-[12px] text-[#5e6b7b]">{q.approved} of {q.total} approved{q.needsInput ? `, ${q.needsInput} need input` : ''}</span>
                         <span className="mt-1.5 block h-1 rounded-full bg-[#eef1f5]"><span className="block h-1 rounded-full bg-[#a8772a]" style={{ width: `${q.total ? (q.approved / q.total) * 100 : 0}%` }} /></span>
                       </span>
                       <ChevronRight className="h-4 w-4 shrink-0 text-[#9aa5b1] group-hover:text-[#8a6a1f]" />

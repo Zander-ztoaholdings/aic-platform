@@ -37,7 +37,7 @@ export default async function PublicTrustPage({ params }: { params: Promise<{ sl
     <div className="min-h-screen bg-[linear-gradient(180deg,#fbfcfd_0%,#f3f5f8_100%)] text-[#0e1b2c]">
       <header className="border-b border-[#0a1728]/[0.06] bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
-          <span className="font-serif text-[19px] font-bold tracking-tight">AIC<span className="text-[#c9920a]">.</span></span>
+          <span className="font-serif text-[19px] font-bold tracking-tight">AIC<span className="text-[#a8772a]">.</span></span>
           <span className="text-[12px] text-[#5e6b7b]">Trust page</span>
         </div>
       </header>

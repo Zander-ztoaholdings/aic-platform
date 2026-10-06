@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow } from '../components/ui/Eyebrow';
+import { PageHeader } from '../components/ui/PageHeader';
 import { useIntegrations, call, ago, type Check, type IntegrationsData } from '../integrations/useIntegrations';
 import type { CheckDefinition } from '@/lib/integrations/catalog';
 
@@ -63,14 +63,11 @@ export default function ChecksPage() {
   return (
     <DashboardShell>
       <div className="space-y-7">
-        <header>
-          <Eyebrow>Compliance tracking</Eyebrow>
-          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Automated checks</h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
-            What AIC found in your connected systems, each with why it matters and how to fix it. A check is evidence towards a control, not a
-            verdict on it.
-          </p>
-        </header>
+        <PageHeader
+          eyebrow="Compliance tracking"
+          title="Automated checks"
+          lede="What AIC found in your connected systems, each with why it matters and how to fix it. A check is evidence towards a control, not a verdict on it."
+        />
 
         {error && <div className="rounded-xl bg-red-50 px-4 py-3 text-[14px] text-red-700">{error}</div>}
         {!data && !error && <p className="text-[14px] text-[#5e6b7b]">Loading…</p>}
@@ -78,7 +75,7 @@ export default function ChecksPage() {
         {data && data.integrations.length === 0 && (
           <div className="rounded-xl border border-dashed border-[#c9ced6] bg-white p-6 text-center">
             <p className="text-[15px] text-[#0e1b2c] font-medium">Nothing is connected yet.</p>
-            <p className="mt-1 text-[14px] text-[#5e6b7b]">Connect GitHub or an AI provider and the first checks run straight away.</p>
+            <p className="mt-1 text-[14px] text-[#5e6b7b]">Connect GitHub, Microsoft 365, an AI provider or any of the other systems on the Connected systems page, and the first checks run straight away.</p>
             <Link href="/integrations" className="mt-4 inline-flex h-11 sm:h-10 items-center px-5 rounded-full bg-[#0e1b2c] text-white text-[14px] font-semibold hover:bg-[#22344a]">
               Connect a system
             </Link>

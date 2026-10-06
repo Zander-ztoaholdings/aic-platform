@@ -77,7 +77,7 @@ export default function AppealPortal() {
                                     onClick={() => setStep(2)}
                                     className="w-full inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                                 >
-                                    PROCEED TO APPEAL
+                                    Continue to the appeal
                                 </button>
                             </div>
                         </motion.div>
@@ -115,7 +115,7 @@ export default function AppealPortal() {
                                         onClick={() => setStep(1)}
                                         className="flex-1 border border-aic-black/10 py-4 rounded-xl text-[12px] font-bold first-cap hover:bg-aic-paper transition-all"
                                     >
-                                        BACK
+                                        Back
                                     </button>
                                     <button 
                                         type="submit"

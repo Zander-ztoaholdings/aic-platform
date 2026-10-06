@@ -30,7 +30,7 @@ export function AccountablePerson({ name, role, initials, caapStatus, verifiedOn
       </div>
 
       <div className="flex gap-4 items-start mb-6">
-        <div className="w-12 h-12 rounded-xl bg-aic-navy flex items-center justify-center font-mono text-sm font-bold text-aic-gold flex-shrink-0">
+        <div className="w-12 h-12 rounded-xl bg-aic-navy flex items-center justify-center text-sm font-bold text-aic-gold flex-shrink-0">
           {initials}
         </div>
         <div className="flex-1 min-w-0">

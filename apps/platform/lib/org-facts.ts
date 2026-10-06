@@ -8,6 +8,7 @@
  * public; callers must decide what of this may be shown to whom.
  */
 
+import { CONNECTORS } from './connectors/catalog';
 import {
   getSystemDb, organizations, orgPolicies, policyAcceptances, integrationChecks, integrations, aiSystems,
   accountablePersons, awareBadges, issuedCertifications, decisionRecords, users,
@@ -54,7 +55,7 @@ export async function gatherOrgFacts(orgId: string): Promise<OrgFacts | null> {
   const b = badges[0];
   const c = certs[0];
   const p = persons[0];
-  const providerLabel: Record<string, string> = { github: 'GitHub', microsoft: 'Microsoft 365', openai: 'OpenAI', anthropic: 'Anthropic' };
+  const providerLabel: Record<string, string> = { github: 'GitHub', microsoft: 'Microsoft 365', openai: 'OpenAI', anthropic: 'Anthropic', ...Object.fromEntries(CONNECTORS.map((c) => [c.key, c.name])) };
 
   return {
     org: { id: org.id, name: org.name, legalName: org.legalName ?? null, division: org.division ?? null, website: org.website ?? null },

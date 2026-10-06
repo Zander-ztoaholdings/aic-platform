@@ -91,7 +91,7 @@ export function AddSystemForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="font-mono text-xs font-bold text-aic-gold underline underline-offset-2 hover:text-aic-navy transition-colors"
+        className="text-xs font-bold text-aic-gold underline underline-offset-2 hover:text-aic-navy transition-colors"
       >
         + Declare a system
       </button>
@@ -199,7 +199,7 @@ export function AddSystemForm() {
             reset();
             setOpen(false);
           }}
-          className="text-xs font-mono text-gray-400 hover:text-gray-600"
+          className="text-xs text-gray-400 hover:text-gray-600"
         >
           Cancel
         </button>

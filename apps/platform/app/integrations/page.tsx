@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Github, Copy, Check, RefreshCw, ExternalLink, KeyRound, Terminal } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
-import { Eyebrow } from '../components/ui/Eyebrow';
+import { PageHeader } from '../components/ui/PageHeader';
+import { ConnectorCatalogue } from './ConnectorCatalogue';
 import { useIntegrations, call, ago, type Integration, type IntegrationsData } from './useIntegrations';
 
 /**
@@ -102,14 +103,11 @@ function IntegrationsPage() {
   return (
     <DashboardShell>
       <div className="space-y-8">
-        <header>
-          <Eyebrow>Compliance tracking</Eyebrow>
-          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Connected systems</h1>
-          <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">
-            Connect the systems where your AI is built and run. AIC reads them every night, runs its checks, and records any change of verdict in your
-            continuity record.
-          </p>
-        </header>
+        <PageHeader
+          eyebrow="Compliance tracking"
+          title="Connected systems"
+          lede="Connect the systems where your AI is built and run, and the ones your people sign in to. AIC reads them every night, runs its checks, and records any change of verdict in your continuity record."
+        />
 
         {notice && (
           <div className="rounded-xl border border-[#dde2e8] bg-white px-4 py-3 text-[14px] text-[#0e1b2c] flex items-start justify-between gap-4">
@@ -198,6 +196,10 @@ function IntegrationsPage() {
               <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} /> {syncing ? 'Checking…' : 'Check now'}
             </button>
           </div>
+        )}
+
+        {data && (
+          <ConnectorCatalogue integrations={data.integrations} checks={data.checks} canManage={data.canManage} onChanged={(m) => { setNotice(m); reload(); }} />
         )}
       </div>
     </DashboardShell>

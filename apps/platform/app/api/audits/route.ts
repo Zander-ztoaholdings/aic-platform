@@ -23,7 +23,8 @@ export async function GET() {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const authorized = await hasCapability(session.user.id, 'access_admin_tools');
+  // Reading is assessment work, so an assessor may; changing anything still needs the admin tools.
+  const authorized = (await hasCapability(session.user.id, 'conduct_assessment')) || (await hasCapability(session.user.id, 'access_admin_tools'));
   if (!authorized) {
     return NextResponse.json(
       { error: 'Forbidden', message: 'Missing capability: access_admin_tools' },

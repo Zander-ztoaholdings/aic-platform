@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Plus, Upload, X } from 'lucide-react';
+import { Portal } from '@/app/components/ui/Portal';
 import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 
@@ -42,6 +43,7 @@ function Drawer({ person, onClose, onSaved }: { person: Person | null; onClose: 
   async function readFile(file: File) { setCsv(await file.text()); }
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={person ? person.name : 'Add people'}>
       <div className="absolute inset-0 bg-[#0a1728]/30" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-lg flex-col bg-white shadow-[-12px_0_40px_-12px_rgba(10,23,40,0.25)]">
@@ -90,6 +92,7 @@ function Drawer({ person, onClose, onSaved }: { person: Person | null; onClose: 
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 
@@ -158,7 +161,7 @@ export default function PeoplePage() {
                     const bad = p.state === 'left' && live.length > 0;
                     return (
                       <li key={p.id}>
-                        <button type="button" onClick={() => d.canManage && setOpen(p)} className={`grid w-full gap-x-4 gap-y-1 px-4 py-3 text-left md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_180px] md:items-center ${d.canManage ? 'hover:bg-[#f9fafb]' : 'cursor-default'}`}>
+                        <button type="button" onClick={() => d.canManage && setOpen(p)} className={`grid w-full gap-x-4 gap-y-1 px-4 py-3 text-left md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.2fr)_180px] md:items-center ${d.canManage ? 'hover:bg-[#f5f7f9]' : 'cursor-default'}`}>
                           <span className="min-w-0">
                             <span className="block truncate text-[14.5px] font-medium text-[#0e1b2c]">{p.name}</span>
                             <span className="block truncate text-[12.5px] text-[#5e6b7b]">{p.email ?? 'No email'}</span>

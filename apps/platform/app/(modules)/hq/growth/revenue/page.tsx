@@ -49,7 +49,7 @@ export default function RevenueVelocityPage() {
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[12px] font-bold text-gray-600 first-cap mb-2">Total Pipeline</p>
+          <p className="text-[12px] font-bold text-gray-600 first-cap mb-2">Pipeline</p>
           <div className="text-3xl md:text-4xl font-serif text-[#0e1b2c] first-cap">
             {total !== null ? total : '—'} orgs
           </div>

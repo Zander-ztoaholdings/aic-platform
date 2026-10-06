@@ -24,10 +24,10 @@ export default function ApplicationsPage() {
   return (
     <AdminShell>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div>
           <Eyebrow>Assessments</Eyebrow>
-          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Alpha Program Applications</h1>
-          <p className="text-gray-500 text-xs first-cap">{applications.length} Total</p>
+          <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Applications</h1>
+          <p className="text-gray-500 text-sm">{applications.length} in total</p>
         </div>
 
         <div className="bg-white rounded-xl border border-[#dde2e8] overflow-hidden">
@@ -36,7 +36,7 @@ export default function ApplicationsPage() {
               <tr>
                 <th className="p-4">Applicant</th>
                 <th className="p-4">Organization</th>
-                <th className="p-4">Use Case</th>
+                <th className="p-4">What they use AI for</th>
                 <th className="p-4">Submitted</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
@@ -55,13 +55,13 @@ export default function ApplicationsPage() {
                   <tr key={app.id} className="hover:bg-[#eef1f5] transition-colors">
                     <td className="p-4">
                       <p className="font-medium text-[#0e1b2c]">{app.first_name} {app.last_name}</p>
-                      <p className="text-xs text-gray-500 font-mono">{app.email}</p>
+                      <p className="text-xs text-gray-500">{app.email}</p>
                     </td>
                     <td className="p-4">{app.company}</td>
                     <td className="p-4">
                       <p className="text-xs text-gray-500 line-clamp-2 max-w-md">{app.use_case}</p>
                     </td>
-                    <td className="p-4 text-gray-500 font-mono text-xs">
+                    <td className="p-4 text-gray-500 text-xs">
                       {new Date(app.created_at).toLocaleDateString()}
                     </td>
                     <td className="p-4 text-right">

@@ -95,7 +95,7 @@ export function TrustView({ v }: { v: View }) {
           <ul className="divide-y divide-[#eef1f5]">
             {v.policies.map((p) => (
               <li key={p.title} className="flex flex-col sm:flex-row sm:justify-between gap-1 py-2.5 text-[13px]">
-                <span className="text-[#0e1b2c]">{p.title} <span className="text-[#8a95a3]">· version {p.version}</span></span>
+                <span className="text-[#0e1b2c]">{p.title} <span className="text-[#8a95a3]">version {p.version}</span></span>
                 <span className="text-[#5e6b7b]">Accepted by {p.accepted} of {p.members} people</span>
               </li>
             ))}

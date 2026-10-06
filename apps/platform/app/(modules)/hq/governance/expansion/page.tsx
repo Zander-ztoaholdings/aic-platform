@@ -37,7 +37,7 @@ export default function RegionalExpansionPage() {
                             <div className="lg:col-span-1 border-r border-[#dde2e8] pr-12">
                                 <span className="text-[12px] font-bold text-gray-600 first-cap mb-4 block">Jurisdiction</span>
                                 <h3 className="text-3xl font-serif font-bold text-[#0e1b2c] mb-2">{j.jurisdiction || j.country}</h3>:apps/hq/app/governance/expansion/page.tsx
-                                <span className={`text-[11px] font-mono font-bold px-2 py-1 rounded border ${
+                                <span className={`text-[11px] font-bold px-2 py-1 rounded border ${
                                     j.status === 'GOLD_STANDARD' ? 'border-green-200 text-green-700' : 'border-aic-gold/20 text-[#8a6a1f]'
                                 }`}>
                                     {j.status}

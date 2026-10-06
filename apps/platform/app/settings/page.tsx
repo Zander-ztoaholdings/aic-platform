@@ -196,7 +196,7 @@ export default function OrganizationalSettings() {
                         <>
                         {generatedInvite && (
                             <div className="mb-10 p-4 sm:p-6 bg-aic-black text-aic-paper rounded-2xl border border-aic-paper/10">
-                                <p className="text-[12px] font-bold text-aic-gold first-cap mb-3">INVITATION LINK READY</p>
+                                <p className="text-[12px] font-bold text-aic-gold first-cap mb-3">Invitation link ready</p>
                                 <div className="flex items-center gap-4">
                                     <code className="flex-1 bg-aic-paper/5 border border-aic-paper/10 p-4 rounded-xl font-mono text-xs break-all">
                                         {generatedInvite}
@@ -274,7 +274,7 @@ export default function OrganizationalSettings() {
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
+                                    className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] px-5 text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                                 >
                                     Invite team member
                                 </button>
@@ -328,7 +328,7 @@ export default function OrganizationalSettings() {
                                                         placeholder="000000"
                                                         value={mfaToken}
                                                         onChange={e => setMfaToken(e.target.value)}
-                                                        className="bg-[#f5f7f9] border border-[#dde2e8] rounded-xl p-3 font-mono text-center tracking-[0.5em] focus:border-aic-gold outline-none w-32"
+                                                        className="bg-[#f5f7f9] border border-[#dde2e8] rounded-xl p-3 text-center tracking-[0.5em] focus:border-aic-gold outline-none w-32"
                                                     />
                                                     <button 
                                                         onClick={completeMfaSetup}
@@ -362,19 +362,19 @@ export default function OrganizationalSettings() {
 
                     {/* Data Residency */}
                     <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
-                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Jurisdiction & Residency</h3>
+                        <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Where your data is kept</h3>
                         <div className="flex items-center gap-6 p-4 sm:p-6 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
                             <div className="w-12 h-12 rounded-xl bg-aic-paper border border-aic-black/5 flex items-center justify-center text-2xl font-serif font-bold">ZA</div>
                             <div>
-                                <p className="text-sm font-serif font-bold text-aic-black mb-1">Sovereign Data Storage</p>
-                                <p className="text-[12px] text-gray-500 first-cap leading-relaxed italic">
-                                    Your institutional data is pinned to South African regional nodes to satisfy POPIA cross-border transfer requirements.
+                                <p className="text-sm font-semibold text-[#0e1b2c] mb-1">Stored in South Africa</p>
+                                <p className="text-[13px] text-[#5e6b7b] leading-relaxed">
+                                    Your organisation’s data is held in South Africa, so nothing crosses a border that POPIA section 72 would need an agreement for.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    {/* Developer API Access */}
+                    {/* API keys */}
                     <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
                         <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Developer API Access</h3>
 
@@ -386,7 +386,7 @@ export default function OrganizationalSettings() {
                         <>
                         {generatedKey && (
                             <div className="mb-10 p-4 sm:p-6 bg-green-50 border border-green-100 rounded-2xl">
-                                <p className="text-[12px] font-bold text-green-600 first-cap mb-3">NEW API KEY GENERATED</p>
+                                <p className="text-[12px] font-bold text-green-600 first-cap mb-3">New API key created</p>
                                 <div className="flex items-center gap-4">
                                     <code className="flex-1 bg-aic-paper border border-green-200 p-4 rounded-xl font-mono text-sm break-all">
                                         {generatedKey}
@@ -421,7 +421,7 @@ export default function OrganizationalSettings() {
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-[12px] text-gray-400 first-cap">Last Used</p>
-                                                <p className="text-[11.5px] font-mono font-bold text-aic-black mt-1">
+                                                <p className="text-[11.5px] font-bold text-aic-black mt-1">
                                                     {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'NEVER'}
                                                 </p>
                                             </div>
@@ -434,7 +434,7 @@ export default function OrganizationalSettings() {
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <input 
                                         className="flex-1 min-w-0 bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
-                                        placeholder="Key Label (e.g. Production CI/CD)"
+                                        placeholder="What the key is for, e.g. production"
                                         value={newKeyLabel}
                                         onChange={e => setNewKeyLabel(e.target.value)}
                                         required
@@ -444,7 +444,7 @@ export default function OrganizationalSettings() {
                                         disabled={saving}
                                         className="inline-flex h-11 shrink-0 items-center justify-center rounded-full bg-[#0e1b2c] px-5 text-sm font-medium text-white hover:bg-[#22344a] disabled:opacity-50"
                                     >
-                                        Generate New Key
+                                        Create a new key
                                     </button>
                                 </div>
                             </form>
@@ -462,7 +462,7 @@ export default function OrganizationalSettings() {
                         disabled={saving || loading}
                         className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
                     >
-                        {saving ? 'SAVING...' : 'SAVE_PROTOCOL_CHANGES'}
+                        {saving ? 'Saving…' : 'Save changes'}
                     </button>
                 </div>
                 )}

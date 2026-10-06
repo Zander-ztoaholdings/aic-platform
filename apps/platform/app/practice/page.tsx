@@ -100,8 +100,8 @@ export default function PracticePage() {
                     <div className="flex flex-wrap items-center gap-2 text-[12px] text-[#5e6b7b]">
                       <span className={`rounded-full px-2.5 py-0.5 font-medium ${VERDICT[r.verdict].chip}`}>{VERDICT[r.verdict].label}</span>
                       <Link href={`/policies/${r.policyId}`} className="hover:text-[#8a6a1f]">{r.policyTitle}, version {r.version}</Link>
-                      <span>· {r.section}</span>
-                      <span>· accepted by {r.acceptedBy}</span>
+                      <span>{r.section}</span>
+                      <span>accepted by {r.acceptedBy}</span>
                     </div>
                     <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>

@@ -30,12 +30,12 @@ export function NotificationBell({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-lg text-[#6b7280] hover:text-[#0A1728] hover:bg-[#0a1728]/[0.04] transition-colors"
+        className="relative p-2 rounded-lg text-[#5e6b7b] hover:text-[#0A1728] hover:bg-[#0a1728]/[0.04] transition-colors"
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
       >
         <Bell className="w-[18px] h-[18px]" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#c9920a] ring-2 ring-white" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#a8772a] ring-2 ring-white" />
         )}
       </button>
 
@@ -61,18 +61,18 @@ export function NotificationBell({
                     key={n.id}
                     onClick={() => markAsRead(n.id)}
                     className={`w-full text-left px-4 py-3 border-b border-[#0a1728]/[0.04] hover:bg-[#0a1728]/[0.025] transition-colors ${
-                      n.status === 'UNREAD' ? 'bg-[#c9920a]/[0.04]' : ''
+                      n.status === 'UNREAD' ? 'bg-[#a8772a]/[0.04]' : ''
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-[13px] font-medium text-[#0A1728]">{n.title}</p>
-                      <p className="text-[11px] text-[#9ca3af] shrink-0">{new Date(n.created_at).toLocaleDateString()}</p>
+                      <p className="text-[11px] text-[#8a95a3] shrink-0">{new Date(n.created_at).toLocaleDateString()}</p>
                     </div>
-                    <p className="text-[12px] text-[#6b7280] leading-relaxed line-clamp-2 mt-0.5">{n.message}</p>
+                    <p className="text-[12px] text-[#5e6b7b] leading-relaxed line-clamp-2 mt-0.5">{n.message}</p>
                   </button>
                 ))}
                 {notifications.length === 0 && (
-                  <p className="px-4 py-10 text-center text-[13px] text-[#9ca3af]">Nothing new.</p>
+                  <p className="px-4 py-10 text-center text-[13px] text-[#8a95a3]">Nothing new.</p>
                 )}
               </div>
             </motion.div>

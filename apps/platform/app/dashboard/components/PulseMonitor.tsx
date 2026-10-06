@@ -75,7 +75,7 @@ export function PulseMonitor({
         {/* Decisions today */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
           <div className="text-[12px] font-bold text-gray-400 first-cap mb-3">Decisions Today</div>
-          <div className="font-mono text-2xl font-bold text-aic-navy leading-none mb-1">{decisionsToday.toLocaleString()}</div>
+          <div className="text-2xl font-bold text-aic-navy leading-none mb-1">{decisionsToday.toLocaleString()}</div>
           <div className="text-[11.5px] text-gray-400">Total processed across all systems</div>
         </div>
 
@@ -94,7 +94,7 @@ export function PulseMonitor({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className={`font-mono text-2xl font-bold ${orCol} leading-none mb-2`}>{overrideRate.toFixed(1)}%</div>
+          <div className={`text-2xl font-bold ${orCol} leading-none mb-2`}>{overrideRate.toFixed(1)}%</div>
           <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden relative mb-1.5">
              <div 
                className="absolute top-0 bottom-0 bg-emerald-600/10" 
@@ -111,7 +111,7 @@ export function PulseMonitor({
         {/* Open Findings */}
         <div className={`rounded-xl p-4 border ${findingsMaxSev === 'critical' ? 'bg-red-50 border-red-100' : 'bg-amber-50 border-amber-100'}`}>
           <div className={`text-[12px] font-bold first-cap mb-3 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>Open Findings</div>
-          <div className={`font-mono text-2xl font-bold leading-none mb-2 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>{openFindings}</div>
+          <div className={`text-2xl font-bold leading-none mb-2 ${findingsMaxSev === 'critical' ? 'text-red-600' : 'text-amber-600'}`}>{openFindings}</div>
           <Badge variant={findingsMaxSev === 'critical' ? 'destructive' : 'secondary'} className="h-4 text-[12px] first-cap font-bold px-1.5">
             {findingsMaxSev}
           </Badge>
@@ -120,7 +120,7 @@ export function PulseMonitor({
         {/* Days to Deadline */}
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
           <div className="text-[12px] font-bold text-gray-400 first-cap mb-3">Days to Deadline</div>
-          <div className={`font-mono text-2xl font-bold leading-none mb-1 ${daysToMilestone <= 7 ? 'text-red-600' : 'text-aic-navy'}`}>{daysToMilestone}</div>
+          <div className={`text-2xl font-bold leading-none mb-1 ${daysToMilestone <= 7 ? 'text-red-600' : 'text-aic-navy'}`}>{daysToMilestone}</div>
           <div className="text-[11.5px] text-gray-400">{milestoneLabel}</div>
         </div>
       </div>

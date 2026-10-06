@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Plus, X } from 'lucide-react';
+import { Portal } from '@/app/components/ui/Portal';
 import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 import { CATEGORIES, CATEGORY_LABEL, DATA_KINDS, DATA_LABEL, OUTCOME_LABEL, REVIEW_MONTHS, type SupplierState } from '@/lib/registers/suppliers';
@@ -53,6 +54,7 @@ function Drawer({ supplier, seed, canManage, onClose, onSaved }: { supplier: Sup
   }
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={supplier ? supplier.name : 'Add a supplier'}>
       <div className="absolute inset-0 bg-[#0a1728]/30" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-[-12px_0_40px_-12px_rgba(10,23,40,0.25)]">
@@ -151,6 +153,7 @@ function Drawer({ supplier, seed, canManage, onClose, onSaved }: { supplier: Sup
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 
@@ -212,7 +215,7 @@ export default function SuppliersPage() {
                   </thead>
                   <tbody>
                     {shown.map((s) => (
-                      <tr key={s.id} onClick={() => setOpen({ supplier: s, seed: null })} className="cursor-pointer border-b border-[#eef1f5] last:border-0 hover:bg-[#f9fafb]">
+                      <tr key={s.id} onClick={() => setOpen({ supplier: s, seed: null })} className="cursor-pointer border-b border-[#eef1f5] last:border-0 hover:bg-[#f5f7f9]">
                         <td className="px-4 py-3">
                           <p className="font-medium text-[#0e1b2c]">{s.name}{s.flags.length > 0 && <AlertTriangle className="ml-1.5 inline h-3.5 w-3.5 text-[#b23a35]" aria-label="Has a data protection gap" />}</p>
                           <p className="text-[12.5px] text-[#5e6b7b]">{CATEGORY_LABEL[s.category]}{s.country ? `, ${s.country}` : ''}</p>

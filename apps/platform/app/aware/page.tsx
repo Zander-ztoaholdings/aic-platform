@@ -73,7 +73,7 @@ export default function AwarePage() {
   return (
     <DashboardShell>
       <div className="mx-auto max-w-3xl">
-        <Eyebrow>AIC Certification · AIC Aware</Eyebrow>
+        <Eyebrow>AIC Certification</Eyebrow>
         <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">AIC Aware</h1>
         <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-gray-500">
           A self-declaration of where your organisation stands on accountable AI, made by a named person
@@ -172,8 +172,8 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
             <UserCheck className="h-4 w-4 text-emerald-600" />
             <div className="text-sm">
               <span className="font-medium text-aic-navy">{state.accountablePerson!.name}</span>
-              {state.accountablePerson!.jobTitle && <span className="text-gray-500"> · {state.accountablePerson!.jobTitle}</span>}
-              <span className="text-gray-400"> · declared {fmt(state.accountablePerson!.declarationAcceptedAt)}</span>
+              {state.accountablePerson!.jobTitle && <span className="text-gray-500">, {state.accountablePerson!.jobTitle}</span>}
+              <span className="text-gray-400">, declared {fmt(state.accountablePerson!.declarationAcceptedAt)}</span>
             </div>
           </div>
         ) : state.canDeclare ? (
@@ -193,7 +193,7 @@ function Flow({ state, onChanged }: { state: AwareState; onChanged: () => Promis
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-gray-100">
           <div className="h-full rounded-full bg-aic-gold transition-all duration-500 ease-out" style={{ width: `${(answered / total) * 100}%` }} />
         </div>
-        <p className="mt-2 text-xs text-gray-400">{answered} of {total} answered · question set {instrument.version}</p>
+        <p className="mt-2 text-xs text-gray-400">{answered} of {total} answered, question set {instrument.version}</p>
 
         <div className={`mt-6 space-y-10 ${hasPerson ? '' : 'pointer-events-none opacity-40'}`}>
           {grouped.map(({ category, questions }) => (
@@ -402,7 +402,7 @@ function BadgePanel({ state, onChanged, onRetake }: { state: AwareState; onChang
       <div className="overflow-hidden rounded-xl bg-gradient-to-br from-[#0A1728] via-[#10233d] to-[#1b3350] p-5 md:p-8 text-white shadow-[0_20px_50px_rgba(10,23,40,0.25)]">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
-            <div className="text-[12.5px] font-semibold first-cap text-aic-gold-light">AIC Aware · self-declared</div>
+            <div className="text-[12.5px] font-semibold first-cap text-aic-gold-light">AIC Aware, self-declared</div>
             <div className="mt-2 text-2xl font-semibold tracking-tight">{badge.orgNameAtIssue}</div>
             <div className="mt-1 font-mono text-sm text-white/70">{badge.code}</div>
           </div>

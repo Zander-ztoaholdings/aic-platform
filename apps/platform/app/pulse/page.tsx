@@ -221,7 +221,7 @@ export default function PulsePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-bold text-aic-navy break-words">{d.systemName}</div>
-                      <div className="mt-0.5 text-sm text-gray-600">{summarize(d.outcome)} <span className="text-[11px] text-gray-400">· {timeAgo(d.createdAt)}</span></div>
+                      <div className="mt-0.5 text-sm text-gray-600">{summarize(d.outcome)} <span className="text-[11px] text-gray-400">{timeAgo(d.createdAt)}</span></div>
                     </div>
                     {canOverride && !d.isHumanOverride && d.reviewStatus !== 'pending' && d.reviewStatus !== 'expired' && overriding !== d.id && (
                       <button type="button" onClick={() => setOverriding(d.id)} className="inline-flex h-10 shrink-0 items-center rounded-full border border-[#dde2e8] bg-white px-4 text-[13px] font-medium text-[#0e1b2c]">Override</button>
@@ -276,7 +276,7 @@ export default function PulsePage() {
                           <span className="text-gray-300 text-xs">—</span>
                         )}
                       </td>
-                      <td className="px-5 py-3 font-mono text-[11px] text-gray-400 whitespace-nowrap">
+                      <td className="px-5 py-3 text-[11px] text-gray-400 whitespace-nowrap">
                         {timeAgo(d.createdAt)}
                       </td>
                       {canOverride && (
@@ -309,7 +309,7 @@ export default function PulsePage() {
               <button
                 type="button"
                 onClick={() => setFormOpen(true)}
-                className="flex items-center gap-2 font-mono text-xs font-bold text-[#c9920a] hover:text-aic-navy transition-colors"
+                className="flex items-center gap-2 text-xs font-bold text-[#a8772a] hover:text-aic-navy transition-colors"
               >
                 <ShieldCheck className="w-3.5 h-3.5" /> Record an override for a decision that is not in the log
               </button>
@@ -325,7 +325,7 @@ export default function PulsePage() {
                       resetForm();
                       setFormOpen(false);
                     }}
-                    className="text-xs font-mono text-gray-400 hover:text-gray-600"
+                    className="text-xs text-gray-400 hover:text-gray-600"
                   >
                     Cancel
                   </button>

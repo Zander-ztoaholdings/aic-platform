@@ -49,7 +49,7 @@ export function JourneyTracker({ stages }: JourneyTrackerProps) {
               <div key={i} className="py-5 border-b border-gray-50">
                 <div className="flex gap-4 items-start">
                   <div className="w-6 h-6 rounded-full bg-aic-gold flex items-center justify-center flex-shrink-0 shadow-[0_0_0_4px_rgba(195,108,50,0.1)]">
-                    <span className="font-mono text-[11.5px] font-bold text-white">{s.id}</span>
+                    <span className="text-[11.5px] font-bold text-white">{s.id}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -77,7 +77,7 @@ export function JourneyTracker({ stages }: JourneyTrackerProps) {
           return (
             <div key={i} className="flex gap-4 items-center py-3 border-b border-gray-50 last:border-0 opacity-40">
               <div className="w-6 h-6 rounded-full border border-gray-200 flex items-center justify-center flex-shrink-0">
-                <span className="font-mono text-[11.5px] font-bold text-gray-300">{s.id}</span>
+                <span className="text-[11.5px] font-bold text-gray-300">{s.id}</span>
               </div>
               <span className="text-xs font-bold text-gray-300">{s.label}</span>
             </div>

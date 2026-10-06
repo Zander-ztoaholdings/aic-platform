@@ -143,7 +143,7 @@ export default function GovernanceWorkspace() {
               </span>
             </div>
             <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
-              Algorithm Audit Trail.
+              Algorithm audit trail.
             </h1>
             
             {/* System Selector */}
@@ -221,13 +221,13 @@ export default function GovernanceWorkspace() {
                   onClick={() => addBlock('text')}
                   className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[12px] font-bold first-cap text-gray-500 hover:border-aic-gold hover:text-[#8a6a1f] transition-all"
                 >
-                  <Plus className="w-3 h-3" /> Add Text
+                  <Plus className="w-3 h-3" /> Add text
                 </button>
                 <button 
                   onClick={() => addBlock('model-card')}
                   className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-2xl text-[12px] font-bold first-cap text-gray-500 hover:border-aic-gold hover:text-[#8a6a1f] transition-all"
                 >
-                  <FileText className="w-3 h-3" /> Model Card
+                  <FileText className="w-3 h-3" /> Model card
                 </button>
               </div>
             </section>

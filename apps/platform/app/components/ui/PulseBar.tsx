@@ -47,16 +47,16 @@ export function PulseBar({ decisions, overrideRate, integrityScore, openCorrecti
   ];
 
   return (
-    <div className="bg-[#0f1f3d] px-5 md:px-7 py-2.5 flex items-center gap-5 flex-wrap">
+    <div className="bg-[#0e1b2c] px-5 md:px-7 py-2.5 flex items-center gap-5 flex-wrap">
       <div className="flex items-center gap-2">
-        <Activity className="w-3 h-3 text-[#c9920a]" />
-        <span className="text-[12px] font-bold first-cap text-[#c9920a]">Pulse</span>
+        <Activity className="w-3 h-3 text-[#a8772a]" />
+        <span className="text-[12px] font-bold first-cap text-[#a8772a]">Pulse</span>
         <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
       </div>
       {stats.map((s) => (
         <div key={s.label} className="flex items-center gap-1.5">
           <span className="text-[12px] first-cap text-white/30">{s.label}</span>
-          <span className={`font-mono text-[11px] font-bold ${s.warn ? 'text-amber-400' : 'text-white'}`}>
+          <span className={`text-[11px] font-bold ${s.warn ? 'text-amber-400' : 'text-white'}`}>
             {s.value}
           </span>
         </div>

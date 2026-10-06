@@ -5,8 +5,9 @@ import type { CheckDefinition } from '@/lib/integrations/catalog';
 
 export type Integration = {
   id: string;
-  provider: 'github' | 'microsoft' | 'openai' | 'anthropic';
-  mode: 'github_app' | 'admin_consent' | 'exporter' | 'api_key';
+  /** github, microsoft, openai, anthropic, or a connector key (lib/connectors/catalog). */
+  provider: string;
+  mode: 'github_app' | 'admin_consent' | 'exporter' | 'api_key' | 'demo';
   status: 'pending' | 'active' | 'error' | 'disconnected';
   accountLabel: string | null;
   externalId: string | null;

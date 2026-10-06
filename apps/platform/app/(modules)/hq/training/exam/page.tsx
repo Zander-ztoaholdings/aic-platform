@@ -154,7 +154,7 @@ export default function BoardExamPage() {
                                 onClick={() => setShowCert(true)}
                                 className="bg-aic-gold text-black px-5 md:px-8 py-3 rounded-lg text-[12px] font-bold first-cap hover:bg-aic-paper transition-all shadow-xl"
                             >
-                                View Institutional Certificate
+                                View certificate
                             </button>
                         </div>
                     ) : (
@@ -199,7 +199,7 @@ export default function BoardExamPage() {
                             onClick={() => handleAnswer(i)}
                             className="text-left p-5 md:p-8 rounded-2xl bg-white border border-[#dde2e8] hover:border-aic-gold/50 hover:bg-[#eef1f5] transition-all group flex items-center gap-6"
                         >
-                            <span className="w-8 h-8 rounded-lg bg-white border border-[#dde2e8] flex items-center justify-center font-mono text-[11.5px] text-gray-500 group-hover:text-[#8a6a1f] transition-colors">0{i+1}</span>
+                            <span className="w-8 h-8 rounded-lg bg-white border border-[#dde2e8] flex items-center justify-center text-[11.5px] text-gray-500 group-hover:text-[#8a6a1f] transition-colors">0{i+1}</span>
                             <span className="text-lg text-gray-500 group-hover:text-[#0e1b2c] transition-colors font-serif italic leading-relaxed">{option}</span>
                         </button>
                     ))}

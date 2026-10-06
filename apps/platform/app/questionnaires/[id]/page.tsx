@@ -98,7 +98,7 @@ export default function QuestionnairePage() {
             <PageHeader
               eyebrow={<Link href="/questionnaires" className="hover:underline underline-offset-2">Questionnaires</Link>}
               title={d.questionnaire.title}
-              lede={`${counts.approved} of ${counts.all} answers approved${d.questionnaire.requester ? ` · for ${d.questionnaire.requester}` : ''}. Only approved answers go into the download.`}
+              lede={`${counts.approved} of ${counts.all} answers approved${d.questionnaire.requester ? `, for ${d.questionnaire.requester}` : ''}. Only approved answers go into the download.`}
               actions={
                 <a href={`/api/questionnaires/${id}/export`} className="inline-flex h-11 items-center gap-2 rounded-full bg-[#0e1b2c] px-5 text-sm font-medium text-white hover:bg-[#22344a]">
                   <Download className="h-4 w-4" /> Download CSV

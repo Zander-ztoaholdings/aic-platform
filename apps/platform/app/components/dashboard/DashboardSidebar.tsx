@@ -52,7 +52,7 @@ const PRODUCTS: { key: string; name: string; tagline: string | null; accent: str
     key: 'certification',
     name: 'Certification',
     tagline: 'Assessment against the AIC standard',
-    accent: '#c9920a',
+    accent: '#a8772a',
     items: [
       { label: 'Evidence Vault',     href: '/evidence',       icon: ShieldCheck },
       { label: 'Assessor Findings',  href: '/findings',       icon: AlertTriangle },
@@ -65,7 +65,7 @@ const PRODUCTS: { key: string; name: string; tagline: string | null; accent: str
     key: 'account',
     name: 'Account',
     tagline: null,
-    accent: '#6b7280',
+    accent: '#5e6b7b',
     items: [
       { label: 'Organisation Profile', href: '/organisation', icon: Building2 },
       { label: 'Team',                 href: '/settings',     icon: Users, restricted: canManageTeamAndKeys },
@@ -84,7 +84,7 @@ function BrandMark() {
       <line x1="8" y1="41" x2="102" y2="41" stroke="#fff" strokeWidth="1" opacity="0.3"/>
       <text x="55" y="100" fontSize="40" fontWeight="700" fill="#fff" textAnchor="middle" letterSpacing="5" fontFamily="Space Grotesk,sans-serif">AIC</text>
       <line x1="8" y1="122" x2="102" y2="122" stroke="#fff" strokeWidth="1" opacity="0.3"/>
-      <text x="55" y="148" fontSize="5" fill="#c9920a" textAnchor="middle" letterSpacing="1.5" fontFamily="Space Grotesk,sans-serif" fontWeight="700">AICCERTIFIED.CLOUD</text>
+      <text x="55" y="148" fontSize="5" fill="#a8772a" textAnchor="middle" letterSpacing="1.5" fontFamily="Space Grotesk,sans-serif" fontWeight="700">AICCERTIFIED.CLOUD</text>
     </svg>
   );
 }
@@ -105,7 +105,7 @@ export function DashboardSidebar({
 }) {
   return (
     <aside
-      className={`w-64 bg-[#0f1f3d] border-r border-white/[0.06] flex flex-col fixed h-full z-40 transition-transform duration-300 md:translate-x-0 overflow-y-auto ${
+      className={`w-64 bg-[#0e1b2c] border-r border-white/[0.06] flex flex-col fixed h-full z-40 transition-transform duration-300 md:translate-x-0 overflow-y-auto ${
         show ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
@@ -143,7 +143,7 @@ export function DashboardSidebar({
                 {group.name}
               </div>
               {group.tagline && (
-                <div className="font-mono text-[11px] text-white/[0.28] tracking-wide mt-0.5 leading-snug">
+                <div className="text-[11px] text-white/[0.28] tracking-wide mt-0.5 leading-snug">
                   {group.tagline}
                 </div>
               )}
@@ -190,7 +190,7 @@ export function DashboardSidebar({
           <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shadow-[0_0_6px_#22c55e] animate-pulse flex-shrink-0" />
           <div>
             <div className="text-[12px] first-cap text-white/30">Pulse</div>
-            <div className="font-mono text-[11px] font-bold text-white">Live — Secure</div>
+            <div className="text-[11px] font-bold text-white">Live — Secure</div>
           </div>
         </div>
         <a
@@ -203,7 +203,7 @@ export function DashboardSidebar({
           onClick={() => signOut({ callbackUrl: '/login' })}
           className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-white/30 text-xs transition-colors hover:text-red-400"
         >
-          <LogOut className="w-3.5 h-3.5" /> Sign Out
+          <LogOut className="w-3.5 h-3.5" /> Sign out
         </button>
       </div>
     </aside>

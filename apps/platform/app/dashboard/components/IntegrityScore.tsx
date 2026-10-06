@@ -58,8 +58,8 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`font-mono text-3xl font-bold ${col} leading-none`}>{overall}</span>
-            <span className="font-mono text-[11.5px] text-gray-400">/ 100</span>
+            <span className={`text-3xl font-bold ${col} leading-none`}>{overall}</span>
+            <span className="text-[11.5px] text-gray-400">/ 100</span>
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
           <p className="text-sm text-gray-500 mb-4 leading-relaxed max-w-2xl">{bottleneck}</p>
           
           <div className="flex flex-wrap items-center gap-6">
-            <div className="font-mono text-xs text-gray-400">
+            <div className="text-xs text-gray-400">
               Trend: <strong className={overall >= 71 ? 'text-emerald-600' : 'text-aic-gold'}>{trend}</strong>
             </div>
             <button 
@@ -107,7 +107,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
                     <div className="text-[12px] font-bold text-gray-500 first-cap tracking-tight mb-2 truncate">{m.label}</div>
                     <div className="flex justify-between items-end mb-1.5">
                       <span className="text-[12px] text-gray-400 first-cap">Weight {m.weight}%</span>
-                      <span className={`font-mono text-sm font-bold ${mc}`}>{m.score}</span>
+                      <span className={`text-sm font-bold ${mc}`}>{m.score}</span>
                     </div>
                     <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
                       <div 
@@ -125,7 +125,7 @@ export function IntegrityScore({ overall, trend, bottleneck, methodology }: Inte
         {/* Action */}
         <div className="flex flex-col gap-2 w-full md:w-auto flex-shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-gray-100">
           <Button className="bg-aic-gold hover:bg-aic-gold-light text-white text-[12.5px] first-cap px-4 sm:px-6 h-11 rounded-full">
-            Submit Evidence
+            Submit evidence
           </Button>
           <div className="text-[12px] text-gray-400 text-center first-cap">
             14 days to deadline

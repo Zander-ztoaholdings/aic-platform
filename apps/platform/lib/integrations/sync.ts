@@ -13,6 +13,9 @@ import { evaluateProvider } from './provider-checks';
 import { collectTenantFacts, microsoftConfigured, MicrosoftError } from './microsoft';
 import { evaluateTenant } from './microsoft-checks';
 import { observeEstate } from '../continuity-store';
+import { IMPLS, isConnector, credentialsOf, contextFor, importPeople } from '../connectors/registry';
+import { ConnectorError } from '../connectors/types';
+import { forgetLeavers } from '../registers/facts';
 
 /**
  * One sync of one organisation's connected systems: read each source, run its
@@ -175,7 +178,21 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
     try {
       let results: CheckResult[];
       let settings: object | undefined;
-      if (i.provider === 'github') {
+      let label: string | undefined;
+      if (isConnector(i.provider)) {
+        const impl = IMPLS[i.provider];
+        const creds = credentialsOf(i);
+        const ctx = await contextFor(orgId, i.provider);
+        const out = await impl.run(creds, ctx);
+        results = out.results;
+        label = out.label;
+        if (impl.people) {
+          const people = await impl.people(creds, ctx);
+          const counts = await importPeople(orgId, i.provider, people);
+          settings = { ...((i.settings as object) ?? {}), people: people.length, peopleAdded: counts.added };
+        }
+        if (impl.accounts || impl.people) forgetLeavers(orgId);
+      } else if (i.provider === 'github') {
         ({ results, settings } = await githubResults(i, declared.ids));
       } else if (i.provider === 'microsoft') {
         if (!microsoftConfigured()) throw new Error('The AIC Microsoft app is not configured on this server.');
@@ -191,20 +208,24 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
       const waiting = i.mode === 'exporter' && results.some((r) => r.checkKey === 'ai.usage_fresh' && r.status === 'warn');
       await db.query((tx) =>
         tx.update(integrations)
-          .set({ status: waiting ? 'pending' : 'active', lastSyncedAt: now, lastError: null, updatedAt: now, ...(settings ? { settings } : {}) })
+          .set({ status: waiting ? 'pending' : 'active', lastSyncedAt: now, lastError: null, updatedAt: now, ...(settings ? { settings } : {}), ...(label ? { accountLabel: label.slice(0, 255) } : {}) })
           .where(eq(integrations.id, i.id))
       );
       outcomes.push({ provider: i.provider, status: 'ok', checks: results.length });
     } catch (err) {
-      const status = err instanceof GitHubError || err instanceof ProviderError || err instanceof MicrosoftError ? err.status : 0;
+      const status = err instanceof GitHubError || err instanceof ProviderError || err instanceof MicrosoftError || err instanceof ConnectorError ? err.status : 0;
+      const connector = isConnector(i.provider);
       // 404 on the installation, or 401/403 on a provider key, means access was
       // withdrawn on the other side — not a transient fault.
       const gone =
+        (connector && status === 401) ||
         (i.provider === 'github' && status === 404) ||
         (i.provider === 'microsoft' && status === 403) ||
-        (i.provider !== 'github' && i.provider !== 'microsoft' && (status === 401 || status === 403));
+        (!connector && i.provider !== 'github' && i.provider !== 'microsoft' && (status === 401 || status === 403));
       const message = gone
-        ? i.provider === 'github'
+        ? connector
+          ? `${(err as Error).message} The credential may have been revoked or expired; connect again with a new one.`
+          : i.provider === 'github'
           ? 'The AIC GitHub App was uninstalled or lost access. Reconnect to resume checks.'
           : i.provider === 'microsoft'
             ? 'Microsoft no longer lets AIC read this tenant. An administrator may have removed the AIC app; reconnect to resume checks.'

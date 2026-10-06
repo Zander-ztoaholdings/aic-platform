@@ -34,7 +34,7 @@ export default function ForgotPassword() {
     <AuthFrame
       title={message ? 'Check your inbox' : 'Reset your password'}
       subtitle={message ? undefined : 'Enter the email you sign in with and we’ll send you a link to choose a new password.'}
-      footer={<>Remembered it? <Link href="/login" className="font-medium text-[#0A1728] hover:text-[#c9920a]">Sign in</Link></>}
+      footer={<>Remembered it? <Link href="/login" className="font-medium text-[#0A1728] hover:text-[#a8772a]">Sign in</Link></>}
     >
       {message ? (
         <div className="space-y-5">

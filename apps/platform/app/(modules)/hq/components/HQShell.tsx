@@ -61,7 +61,7 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
       label: 'Growth',
       icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>,
       routes: [
-        { label: 'Enterprise CRM', href: '/crm' },
+        { label: 'CRM', href: '/crm' },
         { label: 'Pipeline Velocity', href: '/growth/revenue' },
         { label: 'Insurance Partners', href: '/growth/insurance' }
       ]
@@ -112,7 +112,7 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
-                        <button onClick={() => setSearchOpen(false)} className="text-gray-600 hover:text-[#0e1b2c]">ESC</button>
+                        <button onClick={() => setSearchOpen(false)} className="text-gray-600 hover:text-[#0e1b2c]">Esc</button>
                     </div>
 
                     <div className="space-y-8">

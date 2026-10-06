@@ -27,7 +27,7 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
           <span className="text-[12px] font-bold text-aic-gold first-cap">Five Algorithmic Rights</span>
         </div>
         <button className="text-[12px] font-bold text-aic-gold first-cap hover:underline">
-          View Details
+          See details
         </button>
       </div>
       
@@ -45,14 +45,14 @@ export function RightsRibbon({ rights }: RightsRibbonProps) {
             >
               <div className="flex justify-between items-start mb-4">
                 <span className="text-[12px] font-bold px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded first-cap">R{r.id}</span>
-                <span className={`font-mono text-xs font-bold ${trendCol[r.trendDir]}`}>{r.trendDir === 'up' ? '↑' : r.trendDir === 'down' ? '↓' : '→'}</span>
+                <span className={`text-xs font-bold ${trendCol[r.trendDir]}`}>{r.trendDir === 'up' ? '↑' : r.trendDir === 'down' ? '↓' : '→'}</span>
               </div>
               
               <h3 className="font-serif text-sm font-bold text-aic-navy mb-1 line-clamp-1">{r.name}</h3>
               
               <div className="flex items-baseline gap-1 mb-3">
-                <span className={`font-mono text-xl font-bold ${col}`}>{r.score}</span>
-                <span className="font-mono text-[11px] text-gray-400">/100</span>
+                <span className={`text-xl font-bold ${col}`}>{r.score}</span>
+                <span className="text-[11px] text-gray-400">/100</span>
               </div>
               
               <div className="h-0.5 w-full bg-gray-100 rounded-full mb-4 overflow-hidden mt-auto">

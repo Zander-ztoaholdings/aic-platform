@@ -37,7 +37,7 @@ export default function RegulatorRelationsPage() {
                         <p>4. **Joint Standards:** Co-development of "Meaningful Human Intervention" benchmarks for high-risk automated systems.</p>
                     </div>
                     <button className="mt-12 w-full bg-[#0e1b2c] text-white py-4 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all shadow-xl">
-                        DOWNLOAD FULL PROPOSAL
+                        Download the full proposal
                     </button>
                 </div>
 
@@ -57,7 +57,7 @@ export default function RegulatorRelationsPage() {
                                     <p className="text-[12px] text-gray-600 mb-2 first-cap">{log.date}</p>
                                     <p className="font-serif text-sm text-gray-700 leading-relaxed italic">"{log.event}"</p>
                                 </div>
-                                <span className={`text-[11px] font-mono font-bold px-2 py-1 rounded border ${
+                                <span className={`text-[11px] font-bold px-2 py-1 rounded border ${
                                     log.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-aic-gold/10 text-[#8a6a1f] border-aic-gold/20'
                                 }`}>
                                     {log.status}

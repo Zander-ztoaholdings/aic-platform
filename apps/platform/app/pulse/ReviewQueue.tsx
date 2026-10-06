@@ -40,7 +40,7 @@ function Card({ d, history, onDone }: { d: Pending; history: HistoryRow[]; onDon
   return (
     <li className="rounded-xl border border-[#dde2e8] bg-white p-4 sm:p-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="text-sm font-semibold text-[#0e1b2c]">{d.systemName}{d.externalRef ? <span className="font-normal text-[#8a95a3]"> · {d.externalRef}</span> : null}</div>
+        <div className="text-sm font-semibold text-[#0e1b2c]">{d.systemName}{d.externalRef ? <span className="font-normal text-[#8a95a3]">, {d.externalRef}</span> : null}</div>
         <span className="inline-flex items-center gap-1 text-[12px] text-[#b45309]"><Clock className="h-3.5 w-3.5" />{due(d.reviewDueAt)}</span>
       </div>
       <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">

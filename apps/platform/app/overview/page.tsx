@@ -183,7 +183,7 @@ export default async function OrgOverviewPage() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-[12px] font-bold text-aic-gold first-cap">
-              Organisation AI Overview
+              AI estate
             </div>
             <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
               {organisation.name}
@@ -191,7 +191,7 @@ export default async function OrgOverviewPage() {
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
               {organisation.divisionName && (
                 <Badge className="rounded-full bg-aic-navy text-white hover:bg-aic-navy border-transparent">
-                  Division {organisation.division} · {organisation.divisionName}
+                  Division {organisation.division}, {organisation.divisionName}
                 </Badge>
               )}
               {organisation.standardVersion && (
@@ -200,19 +200,19 @@ export default async function OrgOverviewPage() {
                 </Badge>
               )}
               {organisation.certificationStatus && (
-                <Badge className="rounded-full bg-aic-gold text-aic-navy hover:bg-aic-gold border-transparent">
-                  {organisation.certificationStatus}
+                <Badge className="rounded-full bg-[#a8772a]/12 text-[#6f5418] hover:bg-[#a8772a]/12 border-transparent">
+                  {({ DRAFT: 'Not yet certified', PENDING: 'In assessment', ACTIVE: 'Certified', SUSPENDED: 'Suspended', REVOKED: 'Revoked', EXPIRED: 'Expired' } as Record<string, string>)[organisation.certificationStatus] ?? organisation.certificationStatus}
                 </Badge>
               )}
             </div>
           </div>
           <div className="text-right">
             <div className="text-[12px] text-gray-400 first-cap">
-              Assembled {new Date(overview.generatedAt).toLocaleString('en-ZA')}
+              As of {new Date(overview.generatedAt).toLocaleString('en-GB', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Johannesburg' })}
             </div>
             {certificate && (
-              <div className="mt-1 font-mono text-[11px] text-aic-navy">
-                {certificate.number} · expires {date(certificate.expires)}
+              <div className="mt-1 text-[11px] text-aic-navy">
+                {certificate.number}, expires {date(certificate.expires)}
               </div>
             )}
           </div>
@@ -319,18 +319,18 @@ export default async function OrgOverviewPage() {
                     <tr key={s.id} className="align-top">
                       <td className="py-3 pr-4">
                         <div className="font-bold text-aic-navy">{s.name}</div>
-                        <div className="font-mono text-[11.5px] text-gray-400">v{s.version}</div>
+                        <div className="text-[11.5px] text-gray-400">v{s.version}</div>
                       </td>
                       <td className="py-3 pr-4 max-w-md text-gray-600">
                         {s.purpose?.trim() || <span className="text-red-500">Not stated</span>}
                       </td>
-                      <td className="py-3 pr-4 font-mono tabular-nums text-gray-600">{s.riskTier}</td>
+                      <td className="py-3 pr-4 tabular-nums text-gray-600">{s.riskTier}</td>
                       <td className="py-3 pr-4">
                         <Badge variant="outline" className="rounded-full border-gray-200 text-[12px] first-cap text-gray-500">
                           {s.lifecycleStage}
                         </Badge>
                       </td>
-                      <td className="py-3 font-mono text-[11px] text-gray-400">{date(s.updatedAt)}</td>
+                      <td className="py-3 text-[11px] text-gray-400">{date(s.updatedAt)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -395,7 +395,7 @@ export default async function OrgOverviewPage() {
           </SectionCard>
 
           <SectionCard
-            title="Provider &amp; model usage"
+            title="AI providers and models"
             note="Spend and volume as reported by your own tooling - a nightly export or webhook. AIC never calls a provider directly."
           >
             {usage.byProviderModel.length === 0 ? (
@@ -425,13 +425,13 @@ export default async function OrgOverviewPage() {
                         <tr key={`${u.provider}-${u.model ?? 'unspecified'}-${i}`}>
                           <td className="py-2.5 pr-4 font-medium text-aic-navy">{u.provider}</td>
                           <td className="py-2.5 pr-4 text-gray-600">{u.model ?? '—'}</td>
-                          <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-gray-600">
+                          <td className="py-2.5 pr-4 text-right tabular-nums text-gray-600">
                             {u.requests.toLocaleString('en-ZA')}
                           </td>
-                          <td className="py-2.5 pr-4 text-right font-mono tabular-nums text-gray-600">
+                          <td className="py-2.5 pr-4 text-right tabular-nums text-gray-600">
                             {(u.inputTokens + u.outputTokens).toLocaleString('en-ZA')}
                           </td>
-                          <td className="py-2.5 text-right font-mono tabular-nums text-aic-navy">
+                          <td className="py-2.5 text-right tabular-nums text-aic-navy">
                             ${u.costUsd.toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </td>
                         </tr>

@@ -22,7 +22,7 @@ function ResetPasswordContent() {
   if (!token) {
     return (
       <AuthFrame title="This link is incomplete" subtitle="The reset link is missing its token. Request a new one.">
-        <Link href="/forgot-password" className="text-sm font-medium text-[#0A1728] hover:text-[#c9920a]">Request a new link →</Link>
+        <Link href="/forgot-password" className="text-sm font-medium text-[#0A1728] hover:text-[#a8772a]">Request a new link</Link>
       </AuthFrame>
     );
   }

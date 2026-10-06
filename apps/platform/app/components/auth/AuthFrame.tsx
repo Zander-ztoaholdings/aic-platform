@@ -16,7 +16,7 @@ const AIC_WEB = process.env.NEXT_PUBLIC_AIC_WEB_URL || 'https://aiccertified.clo
 export const inputClass =
   'w-full rounded-2xl bg-[#fafbfc] border border-[#0a1728]/[0.07] px-4 py-3 text-sm text-[#0A1728] ' +
   'placeholder:text-[#b6bdc9] outline-none transition-all duration-200 ' +
-  'focus:bg-white focus:border-[#c9920a]/60 focus:ring-4 focus:ring-[#c9920a]/[0.10]';
+  'focus:bg-white focus:border-[#a8772a]/60 focus:ring-4 focus:ring-[#a8772a]/[0.10]';
 
 export const labelClass = 'block text-[11px] font-medium text-[#8a93a3] mb-1.5 tracking-wide';
 
@@ -80,7 +80,7 @@ export function AuthFrame({
       <div className="relative z-10 min-h-screen flex flex-col items-center px-4 py-10 sm:py-14">
         <a href={AIC_WEB} className="mb-8 sm:mb-10" aria-label="AIC — aiccertified.cloud">
           <span className="font-serif text-[22px] font-bold text-[#0A1728] tracking-tight">AIC</span>
-          <span className="text-[#c9920a] font-serif text-[22px] font-bold">.</span>
+          <span className="text-[#a8772a] font-serif text-[22px] font-bold">.</span>
         </a>
 
         <motion.div
@@ -99,9 +99,7 @@ export function AuthFrame({
 
         <div className="mt-auto pt-10 flex items-center gap-4 text-[12px] text-[#a3abb8]">
           <a href={AIC_WEB} className="hover:text-[#0A1728] transition-colors">aiccertified.cloud</a>
-          <span aria-hidden>·</span>
           <Link href="/login" className="hover:text-[#0A1728] transition-colors">Sign in</Link>
-          <span aria-hidden>·</span>
           <Link href="/signup" className="hover:text-[#0A1728] transition-colors">Register</Link>
         </div>
       </div>

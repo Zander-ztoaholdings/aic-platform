@@ -10,6 +10,7 @@ import { getTenantDb, integrations, eq } from '@aic/db';
 import { collectTenantFacts } from '../integrations/microsoft';
 import { installationToken, getInstallation, paginate } from '../integrations/github';
 import { connectorAccounts } from '../connectors/registry';
+import { CONNECTOR_BY_KEY } from '../connectors/catalog';
 
 export type Account = {
   system: string;
@@ -28,7 +29,8 @@ export async function listAccounts(orgId: string): Promise<{ accounts: Account[]
   const notes: string[] = [];
 
   for (const i of rows) {
-    const label = SYSTEM_LABEL[i.provider] ?? i.accountLabel ?? i.provider;
+    if (i.status === 'disconnected') continue;
+    const label = SYSTEM_LABEL[i.provider] ?? CONNECTOR_BY_KEY[i.provider]?.name ?? i.accountLabel ?? i.provider;
     try {
       if (i.mode === 'demo') {
         const fixture = ((i.settings ?? {}) as { accounts?: Account[] }).accounts ?? [];

@@ -92,23 +92,23 @@ export function DashboardHeader({
     : null;
 
   return (
-    <header className="bg-white border-b border-[#e5e7eb] px-5 md:px-7 py-3.5 flex items-center justify-between gap-4">
+    <header className="bg-white border-b border-[#dde2e8] px-5 md:px-7 py-3.5 flex items-center justify-between gap-4">
       {/* Left: page eyebrow + org name */}
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuOpen}
-          className="md:hidden p-2 text-[#6b7280] hover:text-[#0f1f3d] bg-[#f0f4f8] rounded-lg border border-[#e5e7eb]"
+          className="md:hidden p-2 text-[#5e6b7b] hover:text-[#0e1b2c] bg-[#f0f4f8] rounded-lg border border-[#dde2e8]"
         >
           <Menu className="w-5 h-5" />
         </button>
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-4 h-px bg-[#c9920a] inline-block flex-shrink-0" />
-            <span className="text-[12px] font-bold first-cap text-[#c9920a]">
+            <span className="w-4 h-px bg-[#a8772a] inline-block flex-shrink-0" />
+            <span className="text-[12px] font-bold first-cap text-[#a8772a]">
               {pageTitle}
             </span>
           </div>
-          <h1 className="font-serif text-[20px] font-bold text-[#0f1f3d] leading-none tracking-tight">
+          <h1 className="font-serif text-[20px] font-bold text-[#0e1b2c] leading-none tracking-tight">
             {orgName ?? 'Loading organisation…'}
           </h1>
         </div>
@@ -120,9 +120,9 @@ export function DashboardHeader({
         {divisionName && (
           <Badge
             variant="outline"
-            className="hidden md:inline-flex items-center gap-1.5 rounded-full border-[#e5e7eb] px-3 py-1.5 text-[12px] font-bold first-cap text-[#6b7280]"
+            className="hidden md:inline-flex items-center gap-1.5 rounded-full border-[#dde2e8] px-3 py-1.5 text-[12px] font-bold first-cap text-[#5e6b7b]"
           >
-            <span className="text-[#c9920a]">◆</span> Division {division} — {divisionName}
+            <span className="text-[#a8772a]">◆</span> Division {division} — {divisionName}
           </Badge>
         )}
 
@@ -140,11 +140,11 @@ export function DashboardHeader({
         <div className="relative">
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="p-2 rounded-lg border border-[#e5e7eb] text-[#6b7280] hover:text-[#0f1f3d] hover:bg-[#f0f4f8] transition-colors relative"
+            className="p-2 rounded-lg border border-[#dde2e8] text-[#5e6b7b] hover:text-[#0e1b2c] hover:bg-[#f0f4f8] transition-colors relative"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 block h-1.5 w-1.5 rounded-full bg-[#c9920a] ring-2 ring-white" />
+              <span className="absolute top-1.5 right-1.5 block h-1.5 w-1.5 rounded-full bg-[#a8772a] ring-2 ring-white" />
             )}
           </button>
 
@@ -156,14 +156,14 @@ export function DashboardHeader({
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
-                  className="absolute right-0 top-12 w-80 bg-white border border-[#e5e7eb] rounded-2xl shadow-2xl overflow-hidden z-20"
+                  className="absolute right-0 top-12 w-80 bg-white border border-[#dde2e8] rounded-2xl shadow-2xl overflow-hidden z-20"
                 >
-                  <div className="px-5 py-3.5 border-b border-[#e5e7eb] flex justify-between items-center">
-                    <span className="text-[12px] font-bold first-cap text-[#6b7280]">
-                      Registry Alerts
+                  <div className="px-5 py-3.5 border-b border-[#dde2e8] flex justify-between items-center">
+                    <span className="text-[12px] font-bold first-cap text-[#5e6b7b]">
+                      Register alerts
                     </span>
                     {unreadCount > 0 && (
-                      <span className="font-mono text-[11px] font-bold text-[#c9920a] bg-amber-50 px-2 py-0.5 rounded">
+                      <span className="text-[11px] font-bold text-[#a8772a] bg-amber-50 px-2 py-0.5 rounded">
                         {unreadCount} unread
                       </span>
                     )}
@@ -173,21 +173,21 @@ export function DashboardHeader({
                       <div
                         key={n.id}
                         onClick={() => markAsRead(n.id)}
-                        className={`px-5 py-3.5 border-b border-[#f3f4f6] cursor-pointer hover:bg-[#f9fafb] transition-colors ${
+                        className={`px-5 py-3.5 border-b border-[#eef1f5] cursor-pointer hover:bg-[#f5f7f9] transition-colors ${
                           n.status === 'UNREAD' ? 'bg-amber-50/30' : ''
                         }`}
                       >
                         <div className="flex justify-between items-start mb-1">
-                          <p className="text-xs font-bold text-[#0f1f3d]">{n.title}</p>
-                          <p className="font-mono text-[11px] text-[#9ca3af]">
+                          <p className="text-xs font-bold text-[#0e1b2c]">{n.title}</p>
+                          <p className="text-[11px] text-[#8a95a3]">
                             {new Date(n.created_at).toLocaleTimeString()}
                           </p>
                         </div>
-                        <p className="text-[11px] text-[#6b7280] leading-relaxed line-clamp-2">{n.message}</p>
+                        <p className="text-[11px] text-[#5e6b7b] leading-relaxed line-clamp-2">{n.message}</p>
                       </div>
                     ))}
                     {notifications.length === 0 && (
-                      <div className="p-5 md:p-8 text-center text-[#9ca3af] text-sm font-serif italic">
+                      <div className="p-5 md:p-8 text-center text-[#8a95a3] text-sm font-serif italic">
                         No alerts at this time.
                       </div>
                     )}
@@ -199,17 +199,17 @@ export function DashboardHeader({
         </div>
 
         {/* User - the signed-in person, from their own session */}
-        <div className="flex items-center gap-2.5 border-l border-[#e5e7eb] pl-3">
+        <div className="flex items-center gap-2.5 border-l border-[#dde2e8] pl-3">
           <div className="text-right hidden sm:block">
-            <div className="text-xs font-semibold text-[#0f1f3d] leading-none">{displayName}</div>
+            <div className="text-xs font-semibold text-[#0e1b2c] leading-none">{displayName}</div>
             {roleLabel && (
-              <div className="text-[12px] text-[#c9920a] first-cap font-bold mt-0.5">
+              <div className="text-[12px] text-[#a8772a] first-cap font-bold mt-0.5">
                 {roleLabel}
               </div>
             )}
           </div>
           <Avatar className="w-9 h-9 rounded-lg">
-            <AvatarFallback className="rounded-lg bg-[#0f1f3d] font-mono text-[11.5px] font-bold text-[#c9920a]">
+            <AvatarFallback className="rounded-lg bg-[#0e1b2c] text-[11.5px] font-bold text-[#a8772a]">
               {initials}
             </AvatarFallback>
           </Avatar>

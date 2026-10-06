@@ -119,7 +119,7 @@ export default function CMSPage() {
                                 >
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-4">
-                                            <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded border ${
+                                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
                                                 post.status === 'PUBLISHED' ? 'border-green-200 text-green-700 bg-green-50' : 'border-aic-gold/20 text-[#8a6a1f] bg-aic-gold/5'
                                             }`}>
                                                 {post.status}
@@ -201,7 +201,7 @@ export default function CMSPage() {
                             onClick={handleSavePost}
                             className="w-full bg-[#0e1b2c] text-white py-5 font-bold text-xs first-cap hover:bg-[#22344a] transition-all mt-8"
                         >
-                            COMMIT TO DRAFT
+                            Save as draft
                         </button>
                     </div>
 

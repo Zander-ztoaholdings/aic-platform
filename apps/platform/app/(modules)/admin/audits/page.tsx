@@ -131,15 +131,15 @@ export default function AuditsPage() {
             <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{upcoming.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">In Progress</p>
+            <p className="text-gray-500 text-xs first-cap mb-2">In progress</p>
             <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{inProgress.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Completed (YTD)</p>
+            <p className="text-gray-500 text-xs first-cap mb-2">Completed this year</p>
             <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">{completed.length}</p>
           </div>
           <div className="bg-white p-4 sm:p-6 rounded-xl border border-[#dde2e8]">
-            <p className="text-gray-500 text-xs first-cap mb-2">Findings (YTD)</p>
+            <p className="text-gray-500 text-xs first-cap mb-2">Findings this year</p>
             <p className="font-serif text-[28px] font-semibold text-[#0e1b2c]">
               {completed.reduce((sum, a) => sum + (a.findings || 0), 0)}
             </p>
@@ -168,9 +168,9 @@ export default function AuditsPage() {
           </div>
           <button 
             onClick={() => setIsScheduling(true)}
-            className="bg-[#0e1b2c] text-aic-paper px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#22344a]"
+            className="inline-flex h-10 items-center rounded-full bg-[#0e1b2c] px-5 text-sm font-medium text-white hover:bg-[#22344a]"
           >
-            + Schedule New Audit
+            Schedule an audit
           </button>
         </div>
 
@@ -208,7 +208,7 @@ export default function AuditsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500 first-cap mb-2">Scheduled Date</label>
+                  <label className="block text-xs text-gray-500 first-cap mb-2">Date</label>
                   <input 
                     type="date"
                     required
@@ -258,7 +258,7 @@ export default function AuditsPage() {
             <div>
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-blue-700">
                 <span className="w-2 h-2 rounded-full bg-[#0e1b2c] animate-pulse"></span>
-                Active Audits
+                Active audits
               </h3>
               <div className="grid gap-4">
                 {inProgress.map((audit) => (
@@ -285,10 +285,10 @@ export default function AuditsPage() {
                         onClick={() => handleStatusChange(audit.id, 'COMPLETED')}
                         className="bg-green-600 text-aic-paper px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-500"
                       >
-                        Complete Audit
+                        Complete audit
                       </button>
                       <button className="text-gray-500 px-4 py-2 text-sm hover:text-gray-700">
-                        View Evidence
+                        View evidence
                       </button>
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export default function AuditsPage() {
                   <tr>
                     <th className="text-left p-4">Organization</th>
                     <th className="text-left p-4">Auditor</th>
-                    <th className="text-left p-4">Scheduled Date</th>
+                    <th className="text-left p-4">Date</th>
                     <th className="text-left p-4">Actions</th>
                   </tr>
                 </thead>
@@ -317,20 +317,20 @@ export default function AuditsPage() {
                     <tr key={audit.id} className="hover:bg-[#eef1f5]">
                       <td className="p-4 font-medium">{audit.org_name}</td>
                       <td className="p-4 text-sm">{audit.auditor_name || 'UNASSIGNED'}</td>
-                      <td className="p-4 text-sm font-mono">{new Date(audit.scheduled_at).toLocaleDateString()}</td>
+                      <td className="p-4 text-sm">{new Date(audit.scheduled_at).toLocaleDateString()}</td>
                       <td className="p-4">
                         <div className="flex gap-4">
                           <button 
                             onClick={() => handleStatusChange(audit.id, 'IN_PROGRESS')}
-                            className="text-blue-700 hover:text-blue-700 text-[11.5px] font-bold font-mono"
+                            className="text-blue-700 hover:text-blue-700 text-[11.5px] font-bold"
                           >
                             START_NOW
                           </button>
                           <button 
                             onClick={() => handleStatusChange(audit.id, 'CANCELLED')}
-                            className="text-gray-500 hover:text-red-700 text-[11.5px] font-bold font-mono"
+                            className="text-gray-500 hover:text-red-700 text-[11.5px] font-bold"
                           >
-                            CANCEL
+                            Cancel
                           </button>
                         </div>
                       </td>
@@ -350,7 +350,7 @@ export default function AuditsPage() {
                   <tr>
                     <th className="text-left p-4">Organization</th>
                     <th className="text-left p-4">Auditor</th>
-                    <th className="text-left p-4">Completed On</th>
+                    <th className="text-left p-4">Completed</th>
                     <th className="text-left p-4">Findings</th>
                   </tr>
                 </thead>
@@ -361,9 +361,9 @@ export default function AuditsPage() {
                     <tr key={audit.id} className="hover:bg-[#eef1f5]">
                       <td className="p-4 font-medium text-[#0e1b2c]">{audit.org_name}</td>
                       <td className="p-4 text-sm">{audit.auditor_name}</td>
-                      <td className="p-4 text-sm font-mono">{new Date(audit.updated_at || audit.created_at).toLocaleDateString()}</td>
+                      <td className="p-4 text-sm">{new Date(audit.updated_at || audit.created_at).toLocaleDateString()}</td>
                       <td className="p-4">
-                        <span className="text-[11.5px] font-bold font-mono text-[#0e1b2c] bg-green-50 px-2 py-1 rounded">
+                        <span className="text-[11.5px] font-bold text-[#0e1b2c] bg-green-50 px-2 py-1 rounded">
                           CERTIFIED_COMPLIANT
                         </span>
                       </td>

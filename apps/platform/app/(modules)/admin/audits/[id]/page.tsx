@@ -91,7 +91,7 @@ export default function AuditsDetailPage({ params: paramsPromise }: { params: Pr
                             <div className="bg-white border border-[#dde2e8] p-4 sm:p-6 rounded-xl mb-8">
                                 <p className="text-[12px] font-bold text-gray-500 first-cap mb-4">Evidence URL</p>
                                 {req.evidence_url ? (
-                                    <a href={req.evidence_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-700 font-mono text-xs break-all underline decoration-blue-500/30 underline-offset-4">
+                                    <a href={req.evidence_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:text-blue-700 text-xs break-all underline decoration-blue-500/30 underline-offset-4">
                                         {req.evidence_url}
                                     </a>
                                 ) : (
@@ -115,13 +115,13 @@ export default function AuditsDetailPage({ params: paramsPromise }: { params: Pr
                                     onClick={() => handleAction(req.id, 'VERIFIED')}
                                     className="flex-1 bg-green-600 text-aic-paper py-3 rounded-xl text-[12px] font-bold first-cap hover:bg-green-500 transition-colors shadow-lg shadow-green-900/20"
                                 >
-                                    Verify Evidence
+                                    Accept evidence
                                 </button>
                                 <button 
                                     onClick={() => handleAction(req.id, 'REJECTED')}
                                     className="flex-1 bg-red-600 text-aic-paper py-3 rounded-xl text-[12px] font-bold first-cap hover:bg-red-500 transition-colors shadow-lg shadow-red-900/20"
                                 >
-                                    Reject Submission
+                                    Send back
                                 </button>
                             </div>
                         </motion.div>

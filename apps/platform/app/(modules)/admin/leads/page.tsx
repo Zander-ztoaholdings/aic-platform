@@ -101,22 +101,22 @@ export default function LeadsPage() {
         <div className="flex flex-col md:flex-row md:justify-between gap-4 md:items-end">
           <div>
             <Eyebrow>Administration</Eyebrow>
-            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Inbound Leads</h1>
-            <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Prospective organizations captured via Self-Assessment and Contact forms.</p>
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Leads</h1>
+            <p className="mt-2 text-[15px] leading-relaxed text-[#5e6b7b] max-w-2xl">Organisations that came in through the self-assessment and Contact forms.</p>
           </div>
           <div className="flex items-center gap-6">
             <button
               onClick={handleAddLead}
               className="bg-[#0e1b2c] text-aic-paper px-4 py-2 rounded-lg text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all"
             >
-              + Add Outreach Target
+              Add a lead
             </button>
             <div className="text-right border-l border-[#dde2e8] pl-6">
-              <p className="text-[12px] text-gray-500 first-cap">Total Leads</p>
+              <p className="text-[12px] text-gray-500 first-cap">Leads</p>
               <p className="text-2xl font-bold">{leads.length}</p>
             </div>
             <div className="text-right border-l border-[#dde2e8] pl-4">
-              <p className="text-[12px] text-blue-700 first-cap">High Intent (&gt;70)</p>
+              <p className="text-[12px] text-[#8a6a1f] first-cap">Scoring over 70</p>
               <p className="text-2xl font-bold text-blue-700">{highIntentLeads}</p>
             </div>
           </div>
@@ -147,7 +147,7 @@ export default function LeadsPage() {
                     <td className="p-4 text-gray-500">{lead.company || '—'}</td>
                     <td className="p-4">
                       {lead.score ? (
-                        <span className={`font-mono font-bold ${lead.score > 70 ? 'text-blue-400' : 'text-gray-500'}`}>
+                        <span className={`font-bold ${lead.score > 70 ? 'text-blue-400' : 'text-gray-500'}`}>
                           {lead.score}%
                         </span>
                       ) : '—'}
@@ -167,7 +167,7 @@ export default function LeadsPage() {
                         {lead.status?.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-500 font-mono text-xs">
+                    <td className="p-4 text-gray-500 text-xs">
                       {new Date(lead.created_at).toLocaleDateString()}
                     </td>
                     <td className="p-4 text-right">
@@ -206,7 +206,7 @@ export default function LeadsPage() {
             <div className="space-y-4">
               <div>
                 <label className="text-[12px] font-bold text-gray-500 first-cap block mb-1">
-                  Organisation Name
+                  Organisation name
                 </label>
                 <input
                   type="text"
@@ -219,7 +219,7 @@ export default function LeadsPage() {
 
               <div>
                 <label className="text-[12px] font-bold text-gray-500 first-cap block mb-1">
-                  Certification Tier
+                  Certification tier
                 </label>
                 <select
                   value={modal.tier}
@@ -234,7 +234,7 @@ export default function LeadsPage() {
 
               <div>
                 <label className="text-[12px] font-bold text-gray-500 first-cap block mb-1">
-                  Invite Email
+                  Email to invite
                 </label>
                 <input
                   type="email"

@@ -19,7 +19,7 @@ export function TriageNote({ triage, filename, compact = false }: { triage: Tria
   return (
     <div className={`rounded-xl border ${TONE[triage.verdict]} ${compact ? 'px-3 py-2' : 'px-4 py-3'} text-left`}>
       <p className="flex items-center gap-1.5 text-[13px] font-semibold text-[#0e1b2c]">
-        <Sparkles className="h-3.5 w-3.5 text-[#8a6a1f]" />{LABEL[triage.verdict]}{filename ? <span className="font-normal text-[#5e6b7b]"> · {filename}</span> : null}
+        <Sparkles className="h-3.5 w-3.5 text-[#8a6a1f]" />{LABEL[triage.verdict]}{filename ? <span className="font-normal text-[#5e6b7b]">, {filename}</span> : null}
       </p>
       {triage.summary && <p className="mt-1 text-[13px] leading-relaxed text-[#5e6b7b]">{triage.summary}</p>}
       {triage.missing.length > 0 && (

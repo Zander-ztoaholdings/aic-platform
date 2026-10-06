@@ -89,7 +89,7 @@ export default function InstitutionalRolesPage() {
                                 <span className="text-[12px] font-bold text-gray-600 first-cap mb-6 block">Requirements</span>
                                 <ul className="space-y-4">
                                     {role.requirements.map((req, j) => (
-                                        <li key={j} className="flex gap-3 text-xs font-mono text-gray-500">
+                                        <li key={j} className="flex gap-3 text-xs text-gray-500">
                                             <span className={role.color}>•</span>
                                             {req}
                                         </li>
@@ -118,7 +118,7 @@ export default function InstitutionalRolesPage() {
                     Looking to join the mission? All applicants must undergo the preliminary ethics screening.
                 </p>
                 <button className="bg-[#0e1b2c] text-white px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all shadow-2xl">
-                    INITIATE RECRUITMENT FLOW
+                    Start recruiting
                 </button>
             </div>
         </div>

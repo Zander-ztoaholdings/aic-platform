@@ -248,7 +248,7 @@ export default function GovernanceWorkspace() {
               disabled={!selectedSystemId}
               leftIcon={<Lock className="w-4 h-4" />}
             >
-              Sync Hash
+              Sync hash
             </SovereignButton>
           </div>
         </header>
@@ -293,13 +293,13 @@ export default function GovernanceWorkspace() {
                   onClick={() => addBlock('text')}
                   className="group flex items-center gap-3 px-4 sm:px-6 py-3 border border-dashed border-[#dde2e8] rounded-2xl text-[12px] font-bold first-cap text-aic-slate hover:border-aic-cyan hover:text-[#8a6a1f] transition-all"
                 >
-                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add Rationale
+                  <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" /> Add rationale
                 </button>
                 <button 
                   onClick={() => addBlock('model-card')}
                   className="group flex items-center gap-3 px-4 sm:px-6 py-3 border border-dashed border-[#dde2e8] rounded-2xl text-[12px] font-bold first-cap text-aic-slate hover:border-aic-cyan hover:text-[#8a6a1f] transition-all"
                 >
-                  <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" /> Model Artifact
+                  <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" /> Model document
                 </button>
               </div>
             </section>

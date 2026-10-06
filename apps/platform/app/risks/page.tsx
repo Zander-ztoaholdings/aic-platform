@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
+import { Portal } from '@/app/components/ui/Portal';
 import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 import { LIKELIHOOD, IMPACT, CATEGORIES, CATEGORY_LABEL, TREATMENTS, TREATMENT_LABEL, STATUSES, STATUS_LABEL, LEVEL_LABEL, score, level, type RiskLevel } from '@/lib/registers/risk';
@@ -63,6 +64,7 @@ function Editor({ risk, controls, onClose, onSaved }: { risk: Risk | null; contr
   }
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={risk ? 'Edit risk' : 'Add a risk'}>
       <div className="absolute inset-0 bg-[#0a1728]/30" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-[-12px_0_40px_-12px_rgba(10,23,40,0.25)]">
@@ -125,6 +127,7 @@ function Editor({ risk, controls, onClose, onSaved }: { risk: Risk | null; contr
         </div>
       </div>
     </div>
+    </Portal>
   );
 }
 

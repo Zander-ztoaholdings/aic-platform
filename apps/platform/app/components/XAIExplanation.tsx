@@ -50,7 +50,7 @@ export default function XAIExplanation({ explanation }: XAIExplanationProps) {
                                 if (active && payload && payload.length) {
                                     const val = payload[0].value as number;
                                     return (
-                                        <div className="bg-aic-black text-aic-paper p-4 rounded-xl shadow-2xl font-mono text-[11.5px]">
+                                        <div className="bg-aic-black text-aic-paper p-4 rounded-xl shadow-2xl text-[11.5px]">
                                             <p className="first-cap mb-1">{payload[0].payload.name}</p>
                                             <p className={val > 0 ? 'text-green-400' : 'text-aic-red'}>
                                                 IMPACT: {val > 0 ? '+' : ''}{val.toFixed(4)}

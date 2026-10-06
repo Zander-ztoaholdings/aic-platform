@@ -67,7 +67,7 @@ export default function SubscribersPage() {
                 <li key={s.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 px-5 py-3.5">
                   <span className="text-sm font-medium text-[#0e1b2c] break-all">{s.email}</span>
                   <span className="text-[13px] text-[#5e6b7b]">
-                    {s.status ? `${s.status.charAt(0).toUpperCase()}${s.status.slice(1).toLowerCase()} · ` : ''}joined {date(s.subscribed_at)}
+                    {s.status ? `${s.status.charAt(0).toUpperCase()}${s.status.slice(1).toLowerCase()}, ` : ''}joined {date(s.subscribed_at)}
                   </span>
                 </li>
               ))}

@@ -57,7 +57,7 @@ export default function EmpathyDemo() {
             <Card className="p-4 sm:p-6 border-none shadow-sm">
               <h3 className="font-bold text-[#0A1728] mb-4 flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-[#8a6a1f]" />
-                Communication Draft
+                Draft message
               </h3>
               <textarea 
                 value={text}

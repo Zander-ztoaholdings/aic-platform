@@ -91,7 +91,7 @@ export default function SADCRegionalPage() {
                     Our objective is a single AIC certification that satisfies all 16 SADC member state data protection authorities through Mutual Recognition Agreements (MRAs).
                 </p>
                 <button className="bg-[#0e1b2c] text-white px-5 md:px-10 py-4 text-[12px] font-bold first-cap hover:bg-[#22344a] transition-all shadow-2xl">
-                    REQUEST REGIONAL LEGAL BRIEF
+                    Request a regional legal brief
                 </button>
             </div>
         </div>

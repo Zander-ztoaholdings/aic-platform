@@ -77,7 +77,7 @@ export default function GlobalLeaderboard() {
                 className="flex items-center justify-between p-4 sm:p-6 bg-[#f5f7f9] border border-[#dde2e8] rounded-2xl hover:border-aic-gold/30 transition-all group"
               >
                 <div className="flex items-center gap-6">
-                  <span className="font-mono text-xs font-bold text-gray-500 w-4">{i + 1}</span>
+                  <span className="text-xs font-bold text-gray-500 w-4">{i + 1}</span>
                   <div>
                     <span className="font-serif text-xl block group-hover:text-[#8a6a1f] transition-colors">{org.name}</span>
                     <span className="text-[12px] text-gray-500 first-cap">{org.tier ? `${org.tier} certified` : 'Not yet certified'}</span>

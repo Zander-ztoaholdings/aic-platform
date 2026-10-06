@@ -119,7 +119,7 @@ function Field({
   const text = (
     <>
       {label}
-      {hint && <span className="text-[#b6bdc9] font-normal"> · {hint}</span>}
+      {hint && <span className="text-[#b6bdc9] font-normal"> ({hint})</span>}
     </>
   );
   const cls = "block text-[11px] font-medium text-[#8a93a3] mb-1.5 tracking-wide";
@@ -140,7 +140,7 @@ function Field({
 const inputClass =
   "w-full rounded-2xl bg-[#fafbfc] border border-[#0a1728]/[0.07] px-4 py-3 text-sm text-[#0A1728] " +
   "placeholder:text-[#b6bdc9] outline-none transition-all duration-200 " +
-  "focus:bg-white focus:border-[#c9920a]/60 focus:ring-4 focus:ring-[#c9920a]/[0.10]";
+  "focus:bg-white focus:border-[#a8772a]/60 focus:ring-4 focus:ring-[#a8772a]/[0.10]";
 
 function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={inputClass} />;
@@ -212,14 +212,14 @@ function PillGroup({
             transition={SPRING}
             className={`relative px-4 py-2.5 rounded-full text-[13px] transition-colors duration-200 border ${
               active
-                ? "border-[#c9920a]/40 text-[#0A1728] font-medium"
-                : "border-[#0a1728]/[0.08] text-[#6b7280] hover:border-[#0a1728]/[0.16] hover:text-[#0A1728]"
+                ? "border-[#a8772a]/40 text-[#0A1728] font-medium"
+                : "border-[#0a1728]/[0.08] text-[#5e6b7b] hover:border-[#0a1728]/[0.16] hover:text-[#0A1728]"
             }`}
           >
             {active && (
               <motion.span
                 layoutId={`pill-${name}`}
-                className="absolute inset-0 rounded-full bg-[#c9920a]/[0.07]"
+                className="absolute inset-0 rounded-full bg-[#a8772a]/[0.07]"
                 transition={SPRING}
               />
             )}
@@ -385,7 +385,7 @@ export default function SignupWizard() {
         {/* Wordmark */}
         <Link href="/" className="mb-8 sm:mb-10 group">
           <span className="font-serif text-[22px] font-bold text-[#0A1728] tracking-tight">AIC</span>
-          <span className="text-[#c9920a] font-serif text-[22px] font-bold">.</span>
+          <span className="text-[#a8772a] font-serif text-[22px] font-bold">.</span>
         </Link>
 
         <motion.div
@@ -397,7 +397,7 @@ export default function SignupWizard() {
           {/* Progress */}
           <div className="h-[3px] bg-[#0a1728]/[0.05]">
             <motion.div
-              className="h-full bg-[#c9920a] rounded-r-full"
+              className="h-full bg-[#a8772a] rounded-r-full"
               animate={{ width: `${progress}%` }}
               transition={reduceMotion ? { duration: 0 } : SPRING}
             />
@@ -414,7 +414,7 @@ export default function SignupWizard() {
                   className="py-10 text-center"
                 >
                   <motion.div
-                    className="w-14 h-14 rounded-full bg-[#c9920a]/10 flex items-center justify-center mx-auto mb-5"
+                    className="w-14 h-14 rounded-full bg-[#a8772a]/10 flex items-center justify-center mx-auto mb-5"
                     initial={{ scale: 0.6, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ ...SPRING, delay: 0.05 }}
@@ -422,7 +422,7 @@ export default function SignupWizard() {
                     <motion.svg width="26" height="26" viewBox="0 0 26 26" fill="none">
                       <motion.path
                         d="M6 13.5L11 18.5L20 8"
-                        stroke="#c9920a"
+                        stroke="#a8772a"
                         strokeWidth="2.2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -435,7 +435,7 @@ export default function SignupWizard() {
                   <h2 className="font-serif text-2xl font-bold text-[#0A1728] mb-2">
                     {form.orgName} is registered
                   </h2>
-                  <p className="text-sm text-[#6b7280]">
+                  <p className="text-sm text-[#5e6b7b]">
                     Taking you to sign in — your requirement set is already waiting.
                   </p>
                 </motion.div>
@@ -452,7 +452,7 @@ export default function SignupWizard() {
                   {/* Step header */}
                   <div className="mb-7">
                     <div className="flex items-center gap-2 mb-2.5">
-                      <span className="text-[12px] first-cap text-[#c9920a] font-semibold">
+                      <span className="text-[12px] first-cap text-[#a8772a] font-semibold">
                         Step {step + 1}
                       </span>
                       <span className="text-[#dde1e8]">/</span>
@@ -463,7 +463,7 @@ export default function SignupWizard() {
                     <h1 className="font-serif text-[26px] sm:text-[28px] leading-tight font-bold text-[#0A1728] mb-1.5">
                       {stepTitle(step, form)}
                     </h1>
-                    <p className="text-sm text-[#6b7280] leading-relaxed">{stepBlurb(step)}</p>
+                    <p className="text-sm text-[#5e6b7b] leading-relaxed">{stepBlurb(step)}</p>
                   </div>
 
                   <motion.div variants={reduceMotion ? undefined : listVariants} initial="enter" animate="center">
@@ -552,21 +552,21 @@ export default function SignupWizard() {
                               transition={SPRING}
                               className={`relative w-full text-left rounded-2xl px-5 py-4 border transition-colors duration-200 ${
                                 active
-                                  ? "border-[#c9920a]/45"
+                                  ? "border-[#a8772a]/45"
                                   : "border-[#0a1728]/[0.07] hover:border-[#0a1728]/[0.16]"
                               }`}
                             >
                               {active && (
                                 <motion.span
                                   layoutId="division-active"
-                                  className="absolute inset-0 rounded-2xl bg-[#c9920a]/[0.06]"
+                                  className="absolute inset-0 rounded-2xl bg-[#a8772a]/[0.06]"
                                   transition={SPRING}
                                 />
                               )}
                               <span className="relative flex gap-4 items-start">
                                 <span
-                                  className={`font-mono text-[11px] pt-0.5 shrink-0 ${
-                                    active ? "text-[#c9920a]" : "text-[#b6bdc9]"
+                                  className={`text-[11px] pt-0.5 shrink-0 ${
+                                    active ? "text-[#a8772a]" : "text-[#b6bdc9]"
                                   }`}
                                 >
                                   0{d.value}
@@ -576,7 +576,7 @@ export default function SignupWizard() {
                                     <span className="font-serif text-[15px] font-bold text-[#0A1728]">
                                       {d.label}
                                     </span>
-                                    <span className="text-[13px] text-[#6b7280]">{d.tagline}</span>
+                                    <span className="text-[13px] text-[#5e6b7b]">{d.tagline}</span>
                                   </span>
                                   <span className="block text-[12.5px] text-[#8a93a3] leading-relaxed mt-1">
                                     {d.who}
@@ -584,7 +584,7 @@ export default function SignupWizard() {
                                 </span>
                                 <span
                                   className={`w-[18px] h-[18px] rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                                    active ? "border-[#c9920a] bg-[#c9920a]" : "border-[#0a1728]/15"
+                                    active ? "border-[#a8772a] bg-[#a8772a]" : "border-[#0a1728]/15"
                                   }`}
                                 >
                                   {active && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
@@ -624,7 +624,7 @@ export default function SignupWizard() {
                         </Field>
                         <motion.p
                           variants={itemVariants}
-                          className="text-[12.5px] text-[#8a93a3] leading-relaxed border-l-2 border-[#c9920a]/30 pl-3.5"
+                          className="text-[12.5px] text-[#8a93a3] leading-relaxed border-l-2 border-[#a8772a]/30 pl-3.5"
                         >
                           Those last two are the conditions Section 71 of POPIA turns on. Answering
                           them here is not a commitment — it is the starting position your assessment
@@ -692,7 +692,7 @@ export default function SignupWizard() {
                                 className="h-[3px] flex-1 rounded-full bg-[#0a1728]/[0.07] overflow-hidden"
                               >
                                 <motion.div
-                                  className="h-full bg-[#c9920a] origin-left"
+                                  className="h-full bg-[#a8772a] origin-left"
                                   initial={{ scaleX: 0 }}
                                   animate={{ scaleX: passwordScore > i ? 1 : 0 }}
                                   transition={SPRING}
@@ -719,7 +719,7 @@ export default function SignupWizard() {
                           <span
                             className={`mt-0.5 w-[18px] h-[18px] rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                               form.isAccountablePerson
-                                ? "bg-[#c9920a] border-[#c9920a]"
+                                ? "bg-[#a8772a] border-[#a8772a]"
                                 : "border-[#0a1728]/15 group-hover:border-[#0a1728]/30"
                             }`}
                           >
@@ -733,7 +733,7 @@ export default function SignupWizard() {
                             checked={form.isAccountablePerson}
                             onChange={(e) => set("isAccountablePerson", e.target.checked)}
                           />
-                          <span className="text-[13px] text-[#6b7280] leading-relaxed">
+                          <span className="text-[13px] text-[#5e6b7b] leading-relaxed">
                             I am the named individual accountable for automated decisions here. If
                             that is someone else, leave this unticked — you can name them once you
                             are inside.
@@ -755,7 +755,7 @@ export default function SignupWizard() {
                         <Summary label="Size" value={form.sizeBand} onEdit={() => go(0)} />
                         <Summary
                           label="Division"
-                          value={division ? `0${division.value} · ${division.label}` : "—"}
+                          value={division ? `${division.value}, ${division.label}` : "—"}
                           onEdit={() => go(1)}
                         />
                         <Summary label="Systems in scope" value={form.aiSystemsBand} onEdit={() => go(2)} />
@@ -763,7 +763,7 @@ export default function SignupWizard() {
                         <Summary label="Solely automated" value={form.solelyAutomated} onEdit={() => go(2)} />
                         <Summary
                           label="Administrator"
-                          value={`${form.name} · ${form.jobTitle}`}
+                          value={`${form.name}, ${form.jobTitle}`}
                           onEdit={() => go(3)}
                         />
                         <Summary label="Email" value={form.email} onEdit={() => go(3)} />
@@ -775,7 +775,7 @@ export default function SignupWizard() {
                           <span
                             className={`mt-0.5 w-[18px] h-[18px] rounded-md border flex items-center justify-center shrink-0 transition-colors ${
                               form.declaration
-                                ? "bg-[#c9920a] border-[#c9920a]"
+                                ? "bg-[#a8772a] border-[#a8772a]"
                                 : "border-[#0a1728]/15 group-hover:border-[#0a1728]/30"
                             }`}
                           >
@@ -787,7 +787,7 @@ export default function SignupWizard() {
                             checked={form.declaration}
                             onChange={(e) => set("declaration", e.target.checked)}
                           />
-                          <span className="text-[13px] text-[#6b7280] leading-relaxed">
+                          <span className="text-[13px] text-[#5e6b7b] leading-relaxed">
                             These details are accurate to the best of my knowledge. I understand the
                             Division I have chosen decides which of the published requirements this
                             organisation will be assessed against.
@@ -859,7 +859,7 @@ export default function SignupWizard() {
         {!done && (
           <p className="text-[13px] text-[#8a93a3] mt-7">
             Already registered?{" "}
-            <Link href="/login" className="text-[#0A1728] font-medium hover:text-[#c9920a] transition-colors">
+            <Link href="/login" className="text-[#0A1728] font-medium hover:text-[#a8772a] transition-colors">
               Sign in
             </Link>
           </p>
@@ -888,7 +888,7 @@ function Summary({
       <button
         type="button"
         onClick={onEdit}
-        className="text-[#c9920a] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1"
+        className="text-[#a8772a] opacity-0 group-hover:opacity-100 transition-opacity shrink-0 p-1"
         aria-label={`Edit ${label}`}
       >
         <Pencil className="w-3 h-3" />

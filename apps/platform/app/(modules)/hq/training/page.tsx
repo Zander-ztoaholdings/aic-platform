@@ -52,7 +52,7 @@ export default function AuditorAcademy() {
                     >
                         <div>
                             <div className="flex justify-between items-start mb-8">
-                                <span className="px-3 py-1 rounded-full bg-[#f5f7f9] border border-[#dde2e8] text-[11px] font-mono font-bold text-gray-500">
+                                <span className="px-3 py-1 rounded-full bg-[#f5f7f9] border border-[#dde2e8] text-[11px] font-bold text-gray-500">
                                     {item.modules} modules
                                 </span>
                                 <span className="text-[12px] font-medium text-[#5e6b7b]">

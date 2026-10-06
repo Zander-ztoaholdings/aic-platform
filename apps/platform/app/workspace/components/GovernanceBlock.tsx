@@ -102,7 +102,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 bg-[#f5f7f9] p-5 md:p-8 rounded-xl border border-dashed border-[#dde2e8]">
             <div className="space-y-4">
               <label className="flex items-center gap-2 text-[12px] font-bold text-aic-slate first-cap">
-                <Cpu className="w-3 h-3" /> Model Designation
+                <Cpu className="w-3 h-3" /> Model
               </label>
               <input
                 className="w-full bg-[#f5f7f9] border border-[#dde2e8] rounded-xl p-4 text-sm text-[#0e1b2c] focus:border-aic-gold/50 outline-none transition-all"
@@ -125,7 +125,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
             </div>
             <div className="md:col-span-2 space-y-4">
               <label className="flex items-center gap-2 text-[12px] font-bold text-aic-slate first-cap">
-                <Database className="w-3 h-3" /> Training Data Demographics
+                <Database className="w-3 h-3" /> Training data demographics
               </label>
               <textarea
                 className="w-full bg-[#f5f7f9] border border-[#dde2e8] rounded-xl p-4 text-sm text-[#0e1b2c] focus:border-aic-gold/50 outline-none transition-all h-32 leading-relaxed"
@@ -163,7 +163,7 @@ export const GovernanceBlock = ({ block, onUpdate, onDelete, impactMagnitude }: 
               }}
               leftIcon={<FileDown className="w-4 h-4" />}
             >
-              Generate Artifact
+              Generate document
             </SovereignButton>
           </div>
         </div>

@@ -73,7 +73,7 @@ export function ActionItems({ items, onAction }: ActionItemsProps) {
                     onClick={() => onAction(a.id, a.cta)}
                     className="bg-aic-gold hover:bg-aic-gold-light text-white text-[12px] first-cap h-7 px-3 rounded-full"
                   >
-                    {a.cta === 'Evidence Vault' ? 'Upload Evidence' : 'Reply to Auditor'} <ChevronRight className="w-2.5 h-2.5 ml-1" />
+                    {a.cta === 'Evidence Vault' ? 'Upload evidence' : 'Reply to your assessor'} <ChevronRight className="w-2.5 h-2.5 ml-1" />
                   </Button>
                 </div>
               </div>
