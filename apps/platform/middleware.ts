@@ -116,7 +116,12 @@ export function middleware(req: NextRequest) {
     !SAFE_METHODS.has(req.method) &&
     pathname.startsWith("/api/") &&
     !pathname.startsWith("/api/view-as") &&
-    !pathname.startsWith("/api/auth")
+    !pathname.startsWith("/api/auth") &&
+    // The public paths act for nobody's account (registration, a client
+    // onboarding link, a password reset), so a preview cookie left in the
+    // browser must not block them. Without this, a super admin who opened a
+    // client onboarding link in the same browser could not register.
+    !PUBLIC_PATHS.some((p) => pathname.startsWith(p))
   ) {
     return finish(NextResponse.json(
       { error: "Preview mode is read-only. Exit the preview to make changes." },

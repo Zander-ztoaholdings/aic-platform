@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import AdminShell from '@/app/components/admin/AdminShell';
 import { Button, Panel, Pill, Section, field, ago } from '@/app/components/admin/ui';
+import { BulkBar, SelectAll } from '@/app/components/admin/BulkActions';
 
 /**
  * The register. Every assessor sees who has registered, so a new client is
@@ -30,6 +31,8 @@ export default function OrganisationsPage() {
   const [view, setView] = useState<View>('all');
   const [open, setOpen] = useState<Org | null>(null);
   const [claiming, setClaiming] = useState<Org | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [notice, setNotice] = useState('');
 
   const load = useCallback(async () => {
     const [res, st] = await Promise.all([fetch('/api/v1/admin/organizations', { cache: 'no-store' }), fetch('/api/v1/admin/assessors', { cache: 'no-store' })]);
@@ -64,19 +67,21 @@ export default function OrganisationsPage() {
         <input className={`${field} sm:max-w-xs`} placeholder="Search name or sector" value={q} onChange={(e) => setQ(e.target.value)} />
       </div>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {notice && <p className="mt-4 rounded-lg bg-[#2e7a57]/[0.07] px-4 py-3 text-sm text-[#1f5a40]">{notice}</p>}
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-[#dde2e8] bg-white">
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-[#f5f7f9] text-xs text-[#8a95a3]">
-            <tr><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">People</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Lead and reviewer</th><th className="px-4 py-3 font-medium">Registered</th><th /></tr>
+            <tr>{staff?.isSuperAdmin && <th className="w-10 pl-4 py-3"><SelectAll ids={shown.map((o) => o.id)} selected={selected} onChange={setSelected} /></th>}<th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">People</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Lead and reviewer</th><th className="px-4 py-3 font-medium">Registered</th><th /></tr>
           </thead>
           <tbody>
-            {orgs === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
-            {orgs && shown.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">{view === 'mine' ? 'No files are assigned to you yet. Take one from Unassigned.' : 'No organisations match.'}</td></tr>}
+            {orgs === null && <tr><td colSpan={staff?.isSuperAdmin ? 7 : 6} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
+            {orgs && shown.length === 0 && <tr><td colSpan={staff?.isSuperAdmin ? 7 : 6} className="px-4 py-10 text-center text-[#8a95a3]">{view === 'mine' ? 'No files are assigned to you yet. Take one from Unassigned.' : 'No organisations match.'}</td></tr>}
             {shown.map((o) => {
               const suspended = (o.memberCount ?? 0) > 0 && (o.activeMembers ?? 0) === 0;
               return (
-                <tr key={o.id} className="border-t border-[#dde2e8] align-top hover:bg-[#f8f9fb]">
+                <tr key={o.id} className={`border-t border-[#dde2e8] align-top hover:bg-[#f8f9fb] ${selected.includes(o.id) ? 'bg-[#a8772a]/[0.05]' : ''}`}>
+                  {staff?.isSuperAdmin && <td className="w-10 pl-4 py-3.5"><input type="checkbox" aria-label={`Select ${o.name}`} className="h-4 w-4 accent-[#0e1b2c]" checked={selected.includes(o.id)} onChange={() => setSelected((x) => (x.includes(o.id) ? x.filter((i) => i !== o.id) : [...x, o.id]))} /></td>}
                   <td className="px-4 py-3">
                     <div className="font-medium text-[#0e1b2c]">{o.name}</div>
                     <div className="text-xs text-[#8a95a3]">{[o.division ? `Division ${o.division}` : null, o.sector, o.sizeBand].filter(Boolean).join(', ') || 'Profile not completed'}</div>
@@ -105,6 +110,11 @@ export default function OrganisationsPage() {
           </tbody>
         </table>
       </div>
+      {staff?.isSuperAdmin && (
+        <BulkBar kind="organizations" selected={selected} onClear={() => setSelected([])}
+          actions={[{ key: 'suspend', label: 'Suspend access' }, { key: 'restore', label: 'Restore access' }, { key: 'delete', label: 'Delete with everything in it', danger: true }]}
+          onDone={(m) => { setNotice(m); setSelected([]); load(); }} />
+      )}
 
       {claiming && <ClaimFile org={claiming} onClose={() => setClaiming(null)} onDone={async () => { setClaiming(null); await load(); }} />}
       {open && <ManageOrg org={open} assessors={staff?.assessors ?? []} onClose={() => setOpen(null)} onDone={async () => { setOpen(null); await load(); }} />}

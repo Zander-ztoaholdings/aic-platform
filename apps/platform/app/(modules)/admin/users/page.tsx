@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import AdminShell from '@/app/components/admin/AdminShell';
 import { Button, Panel, Pill, Section, field, ROLE_LABEL, ago } from '@/app/components/admin/ui';
+import { BulkBar, SelectAll } from '@/app/components/admin/BulkActions';
 
 interface Person {
   id: string; name: string; email: string; role: string; orgId: string | null; orgName: string | null;
@@ -31,6 +32,8 @@ function PeoplePage() {
   const [statusF, setStatusF] = useState('');
   const [open, setOpen] = useState<Person | null>(null);
   const [creating, setCreating] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [notice, setNotice] = useState('');
 
   const load = useCallback(async () => {
     const [u, o] = await Promise.all([fetch('/api/v1/admin/users', { cache: 'no-store' }), fetch('/api/v1/admin/organizations', { cache: 'no-store' })]);
@@ -83,17 +86,19 @@ function PeoplePage() {
       </div>
 
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      {notice && <p className="mt-4 rounded-lg bg-[#2e7a57]/[0.07] px-4 py-3 text-sm text-[#1f5a40]">{notice}</p>}
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-[#dde2e8]">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-[#f5f7f9] text-xs text-[#8a95a3]">
-            <tr><th className="px-4 py-3 font-medium">Person</th><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Last sign-in</th><th /></tr>
+            <tr><th className="w-10 pl-4 py-3"><SelectAll ids={shown.filter((p) => p.id !== me).map((p) => p.id)} selected={selected} onChange={setSelected} /></th><th className="px-4 py-3 font-medium">Person</th><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">Role</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Last sign-in</th><th /></tr>
           </thead>
           <tbody>
-            {people === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
-            {people && shown.length === 0 && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">No one matches these filters.</td></tr>}
+            {people === null && <tr><td colSpan={7} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
+            {people && shown.length === 0 && <tr><td colSpan={7} className="px-4 py-10 text-center text-[#8a95a3]">No one matches these filters.</td></tr>}
             {shown.map((p) => (
-              <tr key={p.id} className="border-t border-[#dde2e8] hover:bg-[#eef1f5]">
+              <tr key={p.id} className={`border-t border-[#dde2e8] hover:bg-[#eef1f5] ${selected.includes(p.id) ? 'bg-[#a8772a]/[0.05]' : ''}`}>
+                <td className="w-10 pl-4 py-3">{p.id !== me && <input type="checkbox" aria-label={`Select ${p.name}`} className="h-4 w-4 accent-[#0e1b2c]" checked={selected.includes(p.id)} onChange={() => setSelected((x) => (x.includes(p.id) ? x.filter((i) => i !== p.id) : [...x, p.id]))} />}</td>
                 <td className="px-4 py-3"><div className="font-medium text-[#0e1b2c]">{p.name}{p.id === me && <span className="ml-2 text-xs text-[#8a95a3]">you</span>}</div><div className="text-xs text-[#8a95a3]">{p.email}</div></td>
                 <td className="px-4 py-3 text-[#5e6b7b]">{p.orgName ?? <span className="text-[#8a95a3]">AIC</span>}</td>
                 <td className="px-4 py-3"><Pill tone={p.isSuperAdmin ? 'gold' : 'neutral'}>{p.isSuperAdmin ? 'Super admin' : ROLE_LABEL[p.role] ?? p.role}</Pill></td>
@@ -108,6 +113,9 @@ function PeoplePage() {
           </tbody>
         </table>
       </div>
+      <BulkBar kind="users" selected={selected} onClear={() => setSelected([])}
+        actions={[{ key: 'deactivate', label: 'Deactivate' }, { key: 'reactivate', label: 'Reactivate' }, { key: 'remove', label: 'Remove (cannot be undone)', danger: true }]}
+        onDone={async (m) => { setNotice(m); setSelected([]); await load(); }} />
 
       {open && <ManagePerson person={open} orgs={orgs} isMe={open.id === me} canGrant={canGrant} onClose={() => setOpen(null)} onDone={async () => { setOpen(null); await load(); }} />}
       {creating && <CreatePerson orgs={orgs} canGrant={canGrant} onClose={() => setCreating(false)} onDone={async () => { setCreating(false); await load(); }} />}
