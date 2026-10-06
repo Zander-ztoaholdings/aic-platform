@@ -243,14 +243,25 @@ export default function SignupWizard() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
+  const [invite, setInvite] = useState<string | null>(null);
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
   // Arriving from the website's AIC Aware results carries the organisation
   // name typed there; prefill it, still editable, rather than ask twice.
   useEffect(() => {
-    const org = new URLSearchParams(window.location.search).get("organisation")?.trim().slice(0, 200);
+    const params = new URLSearchParams(window.location.search);
+    const org = params.get("organisation")?.trim().slice(0, 200);
     if (org) setForm((f) => (f.orgName ? f : { ...f, orgName: org }));
+    // Arriving from a client onboarding link (/join/<token>): fill in what AIC already knows.
+    const invite = params.get("invite");
+    if (invite && /^[A-Za-z0-9_-]{20,64}$/.test(invite)) {
+      setInvite(invite);
+      fetch(`/api/join/${invite}`).then((r) => (r.ok ? r.json() : null)).then((l) => {
+        if (!l || l.state !== "open") return;
+        setForm((f) => ({ ...f, orgName: f.orgName || l.orgName || "", name: f.name || l.contactName || "", email: f.email || l.contactEmail || "" }));
+      }).catch(() => {});
+    }
   }, []);
 
   const division = useMemo(
@@ -329,6 +340,7 @@ export default function SignupWizard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orgName: form.orgName.trim(),
+          invite,
           division: form.division,
           name: form.name.trim(),
           email: form.email.trim(),

@@ -311,8 +311,8 @@ export default function FrameworksPage() {
               ) : !editing && <p className="text-[13px] text-[#8a95a3]">None yet.</p>}
             </section>
 
-            {groups.map((g) => (
-              <section key={g.g}>
+            {groups.map((g, gi) => (
+              <section key={g.g} data-tour={gi === 0 ? 'setup-frameworks' : undefined}>
                 <h2 className="mb-3 text-[18px] font-semibold text-[#0e1b2c]">{g.label}</h2>
                 <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {g.items.map((f) => (

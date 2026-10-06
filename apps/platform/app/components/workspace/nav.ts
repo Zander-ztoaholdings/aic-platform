@@ -6,7 +6,7 @@ import {
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
   FileBarChart, UserCog, Lock, Target, LineChart, Library,
-  ShieldAlert, Truck, Contact, UserCheck, Bot,
+  ShieldAlert, Truck, Contact, UserCheck, Bot, Send,
 } from 'lucide-react';
 import { canManageTeamAndKeys } from '@/lib/roles';
 import { staffCan, canUseHq, type WorkspaceUser } from '@/lib/workspace';
@@ -59,6 +59,7 @@ export const CLIENT_NAV: NavGroup[] = [
       { label: 'AI Estate', href: '/overview', icon: Boxes, description: 'Each system, its purpose, and the person accountable for it.' },
       { label: 'Decision Log', href: '/pulse', icon: Activity, description: 'Decisions recorded, the overrides, and who made them.' },
       { label: 'AI spend', href: '/spend', icon: Wallet, description: 'What you spend on AI models, by provider, model and system.' },
+      { label: 'Agents', href: '/agents', icon: Bot, description: 'Optional: run your agents from AIC with their reach and spend fixed in advance. No bearing on certification.' },
       { label: 'Register Drafter', href: '/register-drafter', icon: Sparkles, badge: 'Soon', description: 'A draft AI register built from what you have declared.' },
     ],
   },
@@ -89,14 +90,6 @@ export const CLIENT_NAV: NavGroup[] = [
       { label: 'People', href: '/people', icon: Contact, description: 'Joiners and leavers, matched to their accounts.' },
       { label: 'Access reviews', href: '/access-reviews', icon: UserCheck, description: 'Confirm who still needs each account.' },
       { label: 'Training', href: '/training', icon: GraduationCap, description: 'Security, POPIA and AI modules, and who has completed them.' },
-    ],
-  },
-  {
-    key: 'tools',
-    label: 'Tools',
-    summary: 'Optional tools for running your AI. Using them does not affect certification.',
-    items: [
-      { label: 'Agents', href: '/agents', icon: Bot, description: 'Run your agents from AIC with their reach, approvals and spend fixed in advance.' },
     ],
   },
   {
@@ -138,6 +131,7 @@ export const STAFF_NAV: NavGroup[] = [
       { label: 'Audits', href: '/admin/audits', icon: ClipboardCheck, description: 'Scheduled and completed audits.', visible: (u) => staffCan(u, 'conduct_assessment') },
       { label: 'Applications', href: '/admin/applications', icon: FileSearch, description: 'Organisations applying for assessment.', visible: (u) => staffCan(u, 'conduct_assessment') },
       { label: 'Verification', href: '/admin/verification', icon: BadgeCheck, description: 'Evidence and identity verification.', visible: (u) => staffCan(u, 'conduct_assessment') },
+      { label: 'Assignments', href: '/admin/assignments', icon: UserCheck, description: 'Which auditor leads and reviews each organisation.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Connector health', href: '/admin/connectors', icon: Plug, description: 'Which connectors have worked against real client accounts.', visible: (u) => staffCan(u, 'view_all_orgs') },
     ],
   },
@@ -147,6 +141,7 @@ export const STAFF_NAV: NavGroup[] = [
     summary: 'Client organisations, certificates and reports.',
     items: [
       { label: 'Organisations', href: '/admin/organizations', icon: Building2, description: 'Everyone registered, and the files you hold.', visible: (u) => staffCan(u, 'view_all_orgs') },
+      { label: 'Client onboarding links', href: '/admin/onboarding-links', icon: Send, description: 'A link to send a new client: it opens registration filled in and assigns their assessor.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Certifications', href: '/admin/certifications', icon: Award, description: 'Issued certificates and their lifecycle.', visible: (u) => staffCan(u, 'conduct_assessment') },
       { label: 'AIC Aware badges', href: '/admin/aware', icon: BadgeCheck, description: 'Issued badges, their status, and revocation.', visible: (u) => staffCan(u, 'view_all_orgs') },
       { label: 'Reports', href: '/admin/reports', icon: FileBarChart, description: 'Assessment reports across the register.', visible: (u) => staffCan(u, 'conduct_assessment') },

@@ -59,7 +59,7 @@ export function WorkspaceStatusStrip({
           </span>
         ))}
       </div>
-      <div className="hidden sm:flex max-w-[1200px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
+      <div className="hidden sm:flex max-w-[1440px] mx-auto h-11 px-5 md:px-8 items-center gap-6 overflow-x-auto text-[12px] whitespace-nowrap">
         {stage && (
           <span className="flex items-center gap-2 text-[#5e6b7b]">
             <span className="w-1.5 h-1.5 rounded-full bg-[#a8772a]" aria-hidden />

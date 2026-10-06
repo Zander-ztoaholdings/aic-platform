@@ -155,7 +155,7 @@ export default function KeysPage() {
               </div>
 
               {/* Generate new key */}
-              <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <div data-tour="setup-keys" className="mt-4 flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={newKeyLabel}

@@ -58,3 +58,92 @@ export function validateRisk(b: unknown, knownControls: Set<string>): { error: s
   const reviewAt = typeof o.reviewAt === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.reviewAt) ? new Date(o.reviewAt + 'T00:00:00Z') : null;
   return { value: { title: title.slice(0, 200), description: str(o.description, 4000), category, likelihood: L, impact: I, residualLikelihood: rl, residualImpact: ri, treatment, treatmentPlan: str(o.treatmentPlan, 4000), controls, ownerName: str(o.ownerName, 200), status, reviewAt } };
 }
+
+// ── Inherent, current and target scores ──────────────────────────────────────
+
+export type Scored = { likelihood: number; impact: number; residualLikelihood: number | null; residualImpact: number | null; status: string; treatment: string };
+export type ScoreView = { likelihood: number; impact: number; score: number; level: RiskLevel };
+const view = (l: number, i: number): ScoreView => ({ likelihood: l, impact: i, score: l * i, level: level(l * i) });
+
+/** Before any treatment: likelihood × impact as the person recorded it. */
+export const inherent = (r: Scored): ScoreView => view(r.likelihood, r.impact);
+
+/** Where the person expects the risk to sit once treated, if they recorded it. */
+export const target = (r: Scored): ScoreView | null =>
+  r.residualLikelihood && r.residualImpact ? view(r.residualLikelihood, r.residualImpact) : null;
+
+/**
+ * Where the risk sits today, by AIC's reckoning. It starts from the recorded
+ * target once a treatment is under way (being treated or accepted) and from
+ * the inherent score otherwise. Each piece of failing evidence (a linked
+ * control with a gap, or a signal AIC noticed) adds one to the likelihood,
+ * at most two, never past 5. It is shown next to what the person recorded,
+ * never written over it.
+ */
+export function current(r: Scored, failing: number): ScoreView & { raisedBy: number; from: ScoreView } {
+  const t = target(r);
+  const from = t && (r.status === 'treating' || r.status === 'accepted') ? t : inherent(r);
+  if (r.status === 'closed') return { ...from, raisedBy: 0, from };
+  const raisedBy = Math.min(2, Math.max(0, failing), 5 - from.likelihood);
+  return { ...view(from.likelihood + raisedBy, from.impact), raisedBy, from };
+}
+
+// ── Review cadence ───────────────────────────────────────────────────────────
+
+/** Months between reviews: high and critical every 3, medium every 6, low every 12. */
+export function reviewMonths(s: number): number {
+  const l = level(s);
+  return l === 'critical' || l === 'high' ? 3 : l === 'medium' ? 6 : 12;
+}
+
+export function nextReviewAt(s: number, from = new Date()): Date {
+  const d = new Date(from);
+  d.setUTCMonth(d.getUTCMonth() + reviewMonths(s));
+  return d;
+}
+
+// ── Acceptance ───────────────────────────────────────────────────────────────
+
+export type Acceptance = { acceptedBy: string; acceptReason: string; acceptUntil: string };
+
+/** A risk can only be accepted by a named approver, for a stated reason, until a date at most a year away. */
+export function validateAcceptance(b: unknown, today = new Date()): { error: string } | { value: Acceptance } {
+  const o = (b ?? {}) as Record<string, unknown>;
+  const by = typeof o.acceptedBy === 'string' ? o.acceptedBy.trim() : '';
+  const why = typeof o.acceptReason === 'string' ? o.acceptReason.trim() : '';
+  const until = typeof o.acceptUntil === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.acceptUntil) ? o.acceptUntil : '';
+  if (by.length < 2) return { error: 'Name the person who approved accepting this risk.' };
+  if (why.length < 10) return { error: 'Say why the risk is being accepted.' };
+  if (!until) return { error: 'Choose the date the acceptance runs until.' };
+  const t = today.toISOString().slice(0, 10);
+  const max = new Date(today); max.setUTCFullYear(max.getUTCFullYear() + 1);
+  if (until <= t) return { error: 'The acceptance must run until a date in the future.' };
+  if (until > max.toISOString().slice(0, 10)) return { error: 'Accept a risk for a year at most, then decide again.' };
+  return { value: { acceptedBy: by.slice(0, 200), acceptReason: why.slice(0, 2000), acceptUntil: until } };
+}
+
+/** Whether an acceptance has run out. */
+export const acceptanceExpired = (until: string | null | undefined, now = new Date()) => !!until && until < now.toISOString().slice(0, 10);
+
+// ── History ──────────────────────────────────────────────────────────────────
+
+export type RiskEventKind = 'created' | 'scored' | 'treatment' | 'reviewed' | 'signal' | 'closed' | 'reopened';
+export type RiskEventDraft = { kind: RiskEventKind; detail: Record<string, unknown> };
+
+/** The events a change from `a` to `b` should record. */
+export function changeEvents(a: RiskInput, b: RiskInput, acceptance: { before: Acceptance | null; after: Acceptance | null } = { before: null, after: null }): RiskEventDraft[] {
+  const out: RiskEventDraft[] = [];
+  const scoreOf = (x: RiskInput) => ({ likelihood: x.likelihood, impact: x.impact, residualLikelihood: x.residualLikelihood, residualImpact: x.residualImpact });
+  const sa = scoreOf(a), sb = scoreOf(b);
+  if (JSON.stringify(sa) !== JSON.stringify(sb)) {
+    out.push({ kind: 'scored', detail: { from: { ...sa, score: score(a.likelihood, a.impact) }, to: { ...sb, score: score(b.likelihood, b.impact) } } });
+  }
+  const accepted = b.treatment === 'accept' && acceptance.after;
+  const acceptChanged = accepted && JSON.stringify(acceptance.before) !== JSON.stringify(acceptance.after);
+  if (a.treatment !== b.treatment || (a.treatmentPlan ?? '') !== (b.treatmentPlan ?? '') || acceptChanged) {
+    out.push({ kind: 'treatment', detail: { from: a.treatment, to: b.treatment, plan: b.treatmentPlan, ...(accepted ? acceptance.after : {}) } });
+  }
+  if (a.status !== 'closed' && b.status === 'closed') out.push({ kind: 'closed', detail: { from: a.status } });
+  else if (a.status === 'closed' && b.status !== 'closed') out.push({ kind: 'reopened', detail: { to: b.status } });
+  return out;
+}

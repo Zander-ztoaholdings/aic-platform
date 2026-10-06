@@ -69,7 +69,8 @@ export default async function StaffHome() {
     hasCapability(uid, 'clear_impartiality_conflict'),
   ]);
   const now = new Date();
-  const d = await getStaffDashboard({ conductAssessment, viewAllOrgs, approveCertification, issueCertification, clearConflict }, now);
+  const d = await getStaffDashboard({ conductAssessment, viewAllOrgs, approveCertification, issueCertification, clearConflict }, now, uid || undefined);
+  const showMine = !!d.mine && (d.mine.length > 0 || (user.role === 'AIC_AUDITOR' && !user.isSuperAdmin));
 
   const groups = visibleGroups(STAFF_NAV, user);
   const first = user.name?.trim().split(/\s+/)[0];
@@ -101,6 +102,28 @@ export default async function StaffHome() {
       )}
 
       <div className="space-y-6 md:space-y-8">
+        {showMine && d.mine && (
+          <Panel title="Your organisations" href="/admin/assignments" linkLabel="See all assignments">
+            {d.mine.length === 0 ? (
+              <p className="text-[13.5px] text-[#5e6b7b]">No organisations are assigned to you yet. A super admin assigns them on the Assignments page.</p>
+            ) : (
+              <ul className="divide-y divide-[#eef1f5]">
+                {d.mine.map((o) => (
+                  <li key={`${o.orgId}-${o.role}`}>
+                    <Link href={o.role === 'lead' ? `/admin/verification?org=${o.orgId}` : '/admin/queue'} className="-mx-2 flex items-baseline justify-between gap-3 rounded-lg px-2 py-2.5 hover:bg-[#f5f7f9]">
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-medium text-[#0e1b2c]">{o.name}</span>
+                        <span className="block text-[12.5px] text-[#5e6b7b]">{o.role === 'lead' ? 'You lead' : 'You review'}{o.oldestWaiting ? `, oldest waiting since ${day(o.oldestWaiting)}` : ''}</span>
+                      </span>
+                      <span className={`shrink-0 text-[13px] ${o.waiting > 0 ? 'font-medium text-[#b45309]' : 'text-[#2e7a57]'}`}>{o.waiting > 0 ? `${plural(o.waiting, 'document')} waiting` : 'Nothing waiting'}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+        )}
+
         {(d.queue || d.audits || d.applications || d.findings) && (
           <section aria-labelledby="work">
             <h2 id="work" className="mb-3 text-[15px] font-semibold text-[#0e1b2c]">Assessment work</h2>

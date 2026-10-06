@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
-import { getSystemDb, scheduledAudits, organizations, users, eq, desc } from '@aic/db';
+import { getSystemDb, scheduledAudits, organizations, users, eq, desc, or, inArray } from '@aic/db';
 import { hasCapability } from '@/lib/rbac';
+import { resolveScope } from '@/lib/assignments';
 
 /**
  * AIC's institutional audit schedule (app/(modules)/admin/audits, and the
@@ -19,7 +20,7 @@ import { hasCapability } from '@/lib/rbac';
  * already treats a missing count as zero; better an honest zero than a
  * fabricated relationship.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -34,6 +35,11 @@ export async function GET() {
 
   try {
     const db = getSystemDb();
+    // ?scope=mine: audits of organisations this person leads or reviews, or
+    // that name them as auditor. Default per lib/assignments.ts defaultScope.
+    const [me] = await db.select({ role: users.role, isSuperAdmin: users.isSuperAdmin }).from(users).where(eq(users.id, session.user.id)).limit(1);
+    const { scope, orgIds } = await resolveScope({ id: session.user.id, role: me?.role, isSuperAdmin: me?.isSuperAdmin }, request.nextUrl.searchParams.get('scope'));
+    const mine = scope === 'mine' && orgIds !== null;
     const rows = await db
       .select({
         id: scheduledAudits.id,
@@ -50,9 +56,10 @@ export async function GET() {
       .from(scheduledAudits)
       .leftJoin(organizations, eq(scheduledAudits.orgId, organizations.id))
       .leftJoin(users, eq(scheduledAudits.auditorId, users.id))
+      .where(mine ? or(eq(scheduledAudits.auditorId, session.user.id), orgIds.length ? inArray(scheduledAudits.orgId, orgIds) : undefined) : undefined)
       .orderBy(desc(scheduledAudits.scheduledAt));
 
-    return NextResponse.json({ audits: rows });
+    return NextResponse.json({ audits: rows, scope: mine ? 'mine' : 'all', canFilter: orgIds !== null });
   } catch (_error) {
     return NextResponse.json({ error: 'Failed to fetch scheduled audits' }, { status: 500 });
   }

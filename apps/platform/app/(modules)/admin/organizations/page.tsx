@@ -17,6 +17,7 @@ interface Org {
   certificationStatus?: string | null; contactEmail?: string | null;
   memberCount?: number; activeMembers?: number; createdAt?: string | null; created_at?: string | null; signupCompletedAt?: string | null;
   auditorId?: string | null; auditorName?: string | null; assignedToMe?: boolean; waitingEvidence?: number; lastActive?: string | null;
+  lead?: { id: string; name: string } | null; reviewer?: { id: string; name: string } | null; reviewerIsMe?: boolean;
 }
 type Assessor = { id: string; name: string; email: string; role: string };
 type View = 'mine' | 'unassigned' | 'all';
@@ -40,12 +41,12 @@ export default function OrganisationsPage() {
   useEffect(() => { load(); }, [load]);
 
   const counts = useMemo(() => ({
-    mine: (orgs ?? []).filter((o) => o.assignedToMe).length,
+    mine: (orgs ?? []).filter((o) => o.assignedToMe || o.reviewerIsMe).length,
     unassigned: (orgs ?? []).filter((o) => !o.auditorId).length,
     all: (orgs ?? []).length,
   }), [orgs]);
   const shown = useMemo(() => (orgs ?? [])
-    .filter((o) => view === 'all' || (view === 'mine' ? o.assignedToMe : !o.auditorId))
+    .filter((o) => view === 'all' || (view === 'mine' ? o.assignedToMe || o.reviewerIsMe : !o.auditorId))
     .filter((o) => `${o.name} ${o.legalName ?? ''} ${o.sector ?? ''}`.toLowerCase().includes(q.trim().toLowerCase())), [orgs, q, view]);
 
   return (
@@ -67,7 +68,7 @@ export default function OrganisationsPage() {
       <div className="mt-4 overflow-x-auto rounded-xl border border-[#dde2e8] bg-white">
         <table className="w-full min-w-[820px] text-left text-sm">
           <thead className="bg-[#f5f7f9] text-xs text-[#8a95a3]">
-            <tr><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">People</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Assessor</th><th className="px-4 py-3 font-medium">Registered</th><th /></tr>
+            <tr><th className="px-4 py-3 font-medium">Organisation</th><th className="px-4 py-3 font-medium">People</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Lead and reviewer</th><th className="px-4 py-3 font-medium">Registered</th><th /></tr>
           </thead>
           <tbody>
             {orgs === null && <tr><td colSpan={6} className="px-4 py-10 text-center text-[#8a95a3]">Loading…</td></tr>}
@@ -88,7 +89,10 @@ export default function OrganisationsPage() {
                     {suspended ? <Pill tone="bad">Access suspended</Pill> : <Pill>{(o.certificationStatus ?? 'Draft').replace(/_/g, ' ').toLowerCase()}</Pill>}
                     {(o.waitingEvidence ?? 0) > 0 && <div className="mt-1 text-xs text-[#8a6a1f]">{o.waitingEvidence} file{o.waitingEvidence === 1 ? '' : 's'} waiting for review</div>}
                   </td>
-                  <td className="px-4 py-3">{o.assignedToMe ? <Pill tone="gold">You</Pill> : o.auditorName ? <span className="text-[#0e1b2c]">{o.auditorName}</span> : <span className="text-[#8a95a3]">Unassigned</span>}</td>
+                  <td className="px-4 py-3">
+                    <div>{o.assignedToMe ? <Pill tone="gold">You</Pill> : (o.lead?.name ?? o.auditorName) ? <span className="text-[#0e1b2c]">{o.lead?.name ?? o.auditorName}</span> : <span className="text-[#8a95a3]">Unassigned</span>}</div>
+                    <div className="mt-0.5 text-xs text-[#8a95a3]">{o.reviewerIsMe ? 'Reviewer: you' : o.reviewer ? `Reviewer: ${o.reviewer.name}` : 'No reviewer'}</div>
+                  </td>
                   <td className="px-4 py-3 text-[#5e6b7b]">{ago(o.createdAt ?? o.created_at ?? null)}</td>
                   <td className="px-4 py-3 text-right whitespace-nowrap">
                     {o.assignedToMe && <Link href={`/admin/verification?org=${o.id}`} className="mr-2 text-sm font-medium text-[#8a6a1f] hover:underline">Open file</Link>}

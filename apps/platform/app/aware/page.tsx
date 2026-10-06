@@ -90,7 +90,7 @@ export default function AwarePage() {
         )}
 
         {state && !showBadge && (
-          <Flow state={state} onChanged={async () => { await load(); setRetaking(false); }} />
+          <div data-tour="setup-aware"><Flow state={state} onChanged={async () => { await load(); setRetaking(false); }} /></div>
         )}
       </div>
     </DashboardShell>

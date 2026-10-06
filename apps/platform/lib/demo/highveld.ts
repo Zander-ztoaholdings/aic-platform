@@ -26,7 +26,7 @@ import {
   organizations, users, accountablePersons, aiSystems, orgPolicies, policyVersions, policyAcceptances,
   integrations, integrationChecks, llmUsageRecords, decisionRecords, auditRequirements, auditDocuments,
   awareAssessments, awareBadges, trustPages, orgFrameworks, auditFindings, correctiveActions, auditLogs, auditLedger, inviteCodes, EncryptionService,
-  suppliers, supplierReviews, risks, trainingCompletions, accessReviews, accessReviewItems, orgPeople,
+  suppliers, supplierReviews, risks, trainingCompletions, accessReviews, accessReviewItems, orgPeople, riskTracking, riskEvents,
 } from '@aic/db';
 import { StorageService, storageConfig } from '@aic/db/storage';
 import { MFAService } from '@aic/auth';
@@ -41,6 +41,7 @@ import { controlSlot } from '../common-controls';
 import { observeEstate } from '../continuity-store';
 import { MODULE_BY_KEY } from '../training/modules';
 import { nextReview } from '../registers/suppliers';
+import { assignOnSignup } from '../assignments';
 
 export const DEMO_ORG_ID = 'de300000-0000-4000-8000-0000000000a1';
 export const DEMO_DOMAIN = 'demo.aiccertified.cloud';
@@ -459,6 +460,12 @@ export async function seedHighveld(): Promise<{ credentials: DemoCredentials; su
   // ── 13. Today's observation: anything the decisions and usage changed ──────
   await observe(ago(0, 1), 'AIC connector sync');
 
+  // ── 14. An AIC auditor as lead (and a second as reviewer, if there is one) ─
+  // The default rule picks an active AIC auditor, never a super admin, so on a
+  // preview server this is auditor@aic.test. Before migration 018 it does
+  // nothing; it never throws.
+  await assignOnSignup(DEMO_ORG_ID, null);
+
   return {
     credentials: { emails, password, totpSecret, otpauth: MFAService.getOTPAuthURI(totpSecret, 'Highveld Credit (Demo)', 'AIC Platform') },
     summary: { people: PEOPLE.length, systems: SYSTEMS.length, decisions: decisions.length, heldDecisions: 3, requirements: reqRows.length, usageRows: usage.length, filesStored: stored, registerRows: registers },
@@ -510,23 +517,53 @@ async function seedRegisters({ ids, ago, at, msAccounts, ghAccounts }: {
     n++;
   }
 
-  // Risks
-  const R = (title: string, category: string, likelihood: number, impact: number, treatment: string, status: string, ownerName: string | null, reviewIn: number, controls: string[], treatmentPlan: string | null, residual?: [number, number]) => ({
-    orgId: DEMO_ORG_ID, title, category, likelihood, impact, treatment, status, ownerName, reviewAt: ahead(reviewIn), controls, treatmentPlan,
-    residualLikelihood: residual?.[0] ?? null, residualImpact: residual?.[1] ?? null, createdBy: ids.ayesha, createdAt: ago(55), updatedAt: ago(10),
+  // Risks. Most come from AIC's risk library, so the register links them to
+  // what AIC observes: the leaver and phishing risks rely on controls whose
+  // checks are failing (Johan still has access; MFA is not enforced), so the
+  // page shows them getting worse. Nothing covers the undeclared gpt-4.1
+  // usage, the AI-written change merged without review, the Mac without
+  // FileVault or the retiring Claude model, so those are suggested.
+  type Extra = { lib?: string; accept?: { acceptedBy: string; acceptReason: string; acceptUntil: string } };
+  const R = (title: string, category: string, likelihood: number, impact: number, treatment: string, status: string, ownerName: string | null, reviewIn: number, controls: string[], treatmentPlan: string | null, residual?: [number, number], x: Extra = {}) => ({
+    row: {
+      orgId: DEMO_ORG_ID, title, category, likelihood, impact, treatment, status, ownerName, reviewAt: ahead(reviewIn), controls, treatmentPlan,
+      residualLikelihood: residual?.[0] ?? null, residualImpact: residual?.[1] ?? null, createdBy: ids.ayesha, createdAt: ago(55), updatedAt: ago(10),
+    },
+    ...x,
   });
   const riskRows = [
-    R('Pre-screening model declines a protected group more often', 'ai', 3, 5, 'mitigate', 'treating', 'Pieter van Wyk', 30, ['ai.impact_bias', 'ai.human_oversight'], 'Quarterly bias test across age and gender. The referral band stays wide while the open finding on bias testing is resolved.', [2, 5]),
-    R('Customer information goes to a model provider without a signed agreement', 'privacy', 3, 4, 'mitigate', 'open', 'Ayesha Patel', -5, ['ops.supplier_mgmt', 'priv.lawful_basis'], 'Sign the data processing terms with Anthropic before the payslip pilot goes live.'),
-    R('Former staff keep access to company systems', 'security', 4, 4, 'mitigate', 'treating', 'Sipho Dlamini', 20, ['iam.leavers', 'iam.access_review'], 'HR tells IT on the leaving date; quarterly access review catches anything missed.', [2, 4]),
-    R('Phishing leads to a taken-over mailbox', 'security', 4, 3, 'mitigate', 'treating', 'Sipho Dlamini', 45, ['iam.mfa', 'ops.awareness_training'], 'Second factor for everyone; security training every year.', [2, 3]),
+    R('Pre-screening model declines a protected group more often', 'ai', 3, 5, 'mitigate', 'treating', 'Pieter van Wyk', 30, ['ai.impact_bias', 'ai.human_oversight'], 'Quarterly bias test across age and gender. The referral band stays wide while the open finding on bias testing is resolved.', [2, 5], { lib: 'ai_unfair_outcomes' }),
+    R('Customer information goes to a model provider without a signed agreement', 'privacy', 3, 4, 'mitigate', 'open', 'Ayesha Patel', -5, ['ops.supplier_mgmt', 'priv.lawful_basis'], 'Sign the data processing terms with Anthropic before the payslip pilot goes live.', undefined, { lib: 'pi_cross_border' }),
+    R('Former staff keep access to company systems', 'security', 4, 4, 'mitigate', 'treating', 'Sipho Dlamini', 20, ['iam.leavers', 'iam.access_review'], 'HR tells IT on the leaving date; quarterly access review catches anything missed.', [2, 4], { lib: 'leaver_access' }),
+    R('Phishing leads to a taken-over mailbox', 'security', 4, 3, 'mitigate', 'treating', 'Sipho Dlamini', 45, ['iam.mfa', 'ops.awareness_training'], 'Second factor for everyone; security training every year.', [2, 3], { lib: 'phishing_takeover' }),
     R('Help assistant tells a customer something wrong about their account', 'ai', 3, 3, 'mitigate', 'open', 'Megan Fourie', 60, ['ai.monitoring', 'ai.transparency'], 'Assistant answers general questions only; account questions go to a person.'),
     R('Collections prioritiser puts vulnerable customers under pressure', 'ai', 2, 4, 'mitigate', 'open', null, 40, ['ai.impact_bias'], null),
-    R('Main model provider has a long outage', 'supplier', 2, 3, 'accept', 'accepted', 'Naledi Khumalo', 150, [], 'The help assistant falls back to a contact form. Pre-screening does not depend on it.'),
-    R('Model API keys kept in the code repository', 'security', 3, 4, 'mitigate', 'closed', 'Sipho Dlamini', 90, ['dev.secrets'], 'Keys moved to the secrets manager and rotated; secret scanning switched on.', [1, 4]),
+    R('Main model provider has a long outage', 'supplier', 2, 3, 'accept', 'accepted', 'Naledi Khumalo', 150, [], 'The help assistant falls back to a contact form. Pre-screening does not depend on it.', undefined,
+      { lib: 'ai_provider_outage', accept: { acceptedBy: 'Naledi Khumalo', acceptReason: 'The help assistant falls back to a contact form and no credit decision depends on the provider. The cost of a second provider is not justified at current volumes.', acceptUntil: ahead(150).toISOString().slice(0, 10) } }),
+    R('Model API keys kept in the code repository', 'security', 3, 4, 'mitigate', 'closed', 'Sipho Dlamini', 90, ['dev.secrets'], 'Keys moved to the secrets manager and rotated; secret scanning switched on.', [1, 4], { lib: 'secrets_in_code' }),
+    R('Ransomware stops operations and locks data', 'security', 3, 5, 'mitigate', 'open', 'Sipho Dlamini', 70, ['ops.backup', 'ops.endpoint', 'iam.mfa', 'ops.incident_response'], 'Keep tested offline backups, require a second factor, keep devices patched, and rehearse the incident plan.', undefined, { lib: 'ransomware' }),
+    R("A model's performance drifts and nobody notices", 'ai', 3, 4, 'mitigate', 'treating', 'Pieter van Wyk', 80, ['ai.monitoring'], 'Usage reaches AIC daily; Pieter reviews approval rates by month and re-runs the bias test if they move by more than five points.', [2, 4], { lib: 'model_drift' }),
   ];
-  await db.insert(risks).values(riskRows);
+  const inserted = await db.insert(risks).values(riskRows.map((r) => r.row)).returning({ id: risks.id });
   n += riskRows.length;
+  try {
+    // Migration 018: library links, the acceptance, and each risk's history.
+    for (const [i, r] of riskRows.entries()) {
+      if (!r.lib) continue;
+      await db.update(riskTracking).set({ source: 'library', libraryKey: r.lib, ...(r.accept ?? {}) }).where(eq(riskTracking.id, inserted[i].id));
+    }
+    const ev = (i: number, kind: string, days: number, detail: Record<string, unknown>, who = 'ayesha') => ({ riskId: inserted[i].id, orgId: DEMO_ORG_ID, kind, detail, actorId: ids[who], createdAt: ago(days) });
+    await db.insert(riskEvents).values([
+      ...riskRows.map((r, i) => ev(i, 'created', 55, { title: r.row.title, likelihood: r.row.likelihood, impact: r.row.impact, score: r.row.likelihood * r.row.impact, source: r.lib ? 'library' : 'manual', libraryKey: r.lib ?? null })),
+      ev(0, 'scored', 41, { from: { likelihood: 2, impact: 5, residualLikelihood: 2, residualImpact: 5, score: 10 }, to: { likelihood: 3, impact: 5, residualLikelihood: 2, residualImpact: 5, score: 15 } }, 'pieter'),
+      ev(0, 'reviewed', 12, { score: 10, months: 3, next: ahead(30).toISOString().slice(0, 10), note: 'Bias test re-run after the finding was raised; referral band kept wide.', by: 'Pieter van Wyk' }, 'pieter'),
+      ev(6, 'treatment', 50, { from: 'mitigate', to: 'accept', plan: riskRows[6].row.treatmentPlan, ...riskRows[6].accept }, 'naledi'),
+      ev(7, 'closed', 30, { from: 'treating' }, 'sipho'),
+    ]);
+  } catch (e) {
+    const code = (e as { code?: string; cause?: { code?: string } }).code ?? (e as { cause?: { code?: string } }).cause?.code;
+    if (code !== '42P01' && code !== '42703') throw e; // migration 018 not applied: the register still works, without links or history
+  }
 
   // Training: the three general modules by default; Pieter's is out of date.
   const done = (who: string, key: string, days: number, score: number) => ({ orgId: DEMO_ORG_ID, userId: ids[who], moduleKey: key, moduleVersion: MODULE_BY_KEY[key].version, score, completedAt: at(days, 9 + (days % 7), (days * 7) % 60) });

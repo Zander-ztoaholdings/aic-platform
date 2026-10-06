@@ -83,7 +83,7 @@ export default function PoliciesPage() {
             )}
 
             {d.canManage && d.templates.length > 0 && (
-              <section className="space-y-3">
+              <section data-tour="setup-policy" className="space-y-3">
                 <h2 className="text-[16px] font-semibold text-[#0e1b2c]">Templates</h2>
                 <p className="text-[14px] text-[#5e6b7b]">Answer a few questions and AIC writes the policy for you, using what it already knows about your organisation. You can edit every word before publishing.</p>
                 <div className="grid sm:grid-cols-2 gap-3">

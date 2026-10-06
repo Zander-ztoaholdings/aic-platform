@@ -185,7 +185,7 @@ export default function OrganizationalSettings() {
                     </section>
 
                     {/* Team Management */}
-                    <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
+                    <section data-tour="setup-invite" className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
                         <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Team</h3>
 
                         {!canManageTeam ? (

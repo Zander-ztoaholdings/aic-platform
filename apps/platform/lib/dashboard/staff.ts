@@ -59,9 +59,11 @@ export type StaffDashboard = {
   pendingReview: number | null;
   awaitingIssue: number | null;
   conflicts: number | null;
+  /** The signed-in person's organisations (lead or reviewer), most waiting first. Null before migration 018 or without a user. */
+  mine: { orgId: string; name: string; role: 'lead' | 'reviewer'; waiting: number; oldestWaiting: Date | null }[] | null;
 };
 
-export async function getStaffDashboard(caps: StaffCaps, now = new Date()): Promise<StaffDashboard> {
+export async function getStaffDashboard(caps: StaffCaps, now = new Date(), userId?: string): Promise<StaffDashboard> {
   const db = getSystemDb();
   const since = new Date(now.getTime() - (DECISION_DAYS - 1) * DAY);
   since.setUTCHours(0, 0, 0, 0);
@@ -70,6 +72,22 @@ export async function getStaffDashboard(caps: StaffCaps, now = new Date()): Prom
   const ago7 = new Date(now.getTime() - 7 * DAY);
   const skip = <T,>(): Promise<T | null> => Promise.resolve(null);
   const certReader = caps.conductAssessment || caps.viewAllOrgs;
+
+  // Before the rest, so a missing org_assignments table (migration 018) is logged once and left out.
+  const mine = userId && (caps.conductAssessment || caps.viewAllOrgs) ? await safe('your organisations', async () => {
+    const res = await db.execute(sql`
+      select a.org_id as "orgId", o.name, a.role,
+             count(d.id) filter (where d.verification_outcome is null and d.superseded_by is null)::int as waiting,
+             min(d.created_at) filter (where d.verification_outcome is null and d.superseded_by is null) as "oldestWaiting"
+      from org_assignments a
+      join ${organizations} o on o.id = a.org_id
+      left join ${auditDocuments} d on d.org_id = a.org_id
+      where a.user_id = ${userId} and a.ended_at is null
+      group by a.org_id, o.name, a.role
+      order by waiting desc, o.name`);
+    return (res.rows as { orgId: string; name: string; role: 'lead' | 'reviewer'; waiting: unknown; oldestWaiting: string | null }[])
+      .map((r) => ({ orgId: r.orgId, name: r.name, role: r.role, waiting: n(r.waiting), oldestWaiting: r.oldestWaiting ? new Date(r.oldestWaiting) : null }));
+  }) : null;
 
   const [queue, audits, applications, findings, systems, decisions, undeclared, connectors, orgStatus, expiring, mostActive, stage2, pendingReview, awaitingIssue, conflicts] = await Promise.all([
     // Current evidence nobody has decided on: not verified, not superseded.
@@ -209,5 +227,5 @@ export async function getStaffDashboard(caps: StaffCaps, now = new Date()): Prom
     }) : skip<number>(),
   ]);
 
-  return { queue, audits, applications, findings, systems, decisions, undeclared, connectors, orgStatus, expiring, mostActive, stage2, pendingReview, awaitingIssue, conflicts };
+  return { queue, audits, applications, findings, systems, decisions, undeclared, connectors, orgStatus, expiring, mostActive, stage2, pendingReview, awaitingIssue, conflicts, mine };
 }

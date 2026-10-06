@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { Session } from 'next-auth';
-import { ShieldCheck, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, UserPlus, Boxes, Bot } from 'lucide-react';
 import { getSession } from '../../lib/auth';
 import { getClientDashboard } from '@/lib/dashboard/client';
 import { narrateEvent } from '@/lib/continuity';
@@ -10,6 +10,7 @@ import DashboardShell from '../components/DashboardShell';
 import { StandingSeal } from '../components/workspace/StandingSeal';
 import { StatTile, TileGrid, Panel, StackBar, BarList, ActionList, dailySeries, usd, pct } from '../components/dash/Dash';
 import { ObserveButton } from './components/ObserveButton';
+import { SetupPanel } from './components/SetupPanel';
 
 export const metadata = { title: 'Dashboard | AIC' };
 export const dynamic = 'force-dynamic';
@@ -67,7 +68,7 @@ export default async function Dashboard() {
 
   return (
     <DashboardShell>
-      <div className="mx-auto max-w-[1180px] space-y-5 md:py-2">
+      <div className="space-y-5 md:py-2">
         <header className="flex flex-wrap items-center gap-4" data-tour="standing">
           <div className="hidden sm:block"><StandingSeal phase={phase} size={64} /></div>
           <div className="min-w-0 flex-1">
@@ -85,7 +86,22 @@ export default async function Dashboard() {
           <div className="w-full sm:w-auto"><ObserveButton firstRun={!d.record || d.record.total === 0} /></div>
         </header>
 
-        <TileGrid>
+        <nav aria-label="Shortcuts" data-tour="dash-shortcuts" className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {[
+            { href: '/people?new=1', icon: UserPlus, label: 'Onboard a new person', sub: 'Add a joiner and match their accounts' },
+            { href: '/overview#declare', icon: Boxes, label: 'Declare a new AI system', sub: 'What it decides, and who answers for it' },
+            { href: '/agents?new=1', icon: Bot, label: 'Deploy a new agent', sub: 'Optional; no bearing on certification' },
+          ].map(({ href, icon: Icon, label, sub }) => (
+            <Link key={href} href={href} className="group flex items-center gap-3 rounded-2xl border border-[#dde2e8] bg-white px-4 py-3 transition-colors hover:border-[#a8772a]">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0e1b2c] text-white"><Icon className="h-[18px] w-[18px]" /></span>
+              <span className="min-w-0"><span className="block text-[14px] font-semibold text-[#0e1b2c]">{label}</span><span className="block truncate text-[12.5px] text-[#5e6b7b]">{sub}</span></span>
+            </Link>
+          ))}
+        </nav>
+
+        <SetupPanel />
+
+        <div data-tour="dash-tiles"><TileGrid>
           <StatTile
             label="AI systems"
             value={d.systems.total}
@@ -116,12 +132,12 @@ export default async function Dashboard() {
             href={d.issues.findingsOpen ? '/findings' : d.issues.checksFailing ? '/checks' : '/incidents'}
             sub={`${d.issues.findingsOpen} ${d.issues.findingsOpen === 1 ? 'finding' : 'findings'}${d.issues.findingsOverdue ? ` (${d.issues.findingsOverdue} overdue)` : ''}, ${d.issues.incidentsOpen ?? 0} ${(d.issues.incidentsOpen ?? 0) === 1 ? 'incident' : 'incidents'}, ${d.issues.checksFailing} failing ${d.issues.checksFailing === 1 ? 'check' : 'checks'}`}
           />
-        </TileGrid>
+        </TileGrid></div>
 
         <div className="grid gap-5 lg:grid-cols-3">
-          <Panel title="Needs you" className="lg:col-span-2">
+          <div data-tour="dash-needs" className="lg:col-span-2"><Panel title="Needs you" className="h-full">
             <ActionList items={actions.slice(0, 7)} />
-          </Panel>
+          </Panel></div>
           <Panel title="Certification readiness" href="/certificate" linkLabel="Your certificate">
             {d.certificate ? (
               <p className="text-[14px] text-[#0e1b2c]">Certificate {d.certificate.number}, {(d.certificate.status ?? 'recorded').toLowerCase()}{d.certificate.expires ? `, until ${new Date(d.certificate.expires).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.</p>

@@ -37,6 +37,9 @@ export default function AuditsPage() {
   const [auditors, setAuditors] = useState<Auditor[]>([])
   const [loading, setLoading] = useState(true)
   const [isScheduling, setIsScheduling] = useState(false)
+  // null until the server says which view this person starts on (lib/assignments.ts defaultScope).
+  const [scope, setScope] = useState<'mine' | 'all' | null>(null)
+  const [canFilter, setCanFilter] = useState(false)
   
   // Form state
   const [newAudit, setNewAudit] = useState({
@@ -46,11 +49,13 @@ export default function AuditsPage() {
     notes: ''
   })
 
-  const fetchAudits = async () => {
+  const fetchAudits = async (want: 'mine' | 'all' | null = scope) => {
     try {
-      const res = await fetch('/api/audits')
+      const res = await fetch(`/api/audits${want ? `?scope=${want}` : ''}`, { cache: 'no-store' })
       const data = await res.json()
       setAudits(data.audits || [])
+      setCanFilter(!!data.canFilter)
+      if (data.scope) setScope(data.scope)
     } catch {
       toast.error('Failed to fetch scheduled audits')
     } finally {
@@ -148,7 +153,14 @@ export default function AuditsPage() {
 
         {/* Actions */}
         <div className="flex flex-wrap justify-between items-center gap-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {canFilter && (
+              <div className="mr-2 inline-flex rounded-full border border-[#dde2e8] bg-white p-1" role="group" aria-label="Whose audits">
+                {([['mine', 'Mine'], ['all', 'All']] as const).map(([k, l]) => (
+                  <button key={k} onClick={() => { setScope(k); fetchAudits(k) }} aria-pressed={scope === k} className={`h-8 rounded-full px-4 text-sm font-medium ${scope === k ? 'bg-[#0e1b2c] text-white' : 'text-[#5e6b7b] hover:text-[#0e1b2c]'}`}>{l}</button>
+                ))}
+              </div>
+            )}
             <button
               onClick={() => setView('list')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${

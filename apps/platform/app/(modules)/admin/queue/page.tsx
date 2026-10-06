@@ -25,14 +25,22 @@ export default function AdminQueue() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedUser] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  // null until the server says which view this person starts on (lib/assignments.ts defaultScope).
+  const [scope, setScope] = useState<'mine' | 'all' | null>(null);
+  const [canFilter, setCanFilter] = useState(false);
 
   useEffect(() => {
     async function fetchQueue() {
+      setLoading(true);
       try {
-        const res = await fetch('/api/v1/admin/queue');
+        const res = await fetch(`/api/v1/admin/queue${scope ? `?scope=${scope}` : ''}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          setQueue(data);
+          setQueue(Array.isArray(data) ? data : data.items ?? []);
+          if (!Array.isArray(data)) {
+            setCanFilter(!!data.canFilter);
+            if (!scope && data.scope && data.canFilter) setScope(data.scope);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch queue:", error);
@@ -41,7 +49,7 @@ export default function AdminQueue() {
       }
     }
     fetchQueue();
-  }, []);
+  }, [scope]);
 
   const handleReview = (item: any) => {
     setSelectedUser(item);
@@ -56,6 +64,13 @@ export default function AdminQueue() {
           <Eyebrow>Assessments</Eyebrow>
           <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">Review queue</h1>
           <p className="mt-1 text-sm text-[#5e6b7b]">Evidence submitted by clients, waiting for review.</p>
+          {canFilter && (
+            <div className="mt-4 inline-flex rounded-full border border-[#dde2e8] bg-white p-1" role="group" aria-label="Whose organisations">
+              {([['mine', 'Mine'], ['all', 'All']] as const).map(([k, l]) => (
+                <button key={k} onClick={() => setScope(k)} aria-pressed={scope === k} className={`h-9 rounded-full px-4 text-sm font-medium ${scope === k ? 'bg-[#0e1b2c] text-white' : 'text-[#5e6b7b] hover:text-[#0e1b2c]'}`}>{l}</button>
+              ))}
+            </div>
+          )}
         </header>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
@@ -150,7 +165,7 @@ export default function AdminQueue() {
                 {queue.length === 0 && (
                   <tr>
                     <td colSpan={7} className="px-4 sm:px-6 py-12 text-center text-gray-500 bg-aic-paper font-serif italic">
-                      Nothing is waiting for review.
+                      {scope === 'mine' ? 'Nothing is waiting in the organisations you lead or review.' : 'Nothing is waiting for review.'}
                     </td>
                   </tr>
                 )}

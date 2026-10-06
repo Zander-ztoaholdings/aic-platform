@@ -90,7 +90,7 @@ export default function EvidenceVault() {
       {!data && !error && <p className="text-[14px] text-[#5e6b7b]">Loading…</p>}
 
       {data && total === 0 && (
-        <div className="rounded-xl border border-dashed border-[#c9ced6] bg-white p-6">
+        <div data-tour="setup-evidence-empty" className="rounded-xl border border-dashed border-[#c9ced6] bg-white p-6">
           <p className="text-[15px] font-medium text-[#0e1b2c]">No requirements are on record for your organisation yet.</p>
           {data.canSeed ? (
             <>
@@ -117,7 +117,7 @@ export default function EvidenceVault() {
               {data.standardVersion ? <span className="text-[#5e6b7b]"> (standard {data.standardVersion}, Division {data.division})</span> : null}.
             </p>
 
-            <section className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee] overflow-hidden">
+            <section data-tour="setup-evidence" className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee] overflow-hidden">
               {data.rights.map((right) => {
                 const isOpen = open === right.code;
                 const reqs = data.requirements.filter((r) => (r.rightCode ?? 'OTHER') === right.code);

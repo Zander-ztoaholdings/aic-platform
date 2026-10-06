@@ -103,6 +103,10 @@ export default function PeoplePage() {
   const [filter, setFilter] = useState<'all' | 'current' | 'joining' | 'left'>('all');
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<Person | 'new' | null>(null);
+  // From the dashboard shortcut: /people?new=1 opens "Add people" straight away.
+  useEffect(() => {
+    if (d?.canManage && new URLSearchParams(window.location.search).get('new') === '1') { setOpen('new'); window.history.replaceState(null, '', '/people'); }
+  }, [d?.canManage]);
 
   const load = useCallback((accounts = false) => {
     if (accounts) setChecking(true);

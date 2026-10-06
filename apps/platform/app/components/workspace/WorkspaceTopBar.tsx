@@ -105,15 +105,15 @@ export function WorkspaceTopBar({
   return (
     <>
     <header className={`sticky top-0 z-40 border-b backdrop-blur-xl ${t.bar}`}>
-      <div className="max-w-[1200px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-8">
+      <div className="max-w-[1440px] mx-auto h-14 sm:h-16 px-3 sm:px-5 md:px-8 flex items-center gap-2 sm:gap-4 md:gap-5 xl:gap-8">
 
         {/* Brand and context — whose record this is. */}
         <Link href={homeHref} className="flex items-center gap-3 min-w-0 shrink-0">
           <span className="font-serif text-[19px] font-bold tracking-tight leading-none">
             AIC<span className="text-[#a8772a]">.</span>
           </span>
-          <span className={`hidden sm:block w-px h-6 ${t.divider}`} />
-          <span className="hidden sm:flex flex-col min-w-0 max-w-[220px]">
+          <span className={`hidden sm:block md:hidden xl:block w-px h-6 ${t.divider}`} />
+          <span className="hidden sm:flex md:hidden xl:flex flex-col min-w-0 max-w-[220px]">
             <span className="text-[13px] font-semibold leading-tight truncate">
               {contextLabel ?? <span className={t.faint}>Loading…</span>}
             </span>
@@ -132,7 +132,7 @@ export function WorkspaceTopBar({
                 <NavigationMenu.Item key={group.key} className="relative">
                   <NavigationMenu.Trigger
                     data-tour={`nav-${group.key}`}
-                    className={`group inline-flex items-center gap-1 h-9 px-3 rounded-lg text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#a8772a]/40 ${t.trigger} ${groupActive ? t.triggerActive : ''}`}
+                    className={`group inline-flex items-center gap-1 h-9 px-2.5 xl:px-3 whitespace-nowrap rounded-lg text-[13px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#a8772a]/40 ${t.trigger} ${groupActive ? t.triggerActive : ''}`}
                   >
                     {group.label}
                     {groupActive && <span className="w-1 h-1 rounded-full bg-[#a8772a] ml-0.5" aria-hidden />}

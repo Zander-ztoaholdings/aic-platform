@@ -84,6 +84,11 @@ const PUBLIC_PATHS = [
   // AIC's usage exporter script, which organisations download to run on their
   // own side. Contains no secrets; it is the same file for everyone.
   "/exporter/",
+  // Client onboarding links: the welcome page and its prefill. A link carries
+  // no access, only the details AIC staff typed for the client; registration
+  // itself is public at /signup.
+  "/join/",
+  "/api/join/",
 ];
 
 // Staging must never be indexed, even if its password protection is switched

@@ -1502,3 +1502,89 @@ export const hqJurisdictionEvents = pgTable('hq_jurisdiction_events', {
   note: text('note').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * The risk register's live side (db/manual/018 risks fragment).
+ *
+ * riskTracking is the same `risks` table, seen through only the columns 018
+ * adds. They are kept off `risks` itself on purpose: Drizzle names every
+ * column of a table in its inserts and `select()`s, so adding them there
+ * would break every risk query on a server that has not run 018 yet. Read
+ * and write them through this object, and expect Postgres error 42703 or
+ * 42P01 until the migration is applied.
+ *
+ * source: 'manual' | 'library' | 'signal'. library_key names the template in
+ * lib/registers/risk-library; signal_keys the AIC signals that raised or
+ * evidence it. accepted_by / accept_reason / accept_until record a risk
+ * acceptance: who approved it, why, and until when.
+ */
+export const riskTracking = pgTable('risks', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  source: varchar('source', { length: 20 }).notNull().default('manual'),
+  libraryKey: varchar('library_key', { length: 60 }),
+  signalKeys: text('signal_keys').array().notNull().default(sql`'{}'::text[]`),
+  acceptedBy: varchar('accepted_by', { length: 200 }),
+  acceptReason: text('accept_reason'),
+  acceptUntil: date('accept_until'),
+});
+
+/** What happened to a risk, in order: created, scored, treatment, reviewed, signal, closed, reopened. */
+export const riskEvents = pgTable('risk_events', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  riskId: uuid('risk_id').notNull().references(() => risks.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  kind: varchar('kind', { length: 20 }).notNull(),
+  detail: jsonb('detail').notNull().default({}),
+  actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index('risk_events_risk_idx').on(t.riskId, t.createdAt)]);
+
+/** Suggestions an organisation chose not to add to its risk register, and why. */
+export const riskSignalDismissals = pgTable('risk_signal_dismissals', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  signalKey: varchar('signal_key', { length: 60 }).notNull(),
+  subject: varchar('subject', { length: 255 }).notNull(),
+  reason: text('reason').notNull(),
+  dismissedBy: uuid('dismissed_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [unique('risk_signal_dismissals_org_signal_subject').on(t.orgId, t.signalKey, t.subject)]);
+
+/**
+ * Which AIC auditor looks after which organisation (db/manual/018). At most
+ * one current lead and one current reviewer per organisation, never the same
+ * person; a row is current while endedAt is null and stays as history after.
+ * AIC-internal: no row-level policy, not granted to aic_tenant.
+ */
+export const orgAssignments = pgTable('org_assignments', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 20 }).notNull(),
+  assignedBy: uuid('assigned_by').references(() => users.id, { onDelete: 'set null' }),
+  assignedAt: timestamp('assigned_at', { withTimezone: true }).notNull().defaultNow(),
+  reason: text('reason').notNull(),
+  endedAt: timestamp('ended_at', { withTimezone: true }),
+  endedBy: uuid('ended_by').references(() => users.id, { onDelete: 'set null' }),
+  endReason: text('end_reason'),
+});
+
+// 018: links AIC staff send a prospective client to start registration (lib/onboarding-links.ts).
+export const clientOnboardingLinks = pgTable('client_onboarding_links', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  token: varchar('token', { length: 64 }).notNull().unique(),
+  orgName: varchar('org_name', { length: 200 }),
+  contactName: varchar('contact_name', { length: 200 }),
+  contactEmail: varchar('contact_email', { length: 255 }),
+  preferredLeadId: uuid('preferred_lead_id').references(() => users.id, { onDelete: 'set null' }),
+  note: text('note'),
+  maxUses: integer('max_uses').notNull().default(1),
+  uses: integer('uses').notNull().default(0),
+  usedOrgIds: uuid('used_org_ids').array().notNull().default(sql`'{}'::uuid[]`),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+});

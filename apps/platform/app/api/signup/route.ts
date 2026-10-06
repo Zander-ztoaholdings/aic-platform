@@ -3,6 +3,8 @@ import { query, withTransaction } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import { sendVerificationEmail } from '@/lib/verification';
+import { consumeLinkOnSignup } from '@/lib/onboarding-links';
+import { assignOnSignup } from '@/lib/assignments';
 import {
   fetchPublishedStandard,
   requirementsForDivision,
@@ -118,7 +120,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { orgName, division, name, email, password, profile } = body;
+        const { orgName, division, name, email, password, profile, invite } = body;
 
         // Input validation
         if (!orgName || typeof orgName !== 'string' || orgName.trim().length < 2 || orgName.length > 200) {
@@ -222,6 +224,11 @@ export async function POST(request: NextRequest) {
         });
 
         await storeExtendedProfile(result.orgId, result.user.id, email, name, profile);
+
+        // Every new organisation gets an AIC lead by default; a client
+        // onboarding link may name one. Best-effort, after commit.
+        if (typeof invite === 'string' && invite) await consumeLinkOnSignup(invite, result.orgId);
+        else await assignOnSignup(result.orgId, null).catch(() => null);
 
         // Best-effort, after commit: a failed email must not undo a registration.
         await sendVerificationEmail(result.user.id, email.toLowerCase(), name.trim()).catch((error) =>

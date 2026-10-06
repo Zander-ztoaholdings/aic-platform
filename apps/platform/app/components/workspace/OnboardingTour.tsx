@@ -1,167 +1,112 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { CLIENT_NAV } from './nav';
+import { SpotlightLayer, placeCard, useCardHeight, useSpotRect, useTourTarget } from './Spotlight';
+import { startSetupGuide } from './SetupGuide';
 
 /**
- * The first-run tour of the client workspace.
+ * The first-run look around the client workspace.
  *
- * It points at the real interface rather than describing it: each step lights
- * up the actual control, and some steps wait for the person to use it (open a
- * menu) before moving on. It can be skipped at any point (Skip, or Esc), is
- * remembered per person in this browser, and can be restarted from the person
- * menu. Where a control is not on screen (a phone, where the menus collapse),
- * the step is shown as a centred card instead of pointing at nothing.
+ * It points at the real interface: each step lights up the actual control
+ * and dims the rest, and the dimmed page cannot be clicked while a step is
+ * open. It always starts from the dashboard, wherever it was started from,
+ * and brings each control into view however far down the page you were.
+ * Where a control is not on screen (a phone, where the menus collapse) the
+ * step is a card at the bottom of the screen instead.
+ *
+ * It ends by offering the set-up guide (SetupGuide), which walks through
+ * the actual set-up page by page. Skip or Esc at any point; it is
+ * remembered per person in this browser and can be restarted from the
+ * person menu.
  */
 
-type Step = {
-  id: string;
-  target?: string;               // data-tour value
-  title: string;
-  body: React.ReactNode;
-  waitFor?: 'click';             // advance when the highlighted control is used
-  hint?: string;
-  adminOnly?: boolean;
-};
+type Step = { id: string; target?: string; title: string; body: React.ReactNode };
 
 export const TOUR_EVENT = 'aic:start-tour';
-const KEY = (id: string) => `aic-tour-done:${id}`;
+const DONE_KEY = (id: string) => `aic-tour-done:${id}`;
+const RESUME_KEY = 'aic-tour-resume';
 
 export function startTour() {
   window.dispatchEvent(new Event(TOUR_EVENT));
 }
 
+const store = {
+  get: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* blocked */ } },
+  sget: (k: string) => { try { return sessionStorage.getItem(k); } catch { return null; } },
+  sset: (k: string, v: string | null) => { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch { /* blocked */ } },
+};
+
+const inside = (key: string) => CLIENT_NAV.find((g) => g.key === key)?.items.map((i) => i.label).join(', ');
+
 export function OnboardingTour({ orgName }: { orgName: string | null }) {
   const { data } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
   const userId = data?.user?.id as string | undefined;
   const firstName = (data?.user?.name ?? '').split(' ')[0] || null;
-  const isAdmin = data?.user?.role === 'ORG_ADMIN';
   const previewing = !!data?.user?.viewAs;
 
-  const steps = useMemo<Step[]>(() => {
-    const all: Step[] = [
-      {
-        id: 'welcome',
-        title: firstName ? `Welcome to AIC, ${firstName}` : 'Welcome to AIC',
-        body: (
-          <>
-            This is where {orgName ?? 'your organisation'} keeps its record of how it uses AI to make decisions about
-            people, and who answers for each one. A quick look around takes about a minute.
-          </>
-        ),
-      },
-      {
-        id: 'standing',
-        target: 'standing',
-        title: 'Your standing',
-        body: 'The seal fills as you move through the seven stages towards certification. It only ever reflects your actual status, never an estimate.',
-      },
-      {
-        id: 'overview',
-        target: 'nav-overview',
-        title: 'What you run',
-        body: 'Your AI systems, the decisions they make, and who is accountable for each. Open this menu to see what is inside.',
-        waitFor: 'click',
-        hint: 'Click "AI Overview" to continue',
-      },
-      {
-        id: 'compliance',
-        target: 'nav-compliance',
-        title: 'What the standard asks of you',
-        body: 'Only the requirements that apply to your Division, the evidence against each, and anything an assessor has raised.',
-      },
-      {
-        id: 'certification',
-        target: 'nav-certification',
-        title: 'Your badge and certificate',
-        body: 'AIC Aware lives here: a free self-declaration with a badge anyone can verify. Certification follows when you are ready.',
-        waitFor: 'click',
-        hint: 'Click "AIC Certification" to continue',
-      },
-      {
-        id: 'status',
-        target: 'status',
-        title: 'The figures that matter',
-        body: 'Decisions recorded, how often a person overrode the AI, and open corrections. A dash means nothing has been recorded yet; nothing here is invented.',
-      },
-      {
-        id: 'notifications',
-        target: 'notifications',
-        title: 'What needs you',
-        body: 'Findings, requests from your assessor and deadlines arrive here.',
-      },
-      {
-        id: 'account',
-        target: 'account',
-        title: 'Your account and team',
-        body: 'Your profile, your organisation, inviting colleagues, and this tour again whenever you want it.',
-      },
-      {
-        id: 'start',
-        title: 'Three good first moves',
-        body: null,
-      },
-    ];
-    return all.filter((s) => !s.adminOnly || isAdmin);
-  }, [firstName, orgName, isAdmin]);
+  const steps = useMemo<Step[]>(() => [
+    {
+      id: 'welcome',
+      title: firstName ? `Welcome to AIC, ${firstName}` : 'Welcome to AIC',
+      body: <>This is where {orgName ?? 'your organisation'} keeps its record of how it uses AI to make decisions about people, and who answers for each one. A quick look around takes about a minute; then a guide walks you through setting up, one page at a time.</>,
+    },
+    { id: 'standing', target: 'standing', title: 'Your standing', body: 'The seal fills as you move through the seven stages towards certification. It only ever reflects your actual status, never an estimate.' },
+    { id: 'shortcuts', target: 'dash-shortcuts', title: 'The things you do most', body: 'Onboard a new person, declare a new AI system, or deploy an agent, in one click from here.' },
+    { id: 'tiles', target: 'dash-tiles', title: 'Your AI exposure at a glance', body: 'How many AI systems you run, the decisions they made this month and how often a person overrode them, what you spend on AI, and anything open. Each tile opens the page behind it.' },
+    { id: 'needs', target: 'dash-needs', title: 'What needs you', body: 'Gaps AIC can see in your record, most urgent first. Each one links to where you fix it.' },
+    { id: 'overview', target: 'nav-overview', title: 'What you run', body: `Your AI systems, the decisions they make, what you spend, and who is accountable for each. Inside: ${inside('overview')}. Agents is an optional tool for running your own agents from AIC; using it does not raise or lower your chance of certification.` },
+    { id: 'compliance', target: 'nav-compliance', title: 'What the standard asks of you', body: `The requirements that apply to you, and the evidence against each. Inside: ${inside('compliance')}.` },
+    { id: 'people', target: 'nav-people', title: 'Risk and people', body: `The registers every assessor asks for. Inside: ${inside('people')}.` },
+    { id: 'certification', target: 'nav-certification', title: 'Your badge and certificate', body: `AIC Aware, a free self-declaration with a badge anyone can verify, and certification when you are ready. Inside: ${inside('certification')}.` },
+    { id: 'status', target: 'status', title: 'The figures that matter', body: 'Decisions recorded, how often a person overrode the AI, failing checks and open corrections, on every page. A dash means nothing has been recorded yet.' },
+    { id: 'notifications', target: 'notifications', title: 'Messages for you', body: 'Findings, requests from your assessor and deadlines arrive here.' },
+    { id: 'account', target: 'account', title: 'Your account and team', body: 'Your profile, your organisation, inviting colleagues, and this tour and the set-up guide again whenever you want them.' },
+    { id: 'setup', title: 'Now, set up your workspace', body: 'The set-up guide takes you to each page in turn, lights up the one thing to do there, and ticks it off when your record shows it is done. Leave it whenever you like and pick it up from the dashboard.' },
+  ], [firstName, orgName]);
 
   const [index, setIndex] = useState<number | null>(null);
-  const [rect, setRect] = useState<DOMRect | null>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
   const step = index === null ? null : steps[index];
 
-  // First visit: start once the session is known. Never during a preview.
+  const begin = useCallback((at = 0) => {
+    // The tour belongs to the dashboard; go there first and carry on after the page changes.
+    if (pathname !== '/dashboard') { store.sset(RESUME_KEY, String(at)); router.push('/dashboard'); return; }
+    setIndex(at);
+  }, [pathname, router]);
+
+  // First visit, or resuming after the move to the dashboard. Never during a preview.
   useEffect(() => {
     if (!userId || previewing) return;
-    let done = false;
-    try { done = localStorage.getItem(KEY(userId)) === '1'; } catch { /* storage blocked: show it */ }
-    if (!done) {
-      const t = setTimeout(() => setIndex(0), 600);
+    const resume = store.sget(RESUME_KEY);
+    if (resume !== null && pathname === '/dashboard') { store.sset(RESUME_KEY, null); const t = setTimeout(() => setIndex(Number(resume) || 0), 300); return () => clearTimeout(t); }
+    if (store.get(DONE_KEY(userId)) !== '1' && pathname === '/dashboard') {
+      const t = setTimeout(() => setIndex(0), 700);
       return () => clearTimeout(t);
     }
-  }, [userId, previewing]);
+  }, [userId, previewing, pathname]);
 
   useEffect(() => {
-    const on = () => setIndex(0);
+    const on = () => begin(0);
     window.addEventListener(TOUR_EVENT, on);
     return () => window.removeEventListener(TOUR_EVENT, on);
-  }, []);
+  }, [begin]);
 
   const finish = useCallback(() => {
     setIndex(null);
-    if (userId) { try { localStorage.setItem(KEY(userId), '1'); } catch { /* ignore */ } }
+    if (userId) store.set(DONE_KEY(userId), '1');
   }, [userId]);
-
-  const next = useCallback(() => {
-    setIndex((i) => (i === null ? null : i + 1 >= steps.length ? (finish(), null) : i + 1));
-  }, [steps.length, finish]);
+  const next = useCallback(() => setIndex((i) => (i === null ? null : i + 1 >= steps.length ? null : i + 1)), [steps.length]);
   const back = useCallback(() => setIndex((i) => (i && i > 0 ? i - 1 : i)), []);
 
-  // Find and follow the highlighted control.
-  useLayoutEffect(() => {
-    if (!step?.target) { setRect(null); return; }
-    const el = document.querySelector<HTMLElement>(`[data-tour="${step.target}"]`);
-    const visible = el && el.offsetParent !== null && el.getBoundingClientRect().width > 0;
-    if (!visible) { setRect(null); return; }
-    el!.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    const update = () => setRect(el!.getBoundingClientRect());
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
-    let onClick: (() => void) | null = null;
-    if (step.waitFor === 'click') {
-      onClick = () => setTimeout(next, 450);
-      el!.addEventListener('click', onClick, { once: true });
-    }
-    return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
-      if (onClick) el!.removeEventListener('click', onClick);
-    };
-  }, [step, next]);
+  const { el, searching } = useTourTarget(step?.target ? [step.target] : null, 900);
+  const rect = useSpotRect(el);
+  const [cardRef, cardH] = useCardHeight(`${index}-${!!rect}`);
 
-  // Keyboard: Esc skips, arrows move.
   useEffect(() => {
     if (index === null) return;
     const onKey = (e: KeyboardEvent) => {
@@ -170,54 +115,28 @@ export function OnboardingTour({ orgName }: { orgName: string | null }) {
       else if (e.key === 'ArrowLeft') back();
     };
     window.addEventListener('keydown', onKey);
-    cardRef.current?.focus();
+    cardRef.current?.focus({ preventScroll: true });
     return () => window.removeEventListener('keydown', onKey);
-  }, [index, finish, next, back]);
+  }, [index, finish, next, back, cardRef]);
 
   if (!step || index === null) return null;
+  if (step.target && searching) return <div className="pointer-events-auto fixed inset-0 z-[70] bg-[#0e1b2c]/55" />;
 
-  const pad = 8;
-  const pointing = !!rect;
-  const cardW = 340;
-  let cardStyle: React.CSSProperties = {};
-  if (rect) {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const below = rect.bottom + 16 + 220 < vh;
-    cardStyle = {
-      position: 'fixed',
-      width: cardW,
-      left: Math.min(Math.max(16, rect.left + rect.width / 2 - cardW / 2), vw - cardW - 16),
-      top: below ? rect.bottom + pad + 12 : undefined,
-      bottom: below ? undefined : vh - rect.top + pad + 12,
-    };
-  }
-
+  const placed = placeCard(rect, 360, cardH);
   const last = index === steps.length - 1;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[70]" aria-live="polite">
-      {/* Dimmed page with a window cut around the control in focus. The page
-          stays clickable, so steps that ask you to use a control work. */}
-      {pointing ? (
-        <div
-          className="pointer-events-none fixed rounded-xl ring-2 ring-[#d9a53a] transition-all duration-300 motion-reduce:transition-none"
-          style={{
-            left: rect!.left - pad, top: rect!.top - pad, width: rect!.width + pad * 2, height: rect!.height + pad * 2,
-            boxShadow: '0 0 0 9999px rgba(14,27,44,0.55)',
-          }}
-        />
-      ) : (
-        <div className="pointer-events-auto fixed inset-0 bg-[#0e1b2c]/55" />
-      )}
-
+    <div className="fixed inset-0 z-[70]" aria-live="polite">
+      <SpotlightLayer rect={rect} />
       <div
         ref={cardRef}
         tabIndex={-1}
         role="dialog"
         aria-label={step.title}
-        className={`pointer-events-auto outline-none rounded-2xl bg-white p-4 sm:p-6 text-[#0e1b2c] shadow-[0_24px_60px_-20px_rgba(14,27,44,0.45)] ${pointing ? '' : 'fixed left-1/2 top-1/2 w-[min(440px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2'}`}
-        style={pointing ? cardStyle : undefined}
+        className={`pointer-events-auto outline-none rounded-2xl bg-white p-5 sm:p-6 text-[#0e1b2c] shadow-[0_24px_60px_-20px_rgba(14,27,44,0.45)] ${
+          placed ? '' : rect ? 'fixed inset-x-3 bottom-[calc(76px+env(safe-area-inset-bottom))] sm:inset-x-auto sm:left-1/2 sm:w-[440px] sm:-translate-x-1/2' : 'fixed left-1/2 top-1/2 w-[min(460px,calc(100vw-24px))] -translate-x-1/2 -translate-y-1/2'
+        }`}
+        style={placed ?? undefined}
       >
         <div className="flex items-center justify-between gap-4">
           <div className="flex gap-1" aria-label={`Step ${index + 1} of ${steps.length}`}>
@@ -227,36 +146,18 @@ export function OnboardingTour({ orgName }: { orgName: string | null }) {
           </div>
           <button onClick={finish} className="text-[13px] text-[#5e6b7b] hover:text-[#0e1b2c]">Skip tour</button>
         </div>
-
         <h2 className="mt-4 font-serif text-[22px] font-semibold leading-tight">{step.title}</h2>
-
-        {step.id === 'start' ? (
-          <div className="mt-3 space-y-2">
-            <p className="text-[14px] leading-relaxed text-[#5e6b7b]">Most organisations start here. Each takes a few minutes.</p>
-            {[
-              { href: '/aware', t: 'Name your accountable person and take AIC Aware', d: 'Ends with a free badge you can put on your website.' },
-              { href: '/overview', t: 'Declare your first AI system', d: 'What it decides, about whom, and who answers for it.' },
-              ...(isAdmin ? [{ href: '/settings', t: 'Invite a colleague', d: 'Share the work with whoever holds the evidence.' }] : []),
-            ].map((m) => (
-              <Link key={m.href} href={m.href} onClick={finish} className="block rounded-xl border border-[#dde2e8] px-4 py-3 hover:border-[#a8772a] hover:bg-[#a8772a]/[0.04]">
-                <span className="block text-[14px] font-semibold">{m.t}</span>
-                <span className="block text-[13px] text-[#5e6b7b]">{m.d}</span>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-2 text-[14px] leading-relaxed text-[#5e6b7b]">{step.body}</p>
-        )}
-
-        {step.waitFor && pointing && step.hint && (
-          <p className="mt-3 text-[13px] font-medium text-[#8a6a1f]">{step.hint}</p>
-        )}
-
+        <p className="mt-2 text-[14px] leading-relaxed text-[#5e6b7b]">{step.body}</p>
         <div className="mt-5 flex items-center justify-between gap-3">
           <button onClick={back} disabled={index === 0} className="text-[13px] text-[#5e6b7b] hover:text-[#0e1b2c] disabled:invisible">Back</button>
-          <button onClick={last ? finish : next} className="rounded-full bg-[#0e1b2c] px-5 py-2 text-[13px] font-medium text-white hover:bg-[#1b2c44]">
-            {index === 0 ? 'Show me around' : last ? 'Done' : step.waitFor && pointing ? 'Skip this step' : 'Next'}
-          </button>
+          {last ? (
+            <div className="flex items-center gap-3">
+              <button onClick={finish} className="text-[13px] text-[#5e6b7b] hover:text-[#0e1b2c]">Later</button>
+              <button onClick={() => { finish(); startSetupGuide(); }} className="rounded-full bg-[#0e1b2c] px-5 py-2 text-[13px] font-medium text-white hover:bg-[#1b2c44]">Start the set-up guide</button>
+            </div>
+          ) : (
+            <button onClick={next} className="rounded-full bg-[#0e1b2c] px-5 py-2 text-[13px] font-medium text-white hover:bg-[#1b2c44]">{index === 0 ? 'Show me around' : 'Next'}</button>
+          )}
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
 import { getSystemDb, sql } from '@aic/db';
 import { hasCapability } from '@/lib/rbac';
+import { seatsByOrg } from '@/lib/assignments';
 
 /**
  * The register, for AIC staff.
@@ -35,8 +36,13 @@ export async function GET() {
              (SELECT count(*)::int FROM audit_documents d WHERE d.org_id = o.id AND d.verification_outcome IS NULL AND d.superseded_by IS NULL) AS "waitingEvidence",
              (SELECT max(u.last_login) FROM users u WHERE u.org_id = o.id) AS "lastActive"
       FROM organizations o LEFT JOIN users a ON a.id = o.auditor_id
-      ORDER BY o.created_at DESC NULLS LAST`)).rows;
-    return NextResponse.json(rows);
+      ORDER BY o.created_at DESC NULLS LAST`)).rows as { id: string }[];
+    // Lead and reviewer (migration 018); empty before it runs.
+    const seats = await seatsByOrg();
+    return NextResponse.json(rows.map((r) => {
+      const s = seats.get(r.id);
+      return { ...r, lead: s?.lead ?? null, reviewer: s?.reviewer ?? null, reviewerIsMe: s?.reviewer?.id === me };
+    }));
   } catch (_error) {
     return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 });
   }

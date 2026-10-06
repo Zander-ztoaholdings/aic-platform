@@ -78,6 +78,10 @@ export default function AgentsPage() {
   const [d, setD] = useState<Data | null>(null);
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
+  // From the dashboard shortcut: /agents?new=1 opens "Create an agent" straight away.
+  useEffect(() => {
+    if (d?.canManage && new URLSearchParams(window.location.search).get('new') === '1') { setOpen(true); window.history.replaceState(null, '', '/agents'); }
+  }, [d?.canManage]);
 
   const load = useCallback(() => {
     fetch('/api/agents', { cache: 'no-store' }).then(async (r) => {

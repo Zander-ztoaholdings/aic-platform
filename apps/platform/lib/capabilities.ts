@@ -50,6 +50,7 @@ export const CAPABILITIES = {
   access_hq: 'Reach institutional HQ metrics.',
   access_internal_tools: 'Reach internal operations tooling.',
   approve_certification: 'Approve a certification decision.',
+  assign_auditors: 'Decide which AIC auditor leads and reviews each organisation, by hand or by the default rule.',
   clear_impartiality_conflict: 'Clear a declared impartiality conflict on an assessment.',
   conduct_assessment: 'Perform an assessment: raise findings, record corrective actions, work an AIMS file.',
   issue_certification: 'Issue a certificate and publish the organisation to the public register.',
@@ -83,6 +84,8 @@ export const ALL_CAPABILITIES = Object.keys(CAPABILITIES) as Capability[];
 export const ROLE_CAPABILITIES: Record<OrgRole, readonly Capability[]> = {
   // The label, not the power. See the file header: everything a super admin
   // can do above this line is gated on users.isSuperAdmin, not on this row.
+  // `assign_auditors` is deliberately in no role's list: it is a super admin's
+  // (the boolean), or an explicit per-user grant to a lead auditor.
   AIC_SUPER_ADMIN: ['conduct_assessment', 'view_all_orgs', 'access_internal_tools'],
 
   // Evaluation work, and nothing that decides an outcome.

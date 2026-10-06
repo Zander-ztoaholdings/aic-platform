@@ -18,6 +18,8 @@ Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platfo
 
 **017 (tools and markets)** adds the agent runtime (agents, agent_runs, agent_run_steps), model trials, supplier document reads, connector run history and the HQ markets tracker (seeded with South Africa live, Botswana and Mauritius mapped). Nothing existing depends on it: until it is in, Agents, Markets, Connector health and supplier documents say the migration is needed. Paste `db/manual/run-017-in-platform-terminal.txt` the same way; it ends with `✓ 017 verified`.
 
+**018 (risk register, assignments, onboarding links)** adds the live risk register's history, acceptance and dismissed suggestions, which AIC auditor leads and reviews each organisation, and client onboarding links. Until it is in, the risk register still works but cannot record acceptances or history, and assignments and onboarding links say the migration is needed. Paste `db/manual/run-018-in-platform-terminal.txt` the same way; it ends with `✓ 018 verified`. It carries each organisation's current `auditor_id` over as its lead.
+
 **Check:** `/api/health` shows `schema: ok` and names the newest migration applied.
 
 ## 2. Tenant isolation (row-level security)

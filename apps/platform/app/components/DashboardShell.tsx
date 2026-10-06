@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { ViewAsBanner } from './workspace/ViewAsBanner';
 import { OnboardingTour, startTour } from './workspace/OnboardingTour';
-import { Compass } from 'lucide-react';
+import { SetupGuide, startSetupGuide } from './workspace/SetupGuide';
+import { Compass, ListChecks } from 'lucide-react';
 import { useDashboardState } from './dashboard/useDashboardState';
 import { phaseFromCertificationStatus } from './ui/PhaseTracker';
 import { WorkspaceTopBar } from './workspace/WorkspaceTopBar';
@@ -76,7 +77,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           email: userEmail,
           roleLabel: role ? ROLE_LABEL[role as OrgRole] ?? null : null,
         }}
-        menuExtras={[{ label: 'Take the tour', onSelect: startTour, icon: Compass }]}
+        menuExtras={[{ label: 'Take the tour', onSelect: startTour, icon: Compass }, { label: 'Set-up guide', onSelect: startSetupGuide, icon: ListChecks }]}
         actions={
           <span data-tour="notifications" className="inline-flex"><NotificationBell
             notifications={notifications}
@@ -95,7 +96,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         openCorrections={orgSummary?.corrections.open ?? null}
       /></div>
       <OnboardingTour orgName={org?.name ?? null} />
-      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24"><PageTransition>{children}</PageTransition></main>
+      <SetupGuide />
+      <main className="max-w-[1440px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24"><PageTransition>{children}</PageTransition></main>
     </div>
   );
 }

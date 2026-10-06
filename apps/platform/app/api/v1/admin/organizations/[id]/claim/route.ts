@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSystemDb, organizations, conflictChecks, and, eq, isNull } from '@aic/db';
 import { z } from 'zod';
 import { adminActor, recordAdminAction } from '@/lib/admin';
+import { recordFileHolder } from '@/lib/assignments';
 
 /**
  * An assessor takes an unassigned file, or confirms one assigned to them, by
@@ -56,5 +57,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .returning({ id: organizations.id });
   if (!claimed) return NextResponse.json({ error: 'Someone took this file a moment ago.' }, { status: 409 });
   await recordAdminAction({ actorId: actor.id, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: { auditorId: org.auditorId }, next: { auditorId: actor.id, conflictCheck: 'cleared' }, reason: 'Assessor took the file after a conflict declaration' });
+  await recordFileHolder(id, actor.id, actor.id, 'Took the file after a conflict declaration');
   return NextResponse.json({ ok: true });
 }

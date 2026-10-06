@@ -129,7 +129,7 @@ function IntegrationsPage() {
           </div>
         </section>
 
-        <section className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee]">
+        <section data-tour="setup-connect" className="bg-white border border-[#dde2e8] rounded-xl divide-y divide-[#e6e9ee]">
           {SOURCES.map((s) => {
             const i = byProvider(s.key);
             const st = stateOf(i);

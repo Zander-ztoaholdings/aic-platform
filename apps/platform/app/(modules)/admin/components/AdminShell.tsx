@@ -49,7 +49,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         isActive={isActive}
         user={{ name: user.name ?? null, email: user.email ?? null, roleLabel: null }}
       />
-      <main className="max-w-[1200px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24 text-[#0e1b2c]"><PageTransition>{children}</PageTransition></main>
+      <main className="max-w-[1440px] mx-auto px-5 md:px-8 pt-7 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pt-12 md:pb-24 text-[#0e1b2c]"><PageTransition>{children}</PageTransition></main>
     </div>
   );
 }

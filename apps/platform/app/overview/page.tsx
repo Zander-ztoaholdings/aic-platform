@@ -179,7 +179,7 @@ export default async function OrgOverviewPage() {
 
   return (
     <DashboardShell>
-      <div className="max-w-[1200px] mx-auto md:py-4 space-y-6">
+      <div className="mx-auto md:py-4 space-y-6">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="text-[12px] font-bold text-aic-gold first-cap">
@@ -291,7 +291,7 @@ export default async function OrgOverviewPage() {
           </div>
 
           {canDeclare && (
-            <div className="mb-5">
+            <div className="mb-5 scroll-mt-28" id="declare" data-tour="setup-declare">
               <AddSystemForm />
             </div>
           )}
@@ -365,7 +365,7 @@ export default async function OrgOverviewPage() {
               </>
             )}
             {canDeclareAccountablePerson ? (
-              <AddAccountablePersonForm />
+              <div data-tour="setup-accountable"><AddAccountablePersonForm /></div>
             ) : accountability.persons.length === 0 ? (
               <p className="text-xs text-gray-400">
                 Ask an administrator or compliance officer to declare one.

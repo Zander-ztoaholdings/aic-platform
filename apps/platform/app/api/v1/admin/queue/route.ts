@@ -1,9 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@aic/auth';
-import { getSystemDb, sql } from '@aic/db';
+import { getSystemDb, users, eq, sql } from '@aic/db';
 import { hasCapability } from '@/lib/rbac';
+import { resolveScope } from '@/lib/assignments';
 
-export async function GET() {
+/**
+ * Evidence waiting across client files. ?scope=mine limits it to the
+ * organisations the signed-in person leads or reviews; ?scope=all shows
+ * everything. Without it, an auditor with assignments gets their own and
+ * everyone else gets all (lib/assignments.ts defaultScope).
+ */
+export async function GET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -13,20 +20,25 @@ export async function GET() {
 
   try {
     const db = getSystemDb();
-    const queue = await db.execute(sql`
+    const [me] = await db.select({ role: users.role, isSuperAdmin: users.isSuperAdmin }).from(users).where(eq(users.id, session.user.id)).limit(1);
+    const { scope, orgIds } = await resolveScope({ id: session.user.id, role: me?.role, isSuperAdmin: me?.isSuperAdmin }, request.nextUrl.searchParams.get('scope'));
+    const mine = scope === 'mine' && orgIds !== null;
+    const queue = mine && orgIds.length === 0 ? { rows: [] } : await db.execute(sql`
       SELECT 
         d.id, 
         o.name as org, 
+        d.org_id as "orgId",
         d.title as doc, 
         d.status, 
         d.risk_score as risk,
         d.created_at as date
       FROM audit_documents d
       JOIN organizations o ON d.org_id = o.id
+      ${mine ? sql`WHERE d.org_id IN (${sql.join(orgIds.map((id) => sql`${id}`), sql`, `)})` : sql``}
       ORDER BY d.created_at DESC
       LIMIT 100
     `);
-    return NextResponse.json(queue.rows);
+    return NextResponse.json({ items: queue.rows, scope: mine ? 'mine' : 'all', canFilter: orgIds !== null });
   } catch (error) {
     console.error('[ADMIN_QUEUE_ERROR]', error);
     return NextResponse.json({ error: 'Failed to fetch audit queue' }, { status: 500 });

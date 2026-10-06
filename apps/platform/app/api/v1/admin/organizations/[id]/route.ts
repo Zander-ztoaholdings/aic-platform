@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSystemDb, organizations, users, hitlLogs, eq, and, desc, sql } from '@aic/db';
 import { z } from 'zod';
 import { adminActor, recordAdminAction } from '@/lib/admin';
+import { conflictsByOrg, recordFileHolder } from '@/lib/assignments';
 
 /**
  * Manage one organisation: rename, suspend access, restore access, delete.
@@ -42,10 +43,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (a.auditorId) {
       const [u] = await db.select({ role: users.role, active: users.isActive }).from(users).where(eq(users.id, a.auditorId)).limit(1);
       if (!u || (u.role !== 'AIC_AUDITOR' && u.role !== 'AIC_SUPER_ADMIN') || u.active === false) return NextResponse.json({ error: 'That person is not an active AIC assessor.' }, { status: 400 });
+      const conflicted = (await conflictsByOrg(id)).get(id);
+      if (conflicted?.has(a.auditorId)) return NextResponse.json({ error: 'That person has declared a conflict of interest with this organisation, so they cannot be assigned to it.' }, { status: 409 });
     }
     const [before] = await db.select({ auditorId: organizations.auditorId }).from(organizations).where(eq(organizations.id, id)).limit(1);
     await db.update(organizations).set({ auditorId: a.auditorId }).where(eq(organizations.id, id));
     await recordAdminAction({ actorId: actor.id, orgId: id, targetType: 'ADMIN_ORG', targetId: id, previous: { auditorId: before?.auditorId ?? null }, next: { auditorId: a.auditorId }, reason: a.reason });
+    await recordFileHolder(id, a.auditorId, actor.id, a.reason);
     return NextResponse.json({ ok: true });
   }
 
