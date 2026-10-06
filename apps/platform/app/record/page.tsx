@@ -1,0 +1,167 @@
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import type { Session } from 'next-auth';
+import { getSession } from '../../lib/auth';
+import { readContinuity } from '../../lib/continuity-store';
+import { buildOrgOverview } from '../../lib/org-overview';
+import type { Drift } from '../../lib/continuity';
+import DashboardShell from '../components/DashboardShell';
+import { StandingSeal } from '../components/workspace/StandingSeal';
+import { phaseFromCertificationStatus } from '@/lib/phases';
+import { ObserveButton } from '../dashboard/components/ObserveButton';
+import { ContinuityFeed } from '../dashboard/components/ContinuityFeed';
+
+export const metadata = { title: 'Continuity Record | AIC' };
+export const dynamic = 'force-dynamic';
+
+/**
+ * This page replaced a mock.
+ *
+ * It previously rendered a hardcoded integrity score of 77, five invented
+ * rights scores and an "Example Organisation" — convincing enough to demo and
+ * worth nothing to a client, who would have discovered within a week that the
+ * only number on their dashboard was a constant. It now reads the continuity
+ * record, which is the actual product: an unbroken account of what AI the
+ * organisation was running, who was accountable for it, and what changed.
+ */
+
+const DAY = 24 * 60 * 60 * 1000;
+
+const SEVERITY_STYLE: Record<Drift['severity'], string> = {
+  BLOCKING: 'border-red-200 bg-red-50 text-red-900',
+  MATERIAL: 'border-amber-200 bg-amber-50 text-amber-900',
+  ADVISORY: 'border-slate-200 bg-slate-50 text-slate-700',
+};
+
+function ago(iso: string, now: number) {
+  const d = Math.floor((now - new Date(iso).getTime()) / DAY);
+  if (d <= 0) {
+    const h = Math.floor((now - new Date(iso).getTime()) / (60 * 60 * 1000));
+    return h <= 0 ? 'just now' : `${h}h ago`;
+  }
+  return d === 1 ? 'yesterday' : `${d}d ago`;
+}
+
+export default async function ContinuityRecordPage() {
+  const session = (await getSession()) as Session | null;
+  const orgId = session?.user?.orgId as string | undefined;
+  if (!orgId) redirect('/login');
+
+  const [record, overview] = await Promise.all([
+    readContinuity(orgId, 200),
+    buildOrgOverview(orgId),
+  ]);
+
+  const now = Date.now();
+  const firstRun = record.total === 0;
+  const chainOk = record.chain.valid;
+
+  return (
+    <DashboardShell>
+      <div className="max-w-[1100px] mx-auto md:py-4 space-y-6">
+        <header className="flex flex-col md:flex-row md:items-center gap-5 md:gap-8 pb-7 md:pb-8 border-b border-[#dde2e8]" data-tour="standing">
+          <StandingSeal phase={phaseFromCertificationStatus(overview?.organisation.certificationStatus)} />
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-medium text-[#8a6a1f]">Continuity record</p>
+            <h1 className="font-serif text-[30px] md:text-[34px] leading-tight font-semibold text-[#0e1b2c]">
+              {overview?.organisation.name ?? 'Your organisation'}
+            </h1>
+            <p className="mt-3 text-[15px] text-[#5e6b7b] max-w-xl leading-relaxed">
+              {firstRun
+                ? 'Nothing recorded yet. The first observation sets the opening balance — every AI system you have declared, everyone accountable for one, and the state each is in today.'
+                : `${record.total} change${record.total === 1 ? '' : 's'} recorded since ${new Date(
+                    record.since!
+                  ).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })}.`}
+            </p>
+          </div>
+          <ObserveButton firstRun={firstRun} />
+        </header>
+
+        {!firstRun && (
+          <div
+            className={`rounded-2xl border px-5 py-4 ${
+              chainOk ? 'border-[#2e7a57]/20 bg-[#2e7a57]/[0.05]' : 'border-[#b23a35]/30 bg-[#b23a35]/[0.06]'
+            }`}
+          >
+            <div className="flex items-baseline justify-between gap-4 flex-wrap">
+              <span
+                className={`text-[13px] font-semibold ${
+                  chainOk ? 'text-[#2e7a57]' : 'text-[#b23a35]'
+                }`}
+              >
+                {chainOk ? 'Chain intact' : `Chain broken at #${record.chain.brokenAtSeq}`}
+              </span>
+              <span className="text-[12.5px] text-[#5e6b7b]">
+                {record.total} links verified
+                {record.lastObservedAt
+                  ? `, last observed ${ago(record.lastObservedAt, now)}`
+                  : ''}
+              </span>
+            </div>
+            <p className="mt-1 text-[13px] text-[#5e6b7b] leading-relaxed max-w-3xl">
+              {chainOk
+                ? 'Every entry has been recomputed from its own contents and matches the link before it. The record is append-only at the database level, so an entry cannot be edited or removed — a correction is an additional entry and both stay visible.'
+                : `${record.chain.reason}. This record can no longer be relied on from that point forward and AIC should be told.`}
+            </p>
+          </div>
+        )}
+
+        {record.drift.length > 0 && (
+          <section className="bg-white border border-[#dde2e8] rounded-2xl">
+            <header className="px-4 sm:px-6 py-4 border-b border-[#eef1f5]">
+              <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">What has drifted</h2>
+              <p className="mt-1 text-[13px] text-[#5e6b7b]">
+                Conditions that have gone stale or that the record now contradicts. AIC reports
+                what it sees; deciding what to do about it is yours.
+              </p>
+            </header>
+            <ul className="p-4 sm:p-6 space-y-3">
+              {record.drift.map((d, i) => (
+                <li
+                  key={`${d.code}-${i}`}
+                  className={`border rounded-md px-4 py-3 ${SEVERITY_STYLE[d.severity]}`}
+                >
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="text-sm font-bold">{d.title}</h3>
+                    <span className="text-[11px] font-semibold shrink-0">
+                      {d.severity.charAt(0) + d.severity.slice(1).toLowerCase()}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed opacity-90">{d.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <section className="bg-white border border-[#dde2e8] rounded-2xl" id="record">
+          <header className="px-4 sm:px-6 pt-5 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4">
+            <div>
+              <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">The record</h2>
+              <p className="mt-1 text-[13px] text-[#5e6b7b]">
+                Every change to your AI estate, newest first. Open an entry to see what moved, who moved it, and the link that ties it to the one before.
+              </p>
+            </div>
+            <Link href="/overview" className="text-[13px] font-medium text-[#8a6a1f] hover:underline underline-offset-2 shrink-0">
+              See the current estate
+            </Link>
+          </header>
+          <ContinuityFeed events={record.events} now={now} chainOk={chainOk} />
+          {record.total > record.events.length && (
+            <footer className="px-4 sm:px-6 py-3 border-t border-[#eef1f5] text-[12.5px] text-[#8a95a3]">
+              Showing the most recent {record.events.length} of {record.total} entries.
+            </footer>
+          )}
+        </section>
+
+        <footer className="pt-6 border-t border-[#dde2e8]">
+          <p className="text-[12.5px] text-[#8a95a3] leading-relaxed max-w-3xl">
+            This record covers what has been declared to AIC and what AIC has observed in the
+            decision log. It is not a determination of legal compliance in any jurisdiction, and
+            the completeness of the AI inventory remains a declaration by the organisation.
+          </p>
+        </footer>
+      </div>
+    </DashboardShell>
+  );
+}

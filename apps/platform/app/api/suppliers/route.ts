@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getTenantDb, suppliers, supplierReviews, integrations, eq, desc } from '@aic/db';
+import { getTenantDb, suppliers, supplierReviews, supplierDocumentReads, integrations, eq, desc } from '@aic/db';
 import { orgCaller, guarded } from '@/lib/registers/caller';
-import { supplierState, supplierFlags, nextReview, KNOWN_SUPPLIERS, cleanSupplier } from '@/lib/registers/suppliers';
+import { supplierState, supplierFlags, nextReview, KNOWN_SUPPLIERS, cleanSupplier, documentConcerns } from '@/lib/registers/suppliers';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +15,21 @@ export async function GET() {
       revs: await tx.select().from(supplierReviews).where(eq(supplierReviews.orgId, c.orgId)).orderBy(desc(supplierReviews.reviewedAt)),
       ints: await tx.select({ provider: integrations.provider }).from(integrations).where(eq(integrations.orgId, c.orgId)),
     }));
+    // Document reads arrive with migration 017; before it, suppliers simply have none.
+    let docs: { supplierId: string; createdAt: Date; findings: unknown; fileName: string }[] = [];
+    try {
+      docs = await getTenantDb(c.orgId).query((tx) => tx.select({ supplierId: supplierDocumentReads.supplierId, createdAt: supplierDocumentReads.createdAt, findings: supplierDocumentReads.findings, fileName: supplierDocumentReads.fileName })
+        .from(supplierDocumentReads).where(eq(supplierDocumentReads.orgId, c.orgId)).orderBy(desc(supplierDocumentReads.createdAt)));
+    } catch { /* 017 not applied */ }
     const list = rows.map((s) => {
       const history = revs.filter((r) => r.supplierId === s.id);
       const last = history[0] ?? null;
-      return { ...s, lastReview: last, reviews: history.slice(0, 5), state: supplierState({ nextReviewAt: s.nextReviewAt, lastOutcome: last?.outcome ?? null }), flags: supplierFlags(s) };
+      const mine = docs.filter((d) => d.supplierId === s.id);
+      return {
+        ...s, lastReview: last, reviews: history.slice(0, 5), state: supplierState({ nextReviewAt: s.nextReviewAt, lastOutcome: last?.outcome ?? null }),
+        flags: [...supplierFlags(s), ...documentConcerns(mine)],
+        documents: { count: mine.length, latest: mine[0] ? { fileName: mine[0].fileName, createdAt: mine[0].createdAt } : null },
+      };
     });
     const listed = new Set(rows.map((r) => r.name.trim().toLowerCase()));
     const suggestions = [...new Set(ints.map((i) => i.provider))]

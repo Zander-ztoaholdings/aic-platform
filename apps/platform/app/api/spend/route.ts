@@ -4,6 +4,8 @@ import { policyCaller } from '@/lib/policies';
 import { summariseSpend, type UsageRow } from '@/lib/spend';
 import { adviseModels, totalSaving, type ModelUsage } from '@/lib/spend-switch';
 import { PRICES_AS_OF, PRICE_SOURCES } from '@/lib/ai-prices';
+import { modelTrials, desc } from '@aic/db';
+import { latestPerPair, trialVerdict, suggestJudge, scriptSupports } from '@/lib/model-trials';
 
 export const dynamic = 'force-dynamic';
 
@@ -34,12 +36,19 @@ export async function GET() {
     byModel.set(r.model, u);
   }
   const advice = adviseModels([...byModel.values()], now);
+  // Results of the client's own trials (lib/model-trials), newest per pair. Before migration 017 there are none.
+  let trials: { fromModel: string; toModel: string; samples: number; asGood: number; worse: number; failed: number; createdAt: Date; verdict: string; sentence: string }[] = [];
+  try {
+    const rows = await getTenantDb(c.orgId).query((tx) => tx.select().from(modelTrials).where(eq(modelTrials.orgId, c.orgId)).orderBy(desc(modelTrials.createdAt)).limit(200));
+    trials = latestPerPair(rows).map((t) => ({ fromModel: t.fromModel, toModel: t.toModel, samples: t.samples, asGood: t.asGood, worse: t.worse, failed: t.failed, createdAt: t.createdAt, ...trialVerdict(t) }));
+  } catch { /* 017 not applied */ }
+  const judges = Object.fromEntries(advice.flatMap((a) => a.options.map((o) => [`${a.model}|${o.to}`, scriptSupports(a.model) && scriptSupports(o.to) ? suggestJudge(a.model, o.to) : null])));
   const advised = new Set(advice.filter((a) => a.options.length).map((a) => a.model));
   return NextResponse.json({
     ...summary,
     // The switch advice below says the same thing with figures, so the older generic flag is dropped for those models.
     flags: summary.flags.filter((f) => !(f.kind === 'premium_short' && [...advised].some((m) => f.title.startsWith(m + ' ')))),
-    switches: { advice, total: totalSaving(advice), asOf: PRICES_AS_OF, sources: PRICE_SOURCES },
+    switches: { advice, total: totalSaving(advice), asOf: PRICES_AS_OF, sources: PRICE_SOURCES, trials, judges },
     canManage: c.canManage,
   });
 }

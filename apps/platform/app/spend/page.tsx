@@ -6,6 +6,8 @@ import { AlertTriangle, Info } from 'lucide-react';
 import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
 import { SectionCard } from '@/app/components/ui/Eyebrow';
+import { TrialDrawer } from './TrialDrawer';
+import { sameModel } from '@/lib/model-trials';
 
 type Slice = { key: string; label: string; cost: number; requests: number; share: number };
 type Flag = { kind: string; severity: 'warn' | 'info'; title: string; detail: string };
@@ -13,13 +15,15 @@ type Data = {
   last30: number; monthToDate: number; lastMonth: number; projected: number | null; budget: number | null;
   daily: { day: string; cost: number }[]; byProvider: Slice[]; byModel: Slice[]; bySystem: Slice[];
   flags: Flag[]; hasData: boolean; canManage: boolean;
-  switches?: { advice: Advice[]; total: number; asOf: string; sources: { provider: string; url: string }[] };
+  switches?: { advice: Advice[]; total: number; asOf: string; sources: { provider: string; url: string }[]; trials?: Trial[]; judges?: Record<string, string | null> };
 };
 type SwitchOption = { to: string; provider: string; tier: string; estimate: number; saving: number; savingShare: number; reason: string; kind: 'replacement' | 'same_provider' | 'other_provider'; promoUntil: string | null };
 type Advice = {
   model: string; provider: string; matched: string | null; tier: string | null; cost: number; listEstimate: number | null; avgOutputTokens: number | null;
   ending: { on: string | null; status: 'deprecated' | 'retired'; daysLeft: number | null } | null; options: SwitchOption[];
 };
+type Trial = { fromModel: string; toModel: string; samples: number; asGood: number; worse: number; failed: number; createdAt: string; verdict: 'passed' | 'mixed' | 'failed'; sentence: string };
+const TRIAL_TONE = { passed: 'text-[#2e7a57]', mixed: 'text-[#b45309]', failed: 'text-[#b23a35]' } as const;
 const PROVIDER: Record<string, string> = { openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google', mistral: 'Mistral' };
 const KIND: Record<SwitchOption['kind'], string> = { replacement: 'The provider’s replacement', same_provider: 'Same provider', other_provider: 'Another provider' };
 const longDate = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -27,13 +31,15 @@ const longDate = (d: string) => new Date(d + 'T00:00:00Z').toLocaleDateString('e
 function Switches({ s }: { s: NonNullable<Data['switches']> }) {
   const shown = s.advice.filter((a) => a.ending || a.options.length);
   const unknown = s.advice.filter((a) => !a.matched);
+  const [testing, setTesting] = useState<{ from: string; to: string; judge: string | null } | null>(null);
+  const trialFor = (from: string, to: string) => (s.trials ?? []).find((t) => sameModel(t.fromModel, from) && sameModel(t.toModel, to)) ?? null;
   return (
     <SectionCard>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-[15px] font-semibold text-[#0e1b2c]">Cheaper ways to run the same work</h2>
         {s.total >= 1 && <p className="text-[14px] text-[#0e1b2c]">Up to <span className="font-semibold text-[#2e7a57]">{usd(s.total)} a month</span> with the same provider</p>}
       </div>
-      <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-[#5e6b7b]">Each figure is your last 30 days of tokens priced on another model. AIC never sees your prompts or answers, so it cannot tell whether a cheaper model is good enough: run a sample of real requests through it and compare before you switch.</p>
+      <p className="mt-1 max-w-3xl text-[13px] leading-relaxed text-[#5e6b7b]">Each figure is your last 30 days of tokens priced on another model. AIC never sees your prompts or answers, so the price alone cannot tell you whether a cheaper model is good enough. Test it on your own requests: the test runs on your machine and only the score comes back here.</p>
       {shown.length === 0 ? (
         <p className="mt-4 text-[14px] text-[#0e1b2c]">Nothing to suggest: each model you use is current, and nothing comparable is clearly cheaper for your mix of requests.</p>
       ) : (
@@ -57,6 +63,14 @@ function Switches({ s }: { s: NonNullable<Data['switches']> }) {
                       <div className="min-w-0">
                         <p className="text-[14px] text-[#0e1b2c]"><span className="font-medium">{o.to}</span> <span className="text-[12.5px] text-[#8a95a3]">{KIND[o.kind]}{o.kind === 'other_provider' ? `, ${PROVIDER[o.provider] ?? o.provider}` : ''}</span></p>
                         <p className="mt-0.5 text-[13px] leading-relaxed text-[#5e6b7b]">{o.reason}{o.promoUntil ? ` The price is promotional until ${longDate(o.promoUntil)} and rises after that.` : ''}</p>
+                        {(() => {
+                          const t = trialFor(a.model, o.to);
+                          if (t) return <p className={`mt-1 text-[13px] font-medium ${TRIAL_TONE[t.verdict]}`}>Tested on {t.samples} of your requests on {new Date(t.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}: {t.sentence}</p>;
+                          const judge = s.judges?.[`${a.model}|${o.to}`];
+                          return judge !== undefined && judge !== null
+                            ? <button type="button" onClick={() => setTesting({ from: a.model, to: o.to, judge })} className="mt-1 text-[13px] font-medium text-[#0e1b2c] underline decoration-[#a8772a] underline-offset-2">Test it on your own requests</button>
+                            : null;
+                        })()}
                       </div>
                       <div className="text-[13px] md:text-right">
                         <p className="text-[#0e1b2c]">About {usd(o.estimate)} a month</p>
@@ -77,6 +91,7 @@ function Switches({ s }: { s: NonNullable<Data['switches']> }) {
           return <span key={p}>{i > 0 ? (i === arr.length - 1 ? ' and ' : ', ') : ''}<a href={src.url} target="_blank" rel="noreferrer" className="underline decoration-[#c9ced6] underline-offset-2 hover:text-[#0e1b2c]">{PROVIDER[p] ?? p}</a></span>;
         })}, checked {longDate(s.asOf)}. Batch, caching and negotiated discounts are not included.
       </p>
+      {testing && <TrialDrawer from={testing.from} to={testing.to} judge={testing.judge} onClose={() => setTesting(null)} />}
     </SectionCard>
   );
 }

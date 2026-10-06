@@ -1,23 +1,10 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@aic/auth';
-import { getSystemDb, capabilities } from '@aic/db';
-import { hasCapability } from '@/lib/rbac';
+import { superAdminCaller, capabilityList } from '@/lib/rbac-admin';
 
-/** The full capability directory - app/admin/permissions ("God Mode"). */
+export const dynamic = 'force-dynamic';
+
+/** Every capability the platform checks, with what it allows. Super admins only. */
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  const authorized = await hasCapability(session.user.id, 'access_admin_tools');
-  if (!authorized) {
-    return NextResponse.json({ error: 'Forbidden', message: 'Missing capability: access_admin_tools' }, { status: 403 });
-  }
-
-  try {
-    const db = getSystemDb();
-    const rows = await db.select().from(capabilities).orderBy(capabilities.category, capabilities.name);
-    return NextResponse.json(rows);
-  } catch (_error) {
-    return NextResponse.json({ error: 'Failed to fetch capabilities' }, { status: 500 });
-  }
+  if (!(await superAdminCaller())) return NextResponse.json({ error: 'Only a super admin can see permissions.' }, { status: 403 });
+  return NextResponse.json(capabilityList());
 }

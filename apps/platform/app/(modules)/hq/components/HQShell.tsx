@@ -42,7 +42,7 @@ export default function HQShell({ children }: { children: React.ReactNode }) {
       routes: [
         { label: 'Regulatory Stack', href: '/governance/legal' },
         { label: 'Information Regulator', href: '/governance/regulator' },
-        { label: 'SADC Mapping', href: '/governance/sadc' },
+        { label: 'Markets', href: '/markets' },
         { label: 'Constitutional Rights', href: '/governance/constitution' }
       ]
     },

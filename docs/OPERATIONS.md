@@ -16,7 +16,9 @@ Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platfo
 
 **016 (risk and people)** adds the supplier register, risk register, training records, access reviews and the people list. Nothing existing depends on them: until it is in, those five pages say the migration is needed and the matching controls show no evidence. Paste `db/manual/run-016-in-platform-terminal.txt` the same way; it ends with `✓ 016 verified`. Rebuild the demo company afterwards (Admin, Demo company) so it has the registers filled in.
 
-**Check:** `/api/health` shows `schema: ok, up to date with 015`.
+**017 (tools and markets)** adds the agent runtime (agents, agent_runs, agent_run_steps), model trials, supplier document reads, connector run history and the HQ markets tracker (seeded with South Africa live, Botswana and Mauritius mapped). Nothing existing depends on it: until it is in, Agents, Markets, Connector health and supplier documents say the migration is needed. Paste `db/manual/run-017-in-platform-terminal.txt` the same way; it ends with `✓ 017 verified`.
+
+**Check:** `/api/health` shows `schema: ok` and names the newest migration applied.
 
 ## 2. Tenant isolation (row-level security)
 
@@ -141,7 +143,7 @@ Systems that hold a decision for a person (`require_review: true`) can be called
 Three features use a language model when one is configured: drafting questionnaire answers the rules cannot place, suggesting which common controls a custom framework's requirements map to, and a first read of each uploaded evidence document. Without it they fall back to rules and nothing breaks.
 
 1. Create an API key on **AIC's own** Anthropic account (not a client's). Ask Anthropic for zero data retention on that account.
-2. Set `AIC_AI_API_KEY` on aic-platform. Optionally `AIC_AI_MODEL` (default `claude-sonnet-4-5`; set it to a current model name if that one is retired).
+2. Set `AIC_AI_API_KEY` on aic-platform. Optionally `AIC_AI_MODEL` (default `claude-sonnet-5-5`; set it to a current model name if that one is retired).
 3. Before switching it on for a client, the DPA must list Anthropic as a sub-processor and cover the transfer outside South Africa (POPIA section 72). Until the lawyer has signed that off, leave it off in production.
 
 **Check:** `/api/health` shows `ai_assist: on (<model>)`. Upload a PDF in the Evidence Vault; the confirmation shows AIC's first read.
@@ -153,6 +155,16 @@ The catalogue on Connected systems lists AWS, Google Cloud, Azure, Google Worksp
 Two need something on AIC's side. Intune reads devices through AIC's own Microsoft app, so add the application permission `DeviceManagementManagedDevices.Read.All` to that app in Entra and grant admin consent on AIC's tenant; each client's global administrator then re-consents once. Azure reuses the same app and needs nothing new from AIC; the client assigns Reader and Security Reader to it on each subscription.
 
 Every connector is built from the provider's documentation and tested against recorded answers, not yet against a live account. Each one says "New" in the catalogue until it has run against a real tenant; set `verified: true` in `lib/connectors/catalog.ts` once it has. The code marks the specific fields that need confirming with `// Unverified:` comments.
+
+Since 017 every sync and connect attempt is recorded in `connector_runs`, and staff see the result on Admin, Connector health. A connector loses its "New" badge automatically once it has completed a run against a real (non-demo) client; the `verified` flag is no longer the only way.
+
+## 10d. Agent runtime (optional tool for clients)
+
+Clients can run their own agents from AIC (Tools, Agents): their own Anthropic or OpenAI key, their instructions, and a short list of tools (web addresses with allowed methods and paths, ask a person, record a decision). AIC checks every call against the tool's scope before it leaves, pauses writes for a person's approval when the tool says so, follows no redirects, and hash-chains every step of every run. Limits per agent: steps and tokens per run, runs per 24 hours, and a monthly budget worked out from published prices. Model usage lands in the AI spend page with source `aic_runtime`. Pausing an agent stops runs in progress at their next step.
+
+It needs `ENCRYPTION_KEY` (section 3) to store model keys and secret headers. Runs execute inside the request (up to 300 seconds, `maxDuration`); a run that waits for a person costs nothing while it waits. For testing against a mock, `AIC_AGENT_ANTHROPIC_URL` and `AIC_AGENT_OPENAI_URL` override the provider addresses; leave them unset in production.
+
+The page and the API both state that the runtime is optional and neither raises nor lowers an organisation's chance of being certified (`TOOLS_NOTICE` in `lib/agents/config.ts`). Keep the same sentence on aiccertified.cloud.
 
 ## 11. The security mailbox
 

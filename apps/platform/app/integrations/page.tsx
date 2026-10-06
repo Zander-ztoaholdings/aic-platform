@@ -199,7 +199,7 @@ function IntegrationsPage() {
         )}
 
         {data && (
-          <ConnectorCatalogue integrations={data.integrations} checks={data.checks} canManage={data.canManage} onChanged={(m) => { setNotice(m); reload(); }} />
+          <ConnectorCatalogue integrations={data.integrations} checks={data.checks} canManage={data.canManage} proven={data.proven} onChanged={(m) => { setNotice(m); reload(); }} />
         )}
       </div>
     </DashboardShell>

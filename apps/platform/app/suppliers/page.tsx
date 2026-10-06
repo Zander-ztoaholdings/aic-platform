@@ -5,6 +5,7 @@ import { AlertTriangle, Plus, X } from 'lucide-react';
 import { Portal } from '@/app/components/ui/Portal';
 import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '@/app/components/ui/PageHeader';
+import { SupplierDocuments } from './SupplierDocuments';
 import { CATEGORIES, CATEGORY_LABEL, DATA_KINDS, DATA_LABEL, OUTCOME_LABEL, REVIEW_MONTHS, type SupplierState } from '@/lib/registers/suppliers';
 
 type Review = { id: string; outcome: string; notes: string | null; reviewedAt: string; nextReviewAt: string | null };
@@ -85,10 +86,11 @@ function Drawer({ supplier, seed, canManage, onClose, onSaved }: { supplier: Sup
                 <div><dt className="text-[12.5px] text-[#8a95a3]">How much rides on it</dt><dd className="text-[#0e1b2c]">{CRIT_LABEL[supplier.criticality]}, reviewed every {REVIEW_MONTHS[supplier.criticality]} months</dd></div>
                 <div><dt className="text-[12.5px] text-[#8a95a3]">Data processing agreement</dt><dd className="text-[#0e1b2c]">{supplier.hasDpa ? 'Signed' : 'None on file'}</dd></div>
               </dl>
+              <SupplierDocuments supplierId={supplier.id} canManage={canManage && supplier.status === 'active'} onUse={(o, n) => { if (o) setOutcome(o); if (n) setNotes(n); document.getElementById('record-review')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }} />
               {canManage && supplier.status === 'active' && (
-                <section className="rounded-xl border border-[#dde2e8] p-4">
+                <section id="record-review" className="rounded-xl border border-[#dde2e8] p-4">
                   <h3 className="text-[15px] font-semibold text-[#0e1b2c]">Record a review</h3>
-                  <p className="mt-0.5 text-[13px] text-[#5e6b7b]">Look at their security report or certificate, their data processing terms, and anything that has changed. Then record what you decided.</p>
+                  <p className="mt-0.5 text-[13px] text-[#5e6b7b]">Look at their security documents above, their data processing terms, and anything that has changed. Then record what you decided.</p>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {Object.entries(OUTCOME_LABEL).map(([k, v]) => <button key={k} type="button" onClick={() => setOutcome(k)} className={chip(outcome === k)}>{v}</button>)}
                   </div>

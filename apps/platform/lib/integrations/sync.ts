@@ -16,6 +16,7 @@ import { observeEstate } from '../continuity-store';
 import { IMPLS, isConnector, credentialsOf, contextFor, importPeople } from '../connectors/registry';
 import { ConnectorError } from '../connectors/types';
 import { forgetLeavers } from '../registers/facts';
+import { recordConnectorRun } from '../connectors/runs';
 
 /**
  * One sync of one organisation's connected systems: read each source, run its
@@ -212,6 +213,7 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
           .where(eq(integrations.id, i.id))
       );
       outcomes.push({ provider: i.provider, status: 'ok', checks: results.length });
+      if (isConnector(i.provider)) await recordConnectorRun(orgId, i.provider, 'ok', results, null, false);
     } catch (err) {
       const status = err instanceof GitHubError || err instanceof ProviderError || err instanceof MicrosoftError || err instanceof ConnectorError ? err.status : 0;
       const connector = isConnector(i.provider);
@@ -238,6 +240,7 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
         if (gone) await tx.delete(integrationChecks).where(eq(integrationChecks.integrationId, i.id));
       });
       outcomes.push({ provider: i.provider, status: gone ? 'disconnected' : 'error', checks: 0, error: message });
+      if (connector) await recordConnectorRun(orgId, i.provider, gone ? 'disconnected' : 'error', null, message, false);
     }
   }
 

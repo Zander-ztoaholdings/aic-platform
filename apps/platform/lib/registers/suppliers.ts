@@ -67,3 +67,55 @@ export function cleanSupplier(b: Record<string, unknown>) {
   } as const;
 }
 
+
+// ── Supplier security documents ─────────────────────────────────────────────
+// AIC's first read of a supplier's SOC 2 report, ISO certificate, pen test
+// summary, DPA or questionnaire answers. The shape lives here (not in lib/ai)
+// so the browser can import it; lib/ai/supplier-doc.ts produces it.
+
+export const DOC_KINDS = ['soc2_type2', 'soc2_type1', 'iso27001', 'pentest', 'dpa', 'questionnaire', 'other'] as const;
+export type SupplierDocKind = (typeof DOC_KINDS)[number];
+export const DOC_KIND_LABEL: Record<SupplierDocKind, string> = {
+  soc2_type2: 'SOC 2 Type 2 report', soc2_type1: 'SOC 2 Type 1 report', iso27001: 'ISO 27001 certificate',
+  pentest: 'Penetration test summary', dpa: 'Data processing agreement', questionnaire: 'Security questionnaire answers', other: 'Other document',
+};
+
+export type SupplierDocFindings = {
+  kind: SupplierDocKind;
+  issuer: string | null;
+  coversFrom: string | null;
+  coversTo: string | null;
+  expires: string | null;
+  scope: string | null;
+  exceptions: string[];
+  dataLocations: string[];
+  subprocessors: string[];
+  personalInformation: 'mentioned' | 'not mentioned';
+  concerns: string[];
+  suggestedOutcome: 'approved' | 'approved_with_conditions' | 'rejected' | null;
+  suggestedNotes: string;
+  /** Anything the reader could not do, e.g. a PDF with the AI service off, or the file not kept. */
+  readNote?: string | null;
+};
+
+const DAY = 86_400_000;
+const isoDay = (v: string | null | undefined) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? Date.parse(`${v}T23:59:59Z`) : NaN);
+
+/** Why a document is out of date, or null when it is not (or its dates are unknown). */
+export function docOutOfDate(f: Pick<SupplierDocFindings, 'expires' | 'coversTo'>, now = Date.now()): 'expired' | 'stale' | null {
+  const exp = isoDay(f.expires);
+  if (!Number.isNaN(exp) && exp < now) return 'expired';
+  const to = isoDay(f.coversTo);
+  if (!Number.isNaN(to) && to < now - 365 * DAY) return 'stale';
+  return null;
+}
+
+export const STALE_DOC_FLAG = 'Their latest security report is out of date.';
+
+/** Register flag from a supplier's document reads: only the newest one counts. */
+export function documentConcerns(reads: { createdAt: Date | string; findings: unknown }[], now = Date.now()): string[] {
+  if (!reads.length) return [];
+  const latest = [...reads].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  const f = (latest.findings ?? {}) as Partial<SupplierDocFindings>;
+  return docOutOfDate({ expires: f.expires ?? null, coversTo: f.coversTo ?? null }, now) ? [STALE_DOC_FLAG] : [];
+}

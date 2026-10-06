@@ -6,6 +6,7 @@ import { IMPLS, contextFor, importPeople } from '@/lib/connectors/registry';
 import { ConnectorError } from '@/lib/connectors/types';
 import { CHECK_BY_KEY } from '@/lib/integrations/catalog';
 import { forgetLeavers } from '@/lib/registers/facts';
+import { recordConnectorRun } from '@/lib/connectors/runs';
 
 type Ctx = { params: Promise<{ key: string }> };
 
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest, { params }: Ctx) {
   } catch (e) {
     const status = e instanceof ConnectorError ? e.status : 0;
     const msg = (e as Error).message;
+    await recordConnectorRun(caller.orgId, key, 'error', null, msg, false);
     return NextResponse.json({
       error: status === 401 || status === 403
         ? `${def.name} did not accept that credential. ${msg}`
@@ -56,6 +58,8 @@ export async function POST(request: NextRequest, { params }: Ctx) {
         : `AIC could not finish reading ${def.name}: ${msg}`,
     }, { status: 400 });
   }
+
+  await recordConnectorRun(caller.orgId, key, 'ok', out.results, null, false);
 
   const secretField = def.fields.find((f) => f.kind === 'secret');
   const hint = secretField && creds[secretField.key] ? `…${creds[secretField.key].slice(-4)}` : null;

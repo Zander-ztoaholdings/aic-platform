@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { ExternalLink, Search, X } from 'lucide-react';
-import { CONNECTORS } from '@/lib/connectors/catalog';
+import { CONNECTORS as ALL_CONNECTORS } from '@/lib/connectors/catalog';
 import { CATEGORY_LABEL, type ConnectorCategory, type ConnectorDef } from '@/lib/connectors/types';
 import { Portal } from '@/app/components/ui/Portal';
 import { ago, type Integration, type Check } from './useIntegrations';
@@ -151,7 +151,9 @@ function Drawer({ def, i, checks, canManage, microsoftConnected, onClose, onDone
   );
 }
 
-export function ConnectorCatalogue({ integrations, checks, canManage, onChanged }: { integrations: Integration[]; checks: Check[]; canManage: boolean; onChanged: (msg: string) => void }) {
+export function ConnectorCatalogue({ integrations, checks, canManage, onChanged, proven = [] }: { integrations: Integration[]; checks: Check[]; canManage: boolean; onChanged: (msg: string) => void; proven?: string[] }) {
+  // A connector that has read a real account somewhere is no longer new.
+  const CONNECTORS = useMemo(() => ALL_CONNECTORS.map((c) => (proven.includes(c.key) ? { ...c, verified: true } : c)), [proven]);
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<ConnectorCategory | 'all' | 'connected'>('all');
   const [open, setOpen] = useState<ConnectorDef | null>(null);

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getTenantDb, integrations, integrationChecks, aiSystems, eq } from '@aic/db';
+import { getTenantDb, getSystemDb, integrations, integrationChecks, aiSystems, connectorRuns, eq } from '@aic/db';
+import { provenConnectors } from '@/lib/connectors/health';
 import { orgCaller } from '@/lib/integrations/http';
 import { CHECKS } from '@/lib/integrations/catalog';
 import { githubAppConfigured } from '@/lib/integrations/github';
@@ -21,7 +22,15 @@ export async function GET() {
     await tx.select({ id: aiSystems.id, name: aiSystems.name, isActive: aiSystems.isActive }).from(aiSystems).where(eq(aiSystems.orgId, caller.orgId)),
   ] as const);
 
+  // Connectors that have read a real account somewhere, so the catalogue stops calling them new.
+  // Says nothing about any other organisation beyond "this connector has worked".
+  let proven: string[] = [];
+  try {
+    proven = provenConnectors(await getSystemDb().select({ orgId: connectorRuns.orgId, connector: connectorRuns.connector, outcome: connectorRuns.outcome, checks: connectorRuns.checks, unknownChecks: connectorRuns.unknownChecks, error: connectorRuns.error, demo: connectorRuns.demo, ranAt: connectorRuns.ranAt }).from(connectorRuns).where(eq(connectorRuns.outcome, 'ok')));
+  } catch { /* migration 017 not applied yet */ }
+
   return NextResponse.json({
+    proven,
     canManage: caller.canManage,
     githubAppConfigured: githubAppConfigured(),
     microsoftConfigured: microsoftConfigured(),

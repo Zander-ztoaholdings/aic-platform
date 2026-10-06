@@ -59,7 +59,8 @@ export async function GET() {
     };
   });
 
-  const unlinked = docs.filter((d) => !d.requirementId && !controlFromSlot(d.slotType)).map((d) => ({
+  // Supplier documents belong to the supplier register, not the vault's loose files.
+  const unlinked = docs.filter((d) => !d.requirementId && !controlFromSlot(d.slotType) && !d.slotType?.startsWith('SUPPLIER:')).map((d) => ({
     id: d.id, title: d.title, createdAt: d.createdAt, slotType: d.slotType,
   }));
 

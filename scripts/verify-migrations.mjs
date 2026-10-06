@@ -90,6 +90,7 @@ check(await hasTable('org_policies') && await hasTable('policy_acceptances'), '0
 check(await hasTable('trust_pages') && await hasTable('questionnaire_items') && await hasColumn('decision_records', 'review_status'), '014 trust, spend, review', '014 trust, spend, review MISSING  <-- recording any decision fails without this');
 check(await hasTable('org_frameworks') && await hasTable('custom_framework_requirements'), '015 frameworks', '015 frameworks MISSING  <-- choosing frameworks and custom frameworks fail without this');
 check(await hasTable('suppliers') && await hasTable('risks') && await hasTable('access_review_items') && await hasTable('org_people'), '016 registers and people', '016 registers and people MISSING  <-- Suppliers, Risks, Training, Access reviews and People fail without this');
+check(await hasTable('agents') && await hasTable('agent_run_steps') && await hasTable('model_trials') && await hasTable('connector_runs') && await hasTable('hq_jurisdictions'), '017 agents, trials and markets', '017 agents, trials and markets MISSING  <-- Agents, model trials, supplier document reads and Markets fail without this');
 
 console.log('\nRow-level security');
 const rls = await one(`

@@ -22,7 +22,8 @@ export type ContentBlock =
   | { type: 'document'; source: { type: 'base64'; media_type: 'application/pdf'; data: string } }
   | { type: 'image'; source: { type: 'base64'; media_type: 'image/png' | 'image/jpeg' | 'image/webp' | 'image/gif'; data: string } };
 
-const DEFAULT_MODEL = 'claude-sonnet-4-5';
+// claude-sonnet-4-5 retires on 30 November 2026 (lib/ai-prices.ts); its successor is the same price or less.
+const DEFAULT_MODEL = 'claude-sonnet-5-5';
 
 export const aiConfigured = () => !!process.env.AIC_AI_API_KEY;
 export const aiModel = () => process.env.AIC_AI_MODEL || DEFAULT_MODEL;

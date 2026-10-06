@@ -37,6 +37,8 @@ export type IntegrationsData = {
   integrations: Integration[];
   checks: Check[];
   catalog: CheckDefinition[];
+  /** Connector keys that have read a real account somewhere. */
+  proven?: string[];
   systems: { id: string; name: string }[];
 };
 

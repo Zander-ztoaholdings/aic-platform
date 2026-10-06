@@ -1373,3 +1373,132 @@ export const orgPeople = pgTable('org_people', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ── 017: agent runtime, model trials, supplier document reads, connector runs, markets ──
+
+export const agents = pgTable('agents', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 120 }).notNull(),
+  slug: varchar('slug', { length: 80 }).notNull(),
+  purpose: text('purpose'),
+  ownerUserId: uuid('owner_user_id').references(() => users.id, { onDelete: 'set null' }),
+  aiSystemId: uuid('ai_system_id').references(() => aiSystems.id, { onDelete: 'set null' }),
+  provider: varchar('provider', { length: 30 }).notNull(),
+  model: varchar('model', { length: 120 }).notNull(),
+  instructions: text('instructions').notNull().default(''),
+  tools: jsonb('tools').notNull().default([]),
+  limits: jsonb('limits').notNull().default({}),
+  status: varchar('status', { length: 20 }).notNull().default('draft'),
+  modelKeyCiphertext: text('model_key_ciphertext'),
+  modelKeyHint: varchar('model_key_hint', { length: 20 }),
+  toolSecretsCiphertext: text('tool_secrets_ciphertext'),
+  version: integer('version').notNull().default(1),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ orgSlug: unique('agents_org_slug').on(t.orgId, t.slug) }));
+
+export const agentRuns = pgTable('agent_runs', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  agentId: uuid('agent_id').notNull().references(() => agents.id, { onDelete: 'cascade' }),
+  agentVersion: integer('agent_version').notNull(),
+  trigger: varchar('trigger', { length: 20 }).notNull(),
+  triggeredBy: uuid('triggered_by').references(() => users.id, { onDelete: 'set null' }),
+  input: text('input').notNull(),
+  status: varchar('status', { length: 30 }).notNull().default('running'),
+  output: text('output'),
+  state: jsonb('state').notNull().default({}),
+  steps: integer('steps').notNull().default(0),
+  inputTokens: bigint('input_tokens', { mode: 'number' }).notNull().default(0),
+  outputTokens: bigint('output_tokens', { mode: 'number' }).notNull().default(0),
+  costUsd: numeric('cost_usd', { precision: 12, scale: 6 }).notNull().default('0'),
+  error: text('error'),
+  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp('finished_at', { withTimezone: true }),
+});
+
+export const agentRunSteps = pgTable('agent_run_steps', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  runId: uuid('run_id').notNull().references(() => agentRuns.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  seq: integer('seq').notNull(),
+  kind: varchar('kind', { length: 30 }).notNull(),
+  name: varchar('name', { length: 120 }),
+  detail: jsonb('detail').notNull().default({}),
+  actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  prevHash: varchar('prev_hash', { length: 64 }),
+  hash: varchar('hash', { length: 64 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ runSeq: unique('agent_run_steps_seq').on(t.runId, t.seq) }));
+
+export const modelTrials = pgTable('model_trials', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  fromModel: varchar('from_model', { length: 120 }).notNull(),
+  toModel: varchar('to_model', { length: 120 }).notNull(),
+  method: varchar('method', { length: 30 }).notNull(),
+  samples: integer('samples').notNull(),
+  asGood: integer('as_good').notNull().default(0),
+  worse: integer('worse').notNull().default(0),
+  failed: integer('failed').notNull().default(0),
+  fromCostUsd: numeric('from_cost_usd', { precision: 12, scale: 6 }),
+  toCostUsd: numeric('to_cost_usd', { precision: 12, scale: 6 }),
+  fromLatencyMs: integer('from_latency_ms'),
+  toLatencyMs: integer('to_latency_ms'),
+  notes: text('notes'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const supplierDocumentReads = pgTable('supplier_document_reads', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  supplierId: uuid('supplier_id').notNull().references(() => suppliers.id, { onDelete: 'cascade' }),
+  documentId: uuid('document_id').references(() => auditDocuments.id, { onDelete: 'set null' }),
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  findings: jsonb('findings').notNull().default({}),
+  readBy: varchar('read_by', { length: 20 }).notNull().default('ai'),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const connectorRuns = pgTable('connector_runs', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  connector: varchar('connector', { length: 40 }).notNull(),
+  outcome: varchar('outcome', { length: 20 }).notNull(),
+  checks: integer('checks').notNull().default(0),
+  unknownChecks: integer('unknown_checks').notNull().default(0),
+  error: text('error'),
+  demo: boolean('demo').notNull().default(false),
+  ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const hqJurisdictions = pgTable('hq_jurisdictions', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  code: varchar('code', { length: 8 }).notNull().unique(),
+  name: varchar('name', { length: 120 }).notNull(),
+  region: varchar('region', { length: 60 }),
+  law: text('law'),
+  automatedDecisionSection: varchar('automated_decision_section', { length: 120 }),
+  regulator: varchar('regulator', { length: 200 }),
+  stage: varchar('stage', { length: 20 }).notNull().default('watching'),
+  ownerName: varchar('owner_name', { length: 200 }),
+  nextStep: text('next_step'),
+  nextStepDue: date('next_step_due'),
+  notes: text('notes'),
+  updatedBy: uuid('updated_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const hqJurisdictionEvents = pgTable('hq_jurisdiction_events', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  jurisdictionId: uuid('jurisdiction_id').notNull().references(() => hqJurisdictions.id, { onDelete: 'cascade' }),
+  actorId: uuid('actor_id').references(() => users.id, { onDelete: 'set null' }),
+  fromStage: varchar('from_stage', { length: 20 }),
+  toStage: varchar('to_stage', { length: 20 }),
+  note: text('note').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
