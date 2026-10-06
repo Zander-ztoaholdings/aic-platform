@@ -54,3 +54,35 @@ export async function readViewAsCookie(): Promise<ViewAs | null> {
     return null;
   }
 }
+
+/**
+ * One browser, one session cookie. If someone signs in as a second account in
+ * another tab, every tab still open on the first account silently starts
+ * acting as the second: a form filled in for one organisation would be saved
+ * into the other. The client pins the account a page was loaded for and sends
+ * it with every API call (see lib/session-guard.ts); the session callback
+ * refuses the request when the cookie now belongs to somebody else.
+ */
+export const EXPECTED_USER_HEADER = 'x-aic-expected-user';
+
+/** The account the calling page was loaded for, or null if it did not say. */
+export async function readExpectedUser(): Promise<string | null> {
+  try {
+    const { headers } = await import('next/headers');
+    const v = (await headers()).get(EXPECTED_USER_HEADER);
+    return v && v.length <= 100 ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Drop any preview left over from an earlier session. Best effort. */
+export async function clearViewAsCookie(): Promise<void> {
+  try {
+    const { cookies } = await import('next/headers');
+    const jar = await cookies();
+    if (jar.get(VIEW_AS_COOKIE)) jar.delete(VIEW_AS_COOKIE);
+  } catch {
+    // Outside a request, or in a context where cookies are read-only.
+  }
+}

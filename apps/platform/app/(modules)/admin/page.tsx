@@ -6,7 +6,8 @@ import { STAFF_NAV, visibleGroups } from '@/app/components/workspace/nav';
 import { StatTile, TileGrid, Panel, StackBar, BarList, ActionList, dailySeries, pct, type Segment } from '@/app/components/dash/Dash';
 import { hasCapability } from '@/lib/rbac';
 import { getStaffDashboard, DECISION_DAYS } from '@/lib/dashboard/staff';
-import type { WorkspaceUser } from '@/lib/workspace';
+import { canUseHq, type WorkspaceUser } from '@/lib/workspace';
+import { BusinessSection } from './components/BusinessSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -213,6 +214,8 @@ export default async function StaffHome() {
             )}
           </div>
         )}
+
+        {canUseHq(user) && <BusinessSection now={now} />}
 
         {groups.length > 0 && (
           <Panel title="Go to">

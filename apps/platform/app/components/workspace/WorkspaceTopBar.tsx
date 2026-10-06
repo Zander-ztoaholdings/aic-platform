@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { signOutEverywhere } from '@/lib/sign-out';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { ChevronDown, LogOut } from 'lucide-react';
@@ -232,7 +232,7 @@ export function WorkspaceTopBar({
                 ))}
                 <div className={`h-px my-1 ${t.divider}`} />
                 <DropdownMenu.Item
-                  onSelect={() => signOut({ callbackUrl: '/login' })}
+                  onSelect={() => signOutEverywhere()}
                   className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] outline-none cursor-pointer ${t.item}`}
                 >
                   <LogOut className={`w-4 h-4 ${t.muted}`} />

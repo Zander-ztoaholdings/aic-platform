@@ -156,8 +156,28 @@ export const STAFF_NAV: NavGroup[] = [
       { label: 'Users', href: '/admin/users', icon: UserCog, description: 'Accounts across every organisation.', visible: (u) => staffCan(u, 'manage_users') },
       { label: 'Permissions', href: '/admin/permissions', icon: Lock, description: 'Roles and what each may do.', visible: (u) => staffCan(u, 'manage_roles') },
       { label: 'Leads', href: '/admin/leads', icon: Target, description: 'The commercial pipeline.', visible: (u) => staffCan(u, 'access_hq') },
-      { label: 'HQ', href: '/hq/governance', icon: LineChart, description: 'Growth, operations, people and regulation.', visible: (u) => canUseHq(u) },
       { label: 'Demo company', href: '/admin/demo', icon: Sparkles, description: 'Build or reset Highveld Credit (Demo) for a prospect demo.', visible: (u) => !!u.isSuperAdmin },
+    ],
+  },
+  // AIC's own business. Its headline figures are on the staff home; these are
+  // the pages behind them. There is deliberately no HQ landing page: the one
+  // there was repeated the staff home.
+  {
+    key: 'hq',
+    label: 'HQ',
+    summary: 'AIC’s own business: growth, markets, quality and regulation.',
+    items: [
+      { label: 'Pipeline', href: '/hq/growth/revenue', icon: LineChart, description: 'Leads by stage, and how fast they move.', visible: (u) => canUseHq(u) },
+      { label: 'CRM', href: '/hq/crm', icon: Contact, description: 'Contacts and conversations.', visible: (u) => canUseHq(u) },
+      { label: 'Markets', href: '/hq/markets', icon: Globe, description: 'Where AIC is watching, preparing or live.', visible: (u) => canUseHq(u) },
+      { label: 'Quality control', href: '/hq/operations/qc', icon: ClipboardCheck, description: 'How assessors’ evidence decisions are landing.', visible: (u) => canUseHq(u) },
+      { label: 'Audit engine', href: '/hq/intelligence/engine', icon: Activity, description: 'The analysis engine’s health.', visible: (u) => canUseHq(u) },
+      { label: 'Staff activity', href: '/hq/people/performance', icon: Users, description: 'What AIC’s own people have been doing.', visible: (u) => canUseHq(u) },
+      { label: 'Assessor academy', href: '/hq/training', icon: GraduationCap, description: 'Training for AIC assessors.', visible: (u) => canUseHq(u) },
+      { label: 'Public insights', href: '/hq/cms', icon: Library, description: 'Articles published on aiccertified.cloud.', visible: (u) => canUseHq(u) },
+      { label: 'Newsletter subscribers', href: '/hq/subscribers', icon: Send, description: 'Who receives AIC’s updates.', visible: (u) => canUseHq(u) },
+      { label: 'Information Regulator', href: '/hq/governance/regulator', icon: Scale, description: 'AIC’s engagement with the regulator.', visible: (u) => canUseHq(u) },
+      { label: 'Regulatory stack', href: '/hq/governance/legal', icon: ScrollText, description: 'The laws and standards AIC certifies against.', visible: (u) => canUseHq(u) },
     ],
   },
 ];

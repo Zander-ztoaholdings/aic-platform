@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
+import { announceSessionChange } from '@/lib/session-guard';
+import { signOutEverywhere } from '@/lib/sign-out';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
@@ -65,6 +67,13 @@ export default function LoginPage() {
   const [isMfaRequired, setIsMfaRequired] = useState(false);
   const [arrival, setArrival] = useState<string | null>(null);
   const [prefillEmail, setPrefillEmail] = useState('');
+  // Already signed in on this browser. Signing in again would swap the
+  // account under every other open tab, so the form is withheld until the
+  // current account signs out. `signingIn` keeps the panel from flashing up
+  // in the moment between a successful sign-in here and the redirect.
+  const { data: current, status: sessionStatus } = useSession();
+  const [signingIn, setSigningIn] = useState(false);
+  const signedInAs = sessionStatus === 'authenticated' && !signingIn ? (current?.user?.email ?? current?.user?.name ?? 'another account') : null;
   useEffect(() => {
     setArrival(arrivalMessage());
     setPrefillEmail(new URLSearchParams(window.location.search).get('email') ?? '');
@@ -109,6 +118,8 @@ export default function LoginPage() {
     const password = formData.get('password') as string;
     const mfaToken = formData.get('mfaToken') as string;
 
+    setSigningIn(true);
+    announceSessionChange();
     try {
         const result = await signIn('credentials', {
             email,
@@ -284,6 +295,24 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {signedInAs ? (
+            <div className="space-y-4">
+              <p className="text-[14px] leading-relaxed text-[#2b3a4d]">
+                This browser is already signed in as <strong className="font-semibold text-[#0e1b2c]">{signedInAs}</strong>.
+              </p>
+              <p className="text-[13px] leading-relaxed text-[#5e6b7b]">
+                To use a different account, sign out first. Every open AIC tab in this browser shares one account, so signing in as someone else here would change it under those tabs too. For two accounts at once, use a private window or another browser profile.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button type="button" onClick={() => router.push(startUrl())} className="h-11 rounded-full bg-[#0e1b2c] px-5 text-[14px] font-medium text-white hover:bg-[#22344a]">
+                  Continue as {signedInAs}
+                </button>
+                <button type="button" onClick={() => signOutEverywhere()} className="h-11 rounded-full border border-[#dde2e8] px-5 text-[14px] font-medium text-[#0e1b2c] hover:border-[#a8772a]">
+                  Sign out and use another account
+                </button>
+              </div>
+            </div>
+          ) : (<>
           {arrival && !error && (
             <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-[11px] leading-relaxed">
               {arrival}
@@ -310,7 +339,7 @@ export default function LoginPage() {
               {ssoProviders.includes('google') && (
               <button
                 type="button"
-                onClick={() => signIn('google', { callbackUrl: startUrl() })}
+                onClick={() => { announceSessionChange(); signIn('google', { callbackUrl: startUrl() }); }}
                 className="flex items-center justify-center gap-2 border border-[#dde2e8] rounded-xl py-2.5 text-[11.5px] font-bold text-[#5e6b7b] hover:border-[#a8772a] hover:text-[#a8772a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
@@ -325,7 +354,7 @@ export default function LoginPage() {
               {ssoProviders.includes('microsoft-entra-id') && (
               <button
                 type="button"
-                onClick={() => signIn('microsoft-entra-id', { callbackUrl: startUrl() })}
+                onClick={() => { announceSessionChange(); signIn('microsoft-entra-id', { callbackUrl: startUrl() }); }}
                 className="flex items-center justify-center gap-2 border border-[#dde2e8] rounded-xl py-2.5 text-[11.5px] font-bold text-[#5e6b7b] hover:border-[#a8772a] hover:text-[#a8772a] transition-colors"
               >
                 <svg className="w-3.5 h-3.5" viewBox="0 0 23 23">
@@ -425,6 +454,7 @@ export default function LoginPage() {
               </button>
             </form>
           </div>
+          </>)}
 
           <div className="text-center">
             <p className="text-[12px] text-[#8a95a3] first-cap">

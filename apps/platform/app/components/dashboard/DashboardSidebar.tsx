@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { signOutEverywhere } from '@/lib/sign-out';
 import {
   LayoutDashboard, ShieldCheck, Activity, AlertTriangle,
   FileCheck, MessageSquare, Award, GraduationCap, Key, Building2, LogOut, Boxes, ExternalLink, Users, Sparkles,
@@ -200,7 +200,7 @@ export function DashboardSidebar({
           <ExternalLink className="w-3.5 h-3.5" /> aiccertified.cloud
         </a>
         <button 
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={() => signOutEverywhere()}
           className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-white/30 text-xs transition-colors hover:text-red-400"
         >
           <LogOut className="w-3.5 h-3.5" /> Sign out

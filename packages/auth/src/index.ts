@@ -7,7 +7,7 @@ import { getSystemDb, users, organizations, auditLogs, eq, like, EncryptionServi
 import { UserRole, CertificationTier, Permissions } from "@aic/types"
 import jwt from 'jsonwebtoken';
 import { MFAService } from "./services/mfa";
-import { readViewAsCookie, type ViewAs } from "./view-as";
+import { readViewAsCookie, readExpectedUser, clearViewAsCookie, type ViewAs } from "./view-as";
 
 const PRIVATE_KEY = process.env.PLATFORM_PRIVATE_KEY?.replace(/\\n/g, '\n');
 const PUBLIC_KEY = process.env.PLATFORM_PUBLIC_KEY?.replace(/\\n/g, '\n');
@@ -249,7 +249,14 @@ export const authConfig: NextAuthConfig = {
     maxAge: 24 * 60 * 60, // 24 hours
   },
   events: {
+    // A preview cookie belongs to the session that set it. Left behind, it
+    // carried into the next account signed in on the same browser, and the
+    // middleware then refused every write as "preview mode".
+    async signIn() {
+      await clearViewAsCookie();
+    },
     async signOut(message) {
+      await clearViewAsCookie();
       if ('token' in message && message.token) {
         const { token } = message;
         if (token.jti && token.exp) {
@@ -411,6 +418,15 @@ export const authConfig: NextAuthConfig = {
       return token
     },
     async session({ session, token }) {
+      // A page loaded for one account, calling the API after the browser was
+      // signed in to another: answer as if signed out, so nothing it sends is
+      // saved under the wrong account. See EXPECTED_USER_HEADER.
+      const expected = token?.id ? await readExpectedUser() : null
+      if (expected && expected !== token.id) {
+        // `user: null` and not just leaving it out: next-auth's server-side
+        // wrapper fills a missing user in from the token.
+        return { expires: session.expires, user: null } as unknown as typeof session
+      }
       if (token && session.user) {
         session.user.id = token.id
         session.user.role = token.role

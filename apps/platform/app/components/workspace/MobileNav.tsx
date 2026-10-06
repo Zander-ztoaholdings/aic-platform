@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { signOut } from 'next-auth/react';
+import { signOutEverywhere } from '@/lib/sign-out';
 import { ChevronDown, LogOut, Search, X, LayoutGrid } from 'lucide-react';
 import type { NavGroup, NavItem } from './nav';
 
@@ -157,7 +157,7 @@ export function MobileNav({ tabs, groups, accountItems, isActive, contextLabel, 
                       <x.icon className="h-[18px] w-[18px] text-[#5e6b7b]" />{x.label}
                     </button>
                   ))}
-                  <button type="button" onClick={() => signOut({ callbackUrl: '/login' })} className="flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] text-[#b42318] active:bg-[#eef1f5]">
+                  <button type="button" onClick={() => signOutEverywhere()} className="flex min-h-[48px] w-full items-center gap-3 rounded-xl px-3 text-left text-[15px] text-[#b42318] active:bg-[#eef1f5]">
                     <LogOut className="h-[18px] w-[18px]" />Sign out
                   </button>
                 </div>
