@@ -10,7 +10,7 @@ import {
 import { evaluateRepo, evaluateOrg2fa } from './github-checks';
 import { pullUsage, ProviderError, type Provider } from './providers';
 import { evaluateProvider } from './provider-checks';
-import { collectTenantFacts, microsoftConfigured, MicrosoftError } from './microsoft';
+import { collectTenantFacts, microsoftConfigured, MicrosoftError, tenantProven } from './microsoft';
 import { evaluateTenant } from './microsoft-checks';
 import { observeEstate } from '../continuity-store';
 import { IMPLS, isConnector, credentialsOf, contextFor, importPeople } from '../connectors/registry';
@@ -198,6 +198,10 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
       } else if (i.provider === 'microsoft') {
         if (!microsoftConfigured()) throw new Error('The AIC Microsoft app is not configured on this server.');
         if (!i.externalId) throw new Error('No Microsoft tenant is recorded for this connection.');
+        // Connected before the sign-in proof existed: the tenant in it came from
+        // an address that could have been edited, so it is not read again until
+        // an administrator reconnects and signs in.
+        if (!tenantProven(i.settings)) throw new Error('Reconnect Microsoft 365 and sign in with an account from your organisation, so AIC can confirm the tenant is yours. Until then AIC does not read it.');
         const facts = await collectTenantFacts(i.externalId);
         const subject = facts.tenantName ?? i.accountLabel ?? i.externalId;
         results = evaluateTenant(subject, facts);

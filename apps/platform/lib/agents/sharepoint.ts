@@ -11,6 +11,7 @@
  * MS_LOGIN_URL, MS_GRAPH_URL (shared with the evidence app).
  */
 import { docxText } from '@/lib/ai/docx-text';
+import { redeemSignIn as redeemMsSignIn } from '@/lib/integrations/microsoft';
 import { graphItemPath, graphSitePath, SP_MAX_READ_BYTES, type SharePointTool, type SpOp } from './sharepoint-scope';
 
 const LOGIN = () => (process.env.MS_LOGIN_URL || 'https://login.microsoftonline.com').replace(/\/$/, '');
@@ -44,24 +45,8 @@ export function agentSignInUrl(tenantId: string, state: string, redirectUri: str
 }
 
 /** Redeems the sign-in code and returns who signed in, from the ID token. */
-export async function redeemSignIn(tenantId: string, code: string, redirectUri: string, f: typeof fetch = fetch): Promise<{ tid: string; homeTenant: boolean } | null> {
-  const res = await f(`${LOGIN()}/${encodeURIComponent(tenantId)}/oauth2/v2.0/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: process.env.MS_AGENT_CLIENT_ID ?? '', client_secret: process.env.MS_AGENT_CLIENT_SECRET ?? '', grant_type: 'authorization_code', code, redirect_uri: redirectUri, scope: 'openid' }),
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!res.ok) return null;
-  const idToken = ((await res.json()) as { id_token?: string }).id_token;
-  // Received directly from Microsoft over TLS, so its claims can be read without checking the signature.
-  const part = idToken?.split('.')[1];
-  if (!part) return null;
-  let claims: { tid?: string; iss?: string; idp?: string };
-  try { claims = JSON.parse(Buffer.from(part, 'base64url').toString('utf8')); } catch { return null; }
-  if (!claims.tid) return null;
-  // A guest from another organisation signs in with an idp claim naming their own tenant.
-  const homeTenant = !claims.idp || claims.idp === claims.iss || claims.idp.includes(claims.tid);
-  return { tid: claims.tid.toLowerCase(), homeTenant };
+export function redeemSignIn(tenantId: string, code: string, redirectUri: string, f: typeof fetch = fetch): Promise<{ tid: string; homeTenant: boolean } | null> {
+  return redeemMsSignIn(tenantId, code, redirectUri, f, process.env.MS_AGENT_CLIENT_ID ?? '', process.env.MS_AGENT_CLIENT_SECRET ?? '');
 }
 
 export class SharePointError extends Error {

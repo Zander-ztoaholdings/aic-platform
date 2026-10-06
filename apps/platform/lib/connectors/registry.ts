@@ -7,6 +7,7 @@
 import { getTenantDb, integrations, orgPeople, EncryptionService, eq, and } from '@aic/db';
 import type { Account } from '../registers/accounts';
 import { CONNECTOR_BY_KEY } from './catalog';
+import { tenantProven } from '@/lib/integrations/microsoft';
 import { ConnectorError, type ConnectorImpl, type Credentials, type RunContext, type PersonRecord } from './types';
 import { aws } from './providers/aws';
 import { gcp } from './providers/gcp';
@@ -51,12 +52,13 @@ export function credentialsOf(i: Row): Credentials {
   try { return JSON.parse(text) as Credentials; } catch { throw new ConnectorError(400, 'The stored credential could not be read. Connect again.'); }
 }
 
-/** The Microsoft 365 tenant, for Azure and Intune. */
+/** The Microsoft 365 tenant, for Azure and Intune, once it has been proved. */
 export async function microsoftTenant(orgId: string): Promise<string | null> {
   const [m] = await getTenantDb(orgId).query((tx) =>
-    tx.select({ externalId: integrations.externalId, status: integrations.status }).from(integrations)
+    tx.select({ externalId: integrations.externalId, status: integrations.status, settings: integrations.settings }).from(integrations)
       .where(and(eq(integrations.orgId, orgId), eq(integrations.provider, 'microsoft'))).limit(1));
-  return m && m.status !== 'disconnected' ? m.externalId : null;
+  // Only a tenant proved by sign-in; see tenantProven.
+  return m && m.status !== 'disconnected' && tenantProven(m.settings) ? m.externalId : null;
 }
 
 export async function contextFor(orgId: string, provider: string): Promise<RunContext> {

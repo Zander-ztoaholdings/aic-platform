@@ -38,6 +38,54 @@ export function consentUrl(state: string, redirectUri: string): string {
   return `${LOGIN()}/organizations/v2.0/adminconsent?${qs}`;
 }
 
+/**
+ * PROVING THE TENANT. The admin-consent screen sends the administrator back
+ * with the tenant id in the address, and anyone can edit an address. Any
+ * tenant that has ever consented to AIC's app (another client's, say) would
+ * then pass the token check, and its directory would be read into this
+ * organisation's evidence. So after consent the administrator signs in at
+ * that tenant's own sign-in page, and AIC takes the tenant from the ID token
+ * Microsoft returns, never from the address. Only a connection proved this
+ * way is read (see tenantProven).
+ */
+export const TENANT_PROOF = 'sign_in';
+
+export function tenantProven(settings: unknown): boolean {
+  return !!settings && typeof settings === 'object' && (settings as { tenantProof?: unknown }).tenantProof === TENANT_PROOF;
+}
+
+export function signInUrl(tenantId: string, state: string, redirectUri: string, clientId = process.env.MS_CLIENT_ID!): string {
+  const qs = new URLSearchParams({ client_id: clientId, response_type: 'code', response_mode: 'query', scope: 'openid', redirect_uri: redirectUri, state, prompt: 'select_account' });
+  return `${LOGIN()}/${encodeURIComponent(tenantId)}/oauth2/v2.0/authorize?${qs}`;
+}
+
+/** The tenant and member status in an ID token received directly from Microsoft over TLS. */
+export function readIdToken(idToken: string | undefined): { tid: string; homeTenant: boolean } | null {
+  const part = idToken?.split('.')[1];
+  if (!part) return null;
+  let claims: { tid?: string; iss?: string; idp?: string };
+  try { claims = JSON.parse(Buffer.from(part, 'base64url').toString('utf8')); } catch { return null; }
+  if (!claims.tid) return null;
+  // A guest from another organisation signs in with an idp claim naming their own tenant.
+  const homeTenant = !claims.idp || claims.idp === claims.iss || claims.idp.includes(claims.tid);
+  return { tid: claims.tid.toLowerCase(), homeTenant };
+}
+
+/** Redeems the sign-in code and returns who signed in. */
+export async function redeemSignIn(
+  tenantId: string, code: string, redirectUri: string,
+  f: typeof fetch = fetch, clientId = process.env.MS_CLIENT_ID ?? '', clientSecret = process.env.MS_CLIENT_SECRET ?? '',
+): Promise<{ tid: string; homeTenant: boolean } | null> {
+  const res = await f(`${LOGIN()}/${encodeURIComponent(tenantId)}/oauth2/v2.0/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: clientId, client_secret: clientSecret, grant_type: 'authorization_code', code, redirect_uri: redirectUri, scope: 'openid' }),
+    signal: AbortSignal.timeout(20_000),
+  });
+  if (!res.ok) return null;
+  return readIdToken(((await res.json()) as { id_token?: string }).id_token);
+}
+
 export class MicrosoftError extends Error {
   constructor(public status: number, message: string) {
     super(message);

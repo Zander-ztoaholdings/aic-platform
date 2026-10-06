@@ -77,8 +77,12 @@ function IntegrationsPage() {
     if (c === 'github') setNotice('GitHub is connected. AIC is reading your repositories now; checks appear in a minute or two.');
     else if (c === 'microsoft') setNotice('Microsoft 365 is connected. AIC is reading your tenant now; checks appear in a minute or two.');
     else if (params.get('microsoft') === 'declined') setNotice('Microsoft did not grant AIC access. Only a global administrator of the tenant can approve it.');
+    else if (params.get('microsoft') === 'wrongtenant') setNotice('The person who signed in is not a member of the Microsoft 365 organisation that approved AIC, so AIC did not connect it. Sign in with an account from that organisation.');
+    else if (params.get('microsoft') === 'taken') setNotice('That Microsoft 365 tenant is already connected to another organisation on AIC, so it was not connected here. If that is a mistake, contact AIC.');
+    else if (e === 'microsoft') setNotice('Microsoft 365 could not be connected. Microsoft did not confirm AIC’s access to that tenant; try again from the start.');
+    else if (e === 'permission') setNotice('Only an organisation administrator can connect systems.');
     else if (params.get('github') === 'requested') setNotice('GitHub sent your request to an owner of the GitHub organisation. Once they approve it, come back and connect again.');
-    else if (e === 'state') setNotice('That GitHub link expired or belonged to another session. Start the connection again.');
+    else if (e === 'state') setNotice('That connection link expired or belonged to another session. Start the connection again.');
     else if (e) setNotice('GitHub could not be connected. Try again, and check you installed the AIC app rather than a different one.');
   }, [params]);
 
