@@ -22,7 +22,7 @@
 import { createHash, randomBytes } from 'crypto';
 import bcrypt from 'bcryptjs';
 import {
-  getSystemDb, eq, inArray,
+  getSystemDb, eq, inArray, sql,
   organizations, users, accountablePersons, aiSystems, orgPolicies, policyVersions, policyAcceptances,
   integrations, integrationChecks, llmUsageRecords, decisionRecords, auditRequirements, auditDocuments,
   awareAssessments, awareBadges, trustPages, orgFrameworks, auditFindings, correctiveActions, auditLogs, auditLedger, inviteCodes, EncryptionService,
@@ -108,7 +108,39 @@ async function deleteDemoOrg() {
   await db.delete(auditLogs).where(eq(auditLogs.orgId, DEMO_ORG_ID));
   await db.delete(auditLedger).where(eq(auditLedger.orgId, DEMO_ORG_ID));
   await db.delete(inviteCodes).where(eq(inviteCodes.orgId, DEMO_ORG_ID));
-  await db.delete(organizations).where(eq(organizations.id, DEMO_ORG_ID));
+  await releaseDemoOrgRows();
+  try {
+    await db.delete(organizations).where(eq(organizations.id, DEMO_ORG_ID));
+  } catch (e) {
+    // Drizzle's "Failed query" hides Postgres's reason; say which table still holds the demo.
+    const cause = (e as { cause?: { message?: string; detail?: string } }).cause;
+    throw new Error(`The old demo organisation could not be removed: ${cause?.message ?? (e as Error).message}${cause?.detail ? ` (${cause.detail})` : ''}`);
+  }
+}
+
+/**
+ * Anything else that still points at the demo organisation without
+ * ON DELETE CASCADE would block removing it: a staff member left attached to
+ * it, an admin log written about it, a table a later migration added. Read
+ * those foreign keys from Postgres itself, so a new one cannot break the
+ * reset again: a nullable column is cleared, a required one has its demo
+ * rows removed. Only rows of the demo organisation are touched.
+ */
+async function releaseDemoOrgRows() {
+  const db = getSystemDb();
+  const refs = await db.execute(sql`
+    SELECT c.conrelid::regclass::text AS tbl, a.attname AS col, a.attnotnull AS required
+    FROM pg_constraint c
+    JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = c.conkey[1]
+    WHERE c.contype = 'f' AND c.confrelid = 'organizations'::regclass
+      AND array_length(c.conkey, 1) = 1 AND c.confdeltype NOT IN ('c', 'n')`);
+  const rows = ((refs as unknown as { rows?: { tbl: string; col: string; required: boolean }[] }).rows ?? (refs as unknown as { tbl: string; col: string; required: boolean }[]));
+  for (const r of rows) {
+    if (!/^[a-z_][a-z0-9_."]*$/i.test(r.tbl) || !/^[a-z_][a-z0-9_]*$/i.test(r.col)) continue;
+    const t = sql.raw(r.tbl); const col = sql.raw(`"${r.col}"`);
+    if (r.required) await db.execute(sql`DELETE FROM ${t} WHERE ${col} = ${DEMO_ORG_ID}`);
+    else await db.execute(sql`UPDATE ${t} SET ${col} = NULL WHERE ${col} = ${DEMO_ORG_ID}`);
+  }
 }
 
 export async function seedHighveld(): Promise<{ credentials: DemoCredentials; summary: Record<string, number> }> {
