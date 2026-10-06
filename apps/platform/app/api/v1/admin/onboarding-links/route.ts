@@ -4,7 +4,7 @@ import { getSystemDb, clientOnboardingLinks, users, and, eq, inArray } from '@ai
 import { hasCapability } from '@/lib/rbac';
 import { recordAdminAction } from '@/lib/admin';
 import { appUrl } from '@/lib/app-url';
-import { cleanLinkInput, listLinks, newToken } from '@/lib/onboarding-links';
+import { cleanLinkInput, listLinks, newToken, emailLink } from '@/lib/onboarding-links';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,7 +41,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const s = await staff();
   if ('error' in s) return s.error;
-  const v = cleanLinkInput((await request.json().catch(() => ({}))) as Record<string, unknown>);
+  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+  const v = cleanLinkInput(body);
   if ('error' in v) return NextResponse.json({ error: v.error }, { status: 400 });
   const { days, ...rest } = v.value;
   try {
@@ -49,7 +50,9 @@ export async function POST(request: NextRequest) {
       ...rest, token: newToken(), expiresAt: new Date(Date.now() + days * 86_400_000), createdBy: s.id,
     }).returning();
     await recordAdminAction({ actorId: s.id, orgId: null, targetType: 'ADMIN_ORG', targetId: null, previous: null, next: { onboardingLink: row.id, orgName: row.orgName, contactEmail: row.contactEmail }, reason: 'Created a client onboarding link' }).catch(() => {});
-    return NextResponse.json({ id: row.id, url: `${appUrl()}/join/${row.token}` }, { status: 201 });
+    // Sent by AIC from aiccertified.cloud, so the client gets it from a sender they can check.
+    const emailed = body.email === true && row.contactEmail ? await emailLink(row.id, s.id) : null;
+    return NextResponse.json({ id: row.id, url: `${appUrl()}/join/${row.token}`, emailed }, { status: 201 });
   } catch (e) {
     if (missing(e)) return notReady();
     throw e;

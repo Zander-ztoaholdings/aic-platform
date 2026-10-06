@@ -18,6 +18,8 @@ export interface EmailMessage {
   paragraphs: string[];
   action?: { label: string; url: string };
   footnote?: string;
+  /** Where replies go, e.g. the AIC person who sent it, so the recipient can check with a human. */
+  replyTo?: string;
 }
 
 export interface SendResult {
@@ -81,7 +83,7 @@ export async function sendEmail(msg: EmailMessage): Promise<SendResult> {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: env['EMAIL_FROM'] || DEFAULT_FROM, to: [msg.to], subject: msg.subject, html, text }),
+      body: JSON.stringify({ from: env['EMAIL_FROM'] || DEFAULT_FROM, to: [msg.to], subject: msg.subject, html, text, ...(msg.replyTo ? { reply_to: msg.replyTo } : {}) }),
     });
     if (!res.ok) {
       console.error(`[EMAIL] Resend refused "${msg.subject}" to ${msg.to}: ${res.status} ${await res.text().catch(() => '')}`);

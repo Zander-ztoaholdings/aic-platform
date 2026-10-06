@@ -92,6 +92,7 @@ check(await hasTable('org_frameworks') && await hasTable('custom_framework_requi
 check(await hasTable('suppliers') && await hasTable('risks') && await hasTable('access_review_items') && await hasTable('org_people'), '016 registers and people', '016 registers and people MISSING  <-- Suppliers, Risks, Training, Access reviews and People fail without this');
 check(await hasTable('agents') && await hasTable('agent_run_steps') && await hasTable('model_trials') && await hasTable('connector_runs') && await hasTable('hq_jurisdictions'), '017 agents, trials and markets', '017 agents, trials and markets MISSING  <-- Agents, model trials, supplier document reads and Markets fail without this');
 check(await hasTable('risk_events') && await hasTable('org_assignments') && await hasTable('client_onboarding_links'), '018 risk register, assignments and onboarding links', '018 risk register, assignments and onboarding links MISSING  <-- risk history and acceptance, auditor assignments and client onboarding links fail without this');
+check(await hasTable('client_onboarding_link_emails'), '019 onboarding link emails', '019 onboarding link emails MISSING  <-- emailing a client onboarding link is not recorded without this');
 
 console.log('\nRow-level security');
 const rls = await one(`

@@ -9,7 +9,9 @@
  * the prefill and the assignment.
  */
 import { randomBytes } from 'crypto';
-import { getSystemDb, clientOnboardingLinks, users, eq, desc, sql } from '@aic/db';
+import { getSystemDb, clientOnboardingLinks, clientOnboardingLinkEmails, users, eq, desc, inArray, sql } from '@aic/db';
+import { sendEmail } from './email';
+import { appUrl } from './app-url';
 
 export const LINK_DAYS = { min: 1, max: 90, default: 14 } as const;
 
@@ -61,7 +63,12 @@ export async function listLinks() {
   const rows = await getSystemDb().select({ l: clientOnboardingLinks, lead: users.name })
     .from(clientOnboardingLinks).leftJoin(users, eq(users.id, clientOnboardingLinks.preferredLeadId))
     .orderBy(desc(clientOnboardingLinks.createdAt)).limit(200);
-  return rows.map(({ l, lead }) => ({ ...l, leadName: lead, state: linkState(l) }));
+  const emails = await emailHistory(rows.map((r) => r.l.id));
+  return rows.map(({ l, lead }) => {
+    const sent = emails.get(l.id) ?? [];
+    const last = sent.find((e) => e.accepted) ?? null;
+    return { ...l, leadName: lead, state: linkState(l), emailedAt: last?.sentAt ?? null, emailCount: sent.filter((e) => e.accepted).length, emailBlocked: canEmail(l, sent) };
+  });
 }
 
 /**
@@ -84,4 +91,75 @@ export async function consumeLinkOnSignup(token: string | null | undefined, orgI
   } catch (e) {
     console.error('[ONBOARDING_LINK] could not use link:', (e as Error).message);
   }
+}
+
+// ── Sending the link by email ─────────────────────────────────────────────────
+
+export const MAX_EMAILS_PER_LINK = 5;
+export const RESEND_GAP_MS = 10 * 60_000;
+
+type LinkRow = typeof clientOnboardingLinks.$inferSelect;
+type Sender = { name: string | null; email: string | null };
+
+/** Pure: the email a client receives. It says who sent it and how to check it is genuine. */
+export function linkEmail(l: Pick<LinkRow, 'token' | 'orgName' | 'contactName' | 'expiresAt'>, sender: Sender, base = appUrl()) {
+  const first = l.contactName?.trim().split(/\s+/)[0];
+  const who = sender.name?.trim() || 'Your contact at AIC';
+  const org = l.orgName?.trim();
+  const until = new Date(l.expiresAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Johannesburg' });
+  const host = new URL(base).host;
+  return {
+    subject: org ? `Start ${org}'s onboarding with AIC` : 'Start your onboarding with AIC',
+    paragraphs: [
+      `Hello${first ? ` ${first}` : ''},`,
+      `${who} at AI Integrity Certification (AIC) has set up onboarding for ${org ?? 'your organisation'}. Registering takes about ten minutes. A guide then walks you through setting up your workspace, and your AIC assessor is assigned as soon as you register.`,
+      `To check this email is genuine: it comes from aiccertified.cloud and the button below opens ${host}.${sender.email ? ` You can reply to this email to reach ${sender.name?.trim() ? sender.name.trim().split(/\s+/)[0] : 'us'} directly.` : ''} AIC never asks for a password, a one-time code or payment details by email.`,
+    ],
+    action: { label: 'Start onboarding', url: `${base}/join/${l.token}` },
+    footnote: `This link is for ${org ?? 'your organisation'} and works until ${until}. If you were not expecting it, you can ignore this email.`,
+  };
+}
+
+/** Pure: whether a link may be emailed now, and why not. */
+export function canEmail(l: Pick<LinkRow, 'contactEmail' | 'revokedAt' | 'expiresAt' | 'uses' | 'maxUses'>, sent: { sentAt: Date | string; accepted: boolean }[], now = new Date()): string | null {
+  if (!l.contactEmail) return 'Add the contact’s email address to the link first.';
+  if (linkState(l, now) !== 'open') return 'Only a link that is still open can be emailed.';
+  const ok = sent.filter((e) => e.accepted);
+  if (ok.length >= MAX_EMAILS_PER_LINK) return `It has already been emailed ${MAX_EMAILS_PER_LINK} times. Make a new link if it is still needed.`;
+  const last = ok.map((e) => new Date(e.sentAt).getTime()).sort((a, b) => b - a)[0];
+  if (last && now.getTime() - last < RESEND_GAP_MS) return 'It was emailed a few minutes ago. Give it ten minutes before sending again.';
+  return null;
+}
+
+async function emailsFor(linkIds: string[]) {
+  if (!linkIds.length) return [];
+  try {
+    return await getSystemDb().select().from(clientOnboardingLinkEmails).where(inArray(clientOnboardingLinkEmails.linkId, linkIds)).orderBy(desc(clientOnboardingLinkEmails.sentAt));
+  } catch { return []; } // 019 not applied: no history yet
+}
+
+export async function emailHistory(linkIds: string[]) {
+  const rows = await emailsFor(linkIds);
+  const out = new Map<string, { sentAt: Date; accepted: boolean; sentTo: string }[]>();
+  for (const r of rows) out.set(r.linkId, [...(out.get(r.linkId) ?? []), { sentAt: r.sentAt, accepted: r.accepted, sentTo: r.sentTo }]);
+  return out;
+}
+
+/** Emails the link to its contact from AIC, with replies going to the staff member. */
+export async function emailLink(linkId: string, senderId: string): Promise<{ sent: true; to: string } | { sent: false; reason: string }> {
+  const db = getSystemDb();
+  const [l] = await db.select().from(clientOnboardingLinks).where(eq(clientOnboardingLinks.id, linkId)).limit(1);
+  if (!l) return { sent: false, reason: 'Not found' };
+  const history = (await emailHistory([l.id])).get(l.id) ?? [];
+  const refused = canEmail(l, history);
+  if (refused) return { sent: false, reason: refused };
+  const [me] = await db.select({ name: users.name, email: users.email }).from(users).where(eq(users.id, senderId)).limit(1);
+  const replyTo = me?.email && !/@(removed\.invalid|aic\.test)$/i.test(me.email) ? me.email : undefined;
+  const msg = linkEmail(l, { name: me?.name ?? null, email: replyTo ?? null });
+  const res = await sendEmail({ to: l.contactEmail!, ...msg, replyTo });
+  try {
+    await db.insert(clientOnboardingLinkEmails).values({ linkId: l.id, sentTo: l.contactEmail!, sentBy: senderId, accepted: res.sent, failure: res.sent ? null : res.reason ?? 'unknown' });
+  } catch { /* 019 not applied: the email still went */ }
+  if (!res.sent) return { sent: false, reason: res.reason === 'not-configured' ? 'Email is not switched on for this AIC server (RESEND_API_KEY), so nothing was sent. Copy the link instead.' : 'The mail service refused it. Check the address, or copy the link instead.' };
+  return { sent: true, to: l.contactEmail! };
 }

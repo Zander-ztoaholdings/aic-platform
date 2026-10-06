@@ -1588,3 +1588,14 @@ export const clientOnboardingLinks = pgTable('client_onboarding_links', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
 });
+
+// 019: each time AIC emails a client onboarding link.
+export const clientOnboardingLinkEmails = pgTable('client_onboarding_link_emails', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  linkId: uuid('link_id').notNull().references(() => clientOnboardingLinks.id, { onDelete: 'cascade' }),
+  sentTo: varchar('sent_to', { length: 255 }).notNull(),
+  sentBy: uuid('sent_by').references(() => users.id, { onDelete: 'set null' }),
+  accepted: boolean('accepted').notNull(),
+  failure: varchar('failure', { length: 40 }),
+  sentAt: timestamp('sent_at', { withTimezone: true }).notNull().defaultNow(),
+});

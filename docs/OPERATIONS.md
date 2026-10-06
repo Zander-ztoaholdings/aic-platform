@@ -20,6 +20,8 @@ Paste `db/manual/run-014-in-platform-terminal.txt` into **Coolify → aic-platfo
 
 **018 (risk register, assignments, onboarding links)** adds the live risk register's history, acceptance and dismissed suggestions, which AIC auditor leads and reviews each organisation, and client onboarding links. Until it is in, the risk register still works but cannot record acceptances or history, and assignments and onboarding links say the migration is needed. Paste `db/manual/run-018-in-platform-terminal.txt` the same way; it ends with `✓ 018 verified`. It carries each organisation's current `auditor_id` over as its lead.
 
+**019 (onboarding link emails)** records each time AIC emails a client onboarding link. Paste `db/manual/run-019-in-platform-terminal.txt` the same way; it ends with `✓ 019 verified`. The emails go out through Resend, so `RESEND_API_KEY` must be set and aiccertified.cloud verified there (see `lib/email.ts`); without it the page says nothing was sent and offers the link to copy.
+
 **Check:** `/api/health` shows `schema: ok` and names the newest migration applied.
 
 ## 2. Tenant isolation (row-level security)
