@@ -6,7 +6,7 @@ import {
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
   FileBarChart, UserCog, Lock, Target, LineChart, Library,
-  ShieldAlert, Truck, Contact, UserCheck, Bot, Send,
+  ShieldAlert, Truck, Contact, UserCheck, Bot, Send, BookOpen,
 } from 'lucide-react';
 import { canManageTeamAndKeys } from '@/lib/roles';
 import { staffCan, canUseHq, type WorkspaceUser } from '@/lib/workspace';
@@ -111,6 +111,7 @@ export const CLIENT_ACCOUNT: NavItem[] = [
   { label: 'Team', href: '/settings', icon: Users, description: 'Invite and manage people.', visible: (u) => canManageTeamAndKeys(u.role) },
   { label: 'API & access keys', href: '/settings/keys', icon: Key, description: 'Keys for systems that record decisions.', visible: (u) => canManageTeamAndKeys(u.role) },
   { label: 'Practitioner (CAAP)', href: '/practitioner', icon: GraduationCap, description: 'Your professional record.' },
+  { label: 'Docs', href: '/docs', icon: BookOpen, description: 'How the platform works, including the API.' },
 ];
 
 // ── Staff workspace ───────────────────────────────────────────────────────
