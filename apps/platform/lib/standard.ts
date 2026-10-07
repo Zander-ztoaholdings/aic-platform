@@ -130,6 +130,8 @@ let cache: { at: number; standard: PublishedStandard } | null = null;
 
 /** Which source last answered. Reported by /api/health. */
 export let lastSource: 'live' | 'snapshot' | null = null;
+/** Why the internal address failed last time, without the address itself. */
+let lastInternalError: string | null = null;
 
 /**
  * Fetches the published standard, with a short in-process cache and a hard
@@ -166,7 +168,13 @@ export async function fetchPublishedStandard(): Promise<PublishedStandard> {
       // Named so the log says which URL failed and why. The previous version
       // logged only the error, which made "could not load the standard"
       // indistinguishable from a DNS failure, a 404 and a timeout.
-      attempts.push(`${url} — ${(error as Error).message}`);
+      // Node's fetch says only "fetch failed"; the reason is on `cause`.
+      // ENOTFOUND (no such host on this network) and ECONNREFUSED (host there,
+      // nothing listening on that port) need different fixes.
+      const e = error as Error & { cause?: { code?: string } };
+      const why = e.name === 'AbortError' ? 'timed out' : [e.message, e.cause?.code].filter(Boolean).join(': ');
+      attempts.push(`${url} — ${why}`);
+      if (base === process.env.AIC_WEB_INTERNAL_URL?.trim().replace(/\/+$/, '')) lastInternalError = why;
     } finally {
       clearTimeout(timeout);
     }
@@ -217,7 +225,11 @@ export async function standardHealth(): Promise<{ ok: boolean; version?: string;
       return {
         ok: false,
         version: s.version,
-        detail: `serving the pinned snapshot (v${s.version}, captured ${capturedAt ?? 'unknown'}) — aic-web is unreachable`,
+        detail:
+          `serving the pinned snapshot (v${s.version}, captured ${capturedAt ?? 'unknown'}) — aic-web is unreachable: ` +
+          (process.env.AIC_WEB_INTERNAL_URL
+            ? `the internal address failed (${lastInternalError ?? 'unknown'})`
+            : 'AIC_WEB_INTERNAL_URL is not set'),
       };
     }
     return { ok: true, version: s.version };
