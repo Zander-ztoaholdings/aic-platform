@@ -90,6 +90,16 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Secret and token are required' }, { status: 400 });
         }
 
+        // Without a key the secret cannot be stored, and the only thing the
+        // person saw was "Failed to verify MFA token" after typing a correct
+        // code. Say what is actually wrong, before they retry.
+        if (!EncryptionService.isConfigured()) {
+            console.error('[MFA] Enrolment refused: ENCRYPTION_KEY is not set on this deployment.');
+            return NextResponse.json({
+                error: 'Two-factor sign-in cannot be set up on this server yet. AIC has been told; please try again later.',
+            }, { status: 503 });
+        }
+
         const isValid = MFAService.verifyToken(secret, token);
         if (!isValid) {
             return NextResponse.json({ error: 'Invalid verification token' }, { status: 400 });

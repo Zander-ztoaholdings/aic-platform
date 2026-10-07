@@ -33,6 +33,19 @@ describe('encryption v2', () => {
     expect(EncryptionService.encrypt('y').startsWith('v2:k2:')).toBe(true);
   });
 
+  it('reads version 1 written without a key after a key is set', () => {
+    const zero = Buffer.alloc(32, 0);
+    const iv = randomBytes(16);
+    const c = createCipheriv('aes-256-gcm', zero, iv);
+    const e = c.update('JBSWY3DPEHPK3PXP', 'utf8', 'hex') + c.final('hex');
+    const stored = `${iv.toString('hex')}:${c.getAuthTag().toString('hex')}:${e}`;
+    expect(EncryptionService.decryptOrPlain(stored)).toBe('JBSWY3DPEHPK3PXP');
+  });
+
+  it('reads a plain-text MFA secret stored before encryption', () => {
+    expect(EncryptionService.decryptOrPlain('JBSWY3DPEHPK3PXP')).toBe('JBSWY3DPEHPK3PXP');
+  });
+
   it('still reads version 1 ciphertext', () => {
     process.env.ENCRYPTION_KEY = 'a passphrase';
     expect(EncryptionService.decrypt(v1('legacy', 'a passphrase'))).toBe('legacy');

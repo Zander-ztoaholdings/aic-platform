@@ -60,10 +60,22 @@ function keys(): Key[] {
   return [];
 }
 
-/** Version 1 derivation, kept only to read what version 1 wrote. */
-function legacyKey(): Buffer | null {
-  const pass = process.env.ENCRYPTION_KEY_LEGACY || process.env.ENCRYPTION_KEY;
-  return pass ? scryptSync(pass, 'salt', 32) : Buffer.alloc(32, 0);
+/**
+ * Version 1 derivations, kept only to read what version 1 wrote.
+ *
+ * Version 1 used scrypt(ENCRYPTION_KEY, 'salt'), or 32 zero bytes when no key
+ * was set. A deployment that ran without a key and has one set later holds
+ * secrets written under the zero key, so that is tried last rather than
+ * dropped: setting ENCRYPTION_KEY must never lock anyone out of their
+ * authenticator. GCM's tag means a wrong candidate fails, never misreads.
+ */
+function legacyKeys(): Buffer[] {
+  const out: Buffer[] = [];
+  for (const pass of [process.env.ENCRYPTION_KEY_LEGACY, process.env.ENCRYPTION_KEY]) {
+    if (pass) out.push(scryptSync(pass, 'salt', 32));
+  }
+  out.push(Buffer.alloc(32, 0));
+  return out;
 }
 
 const UNREADABLE = '[ENCRYPTED_DATA_UNREADABLE]';
@@ -71,7 +83,6 @@ const UNREADABLE = '[ENCRYPTED_DATA_UNREADABLE]';
 export class EncryptionService {
   static readonly UNREADABLE = UNREADABLE;
 
-  /** Encrypt with the current key. Throws if no key is configured. */
   /** True when a key is configured, so a secret can be stored. */
   static isConfigured(): boolean {
     return keys().length > 0;
@@ -100,11 +111,14 @@ export class EncryptionService {
         return Buffer.concat([d.update(Buffer.from(data, 'base64url')), d.final()]).toString('utf8');
       }
       const [ivHex, tagHex, dataHex] = value.split(':');
-      const d = createDecipheriv(ALGORITHM, legacyKey()!, Buffer.from(ivHex, 'hex'));
-      d.setAuthTag(Buffer.from(tagHex, 'hex'));
-      let out = d.update(dataHex, 'hex', 'utf8');
-      out += d.final('utf8');
-      return out;
+      for (const k of legacyKeys()) {
+        try {
+          const d = createDecipheriv(ALGORITHM, k, Buffer.from(ivHex, 'hex'));
+          d.setAuthTag(Buffer.from(tagHex, 'hex'));
+          return d.update(dataHex, 'hex', 'utf8') + d.final('utf8');
+        } catch { /* next candidate */ }
+      }
+      throw new Error('no version 1 key fits');
     } catch {
       console.error('[SECURITY] Decryption failed. Possible key mismatch or data corruption.');
       return UNREADABLE;
