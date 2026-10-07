@@ -1611,6 +1611,91 @@ export const aiToolUse = pgTable('ai_tool_use', {
   dedupe: unique('ai_tool_use_dedupe').on(table.orgId, table.product, table.subjectType, table.subject, table.day),
 }));
 
+// Projects: a piece of work with its own people, frameworks, AI systems and tasks. Migration 021.
+export const projects = pgTable('projects', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 160 }).notNull(),
+  description: text('description'),
+  status: varchar('status', { length: 12 }).notNull().default('active'),
+  leadId: uuid('lead_id').references(() => users.id, { onDelete: 'set null' }),
+  dueDate: date('due_date', { mode: 'string' }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const projectMembers = pgTable('project_members', {
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  role: varchar('role', { length: 12 }).notNull().default('contributor'),
+  addedAt: timestamp('added_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.projectId, t.userId] })]);
+
+export const projectFrameworks = pgTable('project_frameworks', {
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  frameworkKey: varchar('framework_key', { length: 80 }).notNull(),
+}, (t) => [primaryKey({ columns: [t.projectId, t.frameworkKey] })]);
+
+export const projectSystems = pgTable('project_systems', {
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  systemId: uuid('system_id').notNull().references(() => aiSystems.id, { onDelete: 'cascade' }),
+}, (t) => [primaryKey({ columns: [t.projectId, t.systemId] })]);
+
+export const projectTasks = pgTable('project_tasks', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  title: varchar('title', { length: 300 }).notNull(),
+  detail: text('detail'),
+  assigneeId: uuid('assignee_id').references(() => users.id, { onDelete: 'set null' }),
+  dueDate: date('due_date', { mode: 'string' }),
+  status: varchar('status', { length: 8 }).notNull().default('todo'),
+  frameworkKey: varchar('framework_key', { length: 80 }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  doneAt: timestamp('done_at', { withTimezone: true }),
+});
+
+// Record shares: a period of the continuity record, for a named person who must prove who they are. Migration 021.
+export const recordShares = pgTable('record_shares', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  recipientName: varchar('recipient_name', { length: 200 }).notNull(),
+  recipientEmail: varchar('recipient_email', { length: 255 }).notNull(),
+  purpose: text('purpose'),
+  fromDate: date('from_date', { mode: 'string' }).notNull(),
+  toDate: date('to_date', { mode: 'string' }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  revokedBy: uuid('revoked_by').references(() => users.id, { onDelete: 'set null' }),
+  createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const recordShareCodes = pgTable('record_share_codes', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  shareId: uuid('share_id').notNull().references(() => recordShares.id, { onDelete: 'cascade' }),
+  codeHash: varchar('code_hash', { length: 64 }).notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const recordShareViews = pgTable('record_share_views', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  shareId: uuid('share_id').notNull().references(() => recordShares.id, { onDelete: 'cascade' }),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  viewerEmail: varchar('viewer_email', { length: 255 }).notNull(),
+  userAgent: varchar('user_agent', { length: 200 }),
+  viewedAt: timestamp('viewed_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const clientOnboardingLinkEmails = pgTable('client_onboarding_link_emails', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   linkId: uuid('link_id').notNull().references(() => clientOnboardingLinks.id, { onDelete: 'cascade' }),

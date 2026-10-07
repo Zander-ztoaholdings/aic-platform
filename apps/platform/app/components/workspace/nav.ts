@@ -6,8 +6,7 @@ import {
   Building2, Users, Key, GraduationCap,
   ListChecks, ClipboardCheck, FileSearch, BadgeCheck,
   FileBarChart, UserCog, Lock, Target, LineChart, Library,
-  ShieldAlert, Truck, Contact, UserCheck, Bot, Send, BookOpen,
-} from 'lucide-react';
+  ShieldAlert, Truck, Contact, UserCheck, Bot, Send, BookOpen, FolderKanban } from 'lucide-react';
 import { canManageTeamAndKeys } from '@/lib/roles';
 import { staffCan, canUseHq, type WorkspaceUser } from '@/lib/workspace';
 
@@ -68,6 +67,7 @@ export const CLIENT_NAV: NavGroup[] = [
     label: 'Compliance Tracking',
     summary: 'The requirements that apply to you, and the evidence against each.',
     items: [
+      { label: 'Projects', href: '/projects', icon: FolderKanban, description: 'Work split by project: its people, frameworks, AI systems and tasks.' },
       { label: 'Frameworks', href: '/frameworks', icon: Library, description: 'SOC 2, ISO 27001, GDPR and more: choose what you track, or add your own.' },
       { label: 'Controls', href: '/controls', icon: Layers, description: 'Each framework requirement, and the evidence behind it.' },
       { label: 'Automated checks', href: '/checks', icon: ListChecks, description: 'What AIC found in your connected systems, and how to fix it.' },

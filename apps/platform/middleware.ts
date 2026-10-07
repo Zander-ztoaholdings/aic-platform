@@ -89,6 +89,10 @@ const PUBLIC_PATHS = [
   // itself is public at /signup.
   "/join/",
   "/api/join/",
+  // Shared periods of a continuity record. The link alone opens nothing: the
+  // named recipient proves their address with a one-time code first.
+  "/shared/",
+  "/api/shared/",
 ];
 
 // Staging must never be indexed, even if its password protection is switched

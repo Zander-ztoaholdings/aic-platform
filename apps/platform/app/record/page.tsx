@@ -10,6 +10,7 @@ import { StandingSeal } from '../components/workspace/StandingSeal';
 import { phaseFromCertificationStatus } from '@/lib/phases';
 import { ObserveButton } from '../dashboard/components/ObserveButton';
 import { ContinuityFeed } from '../dashboard/components/ContinuityFeed';
+import { RecordShares } from './RecordShares';
 
 export const metadata = { title: 'Continuity Record | AIC' };
 export const dynamic = 'force-dynamic';
@@ -153,6 +154,8 @@ export default async function ContinuityRecordPage() {
             </footer>
           )}
         </section>
+
+        {!firstRun && <RecordShares since={record.since} />}
 
         <footer className="pt-6 border-t border-[#dde2e8]">
           <p className="text-[12.5px] text-[#8a95a3] leading-relaxed max-w-3xl">
