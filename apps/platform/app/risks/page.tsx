@@ -64,9 +64,9 @@ function Drawer({ label, onClose, children, footer, wide }: { label: string; onC
   }, [onClose]);
   return (
     <Portal>
-      <div className="fixed inset-0 z-50 flex justify-end" role="dialog" aria-modal="true" aria-label={label}>
-        <div className="absolute inset-0 bg-[#0a1728]/30" onClick={onClose} />
-        <div className={`relative flex h-full w-full ${wide ? 'max-w-2xl' : 'max-w-xl'} flex-col bg-white shadow-[-12px_0_40px_-12px_rgba(10,23,40,0.25)]`}>
+      <div className="fixed inset-0 z-[100] flex justify-center sm:items-start sm:px-6 sm:pt-[6vh] sm:pb-6" role="dialog" aria-modal="true" aria-label={label}>
+        <div data-peek-backdrop className="absolute inset-0 bg-[#0a1728]/40 backdrop-blur-[1px]" onClick={onClose} />
+        <div className={`relative flex h-full w-full ${wide ? 'sm:max-w-4xl' : 'sm:max-w-3xl'} flex-col overflow-hidden bg-white sm:h-auto sm:max-h-[88vh] sm:rounded-2xl sm:border sm:border-[#dde2e8] sm:shadow-[0_30px_90px_-24px_rgba(10,23,40,0.5)] aic-peek`}>
           <div className="flex items-center justify-between gap-3 border-b border-[#eef1f5] px-5 py-4">
             <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">{label}</h2>
             <button type="button" onClick={onClose} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#eef1f5]" aria-label="Close"><X className="h-4 w-4" /></button>

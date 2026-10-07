@@ -321,3 +321,9 @@ body { overflow-x: clip; }
 }
 .tour-pulse { animation: tourPulse 2s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .tour-pulse { animation: none; } }
+
+/* Centred record view (PeekView and the views built like it). */
+@keyframes aicPeek { from { opacity: 0; transform: translateY(8px) scale(0.99); } to { opacity: 1; transform: none; } }
+.aic-peek { animation: aicPeek 160ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .aic-peek { animation: none; } }
+.aic-peek > .flex-1 { min-height: 0; }
