@@ -27,9 +27,16 @@ const nextConfig: NextConfig = {
   // The build runs on the same VPS as the live apps and the database, and was
   // being killed for lack of memory at "Collecting build traces". Trades a
   // little build time for a lower memory peak.
+  //
+  // It then died again at "Collecting page data", which by default starts one
+  // worker per CPU, each loading the whole server bundle. One worker is slower
+  // and fits. Lint is run before each commit, not here, for the same reason.
   experimental: {
     webpackMemoryOptimizations: true,
+    cpus: 1,
+    workerThreads: false,
   },
+  eslint: { ignoreDuringBuilds: true },
   serverExternalPackages: [
     'minio',
     '@aws-sdk/client-s3',
