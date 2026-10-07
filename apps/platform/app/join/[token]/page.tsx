@@ -3,7 +3,13 @@ import { publicLink } from '@/lib/onboarding-links';
 import { JoinFrame } from './JoinFrame';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Start with AIC', robots: { index: false, follow: false } };
+export const metadata = {
+  title: 'Start with AIC',
+  description: 'Your invitation to register with AI Integrity Certification: about ten minutes, then your workspace with an AIC assessor alongside.',
+  robots: { index: false, follow: false },
+  openGraph: { title: 'Start with AIC', description: 'Your invitation to register with AI Integrity Certification.', siteName: 'AIC', type: 'website' as const },
+  twitter: { card: 'summary_large_image' as const, title: 'Start with AIC', description: 'Your invitation to register with AI Integrity Certification.' },
+};
 
 const STEPS = [
   { t: 'Register your organisation', d: 'Five short questions: who you are, the Division you operate in, and the person accountable. About ten minutes.' },

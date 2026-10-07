@@ -43,6 +43,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // Absolute addresses for share images (og:image must not be relative).
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://app.aiccertified.cloud"),
   title: "AIC",
   description: "Real-time AI integrity monitoring.",
   robots: "noindex, nofollow",
