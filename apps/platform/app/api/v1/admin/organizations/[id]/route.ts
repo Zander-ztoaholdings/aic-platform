@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSystemDb, organizations, users, hitlLogs, eq, and, desc, sql } from '@aic/db';
 import { z } from 'zod';
+import { actorFor, orgRecipients, sendRemovalNotice, removalReference } from '@/lib/removal-notice';
 import { adminActor, recordAdminAction } from '@/lib/admin';
 import { conflictsByOrg, recordFileHolder } from '@/lib/assignments';
 
@@ -113,6 +114,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ error: `Remove its ${counts.members} member account(s) first, or suspend the organisation instead.` }, { status: 409 });
   }
 
+  const who = await orgRecipients(id, actor.id);
   try {
     await db.transaction(async (tx) => {
       // Removed (anonymised) accounts still point at the organisation.
@@ -124,5 +126,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     return NextResponse.json({ error: 'Other records still refer to this organisation, so it cannot be deleted. Suspend it instead.' }, { status: 409 });
   }
   await recordAdminAction({ actorId: actor.id, orgId: null, targetType: 'ADMIN_ORG', targetId: null, previous: { id, name: org.name }, next: { deleted: true }, reason: body.reason.trim() });
-  return NextResponse.json({ ok: true });
+  const notice = await sendRemovalNotice({ kind: 'organisation', subjectName: org.name, recipients: who.recipients, actor: await actorFor(actor.id), reason: body.reason.trim(), reference: removalReference('organisation', id) });
+  return NextResponse.json({ ok: true, notified: notice.sent });
 }

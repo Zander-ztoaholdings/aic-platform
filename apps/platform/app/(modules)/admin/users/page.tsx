@@ -181,7 +181,7 @@ function ManagePerson({ person, orgs, isMe, canGrant, onClose, onDone }: { perso
             <p className="text-xs text-[#8a95a3]">Deactivating signs them out within a minute and keeps everything they recorded.</p>
           </Section>
 
-          <Section title="Remove account" hint="Erases their name, email and credentials for good. Their past records stay, attributed to a removed account. Cannot be undone.">
+          <Section title="Remove account" hint="Erases their name, email and credentials for good. Their past records stay, attributed to a removed account. Cannot be undone. They are emailed your name, the reason and how to challenge it.">
             <input className={field} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={`Type ${person.email} to confirm`} />
             <Button variant="danger" disabled={busy || confirm.trim().toLowerCase() !== person.email.toLowerCase()} onClick={() => act({ confirmEmail: confirm }, 'DELETE')}>Remove account</Button>
           </Section>

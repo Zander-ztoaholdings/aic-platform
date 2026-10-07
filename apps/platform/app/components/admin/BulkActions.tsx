@@ -81,7 +81,7 @@ function BulkDialog({ kind, ids, action, onClose, onDone }: {
             {!p && !err && <p className="text-[#5e6b7b]">Working out what this will do…</p>}
             {p && (
               <>
-                {action.danger && p.count > 0 && <p className="flex gap-2 rounded-xl bg-[#b23a35]/[0.07] px-3.5 py-2.5 text-[13.5px] text-[#8f2d29]"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />This cannot be undone. Check the list below before you confirm.</p>}
+                {action.danger && p.count > 0 && <p className="flex gap-2 rounded-xl bg-[#b23a35]/[0.07] px-3.5 py-2.5 text-[13.5px] text-[#8f2d29]"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />This cannot be undone. Check the list below before you confirm. Everyone affected is emailed your name, the reason you give and how to challenge it.</p>}
                 <div>
                   <p className="font-medium text-[#0e1b2c]">{p.count} will change</p>
                   <ul className="mt-1.5 max-h-56 divide-y divide-[#eef1f5] overflow-y-auto rounded-xl border border-[#dde2e8]">

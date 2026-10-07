@@ -3,6 +3,7 @@ import { getSystemDb, users, organizations, eq, and, sql } from '@aic/db';
 import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
+import { actorFor, sendRemovalNotice, removalReference } from '@/lib/removal-notice';
 import { adminActor, recordAdminAction, ROLES, isStaffRole } from '@/lib/admin';
 
 /**
@@ -139,5 +140,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   }).where(and(eq(users.id, id)));
 
   await recordAdminAction({ actorId: actor.id, orgId: target.orgId ?? null, targetType: 'ADMIN_USER', targetId: id, previous: { email: target.email, role: target.role }, next: { removed: true }, reason: body.reason.trim() });
-  return NextResponse.json({ ok: true });
+  // Told at the address the account had, which the removal has just erased from the record.
+  const notice = target.email.endsWith('@removed.invalid') ? { sent: 0 } : await sendRemovalNotice({
+    kind: 'account', subjectName: target.email, recipients: [{ email: target.email, name: target.name }],
+    actor: await actorFor(actor.id), reason: body.reason.trim(), reference: removalReference('account', id),
+  });
+  return NextResponse.json({ ok: true, notified: notice.sent });
 }

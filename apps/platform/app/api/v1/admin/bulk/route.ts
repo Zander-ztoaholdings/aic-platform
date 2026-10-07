@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminActor, recordAdminAction } from '@/lib/admin';
+import { actorFor, orgRecipients, sendRemovalNotice, removalReference } from '@/lib/removal-notice';
 import { isUuid } from '@/lib/policy-hash';
 import {
   BULK_MAX, DESTRUCTIVE, confirmPhrase, planOrgs, planUsers, orgFacts, userFacts, activeSuperAdmins, checkOwnPassword,
@@ -19,6 +20,10 @@ const USER_ACTIONS: UserAction[] = ['deactivate', 'reactivate', 'remove'];
  * or removing also needs the confirm phrase and the person's password.
  * Super admins only for organisations; manage_users for accounts.
  */
+
+/** Actions that end someone's access for good, so the people affected are told and can challenge it. */
+const DESTRUCTIVE_NOTICE = new Set(['delete', 'remove']);
+
 export async function POST(request: NextRequest) {
   const b = (await request.json().catch(() => ({}))) as { kind?: string; action?: string; ids?: unknown; preview?: boolean; reason?: string; confirm?: string; password?: string };
   const kind = b.kind === 'organizations' ? 'organizations' : b.kind === 'users' ? 'users' : null;
@@ -50,15 +55,27 @@ export async function POST(request: NextRequest) {
   }
 
   const done: string[] = []; const failed: { label: string; error: string }[] = [];
+  const named = DESTRUCTIVE_NOTICE.has(action) ? await actorFor(actor.id) : null;
+  let notified = 0;
   for (const item of doing) {
     try {
       if (kind === 'organizations') {
-        if (action === 'delete') await purgeOrg(item.id, actor.id);
+        if (action === 'delete') {
+          // Read who to tell before the members are detached and anonymised.
+          const who = await orgRecipients(item.id, actor.id);
+          await purgeOrg(item.id, actor.id);
+          notified += (await sendRemovalNotice({ kind: 'organisation', subjectName: who.orgName, recipients: who.recipients, actor: named!, reason, reference: removalReference('organisation', item.id) })).sent;
+        }
         else if (action === 'suspend') await suspendOrg(item.id, actor.id, reason);
         else await restoreOrg(item.id, actor.id, reason);
       } else {
         const [u] = await userFacts([item.id]);
-        if (u) await applyToUser(action as UserAction, u, actor.id, reason);
+        if (u) {
+          await applyToUser(action as UserAction, u, actor.id, reason);
+          if (action === 'remove' && !u.removed && u.email && !u.email.endsWith('@removed.invalid')) {
+            notified += (await sendRemovalNotice({ kind: 'account', subjectName: u.email, recipients: [{ email: u.email, name: u.name }], actor: named!, reason, reference: removalReference('account', u.id) })).sent;
+          }
+        }
       }
       done.push(item.label);
     } catch (e) {
@@ -73,5 +90,5 @@ export async function POST(request: NextRequest) {
     previous: { selected: plan.map((p) => ({ id: p.id, label: p.label, skipped: p.skip })) },
     next: { bulk: action, done, failed: failed.map((f) => f.label) }, reason,
   }).catch(() => {});
-  return NextResponse.json({ done: done.length, skipped: plan.length - doing.length, failed });
+  return NextResponse.json({ done: done.length, skipped: plan.length - doing.length, failed, notified });
 }

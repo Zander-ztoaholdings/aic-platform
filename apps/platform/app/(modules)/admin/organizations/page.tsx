@@ -198,7 +198,7 @@ function ManageOrg({ org, assessors, onClose, onDone }: { org: Org; assessors: A
           ? <Button disabled={busy} onClick={() => act({ action: 'restore' })}>Restore access</Button>
           : <Button disabled={busy || (org.activeMembers ?? 0) === 0} onClick={() => act({ action: 'suspend' })}>Suspend access</Button>}
       </Section>
-      <Section title="Delete organisation" hint="Only possible once it has no people, certificates or AIC Aware badges. Everything filed under it is deleted. Cannot be undone.">
+      <Section title="Delete organisation" hint="Only possible once it has no people, certificates or AIC Aware badges. Everything filed under it is deleted. Cannot be undone. Its contact is emailed your name, the reason and how to challenge it.">
         <input className={field} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder={`Type ${org.name} to confirm`} />
         <Button variant="danger" disabled={busy || confirm.trim() !== org.name} onClick={() => act({ confirmName: confirm }, 'DELETE')}>Delete organisation</Button>
       </Section>
