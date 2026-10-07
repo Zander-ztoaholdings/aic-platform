@@ -5,9 +5,12 @@ import { CHECKS, CHECK_BY_KEY } from '@/lib/integrations/catalog';
 import { COMMON_BY_KEY } from '@/lib/common-controls';
 
 describe('connector catalogue', () => {
-  it('has 25 connectors, each with an implementation', () => {
-    expect(CONNECTORS).toHaveLength(25);
+  it('has 26 connectors, each with an implementation', () => {
+    expect(CONNECTORS).toHaveLength(26);
     for (const c of CONNECTORS) expect(IMPLS[c.key], c.key).toBeDefined();
+  });
+  it('reads AI use wherever the catalogue says it does', () => {
+    for (const c of CONNECTORS) if (c.ai) expect(IMPLS[c.key].aiUse, `${c.key} aiUse`).toBeTypeOf('function');
   });
   it('gives accounts and people only where implemented', () => {
     for (const c of CONNECTORS) {

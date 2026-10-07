@@ -5,6 +5,49 @@
 import { call, need, result, listSome, plural, googleToken } from '../http';
 import { ConnectorError, type ConnectorImpl } from '../types';
 import type { CheckResult } from '../../integrations/catalog';
+import type { AiUseOutput, AiUseRecord } from '../../ai-use/products';
+
+// ── Vertex AI ───────────────────────────────────────────────────────────────
+//
+// Cloud Monitoring's publisher-model metrics: invocations and tokens per
+// model per day. Viewer on the project includes monitoring.timeSeries.list.
+// No person is in these figures. The metric names come from Google's metric
+// list; their labels are read loosely (any label naming a model), so this is
+// marked unverified until it has run against a live project.
+
+const VERTEX_METRICS = {
+  invocations: 'aiplatform.googleapis.com/publisher/online_serving/model_invocation_count',
+  tokens: 'aiplatform.googleapis.com/publisher/online_serving/token_count',
+};
+
+type Series = { metric?: { labels?: Record<string, string> }; resource?: { labels?: Record<string, string> }; points?: { interval?: { endTime?: string }; value?: { int64Value?: string; doubleValue?: number } }[] };
+
+const modelOf = (s: Series) => {
+  const labels = { ...(s.resource?.labels ?? {}), ...(s.metric?.labels ?? {}) };
+  const k = Object.keys(labels).find((x) => /model/i.test(x) && !/version/i.test(x));
+  return (k && labels[k]) || '(unnamed model)';
+};
+
+export function mapVertex(invocations: Series[], tokens: Series[], project: string): AiUseRecord[] {
+  const rows = new Map<string, AiUseRecord>();
+  const add = (list: Series[], field: 'activity' | 'tokens') => {
+    for (const s of list) {
+      const model = modelOf(s);
+      for (const p of s.points ?? []) {
+        const day = (p.interval?.endTime ?? '').slice(0, 10);
+        if (!day) continue;
+        const v = Number(p.value?.int64Value ?? p.value?.doubleValue ?? 0);
+        const key = `${model}|${day}`;
+        const r = rows.get(key) ?? { product: 'vertex_ai' as const, subjectType: 'model' as const, subject: `${model} (${project})`, day, lastActiveAt: `${day}T00:00:00Z`, activity: 0, metrics: { project, tokens: 0 } };
+        if (field === 'activity') r.activity += v; else (r.metrics as Record<string, number>).tokens += v;
+        rows.set(key, r);
+      }
+    }
+  };
+  add(invocations, 'activity');
+  add(tokens, 'tokens');
+  return [...rows.values()].filter((r) => r.activity > 0 || (r.metrics as Record<string, number>).tokens > 0);
+}
 
 type Binding = { role: string; members?: string[] };
 type AuditConfig = { service: string; auditLogConfigs?: { logType: string }[] };
@@ -82,7 +125,45 @@ async function bucketsCheck(subject: string, project: string, get: <T>(url: stri
     : result(key, subject, 'pass', `All ${plural(buckets.length, 'bucket')} enforce public access prevention.`);
 }
 
+async function vertexUse(c: Record<string, string>, days: number, now: Date): Promise<AiUseOutput> {
+  const sa = need(c, 'serviceAccount', 'The service account key');
+  const { token, projectId: keyProject } = await googleToken(sa, ['https://www.googleapis.com/auth/cloud-platform.read-only']);
+  const project = (c.projectId ?? '').trim() || keyProject;
+  if (!project) return { records: [], notes: [] };
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const start = new Date(end.getTime() - Math.min(days, 30) * 86_400_000);
+  const read = async (type: string): Promise<Series[]> => {
+    const qs = new URLSearchParams({
+      filter: `metric.type = "${type}"`,
+      'interval.startTime': start.toISOString(), 'interval.endTime': end.toISOString(),
+      'aggregation.alignmentPeriod': '86400s', 'aggregation.perSeriesAligner': 'ALIGN_SUM',
+    });
+    const out: Series[] = [];
+    let pageToken = '';
+    for (let i = 0; i < 10; i++) {
+      if (pageToken) qs.set('pageToken', pageToken);
+      const page = await call<{ timeSeries?: Series[]; nextPageToken?: string }>(`https://monitoring.googleapis.com/v3/projects/${encodeURIComponent(project)}/timeSeries?${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+      out.push(...(page.timeSeries ?? []));
+      pageToken = page.nextPageToken ?? '';
+      if (!pageToken) break;
+    }
+    return out;
+  };
+  try {
+    return { records: mapVertex(await read(VERTEX_METRICS.invocations), await read(VERTEX_METRICS.tokens), project), notes: [] };
+  } catch (e) {
+    if (e instanceof ConnectorError && (e.status === 403 || e.status === 400)) {
+      return { records: [], notes: ['Vertex AI: AIC could not read Cloud Monitoring for this project. Viewer on the project includes it; check the service account still has Viewer.'] };
+    }
+    throw e;
+  }
+}
+
 export const gcp: ConnectorImpl = {
+  async aiUse(c, ctx, days) {
+    return vertexUse(c, days, ctx.now);
+  },
+
   async run(c) {
     const sa = need(c, 'serviceAccount', 'The service account key');
     const { token, projectId: keyProject } = await googleToken(sa, ['https://www.googleapis.com/auth/cloud-platform.read-only']);

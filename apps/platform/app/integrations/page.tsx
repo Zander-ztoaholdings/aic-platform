@@ -8,6 +8,8 @@ import DashboardShell from '../components/DashboardShell';
 import { PageHeader } from '../components/ui/PageHeader';
 import { ConnectorCatalogue } from './ConnectorCatalogue';
 import { useIntegrations, call, ago, type Integration, type IntegrationsData } from './useIntegrations';
+import { VendorLogo } from '../components/ui/VendorLogo';
+import { AiUseSection, AiUseNotes } from './AiUse';
 
 /**
  * Connected systems.
@@ -24,12 +26,12 @@ const SOURCES: { key: Source; name: string; reads: string }[] = [
   {
     key: 'github',
     name: 'GitHub',
-    reads: 'Branch rules, merged pull requests and their reviews, Dependabot and secret-scanning alerts, and which repositories depend on AI libraries.',
+    reads: 'Branch rules, merged pull requests and their reviews, Dependabot and secret-scanning alerts, which repositories depend on AI libraries, and who holds a GitHub Copilot seat and last used it.',
   },
   {
     key: 'microsoft',
     name: 'Microsoft 365',
-    reads: 'Whether a second factor is required and registered, who the global administrators are, and which accounts have gone unused. Never mail, files or chats.',
+    reads: 'Whether a second factor is required and registered, who the global administrators are, and which accounts have gone unused, and who uses Microsoft 365 Copilot in which apps. Never mail, files or chats.',
   },
   {
     key: 'openai',
@@ -39,7 +41,7 @@ const SOURCES: { key: Source; name: string; reads: string }[] = [
   {
     key: 'anthropic',
     name: 'Anthropic',
-    reads: 'Daily usage and cost per model for your organisation. Never prompts, outputs or files.',
+    reads: 'Daily usage and cost per model for your organisation and, when AIC holds an admin key, who uses Claude Code and how much. Never prompts, outputs or files. Claude Enterprise seats are under More systems.',
   },
 ];
 
@@ -141,6 +143,7 @@ function IntegrationsPage() {
             return (
               <div key={s.key} className="p-4 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-6">
+                  <VendorLogo id={s.key} name={s.name} size={44} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <h2 className="text-[16px] font-semibold text-[#0e1b2c]">{s.name}</h2>
@@ -148,6 +151,7 @@ function IntegrationsPage() {
                     </div>
                     <p className="mt-1 text-[14px] leading-relaxed text-[#5e6b7b]">{s.reads}</p>
                     {i && <ConnectionFacts i={i} />}
+                    {i && data && <AiUseNotes i={i} checks={data.checks.filter((c) => c.provider === s.key)} />}
                   </div>
                   {data?.canManage && (
                     <div className="flex gap-2 shrink-0">
@@ -201,6 +205,8 @@ function IntegrationsPage() {
             </button>
           </div>
         )}
+
+        {data && <AiUseSection canManage={data.canManage} onNotice={setNotice} refreshKey={data.integrations.reduce((n, i) => n + (i.lastSyncedAt ? Date.parse(i.lastSyncedAt) : 0), 0)} />}
 
         {data && (
           <ConnectorCatalogue integrations={data.integrations} checks={data.checks} canManage={data.canManage} proven={data.proven} onChanged={(m) => { setNotice(m); reload(); }} />
@@ -341,7 +347,7 @@ function MicrosoftPanel({ data, i, onDone }: { data: IntegrationsData; i?: Integ
     <div className="space-y-4">
       <ol className="space-y-2 text-[14px] leading-relaxed text-[#0e1b2c] list-decimal pl-5">
         <li>A <strong className="font-semibold">global administrator</strong> of your Microsoft 365 tenant needs to do this step.</li>
-        <li>Microsoft shows the permissions AIC asks for. Every one is read-only: users, sign-in policies, admin roles and sign-in reports.</li>
+        <li>Microsoft shows the permissions AIC asks for. Every one is read-only: users, sign-in policies, admin roles, sign-in reports and usage reports (for Copilot).</li>
         <li>You come back here, and the first checks run straight away. Two of them need an Entra ID P1 or P2 licence; without one they show “could not check”.</li>
       </ol>
       {!data.microsoftConfigured && <p className="text-[13px] text-[#b45309]">Microsoft 365 connections are not switched on for this AIC server yet.</p>}

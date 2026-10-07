@@ -17,6 +17,11 @@ import { IMPLS, isConnector, credentialsOf, contextFor, importPeople } from '../
 import { ConnectorError } from '../connectors/types';
 import { forgetLeavers } from '../registers/facts';
 import { recordConnectorRun } from '../connectors/runs';
+import { CONNECTOR_BY_KEY } from '../connectors/catalog';
+import { saveAiUse, registerChecks } from '../ai-use/store';
+import { pullClaudeCode } from '../ai-use/anthropic';
+import { pullGithubCopilot, pullM365Copilot } from '../ai-use/copilot';
+import type { AiUseOutput } from '../ai-use/products';
 
 /**
  * One sync of one organisation's connected systems: read each source, run its
@@ -130,6 +135,31 @@ async function providerResults(orgId: string, i: IntegrationRow, declared: { ids
   });
 }
 
+
+/**
+ * AI use read alongside a source's checks (lib/ai-use): stored, turned into
+ * the register check, and summarised onto the connection so the page can say
+ * what was read and what could not be. A failure here never fails the sync;
+ * the checks the source exists for still land.
+ */
+async function recordAiUse(orgId: string, source: string, read: () => Promise<AiUseOutput>, systemNames: string[], now: Date): Promise<{ results: CheckResult[]; summary: object }> {
+  let out: AiUseOutput;
+  try {
+    out = await read();
+  } catch (e) {
+    console.error(`[AI-USE] ${source}:`, (e as Error).message);
+    return { results: [], summary: { at: now.toISOString(), readings: 0, notes: [`AI use could not be read this time: ${(e as Error).message}`] } };
+  }
+  const stored = await saveAiUse(orgId, source, out.records, now);
+  const products = [...new Set(out.records.map((r) => r.product))];
+  return {
+    results: registerChecks(out.records, systemNames, now),
+    summary: { at: now.toISOString(), readings: stored, products, notes: out.notes, facts: out.facts ?? null },
+  };
+}
+
+const aiDays = (i: IntegrationRow) => (i.lastSyncedAt ? PULL_DAYS : FIRST_PULL_DAYS);
+
 async function storeResults(orgId: string, integrationId: string, results: CheckResult[], now: Date) {
   const db = getTenantDb(orgId);
   await db.query(async (tx) => {
@@ -208,6 +238,28 @@ export async function syncOrg(orgId: string, actorLabel = 'AIC connector sync'):
         settings = { ...((i.settings as object) ?? {}), tenantName: facts.tenantName, users: facts.users?.length ?? null };
       } else {
         results = await providerResults(orgId, i, declared);
+      }
+
+      // AI use inside this source, where it has any (lib/ai-use).
+      const names = [...declared.names];
+      let aiRead: (() => Promise<AiUseOutput>) | null = null;
+      if (isConnector(i.provider) && IMPLS[i.provider].aiUse && CONNECTOR_BY_KEY[i.provider]?.ai) {
+        const impl = IMPLS[i.provider];
+        aiRead = async () => impl.aiUse!(credentialsOf(i), await contextFor(orgId, i.provider), aiDays(i));
+      } else if (i.provider === 'anthropic' && i.mode === 'api_key') {
+        aiRead = () => {
+          const key = EncryptionService.decrypt(i.secretCiphertext);
+          return pullClaudeCode(key, aiDays(i), now);
+        };
+      } else if (i.provider === 'github' && i.accountLabel && (settings as { accountType?: string } | undefined)?.accountType === 'Organization') {
+        aiRead = async () => pullGithubCopilot(i.accountLabel!, await installationToken(i.externalId!), now);
+      } else if (i.provider === 'microsoft' && i.externalId) {
+        aiRead = () => pullM365Copilot(i.externalId!, now);
+      }
+      if (aiRead) {
+        const ai = await recordAiUse(orgId, i.provider, aiRead, names, now);
+        results = [...results, ...ai.results];
+        settings = { ...((settings ?? i.settings ?? {}) as object), aiUse: ai.summary };
       }
       await storeResults(orgId, i.id, results, now);
       const waiting = i.mode === 'exporter' && results.some((r) => r.checkKey === 'ai.usage_fresh' && r.status === 'warn');

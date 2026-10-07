@@ -6,6 +6,7 @@ import { call, result, listSome, plural } from '../http';
 import { ConnectorError, type ConnectorImpl, type Credentials, type RunContext } from '../types';
 import type { CheckResult } from '../../integrations/catalog';
 import { tenantToken, MicrosoftError } from '@/lib/integrations/microsoft';
+import type { AiUseOutput, AiUseRecord } from '../../ai-use/products';
 
 const ARM = 'https://management.azure.com';
 const OWNER = '8e3af657-a8ff-443c-a75c-2fe8c4bcb635';
@@ -149,6 +150,83 @@ async function defenderCheck(subs: Sub[], token: string): Promise<CheckResult> {
   return result(key, SUBJECT, failed.length ? 'unknown' : 'pass', `No high-severity recommendations are open${unhealthy.length ? ` (${plural(unhealthy.length, 'lower one')} remain)` : ''}.${unreadNote(failed)}`);
 }
 
+// ── Azure OpenAI and AI Foundry ─────────────────────────────────────────────
+//
+// Cognitive Services accounts of kind OpenAI or AIServices, their model
+// deployments, and Azure Monitor's daily request and token totals per
+// deployment. Reader on the subscription covers all three. No person is in
+// these figures: a row is a deployment on a day.
+// Docs: https://learn.microsoft.com/en-us/azure/foundry-classic/openai/monitor-openai-reference
+
+type CsAccount = { id: string; name: string; kind?: string; location?: string };
+type Deployment = { name: string; properties?: { model?: { name?: string; version?: string } } };
+type MetricsBody = { value?: { name?: { value?: string }; timeseries?: { metadatavalues?: { name?: { value?: string }; value?: string }[]; data?: { timeStamp: string; total?: number }[] }[] }[] };
+
+export function mapAzureMetrics(account: CsAccount, deployments: Deployment[], body: MetricsBody): AiUseRecord[] {
+  const model = new Map(deployments.map((d) => [d.name.toLowerCase(), [d.properties?.model?.name, d.properties?.model?.version].filter(Boolean).join(' ')]));
+  const rows = new Map<string, AiUseRecord>();
+  for (const metric of body.value ?? []) {
+    const name = metric.name?.value ?? '';
+    for (const ts of metric.timeseries ?? []) {
+      const dep = ts.metadatavalues?.find((m) => /deployment/i.test(m.name?.value ?? ''))?.value ?? '(all deployments)';
+      for (const p of ts.data ?? []) {
+        const total = p.total ?? 0;
+        if (!total) continue;
+        const day = p.timeStamp.slice(0, 10);
+        const key = `${dep}|${day}`;
+        const r = rows.get(key) ?? {
+          product: 'azure_openai' as const, subjectType: 'model' as const,
+          subject: `${account.name}/${dep}`, displayName: model.get(dep.toLowerCase()) || null, day,
+          lastActiveAt: `${day}T00:00:00Z`, activity: 0, metrics: { account: account.name, location: account.location ?? null, inputTokens: 0, outputTokens: 0 },
+        };
+        const m = r.metrics as Record<string, number>;
+        if (name === 'AzureOpenAIRequests') r.activity += total;
+        else if (name === 'ProcessedPromptTokens') m.inputTokens += total;
+        else if (name === 'GeneratedTokens') m.outputTokens += total;
+        rows.set(key, r);
+      }
+    }
+  }
+  return [...rows.values()].filter((r) => r.activity > 0 || (r.metrics as Record<string, number>).inputTokens > 0);
+}
+
+async function azureAiUse(c: Credentials, ctx: RunContext, days: number): Promise<AiUseOutput> {
+  const token = await microsoftToken(ctx, 'https://management.azure.com/.default', 'Azure');
+  const subs = await subscriptions(c, token);
+  const records: AiUseRecord[] = [];
+  const notes: string[] = [];
+  const end = new Date(Date.UTC(ctx.now.getUTCFullYear(), ctx.now.getUTCMonth(), ctx.now.getUTCDate()));
+  const start = new Date(end.getTime() - Math.min(days, 30) * 86_400_000);
+  for (const sub of subs) {
+    let accounts: CsAccount[];
+    try {
+      accounts = (await list<CsAccount>(`${ARM}/subscriptions/${encodeURIComponent(sub.id)}/providers/Microsoft.CognitiveServices/accounts?api-version=2024-10-01`, token))
+        .filter((a) => /^(OpenAI|AIServices)$/i.test(a.kind ?? ''));
+    } catch (e) {
+      if (e instanceof ConnectorError && e.status === 401) throw e;
+      notes.push(`Azure OpenAI: could not list AI accounts in ${sub.name}.`);
+      continue;
+    }
+    for (const a of accounts.slice(0, 25)) {
+      const deployments = await list<Deployment>(`${ARM}${a.id}/deployments?api-version=2024-10-01`, token).catch(() => [] as Deployment[]);
+      const qs = new URLSearchParams({
+        'api-version': '2018-01-01',
+        metricnames: 'AzureOpenAIRequests,ProcessedPromptTokens,GeneratedTokens',
+        timespan: `${start.toISOString()}/${end.toISOString()}`,
+        interval: 'P1D', aggregation: 'Total', $filter: "ModelDeploymentName eq '*'",
+      });
+      try {
+        const body = await call<MetricsBody>(`${ARM}${a.id}/providers/microsoft.insights/metrics?${qs}`, { headers: { Authorization: `Bearer ${token}` } });
+        records.push(...mapAzureMetrics(a, deployments, body));
+      } catch (e) {
+        if (e instanceof ConnectorError && e.status === 401) throw e;
+        notes.push(`Azure OpenAI: could not read usage metrics for ${a.name}.`);
+      }
+    }
+  }
+  return { records, notes };
+}
+
 export const azure: ConnectorImpl = {
   async run(c, ctx) {
     const token = await microsoftToken(ctx, 'https://management.azure.com/.default', 'Azure');
@@ -161,4 +239,6 @@ export const azure: ConnectorImpl = {
     ];
     return { results, label: subs.length === 1 ? `Azure ${subs[0].name}` : `Azure, ${plural(subs.length, 'subscription')}` };
   },
+
+  aiUse: azureAiUse,
 };

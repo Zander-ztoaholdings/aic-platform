@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSystemDb, users, organizations, eq } from '@aic/db';
+import { getSystemDb, users, organizations, passwordResetTokens, eq, and, isNull, desc } from '@aic/db';
 import { auth } from '@aic/auth';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
@@ -30,6 +30,79 @@ const InviteSchema = z.object({
  * message as success would give the outside world — but the inviting admin is
  * told plainly, because they are authenticated and it is their own team.
  */
+/**
+ * Invitations still waiting to be accepted, for the Waiting panel on the team
+ * page. A pending invitation is an account in this organisation that has never
+ * been activated and never signed in; a member who was later switched off has
+ * signed in, so is not listed here. Any member may see who is waiting.
+ */
+export async function GET() {
+  const session = await auth();
+  const orgId = session?.user?.orgId as string | undefined;
+  if (!orgId) return NextResponse.json({ error: 'Sign in with an organisation account.' }, { status: 401 });
+
+  const db = getSystemDb();
+  const pending = await db
+    .select({ id: users.id, name: users.name, email: users.email, role: users.role, invitedAt: users.createdAt, updatedAt: users.updatedAt })
+    .from(users)
+    .where(and(eq(users.orgId, orgId), eq(users.isActive, false), isNull(users.lastLogin)))
+    .orderBy(desc(users.createdAt))
+    .limit(100);
+
+  const withLinks = await Promise.all(pending.map(async (p) => {
+    const [t] = await db
+      .select({ expiresAt: passwordResetTokens.expiresAt, sentAt: passwordResetTokens.createdAt, used: passwordResetTokens.used })
+      .from(passwordResetTokens)
+      .where(eq(passwordResetTokens.userId, p.id))
+      .orderBy(desc(passwordResetTokens.createdAt))
+      .limit(1);
+    return {
+      id: p.id,
+      name: p.name,
+      email: p.email,
+      role: ROLE_LABEL[p.role as OrgRole] ?? p.role,
+      roleKey: p.role,
+      invitedAt: p.invitedAt,
+      lastSentAt: t?.sentAt ?? p.invitedAt,
+      linkExpiresAt: t && !t.used ? t.expiresAt : null,
+    };
+  }));
+
+  return NextResponse.json({ pending: withLinks, canManage: canManageTeamAndKeys(session!.user.role as string | undefined) });
+}
+
+/**
+ * Withdraws an invitation: the never-activated account and its links are
+ * removed, so the emailed link stops working. Only for accounts that have
+ * never signed in, so it cannot be used to remove a real member.
+ */
+export async function DELETE(request: NextRequest) {
+  const session = await auth();
+  const orgId = session?.user?.orgId as string | undefined;
+  if (!orgId || !canManageTeamAndKeys(session!.user.role as string | undefined)) {
+    return NextResponse.json({ error: 'Only an organisation admin can withdraw invitations.' }, { status: 403 });
+  }
+  const { id } = (await request.json().catch(() => ({}))) as { id?: string };
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: 'Which invitation?' }, { status: 400 });
+
+  const db = getSystemDb();
+  const [u] = await db
+    .select({ id: users.id, email: users.email })
+    .from(users)
+    .where(and(eq(users.id, id), eq(users.orgId, orgId), eq(users.isActive, false), isNull(users.lastLogin)))
+    .limit(1);
+  if (!u) return NextResponse.json({ error: 'That invitation has already been accepted or withdrawn.' }, { status: 404 });
+
+  await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, u.id));
+  try {
+    await db.delete(users).where(eq(users.id, u.id));
+  } catch {
+    // Something already refers to the account. The links are gone, so the
+    // invitation cannot be accepted; the inactive account stays.
+  }
+  return NextResponse.json({ success: true, message: `The invitation to ${u.email} is withdrawn. Its link no longer works.` });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();

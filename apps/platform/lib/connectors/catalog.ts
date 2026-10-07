@@ -32,6 +32,22 @@ const CHANGE = ['ISO 27001 A.8.4', 'ISO 27001 A.8.32'];
 const CRYPTO = ['ISO 27001 A.8.24', 'POPIA s19'];
 
 export const CONNECTORS: ConnectorDef[] = [
+  // ── AI tools ─────────────────────────────────────────────────────────────
+  {
+    key: 'claude_enterprise', name: 'Claude Enterprise', category: 'ai', verified: false,
+    reads: 'Who in your organisation uses Claude each day, and how much: messages, conversations, projects, connectors, Claude Code and Cowork sessions, with seat totals. Never a prompt, a conversation or a file.',
+    plan: 'Claude Enterprise only. Team, Pro and Max plans have no analytics API; use Import an export under AI in use instead.',
+    setup: [
+      'Only your organisation’s Primary Owner can do this. In claude.ai, open Organization settings, API.',
+      'Turn on the Analytics API, then create a key with the read:analytics scope.',
+      'Paste the key below. It reads counts only, and is separate from any Console Admin key.',
+    ],
+    fields: [secret('analyticsKey', 'Analytics API key')],
+    checks: [],
+    ai: { products: ['claude_seats'] },
+    docs: 'https://platform.claude.com/docs/en/manage-claude/analytics-api',
+  },
+
   // ── Cloud ────────────────────────────────────────────────────────────────
   {
     key: 'aws', name: 'Amazon Web Services', category: 'cloud', verified: false, accounts: true,
@@ -41,6 +57,7 @@ export const CONNECTORS: ConnectorDef[] = [
       'Attach the AWS managed policy SecurityAudit to it. It can read settings but not your data.',
       'Under Security credentials, create an access key for "Third-party service" and paste both parts below.',
       'Give the region where you run most workloads, so AIC reads the right CloudTrail.',
+      'To record Amazon Bedrock use as well, also attach CloudWatchReadOnlyAccess. It reads metrics, not data.',
     ],
     fields: [text('accessKeyId', 'Access key id', 'AKIA…'), secret('secretAccessKey', 'Secret access key'), text('region', 'Main region', 'af-south-1', 'For example af-south-1 (Cape Town) or eu-west-1.')],
     checks: [
@@ -49,6 +66,7 @@ export const CONNECTORS: ConnectorDef[] = [
       { key: 'aws.s3_public_access_blocked', title: 'S3 blocks public access', why: 'A public bucket is the most common way cloud data leaks.', fix: 'In S3, open Block Public Access settings for this account and turn on all four settings.', controls: ['ISO 27001 A.8.3', 'POPIA s19'], common: ['ops.encryption'] },
       { key: 'aws.cloudtrail_enabled', title: 'CloudTrail is logging in every region', why: 'Without CloudTrail there is no record of who changed what in AWS, which is the first thing an incident needs.', fix: 'In CloudTrail, create a trail that applies to all regions, with log file validation on.', controls: LOGGING, common: ['ops.logging_monitoring'] },
     ],
+    ai: { products: ['aws_bedrock'], needs: 'CloudWatchReadOnlyAccess on the same user (cloudwatch:ListMetrics and cloudwatch:GetMetricData).' },
     docs: 'https://docs.aws.amazon.com/aws-managed-policy/latest/reference/SecurityAudit.html',
   },
   {
@@ -65,6 +83,7 @@ export const CONNECTORS: ConnectorDef[] = [
       { key: 'gcp.gcs_public_access_prevented', title: 'Storage buckets prevent public access', why: 'A bucket readable by allUsers is open to the whole internet.', fix: 'In Cloud Storage, open each listed bucket, Permissions, and set public access prevention to enforced.', controls: ['ISO 27001 A.8.3', 'POPIA s19'], common: ['ops.encryption'] },
       { key: 'gcp.audit_logging', title: 'Data access audit logs are on', why: 'Admin activity is always logged, but who read your data is only logged if you turn it on.', fix: 'In IAM and admin, Audit logs, turn on Data Read and Data Write for all services, or at least for the ones holding personal information.', controls: LOGGING, common: ['ops.logging_monitoring'] },
     ],
+    ai: { products: ['vertex_ai'], needs: 'Nothing more: Viewer on the project includes Cloud Monitoring.' },
     docs: 'https://cloud.google.com/iam/docs/understanding-roles',
   },
   {
@@ -83,6 +102,7 @@ export const CONNECTORS: ConnectorDef[] = [
       { key: 'azure.activity_log_exported', title: 'The activity log is kept', why: 'Azure keeps the activity log for 90 days. An incident found later needs more.', fix: 'In Monitor, Activity log, Export activity logs, send Administrative and Security categories to a Log Analytics workspace or storage account.', controls: LOGGING, common: ['ops.logging_monitoring'] },
       { key: 'azure.defender_unhealthy_assessments', title: 'No high-severity Defender for Cloud recommendations open', why: 'Defender for Cloud already lists the riskiest settings in your subscription; high ones are worth fixing first.', fix: 'In Defender for Cloud, Recommendations, filter by High severity and work through the list.', controls: VULNS, common: ['dev.vulnerabilities'] },
     ],
+    ai: { products: ['azure_openai'], needs: 'Nothing more: Reader on the subscription covers AI accounts, deployments and their metrics.' },
     docs: 'https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles',
   },
 
@@ -93,6 +113,7 @@ export const CONNECTORS: ConnectorDef[] = [
     setup: [
       'In Google Cloud, create a service account and a JSON key for it (no project roles needed).',
       'In the Workspace Admin console, Security, Access and data control, API controls, Domain-wide delegation: add the service account’s client id with the scope https://www.googleapis.com/auth/admin.directory.user.readonly',
+      'To record Gemini use as well, add a second scope to the same entry: https://www.googleapis.com/auth/admin.reports.audit.readonly',
       'Paste the key below, with the email of a super admin for AIC to read as. It only reads.',
     ],
     fields: [{ key: 'serviceAccount', label: 'Service account key (JSON)', kind: 'textarea', placeholder: '{ "type": "service_account", … }' }, text('adminEmail', 'Super admin email to read as', 'it@yourcompany.co.za')],
@@ -101,6 +122,7 @@ export const CONNECTORS: ConnectorDef[] = [
       { key: 'google_workspace.admins_limited', title: 'Super admins are few, but more than one', why: ADMINS_WHY, fix: ADMINS_FIX, controls: PRIV, common: ['iam.privileged'] },
       { key: 'google_workspace.stale_accounts', title: 'Unused Google accounts are suspended', why: STALE_WHY, fix: STALE_FIX, controls: LEAVERS, common: ['iam.leavers'] },
     ],
+    ai: { products: ['gemini_workspace'], needs: 'The scope https://www.googleapis.com/auth/admin.reports.audit.readonly added to the same domain-wide delegation.' },
     docs: 'https://developers.google.com/workspace/admin/directory/reference/rest/v1/users/list',
   },
   {

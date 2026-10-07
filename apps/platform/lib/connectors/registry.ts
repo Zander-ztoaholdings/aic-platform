@@ -34,10 +34,12 @@ import { crowdstrike } from './providers/crowdstrike';
 import { cloudflare } from './providers/cloudflare';
 import { datadog } from './providers/datadog';
 import { salesforce } from './providers/salesforce';
+import { claudeEnterprise } from './providers/claude_enterprise';
 
 export const IMPLS: Record<string, ConnectorImpl> = {
   aws, gcp, azure, google_workspace: googleWorkspace, okta, onepassword, gitlab, bitbucket, snyk, jira, linear, zendesk, slack,
   bamboohr, hibob, personio, deel, rippling, intune, jamf, kandji, crowdstrike, cloudflare, datadog, salesforce,
+  claude_enterprise: claudeEnterprise,
 };
 
 type Row = typeof integrations.$inferSelect;

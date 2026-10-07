@@ -6,6 +6,7 @@ import { call, need, result, listSome, plural, daysSince, signAws, xmlTag, xmlAl
 import { ConnectorError, type ConnectorImpl, type Credentials } from '../types';
 import type { CheckResult } from '../../integrations/catalog';
 import type { Account } from '../../registers/accounts';
+import type { AiUseOutput, AiUseRecord } from '../../ai-use/products';
 
 type Keys = { accessKeyId: string; secretAccessKey: string; region: string };
 type Row = Record<string, string>;
@@ -221,6 +222,105 @@ async function cloudTrailCheck(k: Keys, subject: string): Promise<CheckResult> {
     : result(key, subject, 'warn', `The trail ${logging[0].Name} logs every region, but log file validation is off, so tampering with the logs would go unnoticed.`);
 }
 
+// ── Amazon Bedrock ──────────────────────────────────────────────────────────
+//
+// Bedrock publishes Invocations, InputTokenCount and OutputTokenCount to
+// CloudWatch under AWS/Bedrock, per ModelId. There is no person in these
+// figures: a row is a model in a region on a day. Needs cloudwatch:ListMetrics
+// and cloudwatch:GetMetricData (CloudWatchReadOnlyAccess has both).
+// Docs: https://docs.aws.amazon.com/bedrock/latest/userguide/monitoring-runtime-metrics.html
+
+const BEDROCK_REGIONS = ['us-east-1', 'us-west-2', 'eu-central-1', 'eu-west-1', 'eu-west-3', 'ap-southeast-2', 'ap-northeast-1', 'ap-south-1'];
+const BEDROCK_METRICS = ['Invocations', 'InputTokenCount', 'OutputTokenCount'] as const;
+
+const cw = (k: Keys, region: string, params: Record<string, string>) => {
+  const body = new URLSearchParams({ Version: '2010-08-01', ...params }).toString();
+  return request(k, 'POST', `https://monitoring.${region}.amazonaws.com/`, region, 'monitoring', body, { 'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8' });
+};
+
+/** Model ids with Bedrock invocations in this region over the last two weeks (CloudWatch keeps listing metrics that long). */
+export function parseModelIds(xml: string): string[] {
+  const ids = new Set<string>();
+  for (const dims of xmlAll(xml, 'Dimensions')) {
+    const names = xmlAll(dims, 'Name');
+    const values = xmlAll(dims, 'Value');
+    names.forEach((n, i) => { if (n === 'ModelId' && values[i]) ids.add(values[i]); });
+  }
+  return [...ids];
+}
+
+/** GetMetricData's answer: per query id, the daily timestamps and values. */
+export function parseMetricData(xml: string): Map<string, { day: string; value: number }[]> {
+  const out = new Map<string, { day: string; value: number }[]>();
+  const results = xmlTag(xml, 'MetricDataResults') ?? '';
+  for (const chunk of results.split('<Id>').slice(1)) {
+    const id = chunk.slice(0, chunk.indexOf('</Id>'));
+    const times = xmlAll(xmlTag(chunk, 'Timestamps') ?? '', 'member');
+    const values = xmlAll(xmlTag(chunk, 'Values') ?? '', 'member').map(Number);
+    out.set(id, times.map((t, i) => ({ day: t.slice(0, 10), value: values[i] ?? 0 })));
+  }
+  return out;
+}
+
+async function bedrockUse(k: Keys, days: number, now: Date): Promise<AiUseOutput> {
+  const records: AiUseRecord[] = [];
+  const notes: string[] = [];
+  const regions = [...new Set([k.region, ...BEDROCK_REGIONS])];
+  let refused = 0;
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const start = new Date(end.getTime() - days * 86_400_000);
+  for (const region of regions) {
+    let models: string[];
+    try {
+      models = parseModelIds(await cw(k, region, { Action: 'ListMetrics', Namespace: 'AWS/Bedrock', MetricName: 'Invocations' }));
+    } catch (e) {
+      if (e instanceof ConnectorError && (e.status === 401 || e.status === 403)) refused++;
+      continue; // a region not enabled for the account answers with an error; nothing runs there
+    }
+    if (!models.length) continue;
+    const params: Record<string, string> = { Action: 'GetMetricData', StartTime: start.toISOString(), EndTime: end.toISOString() };
+    let q = 0;
+    const ids: { id: string; model: string; metric: string }[] = [];
+    for (const [mi, model] of models.slice(0, 50).entries()) {
+      for (const metric of BEDROCK_METRICS) {
+        q++;
+        const id = `m${mi}_${metric.toLowerCase()}`;
+        ids.push({ id, model, metric });
+        const p = `MetricDataQueries.member.${q}`;
+        Object.assign(params, {
+          [`${p}.Id`]: id,
+          [`${p}.MetricStat.Metric.Namespace`]: 'AWS/Bedrock',
+          [`${p}.MetricStat.Metric.MetricName`]: metric,
+          [`${p}.MetricStat.Metric.Dimensions.member.1.Name`]: 'ModelId',
+          [`${p}.MetricStat.Metric.Dimensions.member.1.Value`]: model,
+          [`${p}.MetricStat.Period`]: '86400',
+          [`${p}.MetricStat.Stat`]: 'Sum',
+          [`${p}.ReturnData`]: 'true',
+        });
+      }
+    }
+    let data: Map<string, { day: string; value: number }[]>;
+    try { data = parseMetricData(await cw(k, region, params)); } catch (e) {
+      if (e instanceof ConnectorError && (e.status === 401 || e.status === 403)) { refused++; continue; }
+      throw e;
+    }
+    const rows = new Map<string, AiUseRecord>();
+    for (const { id, model, metric } of ids) {
+      for (const { day, value } of data.get(id) ?? []) {
+        const key = `${model}|${day}`;
+        const r = rows.get(key) ?? { product: 'aws_bedrock' as const, subjectType: 'model' as const, subject: `${model} (${region})`, day, lastActiveAt: `${day}T00:00:00Z`, activity: 0, metrics: { region, inputTokens: 0, outputTokens: 0 } };
+        if (metric === 'Invocations') r.activity += value;
+        else if (metric === 'InputTokenCount') (r.metrics as Record<string, number>).inputTokens += value;
+        else (r.metrics as Record<string, number>).outputTokens += value;
+        rows.set(key, r);
+      }
+    }
+    records.push(...[...rows.values()].filter((r) => r.activity > 0));
+  }
+  if (refused && !records.length) notes.push('Amazon Bedrock: the AWS key cannot read CloudWatch metrics. Attach CloudWatchReadOnlyAccess to the AIC user, or allow cloudwatch:ListMetrics and cloudwatch:GetMetricData.');
+  return { records, notes };
+}
+
 export const aws: ConnectorImpl = {
   async run(c, ctx) {
     const k = setup(c);
@@ -243,6 +343,10 @@ export const aws: ConnectorImpl = {
     results.push(await s3Check(k, id, id));
     results.push(await cloudTrailCheck(k, id));
     return { results, label: id };
+  },
+
+  async aiUse(c, ctx, days) {
+    return bedrockUse(setup(c), Math.min(days, 14), ctx.now);
   },
 
   async accounts(c) {

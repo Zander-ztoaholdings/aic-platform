@@ -15,7 +15,8 @@ import { createSign } from 'crypto';
  *
  * Required App permissions (repository, all read-only): Metadata, Contents,
  * Pull requests, Administration, Dependabot alerts, Secret scanning alerts.
- * Organisation: Administration (read) for the two-factor check. Any the
+ * Organisation: Administration (read) for the two-factor check, and GitHub
+ * Copilot Business (read) for Copilot seats (lib/ai-use/copilot). Any the
  * organisation declines simply make the affected check "unknown".
  *
  * Environment:

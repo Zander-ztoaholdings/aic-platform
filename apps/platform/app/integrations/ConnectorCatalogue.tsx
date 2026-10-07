@@ -6,6 +6,9 @@ import { CONNECTORS as ALL_CONNECTORS } from '@/lib/connectors/catalog';
 import { CATEGORY_LABEL, type ConnectorCategory, type ConnectorDef } from '@/lib/connectors/types';
 import { Portal } from '@/app/components/ui/Portal';
 import { ago, type Integration, type Check } from './useIntegrations';
+import { VendorLogo } from '@/app/components/ui/VendorLogo';
+import { AI_PRODUCTS } from '@/lib/ai-use/products';
+import { AiUseNotes } from './AiUse';
 
 /**
  * Every other system AIC can read, as a catalogue: search, filter by kind,
@@ -58,9 +61,12 @@ function Drawer({ def, i, checks, canManage, microsoftConnected, onClose, onDone
       <div className="absolute inset-0 bg-[#0e1b2c]/30" onClick={onClose} />
       <div className="relative flex h-full w-full max-w-xl flex-col bg-white shadow-[-12px_0_40px_-12px_rgba(10,23,40,0.25)]">
         <div className="flex items-center justify-between border-b border-[#eef1f5] px-5 py-4">
-          <div>
-            <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">{def.name}</h2>
-            <p className="text-[12.5px] text-[#5e6b7b]">{CATEGORY_LABEL[def.category]}{i?.accountLabel && connected ? `, ${i.accountLabel}` : ''}</p>
+          <div className="flex items-center gap-3 min-w-0">
+            <VendorLogo id={def.key} name={def.name} size={40} />
+            <div className="min-w-0">
+              <h2 className="font-serif text-[20px] font-semibold text-[#0e1b2c]">{def.name}</h2>
+              <p className="text-[12.5px] text-[#5e6b7b]">{CATEGORY_LABEL[def.category]}{i?.accountLabel && connected ? `, ${i.accountLabel}` : ''}</p>
+            </div>
           </div>
           <button type="button" onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-[#eef1f5]" aria-label="Close"><X className="h-4 w-4" /></button>
         </div>
@@ -69,9 +75,20 @@ function Drawer({ def, i, checks, canManage, microsoftConnected, onClose, onDone
           {!def.verified && <p className="rounded-xl bg-[#a8772a]/[0.07] px-3.5 py-2.5 text-[13px] leading-relaxed text-[#6f5418]">New connector, built from {def.name}’s documentation. If something reads wrong once it is connected, tell AIC and it will be fixed quickly.</p>}
           {def.plan && <p className="text-[13px] text-[#5e6b7b]">{def.plan}</p>}
 
+          {def.ai && (
+            <section className="rounded-xl bg-[#f5f7f9] px-4 py-3.5">
+              <h3 className="text-[15px] font-semibold text-[#0e1b2c]">AI use it records</h3>
+              <p className="mt-1 text-[13.5px] leading-relaxed text-[#2b3a4d]">
+                {def.ai.products.map((p) => AI_PRODUCTS[p].name).join(' and ')}: {AI_PRODUCTS[def.ai.products[0]].subject === 'person' ? 'who uses it and how often' : 'which models are called, and how much, per day'}. Counts only, never what anyone wrote.
+              </p>
+              {def.ai.needs && <p className="mt-1 text-[13px] text-[#5e6b7b]">Needs: {def.ai.needs}</p>}
+              {connected && i && <AiUseNotes i={i} checks={checks} />}
+            </section>
+          )}
+
           {connected && i && (
             <section>
-              <h3 className="text-[15px] font-semibold text-[#0e1b2c]">Latest results</h3>
+              <h3 className="text-[15px] font-semibold text-[#0e1b2c]">{def.checks.length ? 'Latest results' : 'Latest read'}</h3>
               <p className="mt-0.5 text-[12.5px] text-[#8a95a3]">Read {ago(i.lastSyncedAt)}{i.secretHint ? `, credential ending ${i.secretHint.replace('…', '')}` : ''}.</p>
               {i.lastError && <p className="mt-2 rounded-lg bg-[#b45309]/[0.07] px-3 py-2 text-[13px] text-[#8a4a10]">{i.lastError}</p>}
               <ul className="mt-2 divide-y divide-[#eef1f5]">
@@ -95,6 +112,7 @@ function Drawer({ def, i, checks, canManage, microsoftConnected, onClose, onDone
               <ul className="mt-2 space-y-2">
                 {def.checks.map((c) => <li key={c.key}><span className="font-medium text-[#0e1b2c]">{c.title}.</span> <span className="text-[#5e6b7b]">{c.why}</span></li>)}
               </ul>
+              {def.checks.length === 0 && <p className="mt-1 text-[13.5px] text-[#5e6b7b]">It records AI use, and checks that each product people use is on your AI register.</p>}
               {(def.accounts || def.people) && <p className="mt-3 text-[13px] text-[#5e6b7b]">{def.people ? 'It also brings your staff list, with start and leaving dates, into the People page.' : 'It also lists who has an account, for access reviews and to catch leavers who still have access.'}</p>}
             </section>
           )}
@@ -189,12 +207,16 @@ export function ConnectorCatalogue({ integrations, checks, canManage, onChanged,
             <li key={c.key}>
               <button type="button" onClick={() => setOpen(c)} className="flex h-full w-full flex-col rounded-2xl border border-[#dde2e8] bg-white p-4 text-left hover:border-[#a8772a]/60">
                 <span className="flex w-full items-start justify-between gap-2">
-                  <span className="text-[15px] font-semibold text-[#0e1b2c]">{c.name}</span>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <VendorLogo id={c.key} name={c.name} size={36} />
+                    <span className="text-[15px] font-semibold text-[#0e1b2c]">{c.name}</span>
+                  </span>
                   {st ? <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-medium ${st.tone}`}>{st.label}</span>
                     : !c.verified ? <span className="shrink-0 rounded-full bg-[#eef1f5] px-2 py-0.5 text-[12px] font-medium text-[#5e6b7b]">New</span> : null}
                 </span>
-                <span className="mt-0.5 text-[12.5px] text-[#8a95a3]">{CATEGORY_LABEL[c.category]}{c.people ? ', brings in your staff list' : c.accounts ? ', lists accounts' : ''}</span>
+                <span className="mt-2 text-[12.5px] text-[#8a95a3]">{CATEGORY_LABEL[c.category]}{c.people ? ', brings in your staff list' : c.accounts ? ', lists accounts' : ''}</span>
                 <span className="mt-2 line-clamp-3 text-[13.5px] leading-relaxed text-[#5e6b7b]">{c.reads}</span>
+                {c.ai && c.category !== 'ai' && <span className="mt-2 text-[13px] text-[#8a6114]">Also records {c.ai.products.map((p) => AI_PRODUCTS[p].name).join(' and ')} use</span>}
                 {i && failing > 0 && <span className="mt-2 text-[13px] font-medium text-[#b23a35]">{failing} check{failing === 1 ? '' : 's'} failing</span>}
               </button>
             </li>

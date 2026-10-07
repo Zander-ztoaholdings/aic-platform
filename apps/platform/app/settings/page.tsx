@@ -7,6 +7,7 @@ import { PageHeader } from '@/app/components/ui/PageHeader';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { canEditOrgProfile, canManageTeamAndKeys } from '../../lib/roles';
+import { WaitingPanel } from './WaitingPanel';
 
 export default function OrganizationalSettings() {
     const { data: session } = useSession();
@@ -23,7 +24,7 @@ export default function OrganizationalSettings() {
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [keys, setKeys] = useState<Array<{ id: string; label: string; key_prefix: string; created_at: string; last_used_at: string | null }>>([]);
+    const [keys, setKeys] = useState<Array<{ id: string; name: string | null; keyPrefix: string | null; createdAt: string | null; lastUsedAt: string | null }>>([]);
     const [loadingKeys, setLoadingKeys] = useState(true);
     const [newKeyLabel, setNewKeyLabel] = useState('');
     const [generatedKey, setGeneratedKey] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export default function OrganizationalSettings() {
     const [mfaSetup, setMfaSetup] = useState<{ secret: string, qrCode: string } | null>(null);
     const [mfaToken, setMfaToken] = useState('');
     const [isMfaEnabling, setIsMfaEnabling] = useState(false);
+    const [invitesChanged, setInvitesChanged] = useState(0);
 
     useEffect(() => {
         fetch('/api/settings')
@@ -147,13 +149,15 @@ export default function OrganizationalSettings() {
 
     return (
         <DashboardShell>
-            <div className="max-w-4xl space-y-6">
+            <div className="max-w-6xl space-y-6">
                 <PageHeader eyebrow="Account" title="Team and organisation" lede="Your organisation’s details as AIC holds them, and the people who can sign in to this workspace." />
 
                 {loading ? (
                     <p className="py-10 text-sm text-[#5e6b7b]">Loading…</p>
                 ) : (
-                <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 lg:grid-cols-[17rem_minmax(0,1fr)] gap-5 items-start">
+                <WaitingPanel refreshKey={invitesChanged} />
+                <div className="grid grid-cols-1 gap-5 min-w-0">
                     {/* Institutional Profile */}
                     <section className="bg-white border border-[#dde2e8] p-5 md:p-7 rounded-xl">
                         <h3 className="text-base font-semibold text-[#0e1b2c] mb-5">Organisation</h3>
@@ -227,6 +231,7 @@ export default function OrganizationalSettings() {
                                     setGeneratedInvite(data.inviteLink ?? null);
                                     setInviteEmail('');
                                     setInviteName('');
+                                    setInvitesChanged((n) => n + 1);
                                     if (data.emailed) toast.success(data.message || 'Invitation sent.');
                                     else toast.warning(data.message || 'Invitation created, but the email could not be sent.');
                                 } else {
@@ -412,19 +417,16 @@ export default function OrganizationalSettings() {
                             ) : (
                                 <div className="space-y-4">
                                     {keys.map((key) => (
-                                        <div key={key.id} className="flex items-center justify-between p-5 bg-aic-paper/50 rounded-2xl border border-aic-black/5">
-                                            <div>
-                                                <p className="text-sm font-serif font-bold text-aic-black">{key.label}</p>
-                                                <p className="text-[12px] text-gray-500 first-cap mt-1">
-                                                    Prefix: {key.key_prefix} • Created {new Date(key.created_at).toLocaleDateString()}
+                                        <div key={key.id} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-[#dde2e8] bg-[#f5f7f9] px-4 py-3.5">
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-[#0e1b2c] break-words">{key.name || 'Unnamed key'}</p>
+                                                <p className="text-[12.5px] text-[#5e6b7b] mt-0.5">
+                                                    Starts {key.keyPrefix ?? 'unknown'}{key.createdAt ? `, created ${new Date(key.createdAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
                                                 </p>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-[12px] text-gray-400 first-cap">Last Used</p>
-                                                <p className="text-[11.5px] font-bold text-aic-black mt-1">
-                                                    {key.last_used_at ? new Date(key.last_used_at).toLocaleDateString() : 'NEVER'}
-                                                </p>
-                                            </div>
+                                            <p className="text-[12.5px] text-[#5e6b7b] sm:text-right">
+                                                {key.lastUsedAt ? `Last used ${new Date(key.lastUsedAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'Not used yet'}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
@@ -433,7 +435,7 @@ export default function OrganizationalSettings() {
                             <form onSubmit={handleGenerateKey} className="pt-6 border-t border-aic-black/5">
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <input 
-                                        className="flex-1 min-w-0 bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
+                                        className="w-full sm:flex-1 min-w-0 bg-white border border-[#dde2e8] rounded-xl h-11 px-3.5 text-sm text-[#0e1b2c] focus:border-[#a8772a] focus:ring-2 focus:ring-[#a8772a]/15 outline-none transition-all"
                                         placeholder="What the key is for, e.g. production"
                                         value={newKeyLabel}
                                         onChange={e => setNewKeyLabel(e.target.value)}
@@ -452,18 +454,19 @@ export default function OrganizationalSettings() {
                         </>
                         )}
                     </section>
-                </div>
-                )}
 
-                {canEditProfile && (
-                <div className="flex justify-end pt-12 gap-4 items-center">
-                    <button
-                        onClick={handleSave}
-                        disabled={saving || loading}
-                        className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
-                    >
-                        {saving ? 'Saving…' : 'Save changes'}
-                    </button>
+                    {canEditProfile && (
+                    <div className="flex justify-end pt-6 gap-4 items-center">
+                        <button
+                            onClick={handleSave}
+                            disabled={saving || loading}
+                            className="inline-flex h-11 items-center justify-center rounded-full bg-[#0e1b2c] px-5 text-white text-sm font-medium hover:bg-[#22344a] disabled:opacity-50"
+                        >
+                            {saving ? 'Saving…' : 'Save changes'}
+                        </button>
+                    </div>
+                    )}
+                </div>
                 </div>
                 )}
             </div>

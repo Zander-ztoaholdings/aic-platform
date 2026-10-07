@@ -113,6 +113,15 @@ export const CHECKS: CheckDefinition[] = [
     controls: ['AIC HU-1', 'POPIA s71'],
   },
 
+  {
+    key: 'ai.tool_on_register',
+    source: 'ai_provider',
+    title: 'AI tools in use are on your AI register',
+    why: 'People in your organisation are using this AI product. Your AI register should name it and the person accountable for how it is used, even if it makes no decisions about people.',
+    fix: 'Declare it on the AI Estate page under a name that includes the product (for example "Microsoft 365 Copilot"), with an owner and what it is used for.',
+    controls: ['AIC HU-3', 'AIC HU-1'],
+  },
+
   // ── Microsoft 365: who can sign in, and how ───────────────────────────────
   {
     key: 'm365.mfa_enforced',

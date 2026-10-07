@@ -11,7 +11,11 @@
  * AIC marks the connection disconnected.
  *
  * Application permissions (all read): User.Read.All, AuditLog.Read.All,
- * Policy.Read.All, RoleManagement.Read.Directory, Organization.Read.All.
+ * Policy.Read.All, RoleManagement.Read.Directory, Organization.Read.All,
+ * and Reports.Read.All for the Microsoft 365 Copilot usage report
+ * (lib/ai-use/copilot). Intune adds DeviceManagementManagedDevices.Read.All.
+ * A tenant that consented before a permission was added must consent again
+ * (reconnect) before AIC can use it; until then that part notes it is missing.
  * Sign-in activity and MFA registration reports need an Entra ID P1 or P2
  * licence; without one those checks show "could not check".
  *

@@ -18,11 +18,12 @@
  */
 import type { CheckResult } from '../integrations/catalog';
 import type { Account } from '../registers/accounts';
+import type { AiProduct, AiUseOutput } from '../ai-use/products';
 
-export type ConnectorCategory = 'cloud' | 'identity' | 'code' | 'ticketing' | 'comms' | 'hr' | 'endpoint' | 'security' | 'observability' | 'crm' | 'password';
+export type ConnectorCategory = 'ai' | 'cloud' | 'identity' | 'code' | 'ticketing' | 'comms' | 'hr' | 'endpoint' | 'security' | 'observability' | 'crm' | 'password';
 
 export const CATEGORY_LABEL: Record<ConnectorCategory, string> = {
-  cloud: 'Cloud', identity: 'Identity', code: 'Code', ticketing: 'Work tracking', comms: 'Communication', hr: 'HR and payroll',
+  ai: 'AI tools', cloud: 'Cloud', identity: 'Identity', code: 'Code', ticketing: 'Work tracking', comms: 'Communication', hr: 'HR and payroll',
   endpoint: 'Devices', security: 'Security', observability: 'Monitoring', crm: 'Sales', password: 'Passwords',
 };
 
@@ -64,6 +65,11 @@ export type ConnectorDef = {
   /** Plan or licence the provider requires for this, where it matters. */
   plan?: string;
   docs: string;
+  /**
+   * AI use this connector also records (lib/ai-use), and what that needs on
+   * top of the credential above, in the provider's words.
+   */
+  ai?: { products: AiProduct[]; needs?: string };
   /** Uses an existing connection rather than its own credential (Azure and Intune reuse Microsoft 365). */
   uses?: 'microsoft';
   /**
@@ -100,6 +106,8 @@ export type RunOutput = {
 
 export type ConnectorImpl = {
   run(creds: Credentials, ctx: RunContext): Promise<RunOutput>;
+  /** AI use inside this system (lib/ai-use), for the given number of days back. */
+  aiUse?(creds: Credentials, ctx: RunContext, days: number): Promise<AiUseOutput>;
   accounts?(creds: Credentials, ctx: RunContext): Promise<Account[]>;
   people?(creds: Credentials, ctx: RunContext): Promise<PersonRecord[]>;
 };

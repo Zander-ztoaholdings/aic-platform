@@ -1590,6 +1590,27 @@ export const clientOnboardingLinks = pgTable('client_onboarding_links', {
 });
 
 // 019: each time AIC emails a client onboarding link.
+// AI use inside the tools an organisation runs (Claude and ChatGPT seats,
+// Claude Code, Microsoft 365 Copilot, GitHub Copilot, Gemini, cloud AI
+// services). One row per product, subject and day. Migration 020.
+export const aiToolUse = pgTable('ai_tool_use', {
+  id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
+  orgId: uuid('org_id').notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  product: varchar('product', { length: 40 }).notNull(),
+  source: varchar('source', { length: 40 }).notNull(),
+  subjectType: varchar('subject_type', { length: 10 }).notNull().default('person'),
+  subject: varchar('subject', { length: 255 }).notNull(),
+  displayName: varchar('display_name', { length: 255 }),
+  day: date('day', { mode: 'string' }).notNull(),
+  lastActiveAt: timestamp('last_active_at', { withTimezone: true }),
+  activity: bigint('activity', { mode: 'number' }).notNull().default(0),
+  metrics: jsonb('metrics').notNull().default({}),
+  observedAt: timestamp('observed_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  orgDay: index('ai_tool_use_org_day_idx').on(table.orgId, table.day),
+  dedupe: unique('ai_tool_use_dedupe').on(table.orgId, table.product, table.subjectType, table.subject, table.day),
+}));
+
 export const clientOnboardingLinkEmails = pgTable('client_onboarding_link_emails', {
   id: uuid('id').primaryKey().default(sql`gen_random_uuid()`),
   linkId: uuid('link_id').notNull().references(() => clientOnboardingLinks.id, { onDelete: 'cascade' }),

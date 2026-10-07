@@ -91,7 +91,7 @@ export async function GET() {
       ['decision_records', 'review_status'],     // 014
       ['organizations', 'ai_monthly_budget_usd'],// 014
     ];
-    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items', 'org_frameworks', 'custom_frameworks', 'custom_framework_requirements', 'suppliers', 'risks', 'training_completions', 'access_review_items', 'org_people', 'agents', 'agent_run_steps', 'model_trials', 'connector_runs', 'hq_jurisdictions', 'risk_events', 'org_assignments', 'client_onboarding_links', 'client_onboarding_link_emails']; // 002, 011, 013, 014, 015, 016, 017, 018, 019
+    const expectedTables = ['audit_findings', 'corrective_actions', 'integrations', 'integration_checks', 'org_policies', 'trust_pages', 'questionnaires', 'questionnaire_items', 'org_frameworks', 'custom_frameworks', 'custom_framework_requirements', 'suppliers', 'risks', 'training_completions', 'access_review_items', 'org_people', 'agents', 'agent_run_steps', 'model_trials', 'connector_runs', 'hq_jurisdictions', 'risk_events', 'org_assignments', 'client_onboarding_links', 'client_onboarding_link_emails', 'ai_tool_use']; // 002, 011, 013, 014, 015, 016, 017, 018, 019, 020
 
     const found = await db.execute(sql`
       SELECT table_name, column_name FROM information_schema.columns
@@ -114,9 +114,9 @@ export async function GET() {
       ? {
           status: 'error',
           latency_ms: Date.now() - schemaStart,
-          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 019)`,
+          detail: `behind — missing ${missing.join(', ')} (apply the db/manual migrations up to 020)`,
         }
-      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 019' };
+      : { status: 'ok', latency_ms: Date.now() - schemaStart, detail: 'up to date with 020' };
   } catch (err: unknown) {
     console.error('[HEALTH] schema check failed:', err);
     checks.schema = { status: 'error', latency_ms: Date.now() - schemaStart, detail: 'Could not read' };
